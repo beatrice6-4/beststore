@@ -224,8 +224,7 @@ def lipa_na_mpesa_online(phone, amount, order_number):
         "AccountReference": order_number,
         "TransactionDesc": "Order Payment"
     }
-    response = requests.post(api_url, json=payload, headers=headers)
-    return response.json()
+
 
 @csrf_exempt
 def mpesa_payment(request, order_number):
