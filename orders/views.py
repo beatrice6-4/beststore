@@ -189,7 +189,6 @@ def order_complete(request):
 
 
     # orders/views.py
-import requests
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
