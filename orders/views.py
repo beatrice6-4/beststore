@@ -8,6 +8,7 @@ import json
 from store.models import Product
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
+
 from django.template.loader import render_to_string
 
 @login_required(login_url='login')
@@ -224,6 +225,8 @@ def lipa_na_mpesa_online(phone, amount, order_number):
         "AccountReference": order_number,
         "TransactionDesc": "Order Payment"
     }
+    response = requests.post(api_url, json=payload, headers=headers)
+    return response.json()
 
 
 @csrf_exempt
