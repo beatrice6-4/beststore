@@ -1,0 +1,171 @@
+/* General body and container styles */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.container {
+    margin-top: 30px;
+}
+
+/* Navbar styles */
+.navbar {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 0 0 10px 10px;
+
+    background: #fff;
+
+}
+
+.navbar-brand img {
+    height: 40px;
+}
+
+.institutionbrand h {
+    color: #3712f0;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Sidenav styles */
+.sidenav {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 220px;
+    height: calc(100% - 70px);
+    background: #fff;
+    border-right: 1px solid #eee;
+    padding-top: 20px;
+    z-index: 100;
+}
+
+.sidenav .menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidenav .menu-link {
+    margin-bottom: 10px;
+}
+
+.sidenav .menu-link a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.sidenav .menu-link.active a,
+.sidenav .menu-link a:hover {
+    background: #3504f7;
+    color: #fff;
+}
+
+.sidenav .menu-link i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.brand-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #aaa;
+    font-size: 0.95em;
+}
+
+/* Main content styles */
+main {
+    margin-left: 240px;
+    padding: 30px 20px;
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.card-title {
+    color: #0ddf09;
+    font-weight: 700;
+}
+
+.primary-text {
+    color: #0ddf09 !important;
+}
+
+.card-stitle {
+    font-size: 1.1em;
+    color: #333;
+}
+
+.dashboardRightLabel a {
+    color: #d35400;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.no-data-img {
+    width: 80px;
+    margin: 10px auto;
+    display: block;
+}
+
+.table th {
+    background: #f3f3f3;
+    color: #d35400;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Profile dropdown styles */
+.profile img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #d35400;
+}
+
+/* Notification styles */
+.notification .notifyIcon {
+    position: relative;
+}
+
+.notification .notifyIcon span {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #d35400;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.8em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .sidenav {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-top: 0;
+    }
+    main {
+        margin-left: 0;
+        padding: 15px 5px;
+    }
+}
