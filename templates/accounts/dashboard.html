@@ -1,50 +1,73 @@
 {% extends 'base.html' %}
-
+{% load static %}
 
 {% block content %}
-
-<section class="section-conten padding-y bg">
-
-{% include 'includes/alerts.html' %}
-<div class="container">
-	<div class="row">
-		<main class="col-md-9">
-			<article class="card">
-				<header class="card-header">
-					<strong class="d-inline-block mr-3">Logged in as:</strong>
-					<span>{{user.full_name}}</span>
-		</header>
-		<div class="card-body">
-			<div class="row">
-
-			<div class="col-md-6">
-				<div class="card" style="text-align:center;">
-					<div class="card-body">
-						<h5 class="card-title">Total Orders</h5>
-						<h4>{{orders_count}}</h4>
-						<a href="{% url 'my_orders' %}">View Orders</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-6">
-				<div class="card" style="text-align:center;">
-					<div class="card-body">
-						<img src="{{userprofile.profile_picture.url}}" alt="User Profile Picture" width="50" height="50" style="border-radius:50%;">
-						<p class="mb-0">{{user.email}}</p>
-						<p>{{user.phone_number}}</p>
-					</div>
-				</div>
-			</div>
-
-			</div> <!-- row.// -->
-		</div> <!-- card-body .// -->
-
-		</article> <!-- order-group.// -->
-	</main>
-</div> <!-- row.// -->
-</div>
-
-
+<section class="section-content padding-y bg">
+    <div class="container">
+        {% include 'includes/alerts.html' %}
+        <div class="row">
+            <!-- Sidebar -->
+            <aside class="col-md-3">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <img src="{{ userprofile.profile_picture.url|default_if_none:static('images/default-avatar.png') }}" alt="Profile Picture" width="80" height="80" style="border-radius:50%; object-fit:cover;">
+                        <h5 class="mt-2">{{ user.full_name }}</h5>
+                        <p class="mb-0">{{ user.email }}</p>
+                        <p>{{ user.phone_number }}</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm mt-2">Edit Profile</a>
+                    </div>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action active">
+                        <i class="fa fa-dashboard"></i> Dashboard
+                    </a>
+                    <a href="{% url 'my_orders' %}" class="list-group-item list-group-item-action">
+                        <i class="fa fa-shopping-bag"></i> My Orders
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fa fa-lock"></i> Change Password
+                    </a>
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fa fa-sign-out"></i> Logout
+                    </a>
+                </div>
+            </aside>
+            <!-- Main Dashboard Content -->
+            <main class="col-md-9">
+                <article class="card">
+                    <header class="card-header">
+                        <strong class="d-inline-block mr-3">Hi, Welcome back!</strong>
+                        <span>{{ user.full_name }}</span>
+                    </header>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Orders Card -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Orders</h5>
+                                        <h4>{{ orders_count }}</h4>
+                                        <a href="{% url 'my_orders' %}" class="btn btn-primary btn-sm mt-2">View Orders</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Profile Card -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Profile Info</h5>
+                                        <p class="mb-0"><strong>Email:</strong> {{ user.email }}</p>
+                                        <p><strong>Phone:</strong> {{ user.phone_number }}</p>
+                                        <a href="#" class="btn btn-outline-secondary btn-sm mt-2">Edit Profile</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Add more dashboard widgets here if needed -->
+                    </div>
+                </article>
+            </main>
+        </div>
+    </div>
 </section>
-
 {% endblock %}
