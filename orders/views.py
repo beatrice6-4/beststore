@@ -5,6 +5,7 @@ from .forms import OrderForm
 import datetime
 from .models import Order, Payment, OrderProduct
 import json
+
 from store.models import Product
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
@@ -114,11 +115,7 @@ def place_order(request, total=0, quantity=0,):
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
             # Generate order number
-            yr = int(date.today().strftime('%Y'))
-            dt = int(date.today().strftime('%d'))
-            mt = int(date.today().strftime('%m'))
-            d = date(yr, mt, dt)
-            current_date = d.strftime("%Y%m%d")
+            current_date = datetime.now().strftime("%Y%m%d")
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
@@ -188,25 +185,38 @@ def order_complete(request):
 
 
 
-
-    # orders/views.py
-from django.conf import settings
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
+# Mpesa Integrationimport requests
 import base64
-from datetime import datetime, date
+from datetime import datetime
+from django.conf import settings
 
-def get_mpesa_access_token():
+def lipa_na_mpesa_online(phone, amount, order_number):
+    """
+    Initiates an Mpesa STK Push request.
+    Returns the API response as a dict.
+    """
+    # Ensure phone is in 2547XXXXXXXX format
+    if phone.startswith('07'):
+        phone = '254' + phone[1:]
+    elif phone.startswith('+254'):
+        phone = phone[1:]
+    elif not phone.startswith('254'):
+        raise ValueError("Phone number must start with 254")
+
+    # Ensure amount is an integer
+    try:
+        amount = int(float(amount))
+    except Exception:
+        raise ValueError("Invalid amount")
+
+    # Get access token
     consumer_key = settings.MPESA_CONSUMER_KEY
     consumer_secret = settings.MPESA_CONSUMER_SECRET
     api_URL = f"{settings.MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials"
     r = requests.get(api_URL, auth=(consumer_key, consumer_secret))
-    return r.json().get('access_token')
+    access_token = r.json().get('access_token')
 
-def lipa_na_mpesa_online(phone, amount, order_number):
-    access_token = get_mpesa_access_token()
-    api_url = f"{settings.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest"
+    # Prepare STK Push request
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     password = base64.b64encode(
         (settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp).encode('utf-8')
@@ -221,30 +231,19 @@ def lipa_na_mpesa_online(phone, amount, order_number):
         "PartyA": phone,
         "PartyB": settings.MPESA_SHORTCODE,
         "PhoneNumber": phone,
-        "CallBackURL": "https://yourdomain.com/mpesa/callback/",
-        "AccountReference": order_number,
+        "CallBackURL": settings.MPESA_CALLBACK_URL,  # Set this in your settings.py
+        "AccountReference": str(order_number),
         "TransactionDesc": "Order Payment"
     }
-    response = requests.post(api_url, json=payload, headers=headers)
-    return response.json()
 
-
-@csrf_exempt
-def mpesa_payment(request, order_number):
-    if request.method == "POST":
-        phone = request.POST.get("phone")
-        amount = request.POST.get("amount")  # Or get from order
-        # Validate phone and amount as needed
-        response = lipa_na_mpesa_online(phone, amount, order_number)
-        if response.get("ResponseCode") == "0":
-            messages.success(request, "Mpesa prompt sent! Complete payment on your phone.")
-        else:
-            messages.error(request, "Failed to send Mpesa prompt. Try again.")
-        return redirect('mpesa_payment', order_number=order_number)
-    # Render the payment form
-    # Pass order and grand_total in context
-    context = {
-        'order': Order.objects.get(order_number=order_number, is_ordered=False),
-        'grand_total': Order.objects.get(order_number=order_number, is_ordered=False).order_total,
-    }
-    return render(request, 'orders/mpesa_payment.html', context)
+    try:
+        response = requests.post(
+            f"{settings.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest",
+            json=payload, headers=headers, timeout=30
+        )
+        # Log the response for debugging
+        print("Mpesa API response:", response.text)
+        return response.json()
+    except Exception as e:
+        print("Mpesa API error:", str(e))
+        return {"ResponseCode": "1", "errorMessage": str(e)}
