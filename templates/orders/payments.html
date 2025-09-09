@@ -31,7 +31,7 @@
 				<div class="card">
 					<h5 class="card-header">Payment Method</h5>
 					<div class="text-center mb-3">
-    <a href="#" class="btn btn-success btn-block" style="font-size:1.2rem;">
+    <a href="{% url 'mpesa_payment' %}" class="btn btn-success btn-block" style="font-size:1.2rem;">
         <i class="fa fa-mobile"></i> Pay with Mpesa
     </a>
 </div>
@@ -108,14 +108,12 @@
 						<p class="text-center mb-3">
 							<img src="{% static './images/misc/payments.png' %}" height="26">
 						</p>
-
-
-						<div id="paypal-button-container">
-							<!-- PayPal Button Will Load -->
-						</div>
-
-					</div> <!-- card-body.// -->
-				</div> <!-- card.// -->
+						<div id="mpesa_payment_button" class="mb-3">
+							<a href="{% url 'mpesa_payment' %}" class="btn btn-success btn-block" style="font-size:1.2rem;">
+								<i class="fa fa-mobile"></i> Pay with Mpesa
+							</a>
+						</div> <!-- mpesa_payment_button -->
+				</div> 
 				<div class="alert alert-success" role="alert">
 				  <b>Please Note: </b>This is a bakery website, proceed with payments.
 				</div>
