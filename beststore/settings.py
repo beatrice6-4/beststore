@@ -45,7 +45,7 @@ MPESA_SHORTCODE = '20306'
 MPESA_PASSKEY = '20306bfb279f9aa9b7b5c3f1c2e8d8f9e0d97f0f6c6e3d3e5b4a3f4e5d6c7b8a9'
 MPESA_BASE_URL = 'https://sandbox.safaricom.co.ke'  # Use production URL for live
 
-
+MPESA_CALLBACK_URL = 'https://mamamaassaibakers.herokuapp.com/orders/payments/'
 
 
 
