@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import administrator
 from django.contrib.auth.admin import UserAdmin
 from .models import Account
 from django.utils.html import format_html
@@ -16,4 +16,4 @@ class AccountAdmin(UserAdmin):
     fieldsets = ()
 
 
-admin.site.register(Account, AccountAdmin)
+administrator.site.register(Account, AccountAdmin)
