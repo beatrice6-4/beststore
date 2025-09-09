@@ -5,87 +5,74 @@ from .forms import OrderForm
 import datetime
 from .models import Order, Payment, OrderProduct
 import json
-
 from store.models import Product
-from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
-
 from django.template.loader import render_to_string
 
-login_required(login_url='login')
+
 def payments(request):
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body)
-        except Exception:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    body = json.loads(request.body)
+    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
 
-        try:
-            order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-        except Order.DoesNotExist:
-            return JsonResponse({'error': 'Order not found'}, status=404)
+    # Store transaction details inside Payment model
+    payment = Payment(
+        user = request.user,
+        payment_id = body['transID'],
+        payment_method = body['payment_method'],
+        amount_paid = order.order_total,
+        status = body['status'],
+    )
+    payment.save()
 
-        # Store transaction details inside Payment model
-        payment = Payment(
-            user = request.user,
-            payment_id = body.get('transID', ''),
-            payment_method = body.get('payment_method', ''),
-            amount_paid = order.order_total,
-            status = body.get('status', ''),
-        )
-        payment.save()
+    order.payment = payment
+    order.is_ordered = True
+    order.save()
 
-        order.payment = payment
-        order.is_ordered = True
-        order.save()
+    # Move the cart items to Order Product table
+    cart_items = CartItem.objects.filter(user=request.user)
 
-        # Move the cart items to Order Product table
-        cart_items = CartItem.objects.filter(user=request.user)
+    for item in cart_items:
+        orderproduct = OrderProduct()
+        orderproduct.order_id = order.id
+        orderproduct.payment = payment
+        orderproduct.user_id = request.user.id
+        orderproduct.product_id = item.product_id
+        orderproduct.quantity = item.quantity
+        orderproduct.product_price = item.product.price
+        orderproduct.ordered = True
+        orderproduct.save()
 
-        for item in cart_items:
-            orderproduct = OrderProduct()
-            orderproduct.order_id = order.id
-            orderproduct.payment = payment
-            orderproduct.user_id = request.user.id
-            orderproduct.product_id = item.product_id
-            orderproduct.quantity = item.quantity
-            orderproduct.product_price = item.product.price
-            orderproduct.ordered = True
-            orderproduct.save()
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variation = cart_item.variations.all()
+        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+        orderproduct.variations.set(product_variation)
+        orderproduct.save()
 
-            cart_item = CartItem.objects.get(id=item.id)
-            product_variation = cart_item.variations.all()
-            orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-            orderproduct.variations.set(product_variation)
-            orderproduct.save()
 
-            # Reduce the quantity of the sold products
-            product = Product.objects.get(id=item.product_id)
-            product.stock -= item.quantity
-            product.save()
+        # Reduce the quantity of the sold products
+        product = Product.objects.get(id=item.product_id)
+        product.stock -= item.quantity
+        product.save()
 
-        # Clear cart
-        CartItem.objects.filter(user=request.user).delete()
+    # Clear cart
+    CartItem.objects.filter(user=request.user).delete()
 
-        # Send order received email to customer
-        mail_subject = 'Thank you for your order!'
-        message = render_to_string('orders/order_recieved_email.html', {
-            'user': request.user,
-            'order': order,
-        })
-        to_email = request.user.email
-        send_email = EmailMessage(mail_subject, message, to=[to_email])
-        send_email.send()
+    # Send order recieved email to customer
+    mail_subject = 'Thank you for your order!'
+    message = render_to_string('orders/order_recieved_email.html', {
+        'user': request.user,
+        'order': order,
+    })
+    to_email = request.user.email
+    send_email = EmailMessage(mail_subject, message, to=[to_email])
+    send_email.send()
 
-        # Send order number and transaction id back to sendData method via JsonResponse
-        data = {
-            'order_number': order.order_number,
-            'transID': payment.payment_id,
-        }
-        return JsonResponse(data)
-    else:
-        # For GET requests, do not try to parse JSON
-        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    # Send order number and transaction id back to sendData method via JsonResponse
+    data = {
+        'order_number': order.order_number,
+        'transID': payment.payment_id,
+    }
+    return JsonResponse(data)
 
 def place_order(request, total=0, quantity=0,):
     current_user = request.user
@@ -125,7 +112,11 @@ def place_order(request, total=0, quantity=0,):
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
             # Generate order number
-            current_date = datetime.now().strftime("%Y%m%d")
+            yr = int(datetime.date.today().strftime('%Y'))
+            dt = int(datetime.date.today().strftime('%d'))
+            mt = int(datetime.date.today().strftime('%m'))
+            d = datetime.date(yr,mt,dt)
+            current_date = d.strftime("%Y%m%d") #20210305
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
@@ -141,28 +132,7 @@ def place_order(request, total=0, quantity=0,):
             return render(request, 'orders/payments.html', context)
     else:
         return redirect('checkout')
-@login_required(login_url='login')
-def mpesa_payment(request, order_number):
-    current_user = request.user
-    order = Order.objects.get(user=current_user, order_number=order_number, is_ordered=False)
-    cart_items = CartItem.objects.filter(user=current_user)
 
-    total = 0
-    quantity = 0
-    for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
-    tax = (2 * total) / 100
-    grand_total = total + tax
-
-    context = {
-        'order': order,
-        'cart_items': cart_items,
-        'total': total,
-        'tax': tax,
-        'grand_total': grand_total,
-    }
-    return render(request, 'orders/mpesa_payment.html', context)
 
 def order_complete(request):
     order_number = request.GET.get('order_number')
@@ -189,70 +159,3 @@ def order_complete(request):
         return render(request, 'orders/order_complete.html', context)
     except (Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
-    
-
-
-
-# Mpesa Integrationimport requests
-import base64
-from datetime import datetime
-from django.conf import settings
-
-def lipa_na_mpesa_online(phone, amount, order_number):
-    """
-    Initiates an Mpesa STK Push request.
-    Returns the API response as a dict.
-    """
-    # Ensure phone is in 2547XXXXXXXX format
-    if phone.startswith('07'):
-        phone = '254' + phone[1:]
-    elif phone.startswith('+254'):
-        phone = phone[1:]
-    elif not phone.startswith('254'):
-        raise ValueError("Phone number must start with 254")
-
-    # Ensure amount is an integer
-    try:
-        amount = int(float(amount))
-    except Exception:
-        raise ValueError("Invalid amount")
-
-    # Get access token
-    consumer_key = settings.MPESA_CONSUMER_KEY
-    consumer_secret = settings.MPESA_CONSUMER_SECRET
-    api_URL = f"{settings.MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials"
-    r = requests.get(api_URL, auth=(consumer_key, consumer_secret))
-    access_token = r.json().get('access_token')
-
-    # Prepare STK Push request
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    password = base64.b64encode(
-        (settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp).encode('utf-8')
-    ).decode('utf-8')
-    headers = {"Authorization": f"Bearer {access_token}"}
-    payload = {
-        "BusinessShortCode": settings.MPESA_SHORTCODE,
-        "Password": password,
-        "Timestamp": timestamp,
-        "TransactionType": "CustomerPayBillOnline",
-        "Amount": amount,
-        "PartyA": phone,
-        "PartyB": settings.MPESA_SHORTCODE,
-        "PhoneNumber": phone,
-        "CallBackURL": settings.MPESA_CALLBACK_URL,  # Set this in your settings.py
-        "AccountReference": str(order_number),
-        "TransactionDesc": "Order Payment"
-    }
-
-    try:
-        response = requests.post(
-            f"{settings.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest",
-            json=payload, headers=headers, timeout=30
-        )
-        # Log the response for debugging
-        print("Mpesa API response:", response.text)
-        return response.json()
-    except Exception as e:
-        print("Mpesa API error:", str(e))
-        return {"ResponseCode": "1", "errorMessage": str(e)}
-
