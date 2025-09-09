@@ -177,3 +177,18 @@ def payments(request):
     else:
         # For GET requests, render a payment page or redirect
         return render(request, 'orders/payments.html')  # or redirect('home')
+    
+
+@login_required(login_url='login')
+def mpesa_payment(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        
+
+        
+        return JsonResponse({'success': True})
+    else:
+        return render(request, 'orders/mpesa_payment.html')
