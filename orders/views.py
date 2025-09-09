@@ -85,7 +85,7 @@ def payments(request):
         return JsonResponse(data)
     else:
         # For GET requests, do not try to parse JSON
-        return redirect('home')
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 def place_order(request, total=0, quantity=0,):
     current_user = request.user
