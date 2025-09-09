@@ -159,3 +159,21 @@ def order_complete(request):
         return render(request, 'orders/order_complete.html', context)
     except (Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
+    
+    from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+import json
+
+@login_required(login_url='login')
+def payments(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        # ... your POST logic ...
+        return JsonResponse({'success': True})
+    else:
+        # For GET requests, render a payment page or redirect
+        return render(request, 'orders/payments.html')  # or redirect('home')
