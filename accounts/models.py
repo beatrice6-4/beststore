@@ -30,9 +30,8 @@ class MyAccountManager(BaseUserManager):
             first_name=first_name,
             last_name=last_name,
         )
-        user.is_administrator = True
+        user.is_admin = True
         user.is_active = True
-        user.is_finance = True
         user.is_staff = True
         user.is_superadmin = True
         user.role = Account.Role.ADMINISTRATOR  # Set superuser as administrator
