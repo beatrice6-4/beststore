@@ -1,94 +1,82 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 from carts.models import CartItem
 from .forms import OrderForm
-from .models import Order, Payment, OrderProduct
-from store.models import Product
 import datetime
+from .models import Order, Payment, OrderProduct
 import json
-import requests
-import base64
-from django.conf import settings
+
+from store.models import Product
+from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
+
+from django.template.loader import render_to_string
 
 @login_required(login_url='login')
 def payments(request):
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body)
-        except Exception:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    body = json.loads(request.body)
+    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
 
-        try:
-            order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-        except Order.DoesNotExist:
-            return JsonResponse({'error': 'Order not found'}, status=404)
+    # Store transaction details inside Payment model
+    payment = Payment(
+        user = request.user,
+        payment_id = body['transID'],
+        payment_method = body['payment_method'],
+        amount_paid = order.order_total,
+        status = body['status'],
+    )
+    payment.save()
 
-        # Store transaction details inside Payment model
-        payment = Payment(
-            user = request.user,
-            payment_id = body.get('transID', ''),
-            payment_method = body.get('payment_method', ''),
-            amount_paid = order.order_total,
-            status = body.get('status', ''),
-        )
-        payment.save()
+    order.payment = payment
+    order.is_ordered = True
+    order.save()
 
-        order.payment = payment
-        order.is_ordered = True
-        order.save()
+    # Move the cart items to Order Product table
+    cart_items = CartItem.objects.filter(user=request.user)
 
-        # Move the cart items to Order Product table
-        cart_items = CartItem.objects.filter(user=request.user)
+    for item in cart_items:
+        orderproduct = OrderProduct()
+        orderproduct.order_id = order.id
+        orderproduct.payment = payment
+        orderproduct.user_id = request.user.id
+        orderproduct.product_id = item.product_id
+        orderproduct.quantity = item.quantity
+        orderproduct.product_price = item.product.price
+        orderproduct.ordered = True
+        orderproduct.save()
 
-        for item in cart_items:
-            orderproduct = OrderProduct()
-            orderproduct.order_id = order.id
-            orderproduct.payment = payment
-            orderproduct.user_id = request.user.id
-            orderproduct.product_id = item.product_id
-            orderproduct.quantity = item.quantity
-            orderproduct.product_price = item.product.price
-            orderproduct.ordered = True
-            orderproduct.save()
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variation = cart_item.variations.all()
+        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+        orderproduct.variations.set(product_variation)
+        orderproduct.save()
 
-            cart_item = CartItem.objects.get(id=item.id)
-            product_variation = cart_item.variations.all()
-            orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-            orderproduct.variations.set(product_variation)
-            orderproduct.save()
+        # Reduce the quantity of the sold products
+        product = Product.objects.get(id=item.product_id)
+        product.stock -= item.quantity
+        product.save()
 
-            # Reduce the quantity of the sold products
-            product = Product.objects.get(id=item.product_id)
-            product.stock -= item.quantity
-            product.save()
+    # Clear cart
+    CartItem.objects.filter(user=request.user).delete()
 
-        # Clear cart
-        CartItem.objects.filter(user=request.user).delete()
+    # Send order recieved email to customer
+    mail_subject = 'Thank you for your order!'
+    message = render_to_string('orders/order_recieved_email.html', {
+        'user': request.user,
+        'order': order,
+    })
+    to_email = request.user.email
+    send_email = EmailMessage(mail_subject, message, to=[to_email])
+    send_email.send()
 
-        # Send order received email to customer
-        mail_subject = 'Thank you for your order!'
-        message = render_to_string('orders/order_recieved_email.html', {
-            'user': request.user,
-            'order': order,
-        })
-        to_email = request.user.email
-        send_email = EmailMessage(mail_subject, message, to=[to_email])
-        send_email.send()
+    # Send order number and transaction id back to sendData method via JsonResponse
+    data = {
+        'order_number': order.order_number,
+        'transID': payment.payment_id,
+    }
+    return JsonResponse(data)
 
-        # Send order number and transaction id back to sendData method via JsonResponse
-        data = {
-            'order_number': order.order_number,
-            'transID': payment.payment_id,
-        }
-        return JsonResponse(data)
-    else:
-        return redirect('home')
-
-@login_required(login_url='login')
-def place_order(request, total=0, quantity=0):
+def place_order(request, total=0, quantity=0,):
     current_user = request.user
 
     # If the cart count is less than or equal to 0, then redirect back to shop
@@ -126,7 +114,7 @@ def place_order(request, total=0, quantity=0):
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
             # Generate order number
-            current_date = datetime.datetime.now().strftime("%Y%m%d")
+            current_date = datetime.now().strftime("%Y%m%d")
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
@@ -142,11 +130,10 @@ def place_order(request, total=0, quantity=0):
             return render(request, 'orders/payments.html', context)
     else:
         return redirect('checkout')
-
 @login_required(login_url='login')
 def mpesa_payment(request, order_number):
     current_user = request.user
-    order = get_object_or_404(Order, user=current_user, order_number=order_number, is_ordered=False)
+    order = Order.objects.get(user=current_user, order_number=order_number, is_ordered=False)
     cart_items = CartItem.objects.filter(user=current_user)
 
     total = 0
@@ -191,8 +178,15 @@ def order_complete(request):
         return render(request, 'orders/order_complete.html', context)
     except (Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
+    
 
-# Mpesa Integration
+
+
+# Mpesa Integrationimport requests
+import base64
+from datetime import datetime
+from django.conf import settings
+
 def lipa_na_mpesa_online(phone, amount, order_number):
     """
     Initiates an Mpesa STK Push request.
@@ -220,7 +214,7 @@ def lipa_na_mpesa_online(phone, amount, order_number):
     access_token = r.json().get('access_token')
 
     # Prepare STK Push request
-    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     password = base64.b64encode(
         (settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp).encode('utf-8')
     ).decode('utf-8')
@@ -244,74 +238,10 @@ def lipa_na_mpesa_online(phone, amount, order_number):
             f"{settings.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest",
             json=payload, headers=headers, timeout=30
         )
+        # Log the response for debugging
         print("Mpesa API response:", response.text)
         return response.json()
     except Exception as e:
         print("Mpesa API error:", str(e))
         return {"ResponseCode": "1", "errorMessage": str(e)}
 
-# KCB Integration Example
-def kcb_account_payment(account_number, amount, order_number):
-    """
-    Initiates a payment request to KCB's API.
-    Replace the endpoint, headers, and payload with actual KCB API details.
-    """
-    # Example endpoint and credentials (replace with real ones)
-    KCB_API_URL = "https://api.kcbbank.com/payments"
-    KCB_API_KEY = "your_kcb_api_key"
-    KCB_API_SECRET = "your_kcb_api_secret"
-
-    headers = {
-        "Authorization": f"Bearer {KCB_API_KEY}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "account_number": account_number,
-        "amount": amount,
-        "order_number": order_number,
-        "description": "Order Payment"
-    }
-
-    try:
-        response = requests.post(KCB_API_URL, json=payload, headers=headers, timeout=30)
-        print("KCB API response:", response.text)
-        return response.json()
-    except Exception as e:
-        print("KCB API error:", str(e))
-        return {"status": "error", "errorMessage": str(e)}
-
-@login_required(login_url='login')
-def kcb_payment(request, order_number):
-    current_user = request.user
-    order = get_object_or_404(Order, user=current_user, order_number=order_number, is_ordered=False)
-    cart_items = CartItem.objects.filter(user=current_user)
-
-    total = 0
-    quantity = 0
-    for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
-    tax = (2 * total) / 100
-    grand_total = total + tax
-
-    if request.method == "POST":
-        account_number = request.POST.get("account_number")
-        response = kcb_account_payment(account_number, grand_total, order.order_number)
-        if response.get("status") == "success":
-            order.is_ordered = True
-            order.save()
-            # Optionally, create a Payment object here
-            return render(request, 'orders/kcb_payment_success.html', {'order': order})
-        else:
-            error_message = response.get("errorMessage", "Failed to process KCB payment. Try again.")
-            return render(request, 'orders/kcb_payment.html', {
-                'order': order,
-                'grand_total': grand_total,
-                'error_message': error_message,
-            })
-
-    context = {
-        'order': order,
-        'grand_total': grand_total,
-    }
-    return render(request, 'orders/kcb_payment.html', context)
