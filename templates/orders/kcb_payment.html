@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-white text-center">
+                        <h4>Pay with KCB Account</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="text-center mb-4">Order #{{ order.order_number }}</h5>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="account_number">KCB Account Number</label>
+                                <input type="text" class="form-control" id="account_number" name="account_number" placeholder="Enter your KCB account number" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount to Pay</label>
+                                <input type="text" class="form-control" value="Ksh. {{ grand_total }}" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-block">
+                                <i class="fa fa-bank"></i> Pay Now
+                            </button>
+                        </form>
+                        <hr>
+                        <p class="text-center text-muted" style="font-size:0.95rem;">
+                            You will be redirected or prompted to complete your payment via KCB.
+                        </p>
+                        <div class="text-center">
+                            <a href="{% url 'checkout' %}" class="btn btn-link">Back to Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

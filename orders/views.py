@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from urllib import request
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from carts.models import CartItem
 from .forms import OrderForm
@@ -244,4 +245,73 @@ def lipa_na_mpesa_online(phone, amount, order_number):
     except Exception as e:
         print("Mpesa API error:", str(e))
         return {"ResponseCode": "1", "errorMessage": str(e)}
+    
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Order
+
+import requests
+
+def kcb_account_payment(account_number, amount, order_number):
+    """
+    Initiates a payment request to KCB's API.
+    Replace the endpoint, headers, and payload with actual KCB API details.
+    """
+    # Example endpoint and credentials (replace with real ones)
+    KCB_API_URL = "https://api.kcbbank.com/payments"
+    KCB_API_KEY = "your_kcb_api_key"
+    KCB_API_SECRET = "your_kcb_api_secret"
+
+    headers = {
+        "Authorization": f"Bearer {KCB_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "account_number": account_number,
+        "amount": amount,
+        "order_number": order_number,
+        "description": "Order Payment"
+    }
+
+    try:
+        response = requests.post(KCB_API_URL, json=payload, headers=headers, timeout=30)
+        print("KCB API response:", response.text)
+        return response.json()
+    except Exception as e:
+        print("KCB API error:", str(e))
+        return {"status": "error", "errorMessage": str(e)}
+
+
+@login_required(login_url='login')
+def kcb_payment(request, order_number):
+    current_user = request.user
+    order = get_object_or_404(Order, user=current_user, order_number=order_number, is_ordered=False)
+    cart_items = CartItem.objects.filter(user=current_user)
+
+    total = 0
+    quantity = 0
+    for cart_item in cart_items:
+        total += (cart_item.product.price * cart_item.quantity)
+        quantity += cart_item.quantity
+    tax = (2 * total) / 100
+    grand_total = total + tax
+
+    if request.method == "POST":
+       account_number = request.POST.get("account_number")
+    # You may want to validate the account number here
+    response = kcb_account_payment(account_number, grand_total, order.order_number)
+    if response.get("status") == "success":
+        # Mark order as paid, save payment info, etc.
+        order.is_ordered = True
+        order.save()
+        # Optionally, create a Payment object
+        # Payment.objects.create(user=request.user, payment_id=response.get("transaction_id"), ...)
+        return render(request, 'orders/kcb_payment_success.html', {'order': order})
+    else:
+        error_message = response.get("errorMessage", "Failed to process KCB payment. Try again.")
+        return render(request, 'orders/kcb_payment.html', {
+            'order': order,
+            'grand_total': grand_total,
+            'error_message': error_message,
+        })

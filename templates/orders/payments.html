@@ -123,7 +123,11 @@
 				  <b>Please Note: </b>This is a bakery website. real payments will be processed.
 				</div>
 			</aside> <!-- col.// -->
-
+<div class="text-center mb-3">
+    <a href="{% url 'kcb_payment' order.order_number %}" class="btn btn-warning btn-block" style="font-size:1.1rem;">
+        <i class="fa fa-bank"></i> Pay with KCB Account
+    </a>
+</div>
 
 		</div> <!-- row.// -->
 

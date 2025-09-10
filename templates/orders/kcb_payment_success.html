@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container text-center">
+        <h2 class="text-success">Payment Successful!</h2>
+        <p>Your payment for order <strong>#{{ order.order_number }}</strong> was received via KCB.</p>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Go to Dashboard</a>
+    </div>
+</section>
+{% endblock %}
