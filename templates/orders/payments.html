@@ -30,11 +30,10 @@
 				</div>
 				<div class="card">
 					<h5 class="card-header">Payment Method</h5>
-					<div class="text-center mb-3">
-    <a href="{% url 'payments' %}" class="btn btn-success btn-block" style="font-size:1.2rem;">
-        <i class="fa fa-mobile"></i> Pay with Mpesa
-    </a>
-</div>
+					<div class="card-body">
+						<p class="card-text">PayPal</p>
+
+					</div>
 				</div>
 				<div class="card">
 					<h5 class="card-header">Review Products</h5>
@@ -73,8 +72,8 @@
 									</td>
 									<td>
 										<div class="price-wrap">
-											<var class="price">Ksh. {{ cart_item.sub_total }}</var>
-											<small class="text-muted"> Ksh. {{ cart_item.product.price }} each </small>
+											<var class="price">$ {{ cart_item.sub_total }}</var>
+											<small class="text-muted"> $ {{ cart_item.product.price }} each </small>
 										</div> <!-- price-wrap .// -->
 									</td>
 
@@ -94,28 +93,30 @@
 					<div class="card-body">
 						<dl class="dlist-align">
 							<dt>Total price:</dt>
-							<dd class="text-right">Ksh. {{total}}</dd>
+							<dd class="text-right">$ {{total}}</dd>
 						</dl>
 						<dl class="dlist-align">
 							<dt>Tax:</dt>
-							<dd class="text-right"> Ksh. {{tax}}</dd>
+							<dd class="text-right"> $ {{tax}}</dd>
 						</dl>
 						<dl class="dlist-align">
 							<dt>Grand Total:</dt>
-							<dd class="text-right text-dark b"><strong>Ksh. {{grand_total}}</strong></dd>
+							<dd class="text-right text-dark b"><strong>$ {{grand_total}}</strong></dd>
 						</dl>
 						<hr>
 						<p class="text-center mb-3">
 							<img src="{% static './images/misc/payments.png' %}" height="26">
 						</p>
-						<div id="mpesa_payment_button" class="mb-3">
-							<a href="{% url 'payments' %}" class="btn btn-success btn-block" style="font-size:1.2rem;">
-								<i class="fa fa-mobile"></i> Pay with Mpesa
-							</a>
-						</div> <!-- mpesa_payment_button -->
-				</div> 
-				<div class="alert alert-success" role="alert">
-				  <b>Please Note: </b>This is a bakery website, proceed with payments.
+
+
+						<div id="paypal-button-container">
+							<!-- PayPal Button Will Load -->
+						</div>
+
+					</div> <!-- card-body.// -->
+				</div> <!-- card.// -->
+				<div class="alert alert-danger" role="alert">
+				  <b>Please Note: </b>This is a demo website. Do not try to make real payments.
 				</div>
 			</aside> <!-- col.// -->
 
