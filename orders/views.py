@@ -244,4 +244,48 @@ def lipa_na_mpesa_online(phone, amount, order_number):
     except Exception as e:
         print("Mpesa API error:", str(e))
         return {"ResponseCode": "1", "errorMessage": str(e)}
+    
+    def kcb_payment(request, order_number):
+        current_user = request.user
+        order = Order.objects.get(user=current_user, order_number=order_number, is_ordered=False)
+        cart_items = CartItem.objects.filter(user=current_user)
 
+        total = 0
+        quantity = 0
+        for cart_item in cart_items:
+            total += (cart_item.product.price * cart_item.quantity)
+            quantity += cart_item.quantity
+        tax = (2 * total) / 100
+        grand_total = total + tax
+
+        context = {
+            'order': order,
+            'cart_items': cart_items,
+            'total': total,
+            'tax': tax,
+            'grand_total': grand_total,
+        }
+        return render(request, 'orders/kcb_payment.html', context)
+
+
+def kcb_payment(request, order_number):
+    current_user = request.user
+    order = Order.objects.get(user=current_user, order_number=order_number, is_ordered=False)
+    cart_items = CartItem.objects.filter(user=current_user)
+
+    total = 0
+    quantity = 0
+    for cart_item in cart_items:
+        total += (cart_item.product.price * cart_item.quantity)
+        quantity += cart_item.quantity
+    tax = (2 * total) / 100
+    grand_total = total + tax
+
+    context = {
+        'order': order,
+        'cart_items': cart_items,
+        'total': total,
+        'tax': tax,
+        'grand_total': grand_total,
+    }
+    return render(request, 'orders/kcb_payment.html', context)
