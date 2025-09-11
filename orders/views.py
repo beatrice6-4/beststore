@@ -177,12 +177,28 @@ def mpesa_payment(request, order_number):
     tax = (2 * total) / 100
     grand_total = total + tax
 
+    error_message = None
+    success_message = None
+
+    if request.method == "POST":
+        phone = request.POST.get("phone")
+        try:
+            response = lipa_na_mpesa_online(phone, grand_total, order.order_number)
+            if response.get("ResponseCode") == "0":
+                success_message = "Mpesa prompt sent! Please complete payment on your phone."
+            else:
+                error_message = response.get("errorMessage", "Failed to send Mpesa prompt. Try again.")
+        except Exception as e:
+            error_message = str(e)
+
     context = {
         'order': order,
         'cart_items': cart_items,
         'total': total,
         'tax': tax,
         'grand_total': grand_total,
+        'error_message': error_message,
+        'success_message': success_message,
     }
     return render(request, 'orders/mpesa_payment.html', context)
 
