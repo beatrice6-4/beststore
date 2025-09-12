@@ -233,17 +233,10 @@ def lipa_na_mpesa_online(phone, amount, order_number):
         "TransactionDesc": "Order Payment"
     }
 
-    try:
-        response = requests.post(
-            f"{settings.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest",
-            json=payload, headers=headers, timeout=30
-        )
-        # Log the response for debugging
-        print("Mpesa API response:", response.text)
-        return response.json()
-    except Exception as e:
-        print("Mpesa API error:", str(e))
-        return {"ResponseCode": "1", "errorMessage": str(e)}
+    stk_push_url = f"{settings.MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest"
+    response = requests.post(stk_push_url, json=payload, headers=headers)
+    return response.json()
+
 
 from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
@@ -288,4 +281,6 @@ def mpesa_validation(request):
         return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
     else:
         return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Invalid request method'})
+
+
     

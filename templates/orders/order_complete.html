@@ -36,6 +36,8 @@
                                     <li>{{order.full_address}}</li>
                                     <li>{{order.city}}, {{order.state}}</li>
                                     <li>{{order.country}}</li>
+                                    <li>{{order.phone}}</li>
+                                    <li>{{order.email}}</li>
                                 </ul>
                             </div>
                         </div>
@@ -49,6 +51,9 @@
                                         <li><strong>Transaction ID</strong> {{transID}}</li>
                                         <li><strong>Order Date:</strong> {{order.created_at}}</li>
                                         <li><strong>Status:</strong> {{payment.status}}</li>
+                                        <li><strong>Payment Method:</strong> {{payment.payment_method}}</li>
+                                        <li><strong>Paid Amount:</strong> Ksh.{{payment.amount_paid}} Ksh.</li>
+                                        <li><strong>Tax:</strong> Ksh.{{order.tax}} Ksh.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -61,6 +66,7 @@
                                                 <th class="per70 text-center">Products</th>
                                                 <th class="per5 text-center">Qty</th>
                                                 <th class="per25 text-center">Total</th>
+                                                <th class="per25 text-center">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>

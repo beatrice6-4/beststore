@@ -11,7 +11,7 @@
                         <h4>Pay with Phone</h4>
                     </div>
                     <div class="card-body">
-                        <h5 class="text-center mb-4">Order #{{ order.order_number }}</h5>
+                        <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
                         <form method="POST" action="{% url 'mpesa_payment' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
@@ -20,6 +20,10 @@
                                        placeholder="e.g. 2547XXXXXXXX"
                                        pattern="2547[0-9]{8}" maxlength="12" required>
                                 <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
+                                <div id="phoneFeedback" class="invalid-feedback">
+                                    Please provide a valid phone number.
+
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Amount to Pay</label>
@@ -32,6 +36,7 @@
                         <hr>
                         <p class="text-center text-muted" style="font-size:0.95rem;">
                             You will receive a prompt on your phone to complete the payment.
+                            Please ensure you enter the correct phone number.
                         </p>
                         <div class="text-center">
                             <a href="{% url 'checkout' %}" class="btn btn-link">Back to Checkout</a>
