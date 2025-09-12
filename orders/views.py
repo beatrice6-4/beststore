@@ -158,7 +158,7 @@ def order_complete(request):
     transID = request.GET.get('payment_id')
 
     try:
-        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
         ordered_products = OrderProduct.objects.filter(order_id=order.id)
 
         subtotal = 0
