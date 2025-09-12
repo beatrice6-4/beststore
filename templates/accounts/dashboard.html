@@ -92,12 +92,28 @@
                     <a href="{% url 'my_orders' %}" class="list-group-item list-group-item-action">
                         <i class="fa fa-shopping-bag"></i> <span class="sidebar-text">My Orders</span>
                     </a>
-                    <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">
+                    <a href="#" class="list-group-item list-group-item-action">
                         <i class="fa fa-lock"></i> <span class="sidebar-text">Change Password</span>
+                        <span class="badge badge-danger float-right">New</span>
                     </a>
                     <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
                         <i class="fa fa-sign-out"></i> <span class="sidebar-text">Logout</span>
+                        <span class="badge badge-danger float-right">New</span>
                     </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fa fa-user"></i> <span class="sidebar-text">Profile</span>
+                        <span class="badge badge-danger float-right">New</span>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fa fa-cog"></i> <span class="sidebar-text">Settings</span>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fa fa-question-circle"></i> <span class="sidebar-text">Help</span>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fa fa-info-circle"></i> <span class="sidebar-text">About</span>
+                    </a>
+                    
                 </div>
             </nav>
             <!-- Main Dashboard Content -->
@@ -129,7 +145,7 @@
                                                 <h5 class="card-title">Profile Info</h5>
                                                 <p class="mb-0"><strong>Email:</strong> {{ user.email }}</p>
                                                 <p><strong>Phone:</strong> {{ user.phone_number }}</p>
-                                                <a href="{% url 'edit_profile' %}" class="btn btn-outline-secondary btn-sm mt-2">Edit Profile</a>
+                                                <a href="#" class="btn btn-outline-secondary btn-sm mt-2">Edit Profile</a>
                                             </div>
                                         </div>
                                     </div>
