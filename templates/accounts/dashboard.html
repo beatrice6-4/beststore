@@ -4,7 +4,37 @@
     <div class="container">
         <h2>Welcome, {{ user.first_name|default:user.username }}!</h2>
         <p>You have {{ orders_count }} orders.</p>
-        <!-- Add dashboard widgets, links, etc. -->
+        <p>Your account details:</p>
+        <ul>
+            <li>Email: {{ user.email }}</li>
+            <li>Phone Number: {{ user.phone_number }}</li>
+        </ul>
+        <p>Your order history:</p>
+        <ul>
+            {% for order in user.orders.all %}
+                <li>Order #{{ order.id }} - {{ order.created_at }}</li>
+            {% empty %}
+                <li>No orders found.</li>
+            {% endfor %}
+        </ul>
+        <p>Your cart items:</p>
+        <ul>
+            {% for item in user.cart_items.all %}
+                <li>{{ item.product.name }} - Quantity: {{ item.quantity }}</li>
+            {% empty %}
+                <li>No items in cart.</li>
+            {% endfor %}
+        </ul>
+        <p>Your account details:</p>
+        <ul>
+            <li>Email: {{ user.email }}</li>
+            <li>Phone Number: {{ user.phone_number }}</li>
+        </ul>
+        
+
+        <a href="{% url 'my_orders' %}" class="btn btn-info">See My Orders</a>
+
+        <a href="{% url 'store' %}" class="btn btn-primary">Continue Shopping</a>
     </div>
 </section>
 {% endblock %}

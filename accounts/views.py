@@ -297,3 +297,20 @@ def order_detail(request, order_id):
         'subtotal': subtotal,
     }
     return render(request, 'accounts/order_detail.html', context)
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+@login_required
+def dashboard(request):
+    # Add any context data you want to show on the dashboard
+    orders_count = Order.objects.filter(user=request.user).count()
+    userprofile = getattr(request.user, 'userprofile', None)
+    context = {
+        'orders_count': orders_count,
+        'user': request.user,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/dashboard.html', context)
