@@ -77,7 +77,7 @@
             <!-- Sidebar -->
             <nav class="col-md-3 sidebar p-0" id="dashboardSidebar">
                 <div class="card mb-3 border-0 bg-transparent text-center pt-4">
-                    <img src="{{ userprofile.profile_picture.url|default_if_none:static('images/default-avatar.png') }}" alt="Profile Picture" class="profile-img">
+                    <img src="#" alt="Profile Picture" class="profile-img">
                     <div class="sidebar-text">
                         <h5 class="mt-2">{{ user.full_name }}</h5>
                         <p class="mb-0">{{ user.email }}</p>
@@ -113,7 +113,7 @@
                     <a href="#" class="list-group-item list-group-item-action">
                         <i class="fa fa-info-circle"></i> <span class="sidebar-text">About</span>
                     </a>
-                    
+
                 </div>
             </nav>
             <!-- Main Dashboard Content -->
