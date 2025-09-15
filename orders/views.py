@@ -193,7 +193,7 @@ from .query import query_stk_status
 
 from django.template.loader import get_template
 from django.http import HttpResponse
-from weasyprint import HTML
+from reportlab.pdfgen import canvas
 from .models import Order, OrderProduct, Payment
 
 def download_receipt(request, order_number):
