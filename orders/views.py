@@ -169,7 +169,7 @@ import base64
 from django.http import JsonResponse
 from .generateAcesstoken import get_access_token
 
-def initiate_stk_push(request):
+def initiate_stk_push(request, order_number):
     access_token_response = get_access_token(request)
     if isinstance(access_token_response, JsonResponse):
         access_token = access_token_response.content.decode('utf-8')
@@ -226,9 +226,11 @@ def initiate_stk_push(request):
     else:
         return JsonResponse({'error': 'Failed to retrieve access token.'})
     
+from .query import query_stk_status
 
-
-
+def check_stk_status(request, order_number):
+    response = query_stk_status(order_number)
+    return JsonResponse(response)
 
 
 
