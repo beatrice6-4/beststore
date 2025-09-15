@@ -189,7 +189,8 @@ def initiate_stk_push(request):
             party_a = phone
             party_b = business_short_code
             account_reference = 'BESTSTORE'
-            transaction_desc = 'Payment of order ' + order_number
+            transaction_desc = 'Payment of order '
+            amount = 1  # Set a default amount or retrieve from order
             stk_push_headers = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + access_token
