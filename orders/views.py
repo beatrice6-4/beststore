@@ -228,6 +228,10 @@ def initiate_stk_push(request):
     
 
 
+
+
+
+
 def order_complete(request):
     order_number = request.GET.get('order_number')
     transID = request.GET.get('payment_id')
