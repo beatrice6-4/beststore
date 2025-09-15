@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from carts.models import CartItem
 from .forms import OrderForm
-import datetime
 from .models import Order, Payment, OrderProduct
 import json
 import datetime
@@ -76,10 +75,10 @@ def payments(request):
     }
     return JsonResponse(data)
 
-def place_order(request, total=0, quantity=0,):
+@login_required(login_url='login')
+def place_order(request, total=0, quantity=0):
     current_user = request.user
 
-    # If the cart count is less than or equal to 0, then redirect back to shop
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
     if cart_count <= 0:
@@ -90,7 +89,7 @@ def place_order(request, total=0, quantity=0,):
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
-    tax = (2 * total)/100
+    tax = (2 * total) / 100
     grand_total = total + tax
 
     if request.method == 'POST':
@@ -113,8 +112,8 @@ def place_order(request, total=0, quantity=0,):
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
-            # Generate order number
-            current_date = datetime.datetime.now().strftime("%Y%m%d")
+            # Generate order number using correct datetime usage
+            current_date = datetime.now().strftime("%Y%m%d")
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
@@ -128,6 +127,15 @@ def place_order(request, total=0, quantity=0,):
                 'grand_total': grand_total,
             }
             return render(request, 'orders/payments.html', context)
+        else:
+            context = {
+                'form': form,
+                'cart_items': cart_items,
+                'total': total,
+                'tax': tax,
+                'grand_total': grand_total,
+            }
+            return render(request, 'orders/checkout.html', context)
     else:
         return redirect('checkout')
 @login_required(login_url='login')
