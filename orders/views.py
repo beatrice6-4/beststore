@@ -176,8 +176,10 @@ def initiate_stk_push(request, order_number):
         access_token_json = json.loads(access_token)
         access_token = access_token_json.get('access_token')
         if access_token:
-            amount = 3 # Amount to be charged
-            phone = "254791711693"
+            # Get the exact amount from the order
+            order = Order.objects.get(order_number=order_number, user=request.user)
+            amount = int(order.order_total)
+            phone = "2547XXXXXXXX"  # Replace with the customer's phone number in the format 2547XXXXXXXX
             passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
             business_short_code = '174379'
             process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
@@ -186,8 +188,8 @@ def initiate_stk_push(request, order_number):
             password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
             party_a = phone
             party_b = '254746690190'
-            account_reference = 'bramwel.go'
-            transaction_desc = 'stkpush test'
+            account_reference = 'BESTSTORE'
+            transaction_desc = 'Payment of order ' + order_number
             stk_push_headers = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + access_token
@@ -210,7 +212,6 @@ def initiate_stk_push(request, order_number):
             try:
                 response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
                 response.raise_for_status()   
-                # Raise exception for non-2xx status codes
                 response_data = response.json()
                 checkout_request_id = response_data['CheckoutRequestID']
                 response_code = response_data['ResponseCode']
@@ -268,6 +269,17 @@ from django.shortcuts import render
 from .generateAcesstoken import get_access_token
 from .stkPush import initiate_stk_push
 from .query import query_stk_status
+
+
+
+def payment(request, order_number):
+    order = Order.objects.get(order_number=order_number, user=request.user)
+    amount = int(order.order_total)
+    context = {
+        'order': order,
+        'amount': amount,
+    }
+    return render(request, 'orders/payments.html', context)
 
 
 
