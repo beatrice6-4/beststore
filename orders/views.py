@@ -187,3 +187,33 @@ from django.shortcuts import render
 from .generateAcesstoken import get_access_token
 from .stkPush import initiate_stk_push
 from .query import query_stk_status
+
+
+
+
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML
+from .models import Order, OrderProduct, Payment
+
+def download_receipt(request, order_number):
+    order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
+    ordered_products = OrderProduct.objects.filter(order_id=order.id)
+    payment = Payment.objects.get(order=order)
+    subtotal = sum([item.product_price * item.quantity for item in ordered_products])
+
+    context = {
+        'order': order,
+        'ordered_products': ordered_products,
+        'order_number': order.order_number,
+        'transID': payment.payment_id,
+        'payment': payment,
+        'subtotal': subtotal,
+    }
+    template = get_template('orders/order_complete.html')
+    html = template.render(context)
+
+    pdf_file = HTML(string=html).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="receipt_{order_number}.pdf"'
+    return response
