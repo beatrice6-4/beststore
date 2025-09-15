@@ -5,7 +5,7 @@ from .forms import OrderForm
 import datetime
 from .models import Order, Payment, OrderProduct
 import json
-
+from datetime import datetime
 from store.models import Product
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
