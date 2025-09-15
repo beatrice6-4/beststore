@@ -176,10 +176,12 @@ def initiate_stk_push(request, order_number):
         access_token_json = json.loads(access_token)
         access_token = access_token_json.get('access_token')
         if access_token:
-            # Get the exact amount from the order
             order = Order.objects.get(order_number=order_number, user=request.user)
             amount = int(order.order_total)
-            phone = "2547XXXXXXXX"  # Replace with the customer's phone number in the format 2547XXXXXXXX
+            if request.method == "POST":
+                phone = request.POST.get("phone")  # Get phone from form
+            else:
+                phone = None
             passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
             business_short_code = '174379'
             process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
@@ -187,7 +189,7 @@ def initiate_stk_push(request, order_number):
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
             party_a = phone
-            party_b = '254746690190'
+            party_b = business_short_code
             account_reference = 'BESTSTORE'
             transaction_desc = 'Payment of order ' + order_number
             stk_push_headers = {
