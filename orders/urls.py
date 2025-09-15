@@ -9,4 +9,5 @@ urlpatterns = [
     path('stkpush/', views.initiate_stk_push, name='initiate_stk_push'),
     path('query/', views.query_stk_status, name='query_stk_status'),
     path('download_receipt/<str:order_number>/', views.download_receipt, name='download_receipt'),
+    path('stkpush/<str:order_number>/', views.stkpush, name='stkpush'),
 ]
