@@ -44,7 +44,18 @@ JET_REBOOT_SETTINGS = {
 
 }
 
-
+ADMINLTE3_CONFIG = {
+    'site_title': 'BestStore Admin',
+    'site_header': 'BestStore Admin',
+    'site_brand': 'BestStore',
+    'welcome_sign': 'Welcome to BestStore Admin',
+    'copyright': 'BestStore',
+    'search_model': 'auth.User',
+    'show_recent_actions': True,
+    'language_chooser': True,
+    'custom_css': 'css/custom.css',
+    'custom_js': 'js/custom.js',
+}
 
 
 
