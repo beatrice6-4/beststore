@@ -13,6 +13,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
+    'adminlte3',
+    'adminlte3_theme',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,6 +28,25 @@ INSTALLED_APPS = [
     'orders',
     'admin_thumbnails',
 ]
+
+
+
+JET_REBOOT_SETTINGS = {
+    'site_title': 'BestStore Admin',
+    'site_logo': '/static/images/logo.png',
+    'welcome_sign': 'Welcome to BestStore Admin',
+    'copyright': '© 2023 BestStore. All rights reserved.',
+    'search_model': 'auth.User',
+    'show_recent_actions': True,
+    'language_chooser': True,
+    'custom_css': '/static/css/custom.css',
+    'custom_js': '/static/js/custom.js',
+
+}
+
+
+
+
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
