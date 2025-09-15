@@ -169,15 +169,13 @@ import base64
 from django.http import JsonResponse
 from .generateAcesstoken import get_access_token
 
-def initiate_stk_push(request, order_number):
+def initiate_stk_push(request):
     access_token_response = get_access_token(request)
     if isinstance(access_token_response, JsonResponse):
         access_token = access_token_response.content.decode('utf-8')
         access_token_json = json.loads(access_token)
         access_token = access_token_json.get('access_token')
         if access_token:
-            order = Order.objects.get(order_number=order_number, user=request.user)
-            amount = int(order.order_total)
             if request.method == "POST":
                 phone = request.POST.get("phone")  # Get phone from form
             else:
