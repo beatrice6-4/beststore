@@ -15,6 +15,12 @@
                         <form id="stkpush-form" method="POST" action="{% url 'initiate_stk_push' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
+
+                                <label for="amount">Amount (KES)</label>
+                                <input type="number" class="form-control" id="amount" name="amount" value="{{ order.get_total_cost }}" readonly>
+                                <label for="amount" style="font-size: 0.9em; color: gray;">(Amount is fixed and cannot be changed)</label>
+                            </div>
+                            <div class="form-group">
                                 <label for="phone">Phone Number</label>
                                 <input type="text" class="form-control" id="phone" name="phone" placeholder="e.g. 2547XXXXXXXX" required>
                             </div>
@@ -58,7 +64,7 @@ document.getElementById('stkpush-form').addEventListener('submit', function(e) {
         document.getElementById('loading-spinner').style.display = 'none';
         if (data.ResponseCode === "0") {
             document.getElementById('payment-result').innerHTML =
-                '<div class="alert alert-success">STK Push sent! Please complete payment on your phone.</div>';
+                '<div class="alert alert-success">Congratulations! STK Push sent! Please complete payment on your phone by entering your PIN.</div>';
         } else if (data.error) {
             document.getElementById('payment-result').innerHTML =
                 '<div class="alert alert-danger">' + data.error + '</div>';
