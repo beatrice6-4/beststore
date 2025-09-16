@@ -332,25 +332,87 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 import json
 
+from .models import Order, Payment, OrderProduct
+from carts.models import CartItem
+
 @csrf_exempt
 def mpesa_callback(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            # You can log the callback data or process it as needed
-            # For example, update payment/order status here
+            # Extract relevant info from the callback
+            body = data.get('Body', {})
+            stk_callback = body.get('stkCallback', {})
+            result_code = stk_callback.get('ResultCode')
+            callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
 
-            # Example: print or log the callback data
-            print("Mpesa Callback Data:", data)
+            if result_code == 0:
+                # Extract details
+                mpesa_receipt = None
+                phone_number = None
+                amount = None
+                order_number = None
 
-            # Always respond with a success message to Safaricom
-            response = {
-                "ResultCode": 0,
-                "ResultDesc": "Accepted"
-            }
-            return JsonResponse(response)
+                for item in callback_metadata:
+                    if item['Name'] == 'MpesaReceiptNumber':
+                        mpesa_receipt = item['Value']
+                    elif item['Name'] == 'PhoneNumber':
+                        phone_number = str(item['Value'])
+                    elif item['Name'] == 'Amount':
+                        amount = float(item['Value'])
+                    elif item['Name'] == 'AccountReference':
+                        order_number = str(item['Value'])
+
+                # Find the order (adjust filter as needed)
+                try:
+                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
+                except Order.DoesNotExist:
+                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
+
+                # Create Payment record
+                payment = Payment.objects.create(
+                    user=order.user,
+                    payment_id=mpesa_receipt,
+                    payment_method="Mpesa",
+                    amount_paid=amount,
+                    status="Completed"
+                )
+
+                # Link payment to order and mark as ordered
+                order.payment = payment
+                order.is_ordered = True
+                order.status = "Completed"
+                order.save()
+
+                # Move cart items to OrderProduct
+                cart_items = CartItem.objects.filter(user=order.user)
+                for item in cart_items:
+                    orderproduct = OrderProduct.objects.create(
+                        order=order,
+                        payment=payment,
+                        user=order.user,
+                        product=item.product,
+                        quantity=item.quantity,
+                        product_price=item.product.price,
+                        ordered=True
+                    )
+                    orderproduct.variations.set(item.variations.all())
+                    orderproduct.save()
+
+                    # Reduce product stock
+                    product = item.product
+                    product.stock -= item.quantity
+                    product.save()
+
+                # Clear cart
+                cart_items.delete()
+
+                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+            # If payment failed
+            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
+
         except Exception as e:
-            # Log the error if needed
             print("Mpesa Callback Error:", str(e))
             return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
     else:
