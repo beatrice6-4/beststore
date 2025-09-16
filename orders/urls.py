@@ -6,9 +6,8 @@ urlpatterns = [
     path('payments/', views.payments, name='payments'),
     path('order_complete/', views.order_complete, name='order_complete'),
     path('access_token/', views.get_access_token, name='get_access_token'),
-    
     path('query/', views.query_stk_status, name='query_stk_status'),
     path('download_receipt/<str:order_number>/', views.download_receipt, name='download_receipt'),
     path('payment/<str:order_number>/', views.payment, name='payment'),
-    path('stkpush/', views.initiate_stk_push, name='initiate_stk_push')
+    path('stkpush/<str:order_number>/', views.initiate_stk_push, name='initiate_stk_push'),  # <-- FIXED
 ]

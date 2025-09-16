@@ -9,6 +9,7 @@ from store.models import Product
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
 
+
 from django.template.loader import render_to_string
 
 @login_required(login_url='login')
@@ -264,7 +265,6 @@ def order_complete(request):
     
 
 
-
 from django.shortcuts import render
 
 from .generateAcesstoken import get_access_token
@@ -282,32 +282,3 @@ def payment(request, order_number):
     }
     return render(request, 'orders/payments.html', context)
 
-
-
-
-from django.template.loader import get_template
-from django.http import HttpResponse
-from reportlab.pdfgen import canvas
-from .models import Order, OrderProduct, Payment
-
-def download_receipt(request, order_number):
-    order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
-    ordered_products = OrderProduct.objects.filter(order_id=order.id)
-    payment = Payment.objects.get(order=order)
-    subtotal = sum([item.product_price * item.quantity for item in ordered_products])
-
-    context = {
-        'order': order,
-        'ordered_products': ordered_products,
-        'order_number': order.order_number,
-        'transID': payment.payment_id,
-        'payment': payment,
-        'subtotal': subtotal,
-    }
-    template = get_template('orders/order_complete.html')
-    html = template.render(context)
-
-    pdf_file = HTML(string=html).write_pdf()
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="receipt_{order_number}.pdf"'
-    return response
