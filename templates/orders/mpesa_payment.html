@@ -14,7 +14,7 @@
                         <p class="text-center">
                             <img src="{% static 'images/mpesa-logo.jpg' %}" alt="Mpesa" style="height:50px;">
                         </p>
-                        <h5 class="text-center mb-4">Order #{{ order.order_number }}</h5>
+                        <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
                         <form method="POST" action="{% url 'stkpush' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
