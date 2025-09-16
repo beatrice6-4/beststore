@@ -1,203 +1,126 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Dashboard</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="{% static 'accounts/favicon.ico' %}">
+    <title>User Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            background: #f8f9fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
         }
-        .sidebar {
-            min-height: 100vh;
-            background: #198754;
+        .dashboard-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 32px;
+        }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .dashboard-header h2 {
+            margin: 0;
+            font-size: 2rem;
+            color: #333;
+        }
+        .dashboard-header .logout-btn {
+            background: #e74c3c;
             color: #fff;
-            width: 220px;
-            transition: width 0.3s;
-        }
-        .sidebar.collapsed {
-            width: 60px !important;
-        }
-        .sidebar .nav-link {
-            color: #fff;
-        }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover {
-            background: #157347;
-            color: #fff;
-        }
-        .sidebar .nav-link i {
-            margin-right: 8px;
-        }
-        .sidebar.collapsed .nav-link span {
-            display: none;
-        }
-        .sidebar.collapsed .sidebar-header {
-            display: none;
-        }
-        .main-content {
-            margin-left: 220px;
-            transition: margin-left 0.3s;
-            padding: 2rem 1rem;
-        }
-        .main-content.expanded {
-            margin-left: 60px;
-        }
-        @media (max-width: 991.98px) {
-            .sidebar {
-                position: fixed;
-                left: -220px;
-                z-index: 1040;
-            }
-            .sidebar.show {
-                left: 0;
-            }
-            .main-content, .main-content.expanded {
-                margin-left: 0;
-            }
-        }
-        .sidebar-toggler {
-            font-size: 1.5rem;
-            color: #198754;
-            background: none;
             border: none;
-            margin: 1rem 0 1rem 1rem;
+            padding: 8px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .dashboard-content {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .dashboard-sidebar {
+            flex: 1 1 200px;
+            min-width: 180px;
+        }
+        .dashboard-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .dashboard-sidebar li {
+            margin-bottom: 14px;
+        }
+        .dashboard-sidebar a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .dashboard-sidebar a:hover {
+            color: #0078d7;
+        }
+        .dashboard-main {
+            flex: 3 1 400px;
+            min-width: 300px;
+        }
+        .dashboard-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .dashboard-card h3 {
+            margin-top: 0;
+            color: #0078d7;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <nav class="sidebar d-flex flex-column position-fixed" id="sidebarMenu">
-        <div class="sidebar-header text-center py-4">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" width="50" class="mb-2">
-            <h5 class="mb-0">KIMBAKERS</h5>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h2>Welcome, {{ user.username }}</h2>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button class="logout-btn" type="submit">Logout</button>
+            </form>
         </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a href="{% url 'dashboard' %}" class="nav-link active"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'store' %}" class="nav-link"><i class="fa-solid fa-store"></i> <span>Store</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'cart' %}" class="nav-link"><i class="fa-solid fa-shopping-cart"></i> <span>Cart</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'my_orders' %}" class="nav-link"><i class="fa-solid fa-box"></i> <span>Orders</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-users"></i> <span>User Management</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-envelope"></i> <span>Contact Messages</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-money-bill-wave"></i> <span>Payments</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span>Reports & Analytics</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-cog"></i> <span>Settings</span></a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Sidebar Toggler -->
-    <button class="sidebar-toggler" id="sidebarToggle" aria-label="Toggle sidebar">
-        <i class="fa fa-bars"></i>
-    </button>
-
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <div class="container-fluid">
-            <div class="row mb-4">
-                <div class="col">
-                    <h2 class="mb-0">Welcome, {{ request.user.first_name|default:request.user.username }}!</h2>
-                    <p class="text-muted">Here is your dashboard overview.</p>
+        <div class="dashboard-content">
+            <nav class="dashboard-sidebar">
+                <ul>
+                    <li><a href="{% url 'dashboard' %}">Dashboard Home</a></li>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="{% url 'my_orders' %}">My Orders</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </nav>
+            <main class="dashboard-main">
+                <div class="dashboard-card">
+                    <h3>Account Overview</h3>
+                    <p>Email: {{ user.email }}</p>
+                    <p>Member since: {{ user.date_joined|date:"F j, Y" }}</p>
                 </div>
-            </div>
-            <!-- Stats Row -->
-            <div class="row mb-4">
-                <div class="col-md-3 mb-3">
-                    <div class="card text-white bg-primary h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Total Orders</h5>
-                            <p class="card-text display-6">{{ my_orders }}</p>
-           
-                <!-- Products Tab -->
-                <div class="tab-pane fade" id="products" role="tabpanel">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Recent Products</h5>
-                            <a href="{% url 'store' %}" class="btn btn-primary btn-sm">View All Products</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Image</th>
-                                            <th>Name</th>
-                                            <th>Price</th>
-                                            <th>Stock</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for product in recent_products %}
-                                        <tr>
-                                            <td>
-                                                {% if product.images %}
-                                                    <img src="{{ product.images.url }}" alt="{{ product.product_name }}" width="50">
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ product.product_name }}</td>
-                                            <td>Ksh {{ product.price }}</td>
-                                            <td>{{ product.stock }}</td>
-                                            <td>
-                                                {% if product.is_available %}
-                                                    <span class="badge bg-success">Available</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Not Available</span>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center">No products found</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                <div class="dashboard-card">
+                    <h3>Recent Orders</h3>
+                    {% if orders %}
+                        <ul>
+                            {% for order in orders %}
+                                <li>Order #{{ order.id }} - {{ order.status }} - {{ order.created_at|date:"M d, Y" }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No recent orders.</p>
+                    {% endif %}
                 </div>
-
-                <!-- End Products Tab -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- End Tab Content -->
+            </main>
         </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Sidebar toggle for mobile and desktop
-        document.getElementById('sidebarToggle').onclick = function () {
-            document.getElementById('sidebarMenu').classList.toggle('collapsed');
-            document.getElementById('mainContent').classList.toggle('expanded');
-        };
-    </script>
 </body>
 </html>
