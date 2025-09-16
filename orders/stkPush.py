@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 import json
 import base64
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .generateAcesstoken import get_access_token
 from .models import Order
@@ -79,3 +79,68 @@ def initiate_stk_push(request, order_number):
             return JsonResponse({'error': str(e)})
     else:
         return JsonResponse({'error': 'Failed to retrieve access token.'})
+from .models import Order, Payment
+from accounts.models import Account
+
+@csrf_exempt
+def mpesa_callback(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            # Extract relevant info from the callback
+            # Example for Safaricom STK Push:
+            body = data.get('Body', {})
+            stk_callback = body.get('stkCallback', {})
+            result_code = stk_callback.get('ResultCode')
+            result_desc = stk_callback.get('ResultDesc')
+            callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
+
+            # Only proceed if payment was successful
+            if result_code == 0:
+                # Extract details
+                mpesa_receipt = None
+                phone_number = None
+                amount = None
+                order_number = None
+
+                for item in callback_metadata:
+                    if item['Name'] == 'MpesaReceiptNumber':
+                        mpesa_receipt = item['Value']
+                    elif item['Name'] == 'PhoneNumber':
+                        phone_number = str(item['Value'])
+                    elif item['Name'] == 'Amount':
+                        amount = float(item['Value'])
+                    elif item['Name'] == 'AccountReference':
+                        order_number = str(item['Value'])
+
+                # Find the order
+                try:
+                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
+                except Order.DoesNotExist:
+                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
+
+                # Create Payment record
+                payment = Payment.objects.create(
+                    user=order.user,
+                    payment_id=mpesa_receipt,
+                    payment_method="Mpesa",
+                    amount_paid=amount,
+                    status="Completed"
+                )
+
+                # Link payment to order and mark as ordered
+                order.payment = payment
+                order.is_ordered = True
+                order.status = "Completed"
+                order.save()
+
+                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+            # If payment failed
+            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
+
+        except Exception as e:
+            print("Mpesa Callback Error:", str(e))
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
+    else:
+        return HttpResponse("Mpesa callback endpoint.", status=200)
