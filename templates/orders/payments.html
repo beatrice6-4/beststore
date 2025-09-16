@@ -12,7 +12,7 @@
                     </div>
                     <div class="card-body">
                         <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
-                        <form method="POST" action="{% url 'initiate_stk_push' %}">
+                        <form method="POST" action="{% url 'initiate_stk_push' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="phone">Phone Number</label>
