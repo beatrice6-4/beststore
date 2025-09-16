@@ -43,7 +43,7 @@ def initiate_stk_push(request, order_number):
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
         account_reference = 'MAMAMAASAIBAKES'
-        transaction_desc = f'Payment of order {order_number}'
+        transaction_desc = f'Payment of order {order_number} - MAMAMAASAIBAKES'
 
         stk_push_headers = {
             'Content-Type': 'application/json',
