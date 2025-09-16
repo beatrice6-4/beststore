@@ -11,5 +11,4 @@ urlpatterns = [
     path('download_receipt/<str:order_number>/', views.download_receipt, name='download_receipt'),
     path('payment/<str:order_number>/', views.payment, name='payment'),
     path('stkpush/', views.initiate_stk_push, name='initiate_stk_push')
-    path('stkpush/<str:order_number>/', initiate_stk_push, name='initiate_stk_push')
 ]
