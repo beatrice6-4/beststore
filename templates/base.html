@@ -33,9 +33,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'js/jquery-3.3.1.min.js' %}" type="text/javascript"></script>
 
-<!-- PayPal Script -->
-<script src="https://www.paypal.com/sdk/js?client-id=AVBSMqNtoZ1IUO6lrSe6-vm9AIV1ZKN8CgXu_nINRs80xELRs650mh3yR62groIUg-GCe59Od_EFOG6O&currency=Ksh."></script>
-
 <style>
 /* Loader Styles */
 #loader-overlay {
@@ -90,6 +87,48 @@ $(document).ready(function() {
     $(window).on('pageshow', function() {
         $('#loader-overlay').hide();
     });
+
+    // Mpesa STK Push AJAX payment handler
+    var stkForm = document.getElementById('stkpush-form');
+    if (stkForm) {
+        stkForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Show loader
+            var loader = document.getElementById('loading-spinner');
+            if (loader) loader.style.display = 'block';
+            var resultDiv = document.getElementById('payment-result');
+            if (resultDiv) resultDiv.innerHTML = '';
+
+            var formData = new FormData(stkForm);
+
+            fetch(stkForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (loader) loader.style.display = 'none';
+                if (data.ResponseCode === "0") {
+                    if (resultDiv) resultDiv.innerHTML =
+                        '<div class="alert alert-success">STK Push sent! Please complete payment on your phone.</div>';
+                } else if (data.error) {
+                    if (resultDiv) resultDiv.innerHTML =
+                        '<div class="alert alert-danger">' + data.error + '</div>';
+                } else {
+                    if (resultDiv) resultDiv.innerHTML =
+                        '<div class="alert alert-warning">Unexpected response. Please try again.</div>';
+                }
+            })
+            .catch(error => {
+                if (loader) loader.style.display = 'none';
+                if (resultDiv) resultDiv.innerHTML =
+                    '<div class="alert alert-danger">Error processing payment. Please try again.</div>';
+            });
+        });
+    }
 });
 </script>
 
