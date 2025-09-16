@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-success mt-5">
+                    <div class="card-header bg-success text-white text-center">
+                        <h3>Payment Successful!</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="lead">Thank you for your payment.</p>
+                        <h5>Order Number: <strong>{{ order.order_number }}</strong></h5>
+                        <h5>Amount Paid: <strong>Ksh. {{ payment.amount_paid }}</strong></h5>
+                        <h5>Payment Method: <strong>{{ payment.payment_method }}</strong></h5>
+                        <h5>Payment ID: <strong>{{ payment.payment_id }}</strong></h5>
+                        <hr>
+                        <p>Your order has been received and is being processed.</p>
+                        <a href="{% url 'dashboard' %}" class="btn btn-success mt-3">Go to Dashboard</a>
+                        <a href="{% url 'store' %}" class="btn btn-outline-primary mt-3">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

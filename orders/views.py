@@ -163,6 +163,52 @@ def mpesa_payment(request, order_number):
     return render(request, 'orders/mpesa_payment.html', context)
 
 
+@login_required(login_url='login')
+def payment_success(request, order_number):
+    """
+    Call this view after a successful payment.
+    It records payment details and marks the order as paid.
+    """
+    # Example: get payment details from request or payment gateway callback
+    payment_id = request.GET.get('payment_id')  # or from POST/callback
+    payment_method = request.GET.get('payment_method', 'Mpesa')
+    amount_paid = request.GET.get('amount_paid')  # or from order/order_total
+    status = request.GET.get('status', 'Paid to Account')
+
+    try:
+        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found.", status=404)
+
+    # Create Payment record
+    payment = Payment.objects.create(
+        user=request.user,
+        payment_id=payment_id,
+        payment_method=payment_method,
+        amount_paid=amount_paid or order.order_total,
+        status=status
+    )
+
+    # Link payment to order and mark as ordered
+    order.payment = payment
+    order.is_ordered = True
+    order.status = "Completed"
+    order.save()
+
+    # Optionally, update OrderProduct records
+    order_products = OrderProduct.objects.filter(order=order)
+    for op in order_products:
+        op.payment = payment
+        op.ordered = True
+        op.save()
+
+    # Show a success page or redirect
+    return render(request, 'orders/payment_success.html', {'order': order, 'payment': payment})
+
+
+
+
+
 import requests
 from datetime import datetime
 import json
