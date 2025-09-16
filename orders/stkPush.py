@@ -39,10 +39,10 @@ def initiate_stk_push(request, order_number):
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
         business_short_code = '174379'
         process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        callback_url = 'https://kariukijames.com/callback'
+        callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        account_reference = 'MAMAMAASAIBAKES'
+        account_reference = '5429863'
         transaction_desc = f'Payment of order {order_number} - MAMAMAASAIBAKES'
 
         stk_push_headers = {
@@ -61,7 +61,7 @@ def initiate_stk_push(request, order_number):
             'PhoneNumber': phone,
             'CallBackURL': callback_url,
             'AccountReference': account_reference,
-            'TransactionDesc': transaction_desc
+            'TransactionDesc': transaction_desc 
         }
 
         try:

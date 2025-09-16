@@ -184,13 +184,13 @@ def initiate_stk_push(request):
             passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
             business_short_code = '174379'
             process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-            callback_url = 'https://kariukijames.com/callback'
+            callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
             party_a = phone
             party_b = business_short_code
-            account_reference = 'BESTSTORE'
-            transaction_desc = 'Payment of order '
+            account_reference = '5429863'
+            transaction_desc = 'Payment of order - MAMAMAASAIBAKES'
             amount = 1  # Set a default amount or retrieve from order
             stk_push_headers = {
                 'Content-Type': 'application/json',
@@ -282,3 +282,30 @@ def payment(request, order_number):
     }
     return render(request, 'orders/payments.html', context)
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
+import json
+
+@csrf_exempt
+def mpesa_callback(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            # You can log the callback data or process it as needed
+            # For example, update payment/order status here
+
+            # Example: print or log the callback data
+            print("Mpesa Callback Data:", data)
+
+            # Always respond with a success message to Safaricom
+            response = {
+                "ResultCode": 0,
+                "ResultDesc": "Accepted"
+            }
+            return JsonResponse(response)
+        except Exception as e:
+            # Log the error if needed
+            print("Mpesa Callback Error:", str(e))
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
+    else:
+        return HttpResponse("Mpesa callback endpoint.", status=200)
