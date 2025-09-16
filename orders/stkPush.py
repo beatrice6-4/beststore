@@ -8,7 +8,7 @@ from .generateAcesstoken import get_access_token
 from .models import Order
 
 @csrf_exempt
-def initiate_stk_push(request):
+def initiate_stk_push(request, order_number):
     # Get access token
     access_token_response = get_access_token(request)
     if isinstance(access_token_response, JsonResponse):
@@ -20,7 +20,9 @@ def initiate_stk_push(request):
 
         # Fetch the exact amount from the order
         try:
-            order = Order.objects.get(user=request.user)
+            order = Order.objects.get(order_number=order_number, user=request.user)
+            if not order:
+                return JsonResponse({'error': 'Order not found.'})
             amount = int(order.order_total)
         except Order.DoesNotExist:
             return JsonResponse({'error': 'Order not found.'})
