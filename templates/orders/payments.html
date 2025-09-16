@@ -12,42 +12,66 @@
                     </div>
                     <div class="card-body">
                         <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
-                        <form method="POST" action="{% url 'initiate_stk_push' order.order_number %}">
+                        <form id="stkpush-form" method="POST" action="{% url 'initiate_stk_push' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="phone">Phone Number</label>
-                                <input type="text" class="form-control" id="phone" name="phone"
-                                       placeholder="e.g. 2547XXXXXXXX"
-                                       pattern="2547[0-9]{8}" maxlength="12" required>
-                                <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
-                                <div id="phoneFeedback" class="invalid-feedback">
-                                    Please provide a valid phone number.
-
-                                </div>
+                                <input type="text" class="form-control" id="phone" name="phone" placeholder="e.g. 2547XXXXXXXX" required>
                             </div>
-                            <div class="form-group">
-                                <label>Amount to Pay</label>
-                                <input type="text" class="form-control" value="Ksh. {{ grand_total }}" readonly>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-block">
-                                <i class="fa fa-mobile"></i> Pay Now
-                            </button>
+                            <button type="submit" class="btn btn-success btn-block">Pay Now</button>
                         </form>
-                        <hr>
-                        <p class="text-center text-muted" style="font-size:0.95rem;">
-                            You will receive a prompt on your phone to complete the payment.
-                            Please ensure you enter the correct phone number.
-                        </p>
-                        <div class="text-center">
-                            <a href="{% url 'checkout' %}" class="btn btn-link">Back to Checkout</a>
+
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" style="display:none; text-align:center; margin-top:20px;">
+                            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="sr-only">Processing payment...</span>
+                            </div>
+                            <p>Processing payment, please wait...</p>
                         </div>
-                        {% if error_message %}
-                            <div class="alert alert-danger mt-3">{{ error_message }}</div>
-                        {% endif %}
+
+                        <div id="payment-result" style="margin-top:20px;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+document.getElementById('stkpush-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('loading-spinner').style.display = 'block';
+    document.getElementById('payment-result').innerHTML = '';
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('loading-spinner').style.display = 'none';
+        if (data.ResponseCode === "0") {
+            document.getElementById('payment-result').innerHTML =
+                '<div class="alert alert-success">STK Push sent! Please complete payment on your phone.</div>';
+        } else if (data.error) {
+            document.getElementById('payment-result').innerHTML =
+                '<div class="alert alert-danger">' + data.error + '</div>';
+        } else {
+            document.getElementById('payment-result').innerHTML =
+                '<div class="alert alert-warning">Unexpected response. Please try again.</div>';
+        }
+    })
+    .catch(error => {
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('payment-result').innerHTML =
+            '<div class="alert alert-danger">Error processing payment. Please try again.</div>';
+    });
+});
+</script>
 {% endblock %}
