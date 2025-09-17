@@ -1,7 +1,69 @@
-{% extends 'base.html' %}
-{% load static %}
-
 {% block content %}
+
+<style>
+.section-content {
+    background: #f8f9fa;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+.card {
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border: none;
+}
+.card-header {
+    border-radius: 14px 14px 0 0;
+    background: #198754 !important;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+.card-body {
+    padding: 2rem;
+}
+.form-group label {
+    font-weight: 600;
+    color: #198754;
+}
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #d1e7dd;
+    box-shadow: none;
+    transition: border-color 0.2s;
+    font-size: 1rem;
+}
+.form-control:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.1rem rgba(25, 135, 84, 0.15);
+}
+.btn-success {
+    background: #198754;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.btn-success:hover {
+    background: #145c32;
+}
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+.alert {
+    border-radius: 8px;
+    font-weight: 500;
+}
+@media (max-width: 600px) {
+    .card-body {
+        padding: 1rem;
+    }
+    .card {
+        padding: 0.5rem;
+    }
+}
+</style>
+
 <section class="section-content padding-y bg">
     <div class="container">
         <div class="row justify-content-center">
@@ -15,7 +77,6 @@
                         <form id="stkpush-form" method="POST" action="{% url 'initiate_stk_push' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
-
                                 <label for="amount">Amount (KES)</label>
                                 <input type="number" class="form-control" id="amount" name="amount" value="{{ order.order_total }}" readonly>
                                 <label for="amount" style="font-size: 0.9em; color: gray;">(Amount is fixed and cannot be changed)</label>

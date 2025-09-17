@@ -24,7 +24,6 @@
 <!-- custom style -->
 <link href="{% static 'css/ui.css' %}" rel="stylesheet" type="text/css"/>
 <link href="{% static 'css/responsive.css' %}" rel="stylesheet" media="only screen and (max-width: 1200px)" />
-
 <link href="{% static 'css/custom.css' %}" rel="stylesheet" type="text/css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -34,7 +33,112 @@
 <script src="{% static 'js/jquery-3.3.1.min.js' %}" type="text/javascript"></script>
 
 <style>
-/* Loader Styles */
+body {
+    background: #f8f9fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #222;
+}
+a {
+    color: #198754;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    color: #145c32;
+    text-decoration: underline;
+}
+.navbar {
+    background: #198754;
+    border-bottom: 2px solid #e0eafc;
+}
+.navbar .navbar-brand, .navbar .nav-link {
+    color: #fff !important;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+.navbar .nav-link:hover {
+    color: #e0eafc !important;
+}
+.footer {
+    background: #198754;
+    color: #fff;
+    padding: 24px 0;
+    text-align: center;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+.footer a {
+    color: #e0eafc;
+    font-weight: 500;
+}
+.footer a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+.btn-primary, .btn-success {
+    background: #198754;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.btn-primary:hover, .btn-success:hover {
+    background: #145c32;
+}
+.btn-outline-primary {
+    border: 2px solid #198754;
+    color: #198754;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-outline-primary:hover {
+    background: #198754;
+    color: #fff;
+}
+.card {
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border: none;
+    margin-bottom: 24px;
+}
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #d1e7dd;
+    box-shadow: none;
+    transition: border-color 0.2s;
+    font-size: 1rem;
+}
+.form-control:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.1rem rgba(25, 135, 84, 0.15);
+}
+.alert {
+    border-radius: 8px;
+    font-weight: 500;
+}
+.section-content {
+    background: #f8f9fa;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+@media (max-width: 991.98px) {
+    .section-content {
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+    .card {
+        margin-bottom: 18px;
+    }
+}
+@media (max-width: 767.98px) {
+    .row {
+        flex-direction: column;
+    }
+    .col-md-3, .col-md-9, .col-md-4 {
+        max-width: 100%;
+    }
+}
 #loader-overlay {
   display: none;
   position: fixed;
