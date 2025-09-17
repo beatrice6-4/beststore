@@ -90,39 +90,25 @@
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
                     <th>Transaction ID</th>
+                    <th>Order Number</th>
                     <th>Amount</th>
                     <th>Status</th>
+                    <th>Date</th>
                 </tr>
             </thead>
             <tbody>
+                {% for transaction in transactions %}
                 <tr>
-                    <td>2024-06-01</td>
-                    <td>#TXN12345</td>
-                    <td>$120.00</td>
-                    <td class="status-success">Success</td>
+                    <td>{{ transaction.transaction_id }}</td>
+                    <td>{{ transaction.order_number }}</td>
+                    <td>${{ transaction.amount }}</td>
+                    <td class="status-{{ transaction.status|lower }}">{{ transaction.status }}</td>
+                    <td>{{ transaction.date|date:"M d, Y H:i" }}</td>
                 </tr>
+                {% empty %}
                 <tr>
-                    <td>2024-05-28</td>
-                    <td>#TXN12344</td>
-                    <td>$75.50</td>
-                    <td class="status-pending">Pending</td>
+                    <td colspan="5" style="text-align:center; color:#718096;">No transactions found.</td>
                 </tr>
-                <tr>
-                    <td>2024-05-25</td>
-                    <td>#TXN12343</td>
-                    <td>$200.00</td>
-                    <td class="status-failed">Failed</td>
-                </tr>
-                <tr>
-                    <td>2024-05-20</td>
-                    <td>#TXN12342</td>
-                    <td>$50.00</td>
-                    <td class="status-success">Success</td>
-                </tr>
+                {% endfor %}
             </tbody>
-        </table>
-    </div>
-</body>
-</html>
