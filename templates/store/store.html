@@ -2,16 +2,158 @@
 {% load static %}
 
 {% block content %}
+
+<style>
+.section-pagetop {
+    background: linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%);
+    padding: 36px 0 24px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+.title-page {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #198754;
+    margin-bottom: 0;
+}
+.section-content {
+    background: #f8f9fa;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+.card {
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border: none;
+    margin-bottom: 24px;
+}
+.filter-group .card-header {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 12px 18px;
+    border-radius: 14px 14px 0 0;
+}
+.filter-group h6.title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #198754;
+    margin-bottom: 0;
+    display: inline-block;
+}
+.list-menu {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+.list-menu li {
+    margin-bottom: 8px;
+}
+.list-menu a {
+    color: #555;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.list-menu a:hover {
+    color: #198754;
+}
+.card-product-grid {
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    border: none;
+    margin-bottom: 24px;
+    background: #fff;
+    transition: box-shadow 0.2s;
+}
+.card-product-grid:hover {
+    box-shadow: 0 4px 16px rgba(25,135,84,0.10);
+}
+.img-wrap {
+    text-align: center;
+    padding: 18px 0 12px 0;
+    background: #f4f6f8;
+    border-radius: 12px 12px 0 0;
+}
+.img-wrap img {
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.info-wrap {
+    padding: 18px 16px 12px 16px;
+}
+.info-wrap .title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #198754;
+    margin-bottom: 6px;
+    display: block;
+    text-decoration: none;
+}
+.price-wrap .price {
+    color: #e67e22;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.btn-outline-primary {
+    border-radius: 8px;
+    font-weight: 600;
+    border: 2px solid #198754;
+    color: #198754;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-outline-primary:hover {
+    background: #198754;
+    color: #fff;
+}
+.pagination {
+    justify-content: center;
+}
+.page-link {
+    border-radius: 6px !important;
+    color: #198754;
+    font-weight: 600;
+}
+.page-item.active .page-link {
+    background: #198754;
+    border-color: #198754;
+    color: #fff;
+}
+.page-item.disabled .page-link {
+    color: #ccc;
+}
+@media (max-width: 991.98px) {
+    .section-content {
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+    .card-product-grid {
+        margin-bottom: 18px;
+    }
+}
+@media (max-width: 767.98px) {
+    .row {
+        flex-direction: column;
+    }
+    .col-md-3, .col-md-9, .col-md-4 {
+        max-width: 100%;
+    }
+    .img-wrap img {
+        max-height: 140px;
+    }
+}
+</style>
+
 <!-- ========================= SECTION PAGETOP ========================= -->
 <section class="section-pagetop bg">
 <div class="container">
-	{% if 'search' in request.path %}
-		<h2 class="title-page">Search Result</h2>
-	{% else %}
-		<h2 class="title-page">Our Store</h2>
-	{% endif %}
-
-</div> <!-- container //  -->
+    {% if 'search' in request.path %}
+        <h2 class="title-page">Search Result</h2>
+    {% else %}
+        <h2 class="title-page">Our Store</h2>
+    {% endif %}
+</div>
 </section>
 <!-- ========================= SECTION INTRO END// ========================= -->
 
@@ -20,103 +162,86 @@
 <div class="container">
 
 <div class="row">
-	<aside class="col-md-3">
-
-<div class="card">
-	<article class="filter-group">
-		<header class="card-header">
-			<a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
-				<i class="icon-control fa fa-chevron-down"></i>
-				<h6 class="title">Categories</h6>
-			</a>
-		</header>
-		<div class="filter-content collapse show" id="collapse_1" style="">
-			<div class="card-body">
-
-				<ul class="list-menu">
-					<li><a href="{% url 'store' %}">All Products  </a></li>
-					{% for category in links %}
-				<li><a href="{{ category.get_url }}">{{ category.category_name }}  </a></li>
-					{% endfor %}
-				</ul>
-
-			</div> <!-- card-body.// -->
-		</div>
-	</article> <!-- filter-group  .// -->
-
-</div> <!-- card.// -->
-
-	</aside> <!-- col.// -->
-	<main class="col-md-9">
-
-<header class="border-bottom mb-4 pb-3">
-		<div class="form-inline">
-			<span class="mr-md-auto"><b>{{ product_count }}</b> items found </span>
-
-		</div>
-</header><!-- sect-heading -->
-
-<div class="row">
-	{% if products %}
-	{% for product in products %}
-	<div class="col-md-4">
-		<figure class="card card-product-grid">
-			<div class="img-wrap">
-
-				<a href="{{ product.get_url }}"><img src="{{ product.images.url }}"></a>
-
-			</div> <!-- img-wrap.// -->
-			<figcaption class="info-wrap">
-				<div class="fix-height">
-					<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-					<div class="price-wrap mt-2">
-						<span class="price">Ksh. {{ product.price }}</span>
-					</div> <!-- price-wrap.// -->
-				</div>
-				<a href="{{ product.get_url }}" class="btn btn-block btn-outline-primary">View Details </a>
-			</figcaption>
-		</figure>
-	</div> <!-- col.// -->
-	{% endfor %}
-	{% else %}
-	<div>
-		<h2>No result found. Please try again.</h2>
-	</div>
-	{% endif %}
-</div> <!-- row end.// -->
-
-
-<nav class="mt-4" aria-label="Page navigation sample">
-	{% if products.has_other_pages %}
-	  <ul class="pagination">
-			{% if products.has_previous %}
-	    <li class="page-item"><a class="page-link" href="?page={{products.previous_page_number}}">Previous</a></li>
-			{% else %}
-			<li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-			{% endif %}
-
-			{% for i in products.paginator.page_range %}
-				{% if products.number == i %}
-	    		<li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
-				{% else %}
-					<li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
-				{% endif %}
-	    {% endfor %}
-
-			{% if products.has_next %}
-	    	<li class="page-item"><a class="page-link" href="?page={{products.next_page_number}}">Next</a></li>
-			{% else %}
-				<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
-			{% endif %}
-	  </ul>
-	{% endif %}
-</nav>
-
-	</main> <!-- col.// -->
-
+    <aside class="col-md-3">
+        <div class="card">
+            <article class="filter-group">
+                <header class="card-header">
+                    <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
+                        <i class="icon-control fa fa-chevron-down"></i>
+                        <h6 class="title">Categories</h6>
+                    </a>
+                </header>
+                <div class="filter-content collapse show" id="collapse_1" style="">
+                    <div class="card-body">
+                        <ul class="list-menu">
+                            <li><a href="{% url 'store' %}">All Products  </a></li>
+                            {% for category in links %}
+                                <li><a href="{{ category.get_url }}">{{ category.category_name }}  </a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </aside>
+    <main class="col-md-9">
+        <header class="border-bottom mb-4 pb-3">
+            <div class="form-inline">
+                <span class="mr-md-auto"><b>{{ product_count }}</b> items found </span>
+            </div>
+        </header>
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                    <div class="col-md-4">
+                        <figure class="card card-product-grid">
+                            <div class="img-wrap">
+                                <a href="{{ product.get_url }}"><img src="{{ product.images.url }}"></a>
+                            </div>
+                            <figcaption class="info-wrap">
+                                <div class="fix-height">
+                                    <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+                                    <div class="price-wrap mt-2">
+                                        <span class="price">Ksh. {{ product.price }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ product.get_url }}" class="btn btn-block btn-outline-primary">View Details </a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div>
+                    <h2>No result found. Please try again.</h2>
+                </div>
+            {% endif %}
+        </div>
+        <nav class="mt-4" aria-label="Page navigation sample">
+            {% if products.has_other_pages %}
+                <ul class="pagination">
+                    {% if products.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{products.previous_page_number}}">Previous</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                    {% endif %}
+                    {% for i in products.paginator.page_range %}
+                        {% if products.number == i %}
+                            <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if products.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{products.next_page_number}}">Next</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </nav>
+    </main>
 </div>
-
-</div> <!-- container .//  -->
+</div>
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
 

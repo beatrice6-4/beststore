@@ -1,23 +1,137 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 
+<style>
+.section-content {
+    background: #f8f9fa;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+.card {
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border: none;
+}
+.table-shopping-cart {
+    background: #fff;
+    border-radius: 10px;
+    margin-bottom: 0;
+}
+.table-shopping-cart th {
+    color: #198754;
+    font-weight: 600;
+    font-size: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+.table-shopping-cart td {
+    vertical-align: middle;
+    padding: 18px 10px;
+}
+.img-sm {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.price-wrap var.price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #e67e22;
+}
+.price-wrap small {
+    color: #6c757d;
+}
+.input-group.input-spinner {
+    max-width: 120px;
+}
+.input-group .btn-light {
+    background: #e9ecef;
+    border: none;
+    color: #198754;
+    font-size: 1rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.input-group .btn-light:hover {
+    background: #d1e7dd;
+}
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #d1e7dd;
+    text-align: center;
+    font-weight: 600;
+}
+.btn-danger {
+    background: #e74c3c;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #fff;
+    transition: background 0.2s;
+}
+.btn-danger:hover {
+    background: #c0392b;
+}
+.btn-primary {
+    background: #198754;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.btn-primary:hover {
+    background: #145c32;
+}
+.btn-light {
+    border-radius: 8px;
+    font-weight: 600;
+}
+.dlist-align dt {
+    color: #198754;
+    font-weight: 600;
+}
+.dlist-align dd {
+    font-weight: 600;
+}
+.text-dark.b {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+@media (max-width: 991.98px) {
+    .section-content {
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+    .card {
+        padding: 10px;
+    }
+}
+@media (max-width: 767.98px) {
+    .row {
+        flex-direction: column;
+    }
+    .col-lg-9, .col-lg-3 {
+        max-width: 100%;
+    }
+}
+</style>
 
 <section class="section-content padding-y bg">
 <div class="container">
 
 <!-- ============================ COMPONENT 1 ================================= -->
 {% if not cart_items %}
-	<h2 class="text-center">Your Shopping Cart is Empty</h2>
-	<br>
-	<div class="text-center">
-		<a href="{% url 'store' %}" class="btn btn-primary">Continue Shopping</a>
-	</div>
+    <h2 class="text-center">Your Shopping Cart is Empty</h2>
+    <br>
+    <div class="text-center">
+        <a href="{% url 'store' %}" class="btn btn-primary">Continue Shopping</a>
+    </div>
 {% else %}
 <div class="row">
-	<aside class="col-lg-9">
+    <aside class="col-lg-9">
 <div class="card">
 <table class="table table-borderless table-shopping-cart">
 <thead class="text-muted">
@@ -32,50 +146,50 @@
 
 {% for cart_item in cart_items %}
 <tr>
-	<td>
-		<figure class="itemside align-items-center">
-			<div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
-			<figcaption class="info">
-				<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-				<p class="text-muted small">
-					{% if cart_item.variations.all %}
-						{% for item in cart_item.variations.all %}
-							{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-						{% endfor %}
-					{% endif %}
-				</p>
-			</figcaption>
-		</figure>
-	</td>
-	<td>
-		<!-- col.// -->
-					<div class="col">
-						<div class="input-group input-spinner">
-							<div class="input-group-prepend">
-							<a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
-							</div>
-							<input type="text" class="form-control"  value="{{ cart_item.quantity }}">
-							<div class="input-group-append">
-								<form action="{% url 'add_cart' cart_item.product.id %}" method="POST">
-									{% csrf_token %}
-									{% for item in cart_item.variations.all %}
-										<input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
-									{% endfor %}
-									<button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
-								</form>
-							</div>
-						</div> <!-- input-group.// -->
-					</div> <!-- col.// -->
-	</td>
-	<td>
-		<div class="price-wrap">
-			<var class="price">Ksh. {{ cart_item.sub_total }}</var>
-			<small class="text-muted"> Ksh. {{ cart_item.product.price }} each </small>
-		</div> <!-- price-wrap .// -->
-	</td>
-	<td class="text-right">
-	<a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" onclick="return confirm('Are you sure you want to delete this item?')" class="btn btn-danger"> Remove</a>
-	</td>
+    <td>
+        <figure class="itemside align-items-center">
+            <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
+            <figcaption class="info">
+                <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+                <p class="text-muted small">
+                    {% if cart_item.variations.all %}
+                        {% for item in cart_item.variations.all %}
+                            {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                        {% endfor %}
+                    {% endif %}
+                </p>
+            </figcaption>
+        </figure>
+    </td>
+    <td>
+        <!-- col.// -->
+                    <div class="col">
+                        <div class="input-group input-spinner">
+                            <div class="input-group-prepend">
+                            <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                            </div>
+                            <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
+                            <div class="input-group-append">
+                                <form action="{% url 'add_cart' cart_item.product.id %}" method="POST">
+                                    {% csrf_token %}
+                                    {% for item in cart_item.variations.all %}
+                                        <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                                    {% endfor %}
+                                    <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
+                                </form>
+                            </div>
+                        </div> <!-- input-group.// -->
+                    </div> <!-- col.// -->
+    </td>
+    <td>
+        <div class="price-wrap">
+            <var class="price">Ksh. {{ cart_item.sub_total }}</var>
+            <small class="text-muted"> Ksh. {{ cart_item.product.price }} each </small>
+        </div> <!-- price-wrap .// -->
+    </td>
+    <td class="text-right">
+    <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" onclick="return confirm('Are you sure you want to delete this item?')" class="btn btn-danger"> Remove</a>
+    </td>
 </tr>
 {% endfor %}
 
@@ -83,31 +197,31 @@
 </table>
 </div> <!-- card.// -->
 
-	</aside> <!-- col.// -->
-	<aside class="col-lg-3">
+    </aside> <!-- col.// -->
+    <aside class="col-lg-3">
 
-		<div class="card">
-		<div class="card-body">
-			<dl class="dlist-align">
-			  <dt>Total price:</dt>
-			  <dd class="text-right">Ksh {{total}}</dd>
-			</dl>
-			<dl class="dlist-align">
-			  <dt>Tax:</dt>
-			  <dd class="text-right"> Ksh {{tax}}</dd>
-			</dl>
-			<dl class="dlist-align">
-			  <dt>Grand Total:</dt>
-			  <dd class="text-right text-dark b"><strong>Ksh {{grand_total}}</strong></dd>
-			</dl>
-			<hr>
-			<p class="text-center mb-3">
-				<img src="{% static './images/misc/payments.png' %}" height="26">
-			</p>
-			<a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Checkout </a>
-			<a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
-		</div> <!-- card-body.// -->
-		</div> <!-- card.// -->
+        <div class="card">
+        <div class="card-body">
+            <dl class="dlist-align">
+              <dt>Total price:</dt>
+              <dd class="text-right">Ksh {{total}}</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Tax:</dt>
+              <dd class="text-right"> Ksh {{tax}}</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Grand Total:</dt>
+              <dd class="text-right text-dark b"><strong>Ksh {{grand_total}}</strong></dd>
+            </dl>
+            <hr>
+            <p class="text-center mb-3">
+                <img src="{% static './images/misc/payments.png' %}" height="26">
+            </p>
+            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Checkout </a>
+            <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
+        </div> <!-- card-body.// -->
+        </div> <!-- card.// -->
 
 </aside> <!-- col.// -->
 
