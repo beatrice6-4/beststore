@@ -77,7 +77,7 @@ def payments(request):
     return JsonResponse(data)
 
 @login_required(login_url='login')
-def place_order(request, total=0, quantity=0):
+def placeOrder(request, total=0, quantity=0):
     current_user = request.user
 
     cart_items = CartItem.objects.filter(user=current_user)
