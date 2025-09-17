@@ -10,6 +10,6 @@ urlpatterns = [
     path('query/', views.query_stk_status, name='query_stk_status'),
     path('payment/<str:order_number>/', views.payment, name='payment'),
     path('stkpush/<str:order_number>/', views.initiate_stk_push, name='initiate_stk_push'),
-    path('payments/<str:order_number>/', views.payments, name='payments')
+    path('payments/<str:order_number>/', views.payments, name='payments'),
     path('transactions/', views.transactions, name='transactions'),
 ]
