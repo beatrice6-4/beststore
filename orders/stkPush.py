@@ -5,11 +5,12 @@ import base64
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .generateAcesstoken import get_access_token
-from .models import Order
+from .models import Order, Payment
+from accounts.models import Account
 
 @csrf_exempt
 def initiate_stk_push(request, order_number):
-    # Get access token
+    # Get access token for live environment
     access_token_response = get_access_token(request)
     if isinstance(access_token_response, JsonResponse):
         access_token = access_token_response.content.decode('utf-8')
@@ -21,8 +22,6 @@ def initiate_stk_push(request, order_number):
         # Fetch the exact amount from the order
         try:
             order = Order.objects.get(order_number=order_number, user=request.user)
-            if not order:
-                return JsonResponse({'error': 'Order not found.'})
             amount = int(order.order_total)
         except Order.DoesNotExist:
             return JsonResponse({'error': 'Order not found.'})
@@ -35,7 +34,7 @@ def initiate_stk_push(request, order_number):
         else:
             return JsonResponse({'error': 'Invalid request method.'})
 
-        # Prepare STK Push parameters
+        # Prepare STK Push parameters for live payments
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
         business_short_code = '5429863'
         process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
@@ -79,25 +78,19 @@ def initiate_stk_push(request, order_number):
             return JsonResponse({'error': str(e)})
     else:
         return JsonResponse({'error': 'Failed to retrieve access token.'})
-from .models import Order, Payment
-from accounts.models import Account
 
 @csrf_exempt
 def mpesa_callback(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            # Extract relevant info from the callback
-            # Example for Safaricom STK Push:
             body = data.get('Body', {})
             stk_callback = body.get('stkCallback', {})
             result_code = stk_callback.get('ResultCode')
             result_desc = stk_callback.get('ResultDesc')
             callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
 
-            # Only proceed if payment was successful
             if result_code == 0:
-                # Extract details
                 mpesa_receipt = None
                 phone_number = None
                 amount = None
@@ -113,13 +106,11 @@ def mpesa_callback(request):
                     elif item['Name'] == 'AccountReference':
                         order_number = str(item['Value'])
 
-                # Find the order
                 try:
                     order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
                 except Order.DoesNotExist:
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
 
-                # Create Payment record
                 payment = Payment.objects.create(
                     user=order.user,
                     payment_id=mpesa_receipt,
@@ -128,7 +119,6 @@ def mpesa_callback(request):
                     status="Completed"
                 )
 
-                # Link payment to order and mark as ordered
                 order.payment = payment
                 order.is_ordered = True
                 order.status = "Completed"
@@ -136,7 +126,6 @@ def mpesa_callback(request):
 
                 return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
 
-            # If payment failed
             return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
 
         except Exception as e:
