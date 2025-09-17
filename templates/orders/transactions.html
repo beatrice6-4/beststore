@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transactions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px;
+        }
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 32px;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+        }
+        th {
+            background: #e2e8f0;
+            color: #2d3748;
+            font-weight: 600;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        tr {
+            transition: background 0.2s;
+        }
+        tr:hover {
+            background: #f1f5f9;
+        }
+        td {
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+        }
+        .status-success {
+            color: #38a169;
+            font-weight: 600;
+        }
+        .status-failed {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+        .status-pending {
+            color: #d69e2e;
+            font-weight: 600;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            th, td {
+                padding: 10px 6px;
+            }
+            th {
+                background: #f4f6fb;
+                border-bottom: none;
+            }
+            td {
+                border-bottom: none;
+                border-top: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Transaction History</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Transaction ID</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2024-06-01</td>
+                    <td>#TXN12345</td>
+                    <td>$120.00</td>
+                    <td class="status-success">Success</td>
+                </tr>
+                <tr>
+                    <td>2024-05-28</td>
+                    <td>#TXN12344</td>
+                    <td>$75.50</td>
+                    <td class="status-pending">Pending</td>
+                </tr>
+                <tr>
+                    <td>2024-05-25</td>
+                    <td>#TXN12343</td>
+                    <td>$200.00</td>
+                    <td class="status-failed">Failed</td>
+                </tr>
+                <tr>
+                    <td>2024-05-20</td>
+                    <td>#TXN12342</td>
+                    <td>$50.00</td>
+                    <td class="status-success">Success</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -9,5 +9,6 @@ urlpatterns = [
     path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
     path('query/', views.query_stk_status, name='query_stk_status'),
     path('payment/<str:order_number>/', views.payment, name='payment'),
-    path('stkpush/<str:order_number>/', views.initiate_stk_push, name='initiate_stk_push'),  # <-- FIXED
+    path('stkpush/<str:order_number>/', views.initiate_stk_push, name='initiate_stk_push'),
+    path('payments/', views.payments, name='payments')
 ]

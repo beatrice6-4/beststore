@@ -417,3 +417,115 @@ def mpesa_callback(request):
             return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
     else:
         return HttpResponse("Mpesa callback endpoint.", status=200)
+    
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import Order, Payment
+from accounts.models import Account
+
+@login_required(login_url='login')
+def payments(request, order_number):
+    """
+    Handles payment for an order and records the transaction.
+    """
+    order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
+    if request.method == "POST":
+        phone = request.POST.get("phone")
+        amount = order.order_total
+
+        # Here you would call your STK Push function and handle response.
+        # For demonstration, let's assume payment is successful and record it.
+
+        payment = Payment.objects.create(
+            user=request.user,
+            payment_id="MPESA123456",  # This should be the actual payment ID from Mpesa
+            payment_method="Mpesa",
+            amount_paid=amount,
+            status="Completed"
+        )
+        order.payment = payment
+        order.is_ordered = True
+        order.status = "Completed"
+        order.save()
+
+        return redirect('order_complete', order_number=order.order_number)
+
+    context = {
+        'order': order,
+    }
+    return render(request, 'orders/payments.html', context)
+
+@login_required(login_url='login')
+def transactions(request):
+    """
+    Lists all payments made by the logged-in user.
+    """
+    payments = Payment.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'payments': payments,
+    }
+    return render(request, 'orders/transactions.html', context)
+
+@csrf_exempt
+def mpesa_callback(request):
+    """
+    Receives Mpesa callback and records the transaction.
+    """
+    if request.method == "POST":
+        try:
+            import json
+            data = json.loads(request.body.decode('utf-8'))
+            body = data.get('Body', {})
+            stk_callback = body.get('stkCallback', {})
+            result_code = stk_callback.get('ResultCode')
+            result_desc = stk_callback.get('ResultDesc')
+            callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
+
+            if result_code == 0:
+                mpesa_receipt = None
+                phone_number = None
+                amount = None
+                order_number = None
+
+                for item in callback_metadata:
+                    if item['Name'] == 'MpesaReceiptNumber':
+                        mpesa_receipt = item['Value']
+                    elif item['Name'] == 'PhoneNumber':
+                        phone_number = str(item['Value'])
+                    elif item['Name'] == 'Amount':
+                        amount = float(item['Value'])
+                    elif item['Name'] == 'AccountReference':
+                        order_number = str(item['Value'])
+
+                try:
+                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
+                except Order.DoesNotExist:
+                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
+
+                payment = Payment.objects.create(
+                    user=order.user,
+                    payment_id=mpesa_receipt,
+                    payment_method="Mpesa",
+                    amount_paid=amount,
+                    status="Completed"
+                )
+
+                order.payment = payment
+                order.is_ordered = True
+                order.status = "Completed"
+                order.save()
+
+                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
+
+        except Exception as e:
+            print("Mpesa Callback Error:", str(e))
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
+    else:
+        return HttpResponse("Mpesa callback endpoint.", status=200)
