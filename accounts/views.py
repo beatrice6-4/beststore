@@ -315,21 +315,3 @@ def dashboard(request):
     }
     return render(request, 'accounts/dashboard.html', context)
 
-from .models import UserProfile
-from .forms import UserProfileForm
-@login_required(login_url='login')
-def settings(request):
-    userprofile = get_object_or_404(UserProfile, user=request.user)
-    if request.method == 'POST':
-        profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
-        if profile_form.is_valid():
-            profile_form.save()
-            messages.success(request, 'Your profile settings have been updated.')
-            return redirect('settings')
-    else:
-        profile_form = UserProfileForm(instance=userprofile)
-    context = {
-        'profile_form': profile_form,
-        'userprofile': userprofile,
-    }
-    return render(request, 'accounts/settings.html', context)
