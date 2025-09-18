@@ -112,14 +112,20 @@ def placeOrder(request, total=0, quantity=0):
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
+            data.is_ordered = False
             data.save()
-            # Generate order number using correct datetime usage
+
+            # Generate order number
             current_date = datetime.now().strftime("%Y%m%d")
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
 
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            try:
+                order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            except Order.DoesNotExist:
+                return redirect('store')
+
             context = {
                 'order': order,
                 'cart_items': cart_items,
