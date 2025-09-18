@@ -297,7 +297,7 @@ def order_complete(request):
     payment_id = request.GET.get('payment_id')
 
     try:
-        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
+        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
         payment = Payment.objects.get(payment_id=payment_id, user=request.user)
         ordered_products = OrderProduct.objects.filter(order=order)
 
