@@ -28,7 +28,7 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name='order_payment'  # Changed to avoid reverse accessor conflict
+        related_name='order_payment'
     )
     order_number = models.CharField(max_length=20)
     first_name = models.CharField(max_length=50)
@@ -45,7 +45,7 @@ class Order(models.Model):
     tax = models.FloatField()
     status = models.CharField(max_length=10, choices=STATUS, default='New')
     ip = models.CharField(blank=True, max_length=20)
-    is_ordered = models.BooleanField(default=False)
+    is_ordered = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -64,7 +64,7 @@ class OrderProduct(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variations = models.ManyToManyField(Variation, blank=True)
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField(default=1)
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
