@@ -32,21 +32,61 @@ INSTALLED_APPS = [
 ]
 
 
+# Add this to your settings.py for a well customized django-admin-interface
 
-JET_REBOOT_SETTINGS = {
-    'site_title': 'BestStore Admin',
-    'site_logo': '/static/images/logo.png',
-    'welcome_sign': 'Welcome to BestStore Admin',
-    'copyright': '© 2023 BestStore. All rights reserved.',
-    'search_model': 'auth.User',
-    'show_recent_actions': True,
-    'language_chooser': True,
-    'custom_css': '/static/css/custom.css',
-    'custom_js': '/static/js/custom.js',
-
+ADMIN_INTERFACE_SETTINGS = {
+    "title": "MAMAMAASAI BAKERS Admin",
+    "logo": "/static/images/logo.png",  # Path to your logo
+    "favicon": "/static/images/favicon.ico",
+    "env": "production",
+    "language_chooser": True,
+    "search_url": "/admin/orders/order/",  # Default search URL
+    "menu": [
+        {
+            "label": "Dashboard",
+            "url": "/admin/",
+            "icon": "fas fa-tachometer-alt",
+        },
+        {
+            "label": "Orders",
+            "url": "/admin/orders/order/",
+            "icon": "fas fa-shopping-cart",
+        },
+        {
+            "label": "Payments",
+            "url": "/admin/orders/payment/",
+            "icon": "fas fa-credit-card",
+        },
+        {
+            "label": "Finance",
+            "url": "/admin/finance/financerecord/",
+            "icon": "fas fa-money-check-alt",
+        },
+        {
+            "label": "Users",
+            "url": "/admin/accounts/account/",
+            "icon": "fas fa-users",
+        },
+    ],
+    "colors": {
+        "header": "#198754",
+        "header_text": "#fff",
+        "logo_background": "#fff",
+        "sidebar_background": "#e0eafc",
+        "sidebar_text": "#198754",
+        "sidebar_active": "#145c32",
+        "button": "#198754",
+        "button_hover": "#145c32",
+        "accent": "#e0eafc",
+    },
+    "list_per_page": 20,
+    "pagination_sticky": True,
+    "form_pagination_sticky": True,
+    "show_required_asterisk": True,
+    "default_icon": "fas fa-cogs",
+    "use_google_fonts": True,
+    "google_fonts": "Roboto:400,700",
 }
-
-
 
 
 
