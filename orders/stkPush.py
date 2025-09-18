@@ -10,7 +10,7 @@ from accounts.models import Account
 
 @csrf_exempt
 def initiate_stk_push(request, order_number):
-    # Get access token for live environment
+    # Get access token for sandbox environment
     access_token_response = get_access_token(request)
     if isinstance(access_token_response, JsonResponse):
         access_token = access_token_response.content.decode('utf-8')
@@ -34,15 +34,15 @@ def initiate_stk_push(request, order_number):
         else:
             return JsonResponse({'error': 'Invalid request method.'})
 
-        # Prepare STK Push parameters for live payments
+        # Prepare STK Push parameters for sandbox payments
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = '174979'  # Live Business Short Code
+        business_short_code = '174379'  # Sandbox Short Code
         process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
+        callback_url = 'https://your-dev-callback-url.com/orders/mpesa/callback/'  # Use a test callback URL
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        account_reference = 'MAMAMAASAIBAKERS'
-        transaction_desc = f'Payment of order {order_number} - MAMAMAASAIBAKES'
+        account_reference = 'BESTSTORE_DEV'
+        transaction_desc = f'Payment of order {order_number} - BESTSTORE_DEV'
 
         stk_push_headers = {
             'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ def mpesa_callback(request):
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
 
                 user = Account.objects.get(id=order.user.id)
-                payment = Payment(
+                payment = Payment.objects.create(
                     user=user,
                     payment_id=mpesa_receipt,
                     payment_method="Mpesa",
