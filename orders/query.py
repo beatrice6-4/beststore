@@ -12,8 +12,8 @@ def query_stk_status(request):
         access_token_json = json.loads(access_token)
         access_token = access_token_json.get('access_token')
         if access_token:
-            query_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query'
-            business_short_code = '174379'
+            query_url = 'https://mpesa-requester.safaricom.co.ke/mpesa/stkpushquery/v1/query'
+            business_short_code = '5429863'
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
             password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
