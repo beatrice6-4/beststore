@@ -41,8 +41,8 @@ def initiate_stk_push(request, order_number):
         callback_url = 'https://your-dev-callback-url.com/orders/mpesa/callback/'  # Use a test callback URL
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        account_reference = 'BESTSTORE_DEV'
-        transaction_desc = f'Payment of order {order_number} - BESTSTORE_DEV'
+        account_reference = 'MAMAMAASAI BAKERS'
+        transaction_desc = f'Payment of order {order_number} - MAMAMAASAI BAKERS'
 
         stk_push_headers = {
             'Content-Type': 'application/json',
@@ -105,6 +105,8 @@ def mpesa_callback(request):
                         amount = float(item['Value'])
                     elif item['Name'] == 'AccountReference':
                         order_number = str(item['Value'])
+                if not all([mpesa_receipt, phone_number, amount, order_number]):
+                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Incomplete callback data"}, status=400)
 
                 try:
                     order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)

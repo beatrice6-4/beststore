@@ -283,19 +283,25 @@ def check_stk_status(request, order_number):
 
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Order, Payment, OrderProduct
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='login')
 def order_complete(request):
+    """
+    Displays the order completion summary after successful payment.
+    Expects 'order_number' and 'payment_id' as GET parameters.
+    """
     order_number = request.GET.get('order_number')
-    transID = request.GET.get('payment_id')
+    payment_id = request.GET.get('payment_id')
 
     try:
         order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
-        ordered_products = OrderProduct.objects.filter(order_id=order.id)
+        payment = Payment.objects.get(payment_id=payment_id, user=request.user)
+        ordered_products = OrderProduct.objects.filter(order=order)
 
-        subtotal = 0
-        for i in ordered_products:
-            subtotal += i.product_price * i.quantity
-
-        payment = Payment.objects.get(payment_id=transID)
+        subtotal = sum([op.product_price * op.quantity for op in ordered_products])
 
         context = {
             'order': order,
@@ -306,7 +312,7 @@ def order_complete(request):
             'subtotal': subtotal,
         }
         return render(request, 'orders/order_complete.html', context)
-    except (Payment.DoesNotExist, Order.DoesNotExist):
+    except (Order.DoesNotExist, Payment.DoesNotExist):
         return redirect('home')
     
 
