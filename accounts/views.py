@@ -229,12 +229,12 @@ def resetPassword(request):
 from orders.models import Order
 
 @login_required(login_url='login')
-def my_orders(request):
+def myOrders(request):
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
     context = {
         'orders': orders,
     }
-    return render(request, 'accounts/my_orders.html', context)
+    return render(request, 'accounts/myOrders.html', context)
 
 @login_required(login_url='login')
 def edit_profile(request):
