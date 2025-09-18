@@ -13,7 +13,6 @@ from django.contrib import messages
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 # Create your views here.
-@login_required(login_url='login')
 def store(request, category_slug=None):
     categories = None
     products = None
