@@ -136,7 +136,7 @@ USE_TZ = True
 import os
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Media files (user-uploaded content, e.g., product images)
 MEDIA_URL = '/media/'
