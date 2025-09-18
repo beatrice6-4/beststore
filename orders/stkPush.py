@@ -111,8 +111,9 @@ def mpesa_callback(request):
                 except Order.DoesNotExist:
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
 
-                payment = Payment.objects.create(
-                    user=order.user,
+                user = Account.objects.get(id=order.user.id)
+                payment = Payment(
+                    user=user,
                     payment_id=mpesa_receipt,
                     payment_method="Mpesa",
                     amount_paid=amount,
