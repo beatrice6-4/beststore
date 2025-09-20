@@ -352,14 +352,13 @@ def mpesa_callback(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            # Extract relevant info from the callback
             body = data.get('Body', {})
             stk_callback = body.get('stkCallback', {})
             result_code = stk_callback.get('ResultCode')
             callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
 
             if result_code == 0:
-                # Extract details
+                # Extract payment details
                 mpesa_receipt = None
                 phone_number = None
                 amount = None
@@ -375,61 +374,41 @@ def mpesa_callback(request):
                     elif item['Name'] == 'AccountReference':
                         order_number = str(item['Value'])
 
-                # Find the order (adjust filter as needed)
-                try:
-                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
-                except Order.DoesNotExist:
-                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
-
-                # Create Payment record
+                # Create Payment object
+                user = Account.objects.filter(phone=phone_number).first()
                 payment = Payment.objects.create(
-                    user=order.user,
+                    user=user,
                     payment_id=mpesa_receipt,
                     payment_method="Mpesa",
                     amount_paid=amount,
                     status="Completed"
                 )
 
-                # Link payment to order and mark as ordered
-                order.payment = payment
-                order.is_ordered = True
-                order.status = "Completed"
-                order.save()
+                # Create or update Order object
+                order, created = Order.objects.get_or_create(
+                    order_number=order_number,
+                    defaults={
+                        'user': user,
+                        'phone': phone_number,
+                        'order_total': amount,
+                        'is_ordered': True,
+                        'status': 'Completed',
+                        'payment': payment,
+                    }
+                )
+                if not created:
+                    order.payment = payment
+                    order.is_ordered = True
+                    order.status = "Completed"
+                    order.save()
 
-                # Move cart items to OrderProduct
-                cart_items = CartItem.objects.filter(user=order.user)
-                for item in cart_items:
-                    orderproduct = OrderProduct.objects.create(
-                        order=order,
-                        payment=payment,
-                        user=order.user,
-                        product=item.product,
-                        quantity=item.quantity,
-                        product_price=item.product.price,
-                        ordered=True
-                    )
-                    orderproduct.variations.set(item.variations.all())
-                    orderproduct.save()
-
-                    # Reduce product stock
-                    product = item.product
-                    product.stock -= item.quantity
-                    product.save()
-
-                # Clear cart
-                cart_items.delete()
-
-                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
-
-            # If payment failed
-            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
-
+                return JsonResponse({"ResultCode": 0, "ResultDesc": "Order created and payment recorded"})
+            else:
+                return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not successful"})
         except Exception as e:
-            print("Mpesa Callback Error:", str(e))
-            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
+            return JsonResponse({"ResultCode": 1, "ResultDesc": str(e)}, status=400)
     else:
         return HttpResponse("Mpesa callback endpoint.", status=200)
-    
 
 
 
