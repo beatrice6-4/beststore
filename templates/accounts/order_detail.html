@@ -67,23 +67,23 @@
                                           				</p>
                                                 </td>
                                                 <td class="text-center">{{item.quantity}}</td>
-                                                <td class="text-center">Ksh {{item.product_price}} USD</td>
+                                                <td class="text-center">Ksh {{item.product_price}} Ksh</td>
                                             </tr>
                                           {% endfor %}
                                         </tbody>
                                         <tfoot>
                                             <tr>
                                                 <th colspan="2" class="text-right">Sub Total:</th>
-                                                <th class="text-center">Ksh {{subtotal}} USD</th>
+                                                <th class="text-center">Ksh {{subtotal}} Ksh</th>
                                             </tr>
                                             <tr>
                                                 <th colspan="2" class="text-right">Tax:</th>
-                                                <th class="text-center">Ksh {{order.tax}} USD</th>
+                                                <th class="text-center">Ksh {{order.tax}} Ksh</th>
                                             </tr>
 
                                             <tr>
                                                 <th colspan="2" class="text-right">Grand Total:</th>
-                                                <th class="text-center">Ksh {{order.order_total}} USD</th>
+                                                <th class="text-center">Ksh {{order.order_total}} Ksh</th>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -91,6 +91,7 @@
                             </div>
                             <div class="invoice-footer mt25">
                                 <p class="text-center">Thank you for shopping with us!</p>
+                                <p class="text-center">For support, contact us at <a href="mailto:dnambuchi@gmail.com">dnambuchi@gmail.com, bramwemwelwanyonyi2021@gmail.com</a></p>
                             </div>
                         </div>
                         <!-- col-lg-12 end here -->
