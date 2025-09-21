@@ -152,14 +152,16 @@ def activate(request, uidb64, token):
         return redirect('register')
 
 
-@login_required(login_url = 'login')
+@login_required
 def dashboard(request):
-    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
     orders_count = orders.count()
-
-    
+    userprofile = getattr(request.user, 'userprofile', None)
     context = {
         'orders_count': orders_count,
+        'orders': orders,
+        'user': request.user,
+        'userprofile': userprofile,
     }
     return render(request, 'accounts/dashboard.html', context)
 
