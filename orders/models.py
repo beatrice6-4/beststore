@@ -12,7 +12,7 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.payment_id
+        return self.payment_id if self.payment_id else "No Mpesa Code"
 
 class Order(models.Model):
     STATUS = (
