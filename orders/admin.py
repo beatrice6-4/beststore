@@ -10,7 +10,10 @@ class PaymentAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         reference_code = cleaned_data.get('reference_code')
+        payment_id = cleaned_data.get('payment_id')
         self._order = None
+        if not payment_id:
+            raise forms.ValidationError("Mpesa code (payment_id) is required.")
         if reference_code:
             try:
                 order = Order.objects.get(order_number=reference_code)
