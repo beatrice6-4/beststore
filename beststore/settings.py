@@ -12,8 +12,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
-    'admin_interface',
-    'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -104,11 +102,13 @@ MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mamamaassaibakers@gmail.com'
 EMAIL_HOST_PASSWORD = 'ujqc yeoo sagb zajx'
 DEFAULT_FROM_EMAIL = 'mamamaassaibakers@gmail.com'
-
 
 # Heroku static files support
 django_heroku.settings(locals())
