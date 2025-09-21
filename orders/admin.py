@@ -16,7 +16,7 @@ class PaymentAdminForm(forms.ModelForm):
                 order = Order.objects.get(order_number=reference_code)
                 self._order = order
             except Order.DoesNotExist:
-                raise forms.ValidationError("No order found with this reference code, Please check the reference code.")
+                raise forms.ValidationError("No order found with this reference code.")
         return cleaned_data
 
     def save(self, commit=True):
@@ -25,7 +25,13 @@ class PaymentAdminForm(forms.ModelForm):
             instance.user = self._order.user
             instance.amount_paid = self._order.order_total
             instance.payment_method = 'Mpesa'
-            instance.status = 'Completed'
+            instance.status = 'Paid Via Mpesa'
+            instance.payment_id = self.cleaned_data.get('payment_id')
+            # Mark the order as completed and link the payment
+            self._order.payment = instance
+            self._order.status = "Completed"
+            self._order.is_ordered = True
+            self._order.save()
         if commit:
             instance.save()
         return instance
