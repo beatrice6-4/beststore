@@ -27,13 +27,16 @@ class PaymentAdminForm(forms.ModelForm):
             instance.payment_method = 'Mpesa'
             instance.status = 'Paid Via Mpesa'
             instance.payment_id = self.cleaned_data.get('payment_id')
-            # Mark the order as completed and link the payment
-            self._order.payment = instance
-            self._order.status = "Completed"
-            self._order.is_ordered = True
-            self._order.save()
-        if commit:
-            instance.save()
+            if commit:
+                instance.save()  # Save Payment first!
+                # Now link payment to order and update order status
+                self._order.payment = instance
+                self._order.status = "Completed"
+                self._order.is_ordered = True
+                self._order.save()
+        else:
+            if commit:
+                instance.save()
         return instance
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
