@@ -13,10 +13,7 @@ class PaymentAdminForm(forms.ModelForm):
         payment_id = cleaned_data.get('payment_id')
         self._order = None
 
-        # Ensure Mpesa code is provided
-        if not payment_id or payment_id.strip() == "":
-            raise forms.ValidationError("Please enter the Mpesa reference code in the 'Mpesa code (payment_id)' field.")
-
+        # Mpesa code is now optional, so no validation error if blank
         # If reference code is provided, fetch the order
         if reference_code:
             try:
