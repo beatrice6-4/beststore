@@ -25,7 +25,9 @@ class PaymentAdminForm(forms.ModelForm):
             instance.user = self._order.user
             instance.amount_paid = self._order.order_total
             instance.payment_method = 'Mpesa'
-            instance.status = 'Completed'
+            instance.status = 'Paid Via Mpesa'
+            # Set payment_id to the Mpesa code entered by admin
+            instance.payment_id = self.cleaned_data.get('payment_id')
         if commit:
             instance.save()
         return instance
