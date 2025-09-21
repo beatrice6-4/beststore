@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 import django_heroku
@@ -15,7 +14,6 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'admin_interface',
     'colorfield',
-    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,65 +29,6 @@ INSTALLED_APPS = [
     'finance',
 ]
 
-
-# Add this to your settings.py for a well customized django-admin-interface
-
-ADMIN_INTERFACE_SETTINGS = {
-    "title": "MAMAMAASAI BAKERS Admin",
-    "logo": "/static/images/logo.png",  # Path to your logo
-    "favicon": "/static/images/favicon.ico",
-    "env": "production",
-    "language_chooser": True,
-    "search_url": "/admin/orders/order/",  # Default search URL
-    "menu": [
-        {
-            "label": "Dashboard",
-            "url": "/admin/",
-            "icon": "fas fa-tachometer-alt",
-        },
-        {
-            "label": "Orders",
-            "url": "/admin/orders/order/",
-            "icon": "fas fa-shopping-cart",
-        },
-        {
-            "label": "Payments",
-            "url": "/admin/orders/payment/",
-            "icon": "fas fa-credit-card",
-        },
-        {
-            "label": "Finance",
-            "url": "/admin/finance/financerecord/",
-            "icon": "fas fa-money-check-alt",
-        },
-        {
-            "label": "Users",
-            "url": "/admin/accounts/account/",
-            "icon": "fas fa-users",
-        },
-    ],
-    "colors": {
-        "header": "#198754",
-        "header_text": "#fff",
-        "logo_background": "#fff",
-        "sidebar_background": "#e0eafc",
-        "sidebar_text": "#198754",
-        "sidebar_active": "#145c32",
-        "button": "#198754",
-        "button_hover": "#145c32",
-        "accent": "#e0eafc",
-    },
-    "list_per_page": 20,
-    "pagination_sticky": True,
-    "form_pagination_sticky": True,
-    "show_required_asterisk": True,
-    "default_icon": "fas fa-cogs",
-    "use_google_fonts": True,
-    "google_fonts": "Roboto:400,700",
-}
-
-
-
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -100,18 +39,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
-
-MPESA_CONSUMER_KEY = 'QoZMbK2rzLOisAZsAZkS5GM1MEu3mSevGXv9N9z7oyzaaTUS'
-MPESA_CONSUMER_SECRET = '75PYlNNbxGfj0nZUGGzdLAuxJaSl2fWIlQ0yOA9wlN7SyMkxc34QAOfrmMl40Q3Z'
-MPESA_SHORTCODE = '20306'
-MPESA_PASSKEY = '20306bfb279f9aa9b7b5c3f1c2e8d8f9e0d97f0f6c6e3d3e5b4a3f4e5d6c7b8a9'
-MPESA_BASE_URL = 'https://sandbox.safaricom.co.ke'  # Use production URL for live
-
-MPESA_CALLBACK_URL = 'https://mamamaassaibakers.herokuapp.com/orders/payments/'
-
-
 
 ROOT_URLCONF = 'beststore.urls'
 
@@ -133,20 +60,9 @@ TEMPLATES = [
     },
 ]
 
-
-
 WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
-
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mamamaassaibakers@gmail.com'
-EMAIL_HOST_PASSWORD = 'ujqc yeoo sagb zajx'
-DEFAULT_FROM_EMAIL = 'mamamaassaibakers@gmail.com'
 
 DATABASES = {
     'default': {
@@ -175,16 +91,27 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-import os
+# Static files (CSS, JavaScript, Images, APKs)
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Place your apk file in static/apk/
+]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Media files (user-uploaded content, e.g., product images)
+# Media files (user-uploaded content)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
-STATIC_ROOT = BASE_DIR / "staticfiles"
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email settings (example)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mamamaasaibakers@gmail.com'
+EMAIL_HOST_PASSWORD = 'ujqc yeoo sagb zajx'
+DEFAULT_FROM_EMAIL = 'mamamaasaibakers@gmail.com'
+
+# Heroku static files support
 django_heroku.settings(locals())
