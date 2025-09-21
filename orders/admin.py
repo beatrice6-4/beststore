@@ -12,18 +12,24 @@ class PaymentAdminForm(forms.ModelForm):
         reference_code = cleaned_data.get('reference_code')
         payment_id = cleaned_data.get('payment_id')
         self._order = None
-        if not payment_id:
-            raise forms.ValidationError("Mpesa code (payment_id) is required.")
+
+        # Ensure Mpesa code is provided
+        if not payment_id or payment_id.strip() == "":
+            raise forms.ValidationError("Please enter the Mpesa reference code in the 'Mpesa code (payment_id)' field.")
+
+        # If reference code is provided, fetch the order
         if reference_code:
             try:
                 order = Order.objects.get(order_number=reference_code)
                 self._order = order
             except Order.DoesNotExist:
                 raise forms.ValidationError("No order found with this reference code.")
+
         return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
+        # If an order was found, auto-fill fields and update order status
         if hasattr(self, '_order') and self._order:
             instance.user = self._order.user
             instance.amount_paid = self._order.order_total
@@ -32,7 +38,7 @@ class PaymentAdminForm(forms.ModelForm):
             instance.payment_id = self.cleaned_data.get('payment_id')
             if commit:
                 instance.save()  # Save Payment first!
-                # Now link payment to order and update order status
+                # Link payment to order and mark as completed
                 self._order.payment = instance
                 self._order.status = "Completed"
                 self._order.is_ordered = True
@@ -41,6 +47,7 @@ class PaymentAdminForm(forms.ModelForm):
             if commit:
                 instance.save()
         return instance
+
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     form = PaymentAdminForm
