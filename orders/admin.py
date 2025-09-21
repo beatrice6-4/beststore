@@ -10,17 +10,25 @@ class PaymentAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         reference_code = cleaned_data.get('reference_code')
+        self._order = None
         if reference_code:
-            # Example: Fetch order by reference_code and populate payment fields
             try:
                 order = Order.objects.get(order_number=reference_code)
-                cleaned_data['user'] = order.user
-                cleaned_data['amount_paid'] = order.order_total
-                cleaned_data['payment_method'] = 'Mpesa'
-                cleaned_data['status'] = 'Completed'
+                self._order = order
             except Order.DoesNotExist:
-                raise forms.ValidationError("No order found with this reference code.")
+                raise forms.ValidationError("No order found with this reference code, Please check the reference code.")
         return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if hasattr(self, '_order') and self._order:
+            instance.user = self._order.user
+            instance.amount_paid = self._order.order_total
+            instance.payment_method = 'Mpesa'
+            instance.status = 'Completed'
+        if commit:
+            instance.save()
+        return instance
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
