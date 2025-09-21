@@ -115,7 +115,7 @@
                             <i class="fa fa-user"></i> logged in as {{ request.user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{% url 'profile_view' %}">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
                             <li><a class="dropdown-item" href="#">Change Password</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
@@ -312,7 +312,7 @@
                                 <tr>
                                     <td>{{ user.username }}</td>
                                     <td>{{ user.email }}</td>
-                                    <td>{{ user.get_role_display }}</td>
+                            
                                     <td>
                                         {% if user.is_active %}
                                             <span class="badge bg-success">Active</span>
