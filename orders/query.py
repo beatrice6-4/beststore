@@ -78,3 +78,4 @@ def query_stk_status(request):
             return JsonResponse({'error': 'Error decoding JSON: ' + str(e)})
     else:
         return JsonResponse({'error': 'Failed to retrieve access token.'})
+    
