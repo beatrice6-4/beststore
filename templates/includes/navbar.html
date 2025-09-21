@@ -92,7 +92,7 @@
     <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+            <a class="navbar-brand d-flex align-items-center" href="">
                 <img src="{% static 'images/logo.png' %}" alt="KIMBAKERY Logo" width="60" height="50" class="me-2" style="object-fit:contain;">
                 KIMBAKERY Dashboards
             </a>
@@ -116,7 +116,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{% url 'profile_view' %}">Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'change_password' %}">Change Password</a></li>
+                            <li><a class="dropdown-item" href="#">Change Password</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                         </ul>
@@ -129,7 +129,7 @@
     <div class="d-flex">
         <nav class="sidebar flex-column p-3" id="sidebarMenu">
             <div class="d-flex align-items-center mb-4">
-                <a class="navbar-brand" href="{% url 'admin_dashboard' %}">My Dashboards</a>
+                <a class="navbar-brand" href="#">My Dashboards</a>
                 <!-- Sidebar toggler (three hamburger lines) -->
                 <button class="ms-auto btn btn-sm" id="sidebarCollapseBtn" style="background:transparent;border:none;" aria-label="Toggle sidebar">
                     <span style="display:inline-block;">
@@ -141,7 +141,7 @@
             </div>
            <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-        <a href="{% url 'index' %}" class="nav-link active" aria-current="page">
+        <a href="#" class="nav-link active" aria-current="page">
             <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
         </a>
     </li>
@@ -177,13 +177,13 @@
     </li>
 
     <li class="nav-item">
-        <a href="{% url 'contact_messages' %}" class="nav-link">
+        <a href="#" class="nav-link">
             <i class="fa-solid fa-envelope"></i> <span>Contact Messages</span>
         </a>
     </li>
 
     <li class="nav-item">
-        <a href="{% url 'welfare_dashboard' %}" class="nav-link">
+        <a href="#" class="nav-link">
             <i class="fa-solid fa-money-bill-wave"></i> <span>Payments</span>
             <span class="badge bg-danger">New</span>
         </a>
@@ -203,9 +203,9 @@
             <i class="fa-solid fa-user-shield"></i> <span>Administration</span>
         </a>
         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-            <li><a class="dropdown-item" href="{% url 'manageUsers' %}">Manage Users</a></li>
-            <li><a class="dropdown-item" href="{% url 'user-roles' %}">User Roles</a></li>
-            <li><a class="dropdown-item" href="{% url 'audit_logs' %}">Audit Logs</a></li>
+            <li><a class="dropdown-item" href="#">Manage Users</a></li>
+            <li><a class="dropdown-item" href="#">User Roles</a></li>
+            <li><a class="dropdown-item" href="#">Audit Logs</a></li>
         </ul>
     </li>
 </ul>
@@ -293,7 +293,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Recent Users</h5>
-                    <a href="{% url 'users_list' %}" class="btn btn-primary btn-sm">View All Users</a>
+                    <a href="#" class="btn btn-primary btn-sm">View All Users</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
