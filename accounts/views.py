@@ -341,3 +341,11 @@ def customerDashboard(request):
         'user': request.user,
     }
     return render(request, 'accounts/customerDashboard.html', context)
+
+@login_required
+def user_management(request):
+    users = Account.objects.all()
+    context = {
+        'users': users,
+    }
+    return render(request, 'accounts/user_management.html', context)
