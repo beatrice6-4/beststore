@@ -327,17 +327,17 @@ from store.models import Product, Category
 from orders.models import Order
 
 @login_required
-def customerDashboard(request):
-    products = Product.objects.all()[:6]  # Featured products
+def customer_dashboard(request):
+    products = Product.objects.all()[:6]
     categories = Category.objects.all()
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    orders_recent = orders[:5]
     active_orders = orders.exclude(status='Delivered')
     context = {
         'products': products,
         'categories': categories,
-        'orders': orders,
+        'orders': orders_recent,
         'active_orders': active_orders,
         'user': request.user,
     }
     return render(request, 'accounts/customerDashboard.html', context)
-
