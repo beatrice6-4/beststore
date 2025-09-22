@@ -74,7 +74,7 @@
 </span>
                         </td>
                         <td>KSH {{ order.order_total }}</td>
-                        <td><a href="{% url 'order_detail' order.id %}" class="btn">View</a></td>
+                        <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn">View</a>
                     </tr>
                     {% empty %}
                     <tr><td colspan="5">No orders yet.</td></tr>
