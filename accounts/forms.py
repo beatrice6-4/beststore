@@ -47,4 +47,11 @@ class UserForm(forms.ModelForm):
 
 
 
-   
+
+from django import forms
+from .models import ContactMessage
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = ContactMessage
+        fields = ['subject', 'message']

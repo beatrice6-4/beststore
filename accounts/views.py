@@ -352,6 +352,19 @@ def user_management(request):
     return render(request, 'accounts/user_management.html', context)
 
 
+from .forms import ContactForm
+from .models import ContactMessage
+
 @login_required
 def contact(request):
-    return render(request, 'accounts/contact.html')
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact_message = form.save(commit=False)
+            contact_message.user = request.user
+            contact_message.save()
+            messages.success(request, 'Your message has been sent to the admin.')
+            return redirect('contact')
+    else:
+        form = ContactForm()
+    return render(request, 'accounts/contact.html', {'form': form})
