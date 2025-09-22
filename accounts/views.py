@@ -350,3 +350,8 @@ def user_management(request):
         'users': users,
     }
     return render(request, 'accounts/user_management.html', context)
+
+
+@login_required
+def contact(request):
+    return render(request, 'accounts/contact.html')
