@@ -69,9 +69,9 @@
                         <td>{{ order.order_number }}</td>
                         <td>{{ order.created_at|date:"M d, Y" }}</td>
                         <td>
-                            <span class="status-{{ order.status|lower|replace:' ','' }}">
-                                {{ order.status }}
-                            </span>
+                            <span class="status-{{ order.status|lower|cut:' ' }}">
+    {{ order.status }}
+</span>
                         </td>
                         <td>KSH {{ order.order_total }}</td>
                         <td><a href="{% url 'order_detail' order.id %}" class="btn">View</a></td>
