@@ -73,7 +73,7 @@
             border-bottom: 1px solid #f0e6e6;
         }
         .orders-table th {
-            background: #ffe5d0;
+            background: #01ef55;
             color: #b85c38;
             font-weight: 600;
         }
@@ -132,8 +132,8 @@
             display: inline-block;
         }
         .status-pending { background: #fff3e0; }
-        .status-inprogress { background: #e3f2fd; }
-        .status-delivered { background: #e8f5e9; }
+        .status-inprogress { background: #7c02e0; }
+        .status-delivered { background: #06e218; }
         @media (max-width: 900px) {
             .container { padding: 18px 4vw; }
             .products { gap: 14px; }
@@ -149,7 +149,7 @@
 <body>
     <div class="container">
         <div class="welcome">
-            <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+            <h1> Hi Welcome Back!, {{ user.first_name|default:user.username }}!</h1>
             <p>We're glad to have you back at <strong>KIMBAKERY</strong>. Explore our fresh products and track your orders below.</p>
         </div>
 
@@ -160,7 +160,7 @@
                 <div class="product-card">
                     <img src="{{ product.images.url }}" alt="{{ product.name }}">
                     <h4>{{ product.name }}</h4>
-                    <p style="font-weight:600; color:#b85c38;">KSH {{ product.price }}</p>
+                    <p style="font-weight:600; color:#2607f1;">KSH {{ product.price }}</p>
                     <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn">View</a>
                 </div>
                 {% endfor %}
@@ -194,7 +194,7 @@
                         </td>
                         <td>KSH {{ order.order_total }}</td>
                         <td>
-                            <a href="{% url 'order_detail' order.id %}" class="btn btn-sm"><i class="fa fa-eye"></i> View</a>
+                            <a href="{% url 'myOrders' %}" class="btn btn-sm"><i class="fa fa-eye"></i> View</a>
                         </td>
                     </tr>
                     {% empty %}
