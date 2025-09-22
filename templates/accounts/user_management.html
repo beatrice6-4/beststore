@@ -1,53 +1,37 @@
-{% extends "txt.html" %}
-
-{% block content %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Management</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .active { color: green; font-weight: bold; }
-        .inactive { color: red; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <h1>User Management</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>
-                    {% if user.is_active %}
-                        <span class="active">Active</span>
-                    {% else %}
-                        <span class="inactive">Inactive</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No users found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
-{% endblock %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h2>User Management</h2>
+    </div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="text-success fw-bold">Active</span>
+                        {% else %}
+                            <span class="text-danger fw-bold">Inactive</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
