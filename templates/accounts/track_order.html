@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Track Your Order | KIMBAKERY</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { background: #fff8f0; font-family: 'Segoe UI', Arial, sans-serif; }
+        .track-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px #f3e1d0;
+            padding: 36px 28px 28px 28px;
+        }
+        h2 { color: #b85c38; font-weight: 700; margin-bottom: 18px; }
+        .order-info { margin-bottom: 24px; }
+        .order-info strong { color: #b85c38; }
+        .progress-container {
+            margin: 30px 0;
+            padding: 0 10px;
+        }
+        .progress-bar-bg {
+            background: #ffe5d0;
+            border-radius: 8px;
+            height: 18px;
+            width: 100%;
+            position: relative;
+        }
+        .progress-bar-fill {
+            background: #b85c38;
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.6s;
+        }
+        .status-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .status-step {
+            text-align: center;
+            flex: 1;
+            color: #b85c38;
+            font-size: 0.98em;
+        }
+        .status-step.active {
+            font-weight: bold;
+            color: #fff;
+            background: #b85c38;
+            border-radius: 12px;
+            padding: 2px 8px;
+        }
+        .order-items {
+            margin: 18px 0;
+            background: #fff3e6;
+            border-radius: 8px;
+            padding: 12px 18px;
+            box-shadow: 0 1px 4px #f3e1d0;
+        }
+        .order-items ul { margin: 0; padding: 0 0 0 18px; }
+        .order-status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .status-pending { background: #fff3e0; color: #ff9800; }
+        .status-inprogress { background: #e3f2fd; color: #2196f3; }
+        .status-ready { background: #e8f5e9; color: #4caf50; }
+        .status-dispatched { background: #e3eafc; color: #1976d2; }
+        .status-delivered { background: #e8f5e9; color: #388e3c; }
+        .btn {
+            background: #b85c38;
+            color: #fff;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1em;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px #e6c9a8;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 18px;
+        }
+        .btn:hover, .btn:focus {
+            background: #8d3c1e;
+            color: #fff;
+            box-shadow: 0 2px 8px #e6c9a8;
+        }
+        @media (max-width: 700px) {
+            .track-container { padding: 16px 4vw; }
+        }
+    </style>
+</head>
+<body>
+    <div class="track-container">
+        <h2><i class="fa fa-truck"></i> Track Your Order</h2>
+        <div class="order-info">
+            <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+            <p><strong>Placed On:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+            <p>
+                <strong>Status:</strong>
+                <span class="order-status-badge status-{{ order.status|lower|cut:' ' }}">
+                    {{ order.status }}
+                </span>
+            </p>
+            {% if order.estimated_completion %}
+            <p><strong>Estimated Completion:</strong> {{ order.estimated_completion }}</p>
+            {% endif %}
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill"
+                     style="width:
+                        {% if order.status == 'Pending' %}20%
+                        {% elif order.status == 'In Progress' %}40%
+                        {% elif order.status == 'Ready' %}60%
+                        {% elif order.status == 'Dispatched' %}80%
+                        {% elif order.status == 'Delivered' %}100%
+                        {% else %}10%{% endif %};">
+                </div>
+            </div>
+            <div class="status-steps mt-2">
+                <div class="status-step {% if order.status == 'Pending' %}active{% endif %}">Pending</div>
+                <div class="status-step {% if order.status == 'In Progress' %}active{% endif %}">In Progress</div>
+                <div class="status-step {% if order.status == 'Ready' %}active{% endif %}">Ready</div>
+                <div class="status-step {% if order.status == 'Dispatched' %}active{% endif %}">Dispatched</div>
+                <div class="status-step {% if order.status == 'Delivered' %}active{% endif %}">Delivered</div>
+            </div>
+        </div>
+
+        <div class="order-items">
+            <strong>Items Ordered:</strong>
+            <ul>
+                {% for item in order.orderproduct_set.all %}
+                    <li>{{ item.product.product_name }} x{{ item.quantity }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if order.status != "Delivered" %}
+        <div>
+            <p><i class="fa fa-info-circle"></i> Your order is being processed. You will receive a notification when it is ready or dispatched.</p>
+        </div>
+        {% else %}
+        <div>
+            <p><i class="fa fa-check-circle" style="color:#4caf50;"></i> Your order has been delivered. Enjoy your treats!</p>
+        </div>
+        {% endif %}
+
+        <a href="{% url 'customerDashboard' %}" class="btn"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+</body>
+</html>

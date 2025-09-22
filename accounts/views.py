@@ -368,3 +368,12 @@ def contact(request):
     else:
         form = ContactForm()
     return render(request, 'accounts/contact.html', {'form': form})
+
+
+@login_required
+def track_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    context = {
+        'order': order,
+    }
+    return render(request, 'accounts/track_order.html', context)

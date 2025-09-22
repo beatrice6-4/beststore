@@ -40,7 +40,7 @@
             flex-wrap: wrap;
         }
         .product-card {
-            background: #fff3e6;
+            background: #2807e3;
             border-radius: 10px;
             padding: 18px 12px;
             width: 180px;
@@ -213,7 +213,7 @@
                         <span style="font-weight:600;">Order #{{ order.order_number }}:</span>
                         <span class="status-{{ order.status|lower|cut:' ' }}">{{ order.status }}</span>
                         {% if order.status != "Delivered" %}
-                            <a href="{% url 'order_detail' order.id %}" class="btn btn-sm" style="margin-left:10px;"><i class="fa fa-truck"></i> Track</a>
+                            <a href="{% url 'track_order' order.id %}" class="btn btn-sm" style="margin-left:10px;"><i class="fa fa-truck"></i> Track</a>
                         {% endif %}
                     </li>
                 {% endfor %}
