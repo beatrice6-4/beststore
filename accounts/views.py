@@ -332,7 +332,7 @@ def customer_dashboard(request):
     categories = Category.objects.all()
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     orders_recent = orders[:5]
-    active_orders = orders.exclude(status='Delivered')
+    active_orders = orders.exclude(status='pending')
     context = {
         'products': products,
         'categories': categories,
