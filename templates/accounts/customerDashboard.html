@@ -42,7 +42,7 @@
                     <img src="{{ product.image.url }}" alt="{{ product.name }}">
                     <h4>{{ product.name }}</h4>
                     <p>KSH {{ product.price }}</p>
-                    <a href="{% url 'product_detail' product.id %}" class="btn">View</a>
+                   <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn">View</a>
                 </div>
                 {% endfor %}
             </div>
