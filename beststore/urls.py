@@ -21,6 +21,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path('jet/', include('jet.urls', 'jet')),  # Django JET URLS
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('store/', include('store.urls')),
