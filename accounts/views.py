@@ -327,7 +327,7 @@ from store.models import Product, Category
 from orders.models import Order
 
 @login_required
-def customer_dashboard(request):
+def customerDashboard(request):
     products = Product.objects.all()[:6]
     categories = Category.objects.all()
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
