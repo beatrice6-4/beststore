@@ -332,7 +332,7 @@ def customerDashboard(request):
     categories = Category.objects.all()
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     orders_recent = orders[:5]
-    active_orders = orders.exclude(status='pending')
+    active_orders = Order.objects.filter(user=request.user).exclude(status='pending').order_by('-created_at')
     context = {
         'products': products,
         'categories': categories,
