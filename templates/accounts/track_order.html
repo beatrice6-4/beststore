@@ -153,8 +153,10 @@
         </div>
         {% else %}
         <div>
-            <p><i class="fa fa-check-circle" style="color:#4caf50;"></i> Your order has been delivered. Enjoy your treats!</p>
-        </div>
+    <p>
+        <i class="fa fa-info-circle"></i> {{ order_message }}
+    </p>
+</div>
         {% endif %}
 
         <a href="{% url 'customerDashboard' %}" class="btn"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>

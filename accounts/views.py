@@ -373,7 +373,15 @@ def contact(request):
 @login_required
 def track_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
+    # Set a custom message based on order status
+    if order.status.lower() == "completed":
+        order_message = "Your order has been completed. Thank you for shopping with us!"
+    elif order.status.lower() == "delivered":
+        order_message = "Your order has been delivered. Enjoy your treats!"
+    else:
+        order_message = "Your order is being processed. You will receive a notification when it is ready or dispatched."
     context = {
         'order': order,
+        'order_message': order_message,
     }
     return render(request, 'accounts/track_order.html', context)
