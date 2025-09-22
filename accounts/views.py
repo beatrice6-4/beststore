@@ -318,3 +318,26 @@ def dashboard(request):
     }
     return render(request, 'accounts/dashboard.html', context)
 
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from store.models import Product, Category
+from orders.models import Order
+
+@login_required
+def customerDashboard(request):
+    products = Product.objects.all()[:6]  # Featured products
+    categories = Category.objects.all()
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
+    active_orders = orders.exclude(status='Delivered')
+    context = {
+        'products': products,
+        'categories': categories,
+        'orders': orders,
+        'active_orders': active_orders,
+        'user': request.user,
+    }
+    return render(request, 'accounts/customerDashboard.html', context)
+
