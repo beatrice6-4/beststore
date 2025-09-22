@@ -1,6 +1,87 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+<style>
+    body {
+        background: #fff8f0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .section-content {
+        padding: 40px 0;
+    }
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 4px 24px #f3e1d0;
+        border: none;
+        background: #fff;
+    }
+    .card-header {
+        background: linear-gradient(90deg, #ffe5d0 60%, #fff8f0 100%);
+        border-radius: 16px 16px 0 0;
+        color: #b85c38;
+        font-size: 1.3em;
+        font-weight: 700;
+        padding: 20px 28px;
+        border-bottom: 1px solid #f3e1d0;
+    }
+    .card-body {
+        padding: 28px;
+    }
+    .table {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px #f3e1d0;
+    }
+    .table thead {
+        background: #ffe5d0;
+        color: #b85c38;
+        font-weight: 600;
+    }
+    .table th, .table td {
+        padding: 14px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0e6e6;
+    }
+    .table th {
+        background: #ffe5d0;
+        color: #b85c38;
+        font-weight: 700;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #fff3e6;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #fffbe7;
+        transition: background 0.2s;
+    }
+    a {
+        color: #b85c38;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    a:hover {
+        color: #8d3c1e;
+        text-decoration: underline;
+    }
+    .text-center {
+        text-align: center;
+    }
+    @media (max-width: 900px) {
+        .card-body { padding: 14px; }
+        .card-header { padding: 14px 10px; }
+        .table th, .table td { padding: 10px 6px; }
+    }
+    @media (max-width: 600px) {
+        .card { border-radius: 8px; }
+        .card-header { font-size: 1.1em; }
+        .card-body { padding: 6px; }
+        .table th, .table td { font-size: 0.95em; }
+    }
+</style>
 
 <section class="section-content padding-y bg">
     {% include 'includes/alerts.html' %}
@@ -9,12 +90,13 @@
             <main class="col-md-9 mx-auto">
                 <article class="card">
                     <header class="card-header">
-                        <strong class="d-inline-block mr-3">Your Order History</strong>
+                        <i class="fa fa-history"></i>
+                        <span class="d-inline-block ml-2">Your Order History</span>
                     </header>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover">
-                                <thead class="thead-dark">
+                                <thead>
                                     <tr>
                                         <th scope="col">Order #</th>
                                         <th scope="col">Billing Name</th>
@@ -34,7 +116,7 @@
                                         <td>{{ order.full_name }}</td>
                                         <td>{{ order.phone }}</td>
                                         <td>Ksh.{{ order.order_total }}</td>
-                                        <td>{{ order.created_at }}</td>
+                                        <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
                                     </tr>
                                     {% empty %}
                                     <tr>
@@ -50,5 +132,4 @@
         </div>
     </div>
 </section>
-
 {% endblock %}
