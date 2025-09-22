@@ -3,202 +3,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bakery Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5 & FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>My Bakery Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <style>
-        body { background: #f8f9fa; }
-        .sidebar {
-            height: 100vh;
-            background: #b85c38;
-            color: #fff;
-            position: fixed;
-            left: 0; top: 0; bottom: 0;
-            width: 220px;
-            transition: width 0.3s;
-            z-index: 1000;
-        }
-        .sidebar.collapsed { width: 60px; }
-        .sidebar .nav-link { color: #fff; }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover { background: #8d3c1e; }
-        .sidebar .sidebar-toggle {
-            background: none; border: none; color: #fff; font-size: 1.5em; margin: 10px 0 10px 10px;
-        }
-        .main-content {
-            margin-left: 220px;
-            transition: margin-left 0.3s;
-            padding: 30px;
-        }
-        .main-content.collapsed { margin-left: 60px; }
-        .card { border-radius: 10px; }
-        .toggle-switch { display: flex; align-items: center; gap: 10px; }
-        .notification-bell {
-            position: absolute; top: 20px; right: 40px; font-size: 1.5em; color: #b85c38; cursor: pointer;
-        }
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; width: 60px; }
-            .main-content { margin-left: 60px; padding: 15px; }
-        }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; }
+        .container { max-width: 1100px; margin: 30px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #eee; padding: 30px; }
+        h1, h2 { color: #590bea; }
+        .welcome { margin-bottom: 30px; }
+        .section { margin-bottom: 40px; }
+        .products { display: flex; gap: 20px; flex-wrap: wrap; }
+        .product-card { background: #f4f6f8; border-radius: 6px; padding: 15px; width: 170px; text-align: center; }
+        .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
+        .orders-table { width: 100%; border-collapse: collapse; }
+        .orders-table th, .orders-table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .orders-table th { background: #f0e6e6; }
+        .status-pending { color: #ff9800; }
+        .status-inprogress { color: #2196f3; }
+        .status-delivered { color: #4caf50; }
+        .profile-section { background: #f4f6f8; padding: 15px; border-radius: 6px; }
+        .offers { background: #fffbe7; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .support { background: #e3eafc; padding: 15px; border-radius: 6px; }
+        .btn { background: #b85c38; color: #fff; padding: 8px 16px; border: none; border-radius: 4px; text-decoration: none; }
+        .btn:hover { background: #8d3c1e; }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <button class="sidebar-toggle" onclick="toggleSidebar()"> 
-            <i class="fa fa-bars"></i>
-        </button>
-        <ul class="nav flex-column mt-4">
-            <li class="nav-item text-center mb-4">
-                <h4>Bakery Dashboard</h4>
-            <li class="nav-item"><a class="nav-link active" href="#"><i class="fa fa-home"></i> <span class="sidebar-label">Dashboard Home</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'myOrders' %}"><i class="fa fa-shopping-cart"></i> <span class="sidebar-label">My Orders</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa fa-clipboard-list"></i> <span class="sidebar-label">Order Management</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'user_management' %}"><i class="fa fa-users-cog"></i> <span class="sidebar-label">User Management</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa fa-boxes"></i> <span class="sidebar-label">Inventory Tracking</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa fa-chart-line"></i> <span class="sidebar-label">Sales Reports</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa fa-users"></i> <span class="sidebar-label">Staff Scheduling</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa fa-bread-slice"></i> <span class="sidebar-label">Recipes & Menu</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i class="fa fa-cogs"></i> <span class="sidebar-label">Settings</span></a></li>
-        </ul>
-    </div>
-
-    <!-- Notifications Bell -->
-    <div class="notification-bell" id="notifBell" onclick="toggleNotifications()">
-        <i class="fa fa-bell"></i>
-        <span class="badge bg-danger" id="notifCount">3</span>
-    </div>
-    <!-- Notifications Panel -->
-    <div id="notificationsPanel" style="display:none; position:fixed; top:60px; right:40px; width:320px; background:#fff; border-radius:8px; box-shadow:0 2px 8px #ccc; z-index:2000;">
-        <div class="p-3 border-bottom"><strong>Notifications</strong></div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">New order received: #1234</li>
-            <li class="list-group-item">Low stock: Eggs</li>
-            <li class="list-group-item">Customer review: "Best bread ever!"</li>
-        </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <!-- Overview Widgets -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-3">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <h6 class="card-title">Today's Sales</h6>
-                        <h3>KSH 12,500</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <h6 class="card-title">Active Orders</h6>
-                        <h3>{{ active_orders|length }}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <h6 class="card-title">Low Stock Items</h6>
-                        <h3>3</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-center p-3">
-                    <div class="card-body">
-                        <h6 class="card-title">Feedback</h6>
-                        <h3>4.8 <i class="fa fa-star text-warning"></i></h3>
-                    </div>
-                </div>
-            </div>
+    <div class="container">
+        <div class="welcome">
+            <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+            <p>We're glad to have you back at <strong>KIMBAKERY</strong>. Explore our fresh products and track your orders below.</p>
         </div>
 
-        <!-- Order Management: Active Orders of the User -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="fa fa-clipboard-list"></i> Active Orders</span>
-                <div class="toggle-switch">
-                    <label for="orderFilter">Show:</label>
-                    <select id="orderFilter" class="form-select form-select-sm" style="width:auto;">
-                        <option>All</option>
-                        <option>Pending</option>
-                        <option>Ready</option>
-                        <option>Dispatched</option>
-                    </select>
+        <div class="section">
+            <h2>🍞 Featured Products</h2>
+            <div class="products">
+                {% for product in products %}
+                <div class="product-card">
+                    <img src="{{ product.images.url }}" alt="{{ product.name }}">
+                    <h4>{{ product.name }}</h4>
+                    <p>KSH {{ product.price }}</p>
+                    <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn">View</a>
                 </div>
+                {% endfor %}
             </div>
-            <div class="card-body p-0">
-                <table class="table mb-0">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Status</th>
-                            <th>Items</th>
-                            <th>Placed</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in active_orders %}
-                        <tr>
-                            <td>#{{ order.order_number }}</td>
-                            <td>
-                                <span class="badge 
-                                    {% if order.status == 'Pending' %}bg-warning text-dark
-                                    {% elif order.status == 'Ready' %}bg-info text-dark
-                                    {% elif order.status == 'Dispatched' %}bg-primary
-                                    {% else %}bg-secondary{% endif %}">
-                                    {{ order.status }}
-                                </span>
-                            </td>
-                            <td>
-                                {% for item in order.orderproduct_set.all %}
-                                    {{ item.product.product_name }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
-                            <td>
-                                {% if order.status == 'Pending' %}
-                                    <button class="btn btn-success btn-sm">Mark as Ready</button>
-                                {% endif %}
-                                {% if order.status in 'Pending,Ready' %}
-                                    <button class="btn btn-primary btn-sm">Dispatch</button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5">No active orders.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <p style="margin-top:10px;">
+                <a href="{% url 'store' %}" class="btn">Browse All Products</a>
+            </p>
         </div>
 
-        <!-- User Management Section -->
-        {% include "accounts/user_management.html" %}
+        <div class="section">
+            <h2>🛒 My Recent Orders</h2>
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="status-{{ order.status|lower|cut:' ' }}">
+    {{ order.status }}
+</span>
+                        </td>
+                        <td>KSH {{ order.order_total }}</td>
+                        <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn">View</a>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">No orders yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-        <!-- (Other dashboard sections remain unchanged) -->
-        <!-- ...Inventory, Sales, Staff, Recipes, etc... -->
+        <div class="section">
+            <h2>🚚 Track Active Deliveries</h2>
+            {% if active_orders %}
+                <ul>
+                {% for order in active_orders %}
+                    <li>
+                        Order #{{ order.order_number }}: 
+                        <strong>{{ order.status }}</strong>
+                        {% if order.status != "Delivered" %}
+                            <a href="{% url 'order_detail' order.id %}" class="btn">Track</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No active deliveries at the moment.</p>
+            {% endif %}
+        </div>
+
+        <div class="section profile-section">
+            <h2>👤 My Profile</h2>
+            <p>Name: {{ user.first_name }} {{ user.last_name }}</p>
+            <p>Email: {{ user.email }}</p>
+            <a href="#" class="btn">Edit Profile</a>
+        </div>
+
+        <div class="section offers">
+            <h2>🎉 Latest Offers & News</h2>
+            <p>Get 10% off on all cakes this week! Use code <strong>CAKE10</strong> at checkout.</p>
+        </div>
+
+        <div class="section support">
+            <h2>💬 Need Help?</h2>
+            <p>Contact us at <a href="mailto:info@kimbakery.com">info@kimbakery.com</a> or <a href="{% url 'contact' %}">send a message</a>.</p>
+        </div>
     </div>
-
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-            document.getElementById('mainContent').classList.toggle('collapsed');
-            document.querySelectorAll('.sidebar-label').forEach(function(el) {
-                el.style.display = document.getElementById('sidebar').classList.contains('collapsed') ? 'none' : 'inline';
-            });
-        }
-        function toggleNotifications() {
-            var panel = document.getElementById('notificationsPanel');
-            panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
-        }
-    </script>
 </body>
-</html>h 
+</html>
