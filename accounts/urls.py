@@ -12,6 +12,7 @@ urlpatterns = [
     path('userManagement/', views.user_management, name='user_management'),
     path('track_order/<int:order_id>/', views.track_order, name='track_order'),
     path('transactions/', views.transactions, name='transactions'),
+    path('recipes/', views.recipes, name='recipes'),
 
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('forgotPassword/', views.forgotPassword, name='forgotPassword'),
