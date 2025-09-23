@@ -23,13 +23,13 @@
                     <a class="nav-link" href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i> My Orders</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'track_order' %}"><i class="fa fa-truck"></i> Track Order</a>
+                    <a class="nav-link" href="#"><i class="fa fa-truck"></i> Track Order</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#"><i class="fa fa-user-cog"></i> Edit Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'change_password' %}"><i class="fa fa-key"></i> Change Password</a>
+                    <a class="nav-link" href="#"><i class="fa fa-key"></i> Change Password</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
@@ -50,5 +50,5 @@
     setInterval(function() {
         currentLogo = (currentLogo + 1) % logoImages.length;
         document.getElementById('navbar-logo').src = logoImages[currentLogo];
-    }, 60000); // 60000 ms = 1 minute
+    }, 3000); // 3000 ms = 3 seconds
 </script>
