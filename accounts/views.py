@@ -397,6 +397,5 @@ def transactions(request):
     }
     return render(request, 'accounts/transactions.html', context)
 
-@login_required
 def recipes(request):
     return render(request, 'accounts/recipes.html')
