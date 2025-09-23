@@ -385,3 +385,14 @@ def track_order(request, order_id):
         'order_message': order_message,
     }
     return render(request, 'accounts/track_order.html', context)
+
+
+from .models import Transaction  # Adjust import path if model is in orders.models
+
+@login_required
+def transactions(request):
+    transactions = Transaction.objects.filter(order__user=request.user).order_by('-created_at')
+    context = {
+        'transactions': transactions,
+    }
+    return render(request, 'accounts/transactions.html', context)
