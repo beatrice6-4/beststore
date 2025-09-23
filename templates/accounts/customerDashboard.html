@@ -182,6 +182,20 @@
                         <th>Details</th>
                     </tr>
                 </thead>
+                <!-- Bootstrap Modal for Track Order -->
+<div class="modal fade" id="trackOrderModal" tabindex="-1" aria-labelledby="trackOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="trackOrderModalLabel"><i class="fa fa-truck"></i> Track Your Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="trackOrderModalBody">
+        <div class="text-center text-muted py-5"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
                 <tbody>
                     {% for order in orders %}
                     <tr>
@@ -229,7 +243,8 @@
                         <span style="font-weight:600;">Order #{{ order.order_number }}:</span>
                         <span class="status-{{ order.status|lower|cut:' ' }}">{{ order.status }}</span>
                         {% if order.status != "Delivered" %}
-                            <a href="{% url 'track_order' order.id %}" class="btn btn-sm" style="margin-left:10px;"><i class="fa fa-truck"></i> Track</a>
+                            <a href="{% url 'track_order' order.id %}" class="btn btn-sm track-order-btn" data-order-id="{{ order.id }}" style="margin-left:10px;">
+    <i class="fa fa-truck"></i> Track</a>
                         {% endif %}
                     </li>
                 {% endfor %}
@@ -257,4 +272,29 @@
         </div>
     </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.track-order-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var orderId = this.getAttribute('data-order-id');
+            var modalBody = document.getElementById('trackOrderModalBody');
+            modalBody.innerHTML = '<div class="text-center text-muted py-5"><i class="fa fa-spinner fa-spin"></i> Loading...</div>';
+            // Fetch the order tracking HTML via AJAX
+            fetch('/accounts/track_order/' + orderId + '/')
+                .then(response => response.text())
+                .then(html => {
+                    modalBody.innerHTML = html;
+                })
+                .catch(() => {
+                    modalBody.innerHTML = '<div class="text-danger text-center py-5">Failed to load order details.</div>';
+                });
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('trackOrderModal'));
+            modal.show();
+        });
+    });
+});
+</script>
 </html>
