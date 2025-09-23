@@ -2,10 +2,18 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Account, ContactMessage
 from django.utils.html import format_html
+from .models import Transaction  # Adjust import if Transaction is in another app
+
 
 
 # Register your models here.
 
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('transaction_id', 'order', 'amount', 'payment_method', 'status', 'created_at')
+    list_filter = ('status', 'payment_method', 'created_at')
+    search_fields = ('transaction_id', 'order__order_number', 'order__user__email')
+
+admin.site.register(Transaction, TransactionAdmin)
 
 
 class ContactMessageAdmin(admin.ModelAdmin):
