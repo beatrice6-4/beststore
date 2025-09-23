@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'orders',
     'admin_thumbnails',
     'finance',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -37,6 +38,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+SESSION_EXPIRE_SECONDS = 3600  # 1 hour
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+SESSION_TIMEOUT_REDIRECT = 'accounts/login'
+
 
 ROOT_URLCONF = 'beststore.urls'
 
@@ -95,6 +101,9 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",  # Place your apk file in static/apk/
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Media files (user-uploaded content)
 MEDIA_URL = '/media/'
