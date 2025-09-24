@@ -4,6 +4,7 @@ from django.views.generic import ListView, DetailView, CreateView
 from .models import Group, Payment, Activity, Training, Service
 from django import forms
 from django.db.models import Sum
+from datetime import datetime
 
 # --- Forms ---
 class GroupForm(forms.ModelForm):
@@ -56,7 +57,17 @@ class PaymentListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_amount'] = Payment.objects.aggregate(total=Sum('amount'))['total'] or 0
+        all_payments = Payment.objects.all()
+        context['total_amount'] = all_payments.aggregate(total=Sum('amount'))['total'] or 0
+
+        # Payments by weekday
+        context['monday_payments'] = all_payments.filter(payment_date__week_day=2)
+        context['tuesday_payments'] = all_payments.filter(payment_date__week_day=3)
+        context['wednesday_payments'] = all_payments.filter(payment_date__week_day=4)
+        context['thursday_payments'] = all_payments.filter(payment_date__week_day=5)
+        context['friday_payments'] = all_payments.filter(payment_date__week_day=6)
+        context['saturday_payments'] = all_payments.filter(payment_date__week_day=7)
+        context['sunday_payments'] = all_payments.filter(payment_date__week_day=1)
         return context
 class PaymentCreateView(CreateView):
     model = Payment
