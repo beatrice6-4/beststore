@@ -34,11 +34,7 @@
     </thead>
     <tbody>
         <tr>
-            <td>
-                {% with total=payments|map:'amount'|sum %}
-                    {{ total }}
-                {% endwith %}
-            </td>
+            <td>{{ total_amount }}</td>
         </tr>
     </tbody>
 </table>
