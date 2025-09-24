@@ -1,0 +1,27 @@
+{% extends 'gov.html' %}
+{% block content %}
+<h2>Group Payments</h2>
+<a href="{% url 'cdmis:payment_add' %}" class="btn btn-success mb-3">Add Payment</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Group</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ payment.group.name }}</td>
+            <td>{{ payment.amount }}</td>
+            <td>{{ payment.payment_date }}</td>
+            <td>{{ payment.notes }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No payments recorded.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
