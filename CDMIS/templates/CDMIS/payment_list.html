@@ -1,3 +1,51 @@
+{% extends 'gov.html' %}
+{% block content %}
+<style>
+body {
+    background: #f8f9fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+h3 {
+    color: #2d7a2d;
+    font-weight: 700;
+    margin-top: 32px;
+    margin-bottom: 12px;
+}
+.table {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #e3e3e3;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+.table thead {
+    background: #eafbe7;
+    color: #2d7a2d;
+    font-weight: 600;
+}
+.table th, .table td {
+    padding: 12px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e3e3e3;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f6fff4;
+}
+.table-striped tbody tr:hover {
+    background-color: #eafbe7;
+    transition: background 0.2s;
+}
+.mt-4 {
+    margin-top: 2rem !important;
+}
+@media (max-width: 700px) {
+    .table th, .table td { padding: 8px 4px; font-size: 0.95em; }
+    h3 { font-size: 1.1em; }
+}
+</style>
+
+<h2 class="mb-4">Payments by Day</h2>
+
 <!-- Monday Payments -->
 <h3 class="mt-4">Monday Payments</h3>
 <table class="table table-striped">
@@ -48,7 +96,7 @@
     </tbody>
 </table>
 
-<!-- Repeat for Wednesday, Thursday, Friday, Saturday, Sunday -->
+<!-- Wednesday Payments -->
 <h3 class="mt-4">Wednesday Payments</h3>
 <table class="table table-striped">
     <thead>
@@ -73,6 +121,7 @@
     </tbody>
 </table>
 
+<!-- Thursday Payments -->
 <h3 class="mt-4">Thursday Payments</h3>
 <table class="table table-striped">
     <thead>
@@ -97,6 +146,7 @@
     </tbody>
 </table>
 
+<!-- Friday Payments -->
 <h3 class="mt-4">Friday Payments</h3>
 <table class="table table-striped">
     <thead>
@@ -121,6 +171,7 @@
     </tbody>
 </table>
 
+<!-- Saturday Payments -->
 <h3 class="mt-4">Saturday Payments</h3>
 <table class="table table-striped">
     <thead>
@@ -145,6 +196,7 @@
     </tbody>
 </table>
 
+<!-- Sunday Payments -->
 <h3 class="mt-4">Sunday Payments</h3>
 <table class="table table-striped">
     <thead>
@@ -168,3 +220,4 @@
         {% endfor %}
     </tbody>
 </table>
+{% endblock %}
