@@ -89,12 +89,12 @@
         <!-- Sidebar -->
         <div class="sidebar p-3">
             <nav>
-                <a href="{% url 'groups' %}">Community Groups</a>
-                <a href="{% url 'training' %}">Trainins</a>
-                <a href="{% url 'services' %}">Other Services</a>
-                <a href="{% url 'activities' %}">Activities Rendered to Group</a>
-                <a href="{% url 'users' %}">User Management</a>
-                <a href="{% url 'payments' %}">Payments Management</a>
+                <a href="{% url 'cdmis:group_list' %}">Community Groups</a>
+                <a href="{% url 'cdmis:training_list' %}">Trainings</a>
+                <a href="{% url 'cdmis:service_list' %}">Other Services</a>
+                <a href="{% url 'cdmis:activity_list' %}">Activities Rendered to Group</a>
+                <a href="{% url 'cdmis:user_list' %}">User Management</a>
+                <a href="{% url 'cdmis:payment_list' %}">Payments Management</a>
             </nav>
         </div>
 
