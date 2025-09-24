@@ -52,6 +52,7 @@ class PaymentListView(ListView):
     model = Payment
     template_name = 'CDMIS/payment_list.html'
     context_object_name = 'payments'
+    queryset = Payment.objects.select_related('group').order_by('-payment_date')
 
 class PaymentCreateView(CreateView):
     model = Payment
