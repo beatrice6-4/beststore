@@ -5,6 +5,7 @@ from .models import Group, Payment, Activity, Training, Service
 from django import forms
 from django.db.models import Sum
 from datetime import datetime
+from collections import defaultdict
 
 # --- Forms ---
 class GroupForm(forms.ModelForm):
@@ -57,17 +58,27 @@ class PaymentListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        all_payments = Payment.objects.all()
+        all_payments = Payment.objects.all().order_by('payment_date')
         context['total_amount'] = all_payments.aggregate(total=Sum('amount'))['total'] or 0
 
-        # Payments by weekday
-        context['monday_payments'] = all_payments.filter(payment_date__week_day=2)
-        context['tuesday_payments'] = all_payments.filter(payment_date__week_day=3)
-        context['wednesday_payments'] = all_payments.filter(payment_date__week_day=4)
-        context['thursday_payments'] = all_payments.filter(payment_date__week_day=5)
-        context['friday_payments'] = all_payments.filter(payment_date__week_day=6)
-        context['saturday_payments'] = all_payments.filter(payment_date__week_day=7)
-        context['sunday_payments'] = all_payments.filter(payment_date__week_day=1)
+        # Group payments by date and sum amounts
+        payments_by_date = defaultdict(list)
+        for payment in all_payments:
+            payments_by_date[payment.payment_date].append(payment)
+
+        # Prepare a list of dicts: [{'date': ..., 'payments': [...], 'date_total': ...}, ...]
+        grouped_payments = []
+        for date, payments in payments_by_date.items():
+            date_total = sum(p.amount for p in payments)
+            grouped_payments.append({
+                'date': date,
+                'payments': payments,
+                'date_total': date_total
+            })
+
+        # Sort by date (ascending)
+        grouped_payments.sort(key=lambda x: x['date'])
+        context['grouped_payments'] = grouped_payments
         return context
 class PaymentCreateView(CreateView):
     model = Payment
