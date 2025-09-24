@@ -9,24 +9,24 @@
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #fff8f0;
+            background: #5cef1d;
             margin: 0;
         }
         .container {
             max-width: 1100px;
             margin: 40px auto;
-            background: #fff;
+            background: #f50505;
             border-radius: 18px;
-            box-shadow: 0 4px 24px #f3e1d0;
+            box-shadow: 0 4px 24px #e17007;
             padding: 40px 32px 32px 32px;
         }
         h1, h2 {
-            color: #91e989;
+            color: #19e107;
             font-weight: 700;
         }
         .welcome {
             margin-bottom: 32px;
-            background: linear-gradient(90deg, #ffe5d0 60%, #fff8f0 100%);
+            background: linear-gradient(90deg, #d60a77 60%, #fff8f0 100%);
             border-radius: 12px;
             padding: 24px 28px;
             box-shadow: 0 2px 8px #f3e1d0;
@@ -40,17 +40,17 @@
             flex-wrap: wrap;
         }
         .product-card {
-            background: #e5eaeb;
+            background: hsl(190, 15%, 39%);
             border-radius: 10px;
             padding: 18px 12px;
             width: 180px;
             text-align: center;
-            box-shadow: 0 2px 8px #f3e1d0;
+            box-shadow: 0 2px 8px #0231ef;
             transition: transform 0.15s;
         }
         .product-card:hover {
             transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 6px 18px #f3e1d0;
+            box-shadow: 0 6px 18px #07d6c1;
         }
         .product-card img {
             width: 100%;
@@ -58,34 +58,34 @@
             object-fit: cover;
             border-radius: 6px;
             margin-bottom: 10px;
-            box-shadow: 0 1px 4px #e6c9a8;
+            box-shadow: 0 1px 4px #07c8e6;
         }
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            background: #fff;
+            background: #0adaed;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 8px #f3e1d0;
+            box-shadow: 0 2px 8px #4dea09;
         }
         .orders-table th, .orders-table td {
             padding: 12px 10px;
-            border-bottom: 1px solid #f0e6e6;
+            border-bottom: 1px solid #f20909;
         }
         .orders-table th {
             background: #01ef55;
-            color: #b85c38;
+            color: #2d07d6;
             font-weight: 600;
         }
         .orders-table tr:last-child td {
             border-bottom: none;
         }
-        .status-pending { color: #ff9800; font-weight: 600; background: #fff3e0; }
+        .status-pending { color: #ff9800; font-weight: 600; background: hsl(122, 96%, 47%); }
         .status-inprogress { color: #2196f3; font-weight: 600; background: #7c02e0; }
         .status-delivered { color: #4caf50; font-weight: 600; background: #06e218; }
         .btn {
-            background: #ebe7e6;
-            color: #fff;
+            background: #2aa6db;
+            color: #ca6666;
             padding: 8px 18px;
             border: none;
             border-radius: 5px;
@@ -93,33 +93,33 @@
             font-weight: 500;
             font-size: 1em;
             transition: background 0.2s, box-shadow 0.2s;
-            box-shadow: 0 1px 4px #e6c9a8;
+            box-shadow: 0 1px 4px #07c4ef;
             cursor: pointer;
             display: inline-block;
         }
         .btn:hover, .btn:focus {
             background: #8d3c1e;
-            color: #fff;
-            box-shadow: 0 2px 8px #e6c9a8;
+            color: #d16969;
+            box-shadow: 0 2px 8px #c60599;
         }
         .profile-section {
-            background: #f4f6f8;
+            background: #1178e0;
             padding: 18px 22px;
             border-radius: 10px;
-            box-shadow: 0 1px 4px #e6c9a8;
+            box-shadow: 0 1px 4px #73dc8e;
         }
         .offers {
-            background: linear-gradient(90deg, #fffbe7 60%, #ffe5d0 100%);
+            background: linear-gradient(90deg, #f4cc06 60%, #2f11da 100%);
             padding: 18px 22px;
             border-radius: 10px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 4px #e6c9a8;
+            box-shadow: 0 1px 4px #061dc9;
         }
         .support {
-            background: #e3eafc;
+            background: #084bf2;
             padding: 18px 22px;
             border-radius: 10px;
-            box-shadow: 0 1px 4px #e6c9a8;
+            box-shadow: 0 1px 4px #08cf30;
         }
         .orders-table .btn {
             padding: 6px 14px;
@@ -132,12 +132,12 @@
             display: inline-block;
         }
         .track-details {
-            background: #f8f8f8;
-            border: 1px solid #e0e0e0;
+            background: #0cb4e7;
+            border: 1px solid #f80a0a;
             border-radius: 10px;
             margin: 18px 0 0 0;
             padding: 18px 22px;
-            box-shadow: 0 1px 4px #e6c9a8;
+            box-shadow: 0 1px 4px #0857f6;
             display: none;
         }
         .track-details.active {
