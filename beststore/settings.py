@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'admin_thumbnails',
     'finance',
     'storages',
+    'CDMIS',
 ]
 
 MIDDLEWARE = [
