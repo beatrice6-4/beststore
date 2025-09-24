@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'gov.html' %}
 {% block content %}
 <h2>All Payments</h2>
 <a href="{% url 'cdmis:payment_add' %}" class="btn btn-success mb-3">Add Payment</a>
@@ -22,6 +22,24 @@
         {% empty %}
         <tr><td colspan="4">No payments recorded.</td></tr>
         {% endfor %}
+    </tbody>
+</table>
+
+<!-- New table to show total sum of all payments -->
+<table class="table table-bordered mt-4">
+    <thead>
+        <tr>
+            <th>Total Amount of All Payments</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                {% with total=payments|map:'amount'|sum %}
+                    {{ total }}
+                {% endwith %}
+            </td>
+        </tr>
     </tbody>
 </table>
 {% endblock %}
