@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sunrise Bakery</title>
+  <style>
+    :root{
+      --bg:#fff9f2;
+      --accent:#c75a31;
+      --muted:#7a5a4a;
+      --card:#fff3ea;
+      --radius:14px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),#fff);
+      color:var(--muted);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.4;
+      padding:24px;
+      display:flex;
+      justify-content:center;
+      font-size:16px;
+    }
+    .site{
+      width:100%;
+      max-width:980px;
+    }
+
+    header{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      margin-bottom:22px;
+    }
+    .brand {
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo {
+      width:64px;
+      height:64px;
+      display:grid;
+      place-items:center;
+      border-radius:12px;
+      background:linear-gradient(135deg,#ffd8c2,#ffd7b3);
+      box-shadow:0 6px 18px rgba(199,90,49,0.12);
+      flex-shrink:0;
+    }
+    .logo svg{width:40px;height:40px}
+    h1{font-size:1.35rem;margin:0;color:var(--accent)}
+    p.lead{margin:4px 0 0;color:#6d4b3d;font-size:0.95rem}
+
+    main{
+      display:grid;
+      grid-template-columns:1fr 320px;
+      gap:20px;
+      align-items:start;
+    }
+
+    .hero{
+      background:var(--card);
+      padding:18px;
+      border-radius:var(--radius);
+      box-shadow:0 6px 18px rgba(120,80,60,0.06);
+    }
+    .hero h2{margin-top:0;margin-bottom:8px;color:var(--muted)}
+    .hero p{margin:0 0 12px}
+    .cta{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:12px;
+      background:linear-gradient(90deg,var(--accent),#e65b3a);
+      color:white;
+      font-weight:600;
+      box-shadow:0 8px 18px rgba(199,90,49,0.15);
+      user-select:none;
+    }
+
+    .menu {
+      margin-top:14px;
+      display:grid;
+      gap:12px;
+    }
+    .item {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      background:#fff;
+      padding:10px;
+      border-radius:12px;
+      border:1px solid rgba(120,90,70,0.06);
+    }
+    .thumb{
+      width:72px;
+      height:72px;
+      border-radius:10px;
+      background:linear-gradient(135deg,#ffe6d6,#fff1ea);
+      display:grid;
+      place-items:center;
+      flex-shrink:0;
+    }
+    .item h3{margin:0;font-size:1rem;color:#4f3428}
+    .item p{margin:4px 0 0;font-size:0.9rem;color:#8a6b60}
+
+    aside .box{
+      background:#fff;
+      padding:14px;
+      border-radius:12px;
+      border:1px solid rgba(120,90,70,0.06);
+    }
+    .hours{display:grid;gap:6px}
+    .hours div{display:flex;justify-content:space-between;font-size:0.95rem}
+
+    footer{
+      margin-top:20px;
+      text-align:center;
+      color:#6b4f45;
+      font-size:0.9rem;
+    }
+
+    /* responsive */
+    @media (max-width:880px){
+      main{grid-template-columns:1fr; padding-bottom:40px}
+      .logo{width:56px;height:56px}
+      .brand{gap:8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="site" role="document" aria-label="Sunrise Bakery homepage">
+    <header>
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">
+          <!-- Simple inline cupcake SVG -->
+          <svg viewBox="0 0 24 24" fill="none" role="img" aria-label="Bakery logo">
+            <path d="M6 10c0 0-1.5 5 6 5s6-5 6-5H6z" fill="#ffd1b3"/>
+            <path d="M9 7a3 3 0 0 1 6 0c0 1.6-1.4 2-3 2s-3-0.4-3-2z" fill="#ffe6d9"/>
+            <circle cx="10.5" cy="7.2" r="0.6" fill="#c75a31"/>
+            <circle cx="13.5" cy="7.2" r="0.6" fill="#c75a31"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Sunrise Bakery</h1>
+          <p class="lead">Handmade breads, pastries & smiles — baked fresh daily</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <h2 id="hero-title">Warm. Simple. Delicious.</h2>
+        <p>We bake small batches every morning using local flour and seasonal ingredients. Stop by to smell the croissants!</p>
+        <div style="margin-top:12px">
+          <span class="cta" role="button" aria-pressed="false" tabindex="0">Order in person</span>
+        </div>
+
+        <div class="menu" aria-label="Featured menu">
+          <article class="item" aria-labelledby="item1">
+            <div class="thumb" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 10c0 0-1.5 5 6 5s6-5 6-5H6z" fill="#ffd1b3"/>
+              </svg>
+            </div>
+            <div>
+              <h3 id="item1">Butter Croissant</h3>
+              <p>Flaky, layered, golden — the classic.</p>
+            </div>
+          </article>
+
+          <article class="item" aria-labelledby="item2">
+            <div class="thumb" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="10" r="6" fill="#fff1ea" stroke="#ffd1b3" stroke-width="1"/>
+              </svg>
+            </div>
+            <div>
+              <h3 id="item2">Cinnamon Roll</h3>
+              <p>Swirled with brown sugar and a light glaze.</p>
+            </div>
+          </article>
+
+          <article class="item" aria-labelledby="item3">
+            <div class="thumb" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="4" y="6" width="16" height="10" rx="3" fill="#fff3ea"/>
+              </svg>
+            </div>
+            <div>
+              <h3 id="item3">Sourdough Loaf</h3>
+              <p>Slow-fermented, crisp crust, open crumb.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <aside>
+        <div class="box" aria-labelledby="info-title">
+          <h3 id="info-title" style="margin-top:0">Today</h3>
+          <p style="margin:6px 0 12px">Baked fresh from 6:30 AM — come early for the croissants.</p>
+
+          <div class="hours" aria-hidden="false">
+            <div><span>Mon — Fri</span><strong>6:30 AM — 6:00 PM</strong></div>
+            <div><span>Sat</span><strong>7:00 AM — 4:00 PM</strong></div>
+            <div><span>Sun</span><strong>Closed</strong></div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(120,90,70,0.06)" />
+
+          <div>
+            <h4 style="margin:0 0 6px">Location</h4>
+            <p style="margin:0">123 Baker Lane<br/>Neighborhood, City</p>
+
+            <h4 style="margin:12px 0 6px">Phone</h4>
+            <p style="margin:0">+254 700 000 000</p>
+
+            <h4 style="margin:12px 0 6px">Notes</h4>
+            <p style="margin:0">Walk-ins welcome. We accept cash and card in-store.</p>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <p>&copy; <span id="year"></span> Sunrise Bakery — Baked with care.</p>
+    </footer>
+  </div>
+
+  <script>
+    // small script to set year and enable keyboard "click" on CTA (no links)
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const cta = document.querySelector('.cta');
+    cta.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        // playful focus feedback; no navigation or links
+        cta.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-3px)' }, { transform: 'translateY(0)' }], { duration: 220 });
+      }
+    });
+  </script>
+</body>
+</html>
