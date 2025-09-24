@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView
 from .models import Group, Payment, Activity, Training, Service
 from django import forms
+from django.db.models import Sum
 
 # --- Forms ---
 class GroupForm(forms.ModelForm):
@@ -52,8 +53,11 @@ class PaymentListView(ListView):
     model = Payment
     template_name = 'CDMIS/payment_list.html'
     context_object_name = 'payments'
-    queryset = Payment.objects.select_related('group').order_by('-payment_date')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_amount'] = Payment.objects.aggregate(total=Sum('amount'))['total'] or 0
+        return context
 class PaymentCreateView(CreateView):
     model = Payment
     form_class = PaymentForm
