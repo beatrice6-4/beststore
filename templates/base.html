@@ -82,8 +82,8 @@
         <div>
             <span>Welcome, {{ user.username }}</span>
         </div>
-    </div>
 
+    </div>
     <!-- Sidebar + Main Content -->
     <div class="content-wrapper">
         <!-- Sidebar -->
@@ -91,6 +91,8 @@
             <nav>
     <a href="{% url 'store' %}"><i class="fa fa-users"></i>Store</a>
     <a href="{% url 'cart' %}"><i class="fa fa-chalkboard-teacher"></i>Cart</a>
+    <a href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i>Orders</a>
+    <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i>Logout</a>
 </nav>
         </div>
 
