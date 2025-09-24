@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Group Trainings</h2>
+<a href="{% url 'cdmis:training_add' %}" class="btn btn-success mb-3">Add Training</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Group</th>
+            <th>Topic</th>
+            <th>Trainer</th>
+            <th>Date</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for training in trainings %}
+        <tr>
+            <td>{{ training.group.name }}</td>
+            <td>{{ training.topic }}</td>
+            <td>{{ training.trainer }}</td>
+            <td>{{ training.training_date }}</td>
+            <td>{{ training.notes }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No trainings recorded.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

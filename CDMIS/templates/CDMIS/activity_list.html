@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Group Activities</h2>
+<a href="{% url 'cdmis:activity_add' %}" class="btn btn-success mb-3">Add Activity</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Group</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for activity in activities %}
+        <tr>
+            <td>{{ activity.group.name }}</td>
+            <td>{{ activity.title }}</td>
+            <td>{{ activity.activity_date }}</td>
+            <td>{{ activity.description }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No activities recorded.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
