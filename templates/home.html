@@ -3,6 +3,99 @@
 
 {% block content %}
 
+<style>
+.section-intro {
+    background: linear-gradient(90deg, #f8f9fa 60%, #eafbe7 100%);
+    padding: 40px 0 20px 0;
+}
+.intro-banner-wrap img {
+    box-shadow: 0 4px 24px #e3e3e3;
+    border-radius: 18px;
+    margin-bottom: 18px;
+}
+.section-heading {
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.section-title {
+    color: #2d7a2d;
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 0;
+}
+.card-product-grid {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    margin-bottom: 28px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    background: #fff;
+}
+.card-product-grid:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 8px 24px #eafbe7;
+}
+.card-product-grid .img-wrap {
+    display: block;
+    height: 220px;
+    background: #f6fff4;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    text-align: center;
+}
+.card-product-grid .img-wrap img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: cover;
+    margin: 0 auto;
+    transition: transform 0.2s;
+}
+.card-product-grid:hover .img-wrap img {
+    transform: scale(1.07);
+}
+.info-wrap {
+    padding: 18px 14px 12px 14px;
+}
+.info-wrap .title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #003366;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+    transition: color 0.2s;
+}
+.info-wrap .title:hover {
+    color: #2d7a2d;
+}
+.price {
+    color: #2d7a2d;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.rating-star {
+    margin-top: 6px;
+    color: #f7b731;
+    font-size: 1.05em;
+}
+.btn-outline-primary {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-width: 2px;
+}
+@media (max-width: 900px) {
+    .card-product-grid .img-wrap { height: 160px; }
+    .section-title { font-size: 1.3rem; }
+}
+@media (max-width: 600px) {
+    .card-product-grid .img-wrap { height: 120px; }
+    .info-wrap { padding: 10px 7px 8px 7px; }
+}
+</style>
+
 <!-- ========================= SECTION MAIN ========================= -->
 <section class="section-intro padding-y-sm">
 <div class="container">
@@ -38,16 +131,16 @@
 <div class="container">
 
 <header class="section-heading">
-    <a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
     <h3 class="section-title">Most Recent Products</h3>
+    <a href="{% url 'store' %}" class="btn btn-outline-primary">See all</a>
 </header><!-- sect-heading -->
 
 <div class="row">
     {% for product in products %}
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6 col-12">
         <div class="card card-product-grid">
             <a href="{% url 'product_detail' product.category.slug product.slug %}" class="img-wrap">
-                <img src="{{ product.images.url }}">
+                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
             </a>
             <figcaption class="info-wrap">
                 <a href="{% url 'product_detail' product.category.slug product.slug %}" class="title">{{ product.product_name }}</a>
@@ -63,6 +156,10 @@
                 </div>
             </figcaption>
         </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">No products available at the moment.</div>
     </div>
     {% endfor %}
 </div> <!-- row.// -->
