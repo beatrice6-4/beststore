@@ -9,6 +9,7 @@
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
         body {
@@ -16,24 +17,30 @@
             display: flex;
             flex-direction: column;
         }
-
         .sidebar {
             min-height: 100vh;
             background-color: #003366;
             color: white;
+            transition: left 0.3s, width 0.3s;
+            width: 220px;
+            position: relative;
+            z-index: 1050;
         }
-
-        .sidebar a {
+        .sidebar nav a {
             color: white;
             text-decoration: none;
             display: block;
             padding: 12px 20px;
         }
-
-        .sidebar a:hover {
+        .sidebar nav a:hover {
             background-color: #005599;
         }
-
+        .sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
         .header {
             background-color: #004080;
             color: white;
@@ -42,33 +49,85 @@
             align-items: center;
             justify-content: space-between;
         }
-
         .logo {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
         .logo img {
             height: 40px;
         }
-
+        .hamburger {
+            width: 36px;
+            height: 36px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-right: 14px;
+            cursor: pointer;
+        }
+        .hamburger .bar {
+            display: block;
+            width: 26px;
+            height: 4px;
+            margin: 4px 0;
+            background-color: white;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
         .content-wrapper {
             display: flex;
             flex-grow: 1;
         }
-
         .main-content {
             flex-grow: 1;
             padding: 30px;
             background-color: #f5f7fa;
         }
-
-        footer {
-            background-color: #004080;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 1040;
+        }
+        .overlay.show {
+            display: block;
+        }
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -220px;
+                top: 0;
+                height: 100vh;
+                width: 220px;
+                box-shadow: 2px 0 12px #0002;
+                transition: left 0.3s;
+            }
+            .sidebar.show {
+                left: 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .main-content {
+                padding: 18px 6px;
+            }
+        }
+        @media (max-width: 600px) {
+            .main-content {
+                padding: 10px 2vw 8px 2vw;
+            }
+            .header {
+                padding: 10px 7px;
+            }
+            .logo img {
+                height: 30px;
+            }
         }
     </style>
 </head>
@@ -77,6 +136,11 @@
     <!-- Header -->
     <div class="header">
         <div class="logo">
+            <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
             <img src="{% static 'images/gov.png' %}" alt="Gov Logo">
             <h4 class="mb-0">Community Development MIS</h4>
         </div>
@@ -88,16 +152,17 @@
     <!-- Sidebar + Main Content -->
     <div class="content-wrapper">
         <!-- Sidebar -->
-        <div class="sidebar p-3">
+        <div class="sidebar p-3" id="sidebar">
             <nav>
-    <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i> Community Groups</a>
-    <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher"></i> Trainings</a>
-    <a href="{% url 'cdmis:service_list' %}"><i class="fa fa-concierge-bell"></i> Other Services</a>
-    <a href="{% url 'cdmis:activity_list' %}"><i class="fa fa-tasks"></i> Activities Rendered to Group</a>
-    <a href="{% url 'cdmis:payment_list' %}"><i class="fa fa-money-check-alt"></i> Payments Management</a>
-</nav>
+                <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i> Community Groups</a>
+                <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher"></i> Trainings</a>
+                <a href="{% url 'cdmis:service_list' %}"><i class="fa fa-concierge-bell"></i> Other Services</a>
+                <a href="{% url 'cdmis:activity_list' %}"><i class="fa fa-tasks"></i> Activities Rendered to Group</a>
+                <a href="{% url 'cdmis:payment_list' %}"><i class="fa fa-money-check-alt"></i> Payments Management</a>
+            </nav>
         </div>
-
+        <!-- Overlay for mobile -->
+        <div class="overlay" id="sidebarOverlay"></div>
         <!-- Main Content -->
         <div class="main-content">
             {% block content %}
@@ -113,5 +178,26 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Hamburger menu toggle for mobile
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const overlay = document.getElementById('sidebarOverlay');
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        sidebarToggle.onclick = function() {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        };
+        overlay.onclick = closeSidebar;
+        // Optional: close sidebar on navigation (mobile)
+        document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+            link.onclick = function() {
+                if(window.innerWidth <= 900) closeSidebar();
+            }
+        });
+    </script>
 </body>
 </html>
