@@ -122,13 +122,13 @@
     <!-- Header -->
     <div class="header">
         <div class="logo">
-            <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+            
+            <img src="{% static 'images/logo.png' %}" alt="Gov Logo">
+           <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
     <span class="bar"></span>
     <span class="bar"></span>
     <span class="bar"></span>
 </button>
-            <img src="{% static 'images/logo.png' %}" alt="Gov Logo">
-            <h4 class="mb-0">MAMAMAASAI BAKERS</h4>
         </div>
         <div>
             <span>Welcome, {{ user.username }}</span>
