@@ -40,7 +40,7 @@
         .hamburger {
             width: 36px;
             height: 36px;
-            display: none;
+            display: flex !important;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -156,7 +156,6 @@
     <div class="header">
         <div class="logo">
             <img src="{% static 'images/logo.png' %}" alt="Logo">
-            <span style="font-weight:700; letter-spacing:1px;">MAMAMAASAI BAKERS</span>
             <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
                 <span class="bar"></span>
                 <span class="bar"></span>
