@@ -6,6 +6,7 @@ from django import forms
 from django.db.models import Sum
 from datetime import datetime
 from collections import defaultdict
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 # --- Forms ---
 class GroupForm(forms.ModelForm):
@@ -51,10 +52,17 @@ class GroupCreateView(CreateView):
     success_url = reverse_lazy('cdmis:group_list')
 
 # --- Payment Views ---
-class PaymentListView(ListView):
+class PaymentListView(UserPassesTestMixin, ListView):
     model = Payment
     template_name = 'CDMIS/payment_list.html'
     context_object_name = 'payments'
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("You do not have permission to view this page.")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -62,11 +70,11 @@ class PaymentListView(ListView):
         context['total_amount'] = all_payments.aggregate(total=Sum('amount'))['total'] or 0
 
         # Group payments by date and sum amounts
+        from collections import defaultdict
         payments_by_date = defaultdict(list)
         for payment in all_payments:
             payments_by_date[payment.payment_date].append(payment)
 
-        # Prepare a list of dicts: [{'date': ..., 'payments': [...], 'date_total': ...}, ...]
         grouped_payments = []
         for date, payments in payments_by_date.items():
             date_total = sum(p.amount for p in payments)
@@ -76,15 +84,22 @@ class PaymentListView(ListView):
                 'date_total': date_total
             })
 
-        # Sort by date (ascending)
         grouped_payments.sort(key=lambda x: x['date'])
         context['grouped_payments'] = grouped_payments
         return context
-class PaymentCreateView(CreateView):
+
+class PaymentCreateView(UserPassesTestMixin, CreateView):
     model = Payment
     form_class = PaymentForm
     template_name = 'CDMIS/payment_form.html'
     success_url = reverse_lazy('cdmis:payment_list')
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("You do not have permission to view this page.")
 
 # --- Activity Views ---
 class ActivityListView(ListView):
