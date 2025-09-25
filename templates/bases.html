@@ -1,110 +1,62 @@
 {% load static %}
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}BestStore{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="cache-control" content="max-age=604800" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Minimal modern CSS framework (Bootstrap alternative) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<title>KIMBAKERY | One of the Biggest Online Shopping Platform</title>
 
-    <!-- Custom styles -->
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-    <style>
-        body {
-            background: #0975e1;
-        }
-        .navbar {
-            background: #22223b;
-        }
-        .navbar .navbar-item,
-        .navbar .navbar-link {
-            color: #fff;
-        }
-        .navbar .navbar-item:hover {
-            background: #4a4e69;
-            color: #fff;
-        }
-        .footer {
-            background: #22223b;
-            color: #fff;
-            padding: 2rem 1rem;
-            text-align: center;
-        }
-        .main-content {
-            min-height: 70vh;
-            padding: 2rem 0;
-        }
-    </style>
-    {% block extra_head %}{% endblock %}
+<link href="{% static 'images/logo.png' %}" rel="shortcut icon" type="image/x-icon">
+
+<!-- jQuery -->
+<script src="{% static 'js/jquery-2.0.0.min.js' %}" type="text/javascript"></script>
+
+<!-- Bootstrap4 files-->
+<script src="{% static 'js/bootstrap.bundle.min.js' %}" type="text/javascript"></script>
+<link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
+
+<!-- Font awesome 5 -->
+<link href="{% static 'fonts/fontawesome/css/all.min.css' %}" type="text/css" rel="stylesheet">
+
+<!-- custom style -->
+<link href="{% static 'css/ui.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'css/responsive.css' %}" rel="stylesheet" media="only screen and (max-width: 1200px)" />
+
+<link href="{% static 'css/custom.css' %}" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<!-- custom javascript -->
+<script src="{% static 'js/script.js' %}" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="{% static 'js/jquery-3.3.1.min.js' %}" type="text/javascript"></script>
+
+
+<!-- PayPal Script -->
+<script src="https://www.paypal.com/sdk/js?client-id=AVBSMqNtoZ1IUO6lrSe6-vm9AIV1ZKN8CgXu_nINRs80xELRs650mh3yR62groIUg-GCe59Od_EFOG6O&currency=USD"></script>
+
+<script type="text/javascript">
+/// some script
+
+// jquery ready start
+$(document).ready(function() {
+	// jQuery code
+
+});
+// jquery end
+</script>
+
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="{% url 'home' %}">
-                <strong>BestStore</strong>
-            </a>
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-        <div id="navbarBasic" class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="{% url 'store' %}">Shop</a>
-                <a class="navbar-item" href="{% url 'dashboard' %}">Dashboard</a>
-            </div>
-            <div class="navbar-end">
-                {% if user.is_authenticated %}
-                    <div class="navbar-item">Hi, {{ user.first_name|default:user.username }}</div>
-                    <a class="navbar-item" href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                    <a class="navbar-item" href="{% url 'login' %}">Login</a>
-                    <a class="navbar-item" href="{% url 'register' %}">Register</a>
-                {% endif %}
-                <a class="navbar-item" href="{% url 'cart' %}">
-                    <span class="icon"><i class="fa fa-shopping-cart"></i></span>
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <section class="main-content">
-        <div class="container">
-            {% block content %}
-            <!-- Page content goes here -->
-            {% endblock %}
-        </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div>
-            &copy; {{ now|date:"Y" }} BestStore. All rights reserved.
-        </div>
-    </footer>
 
-    <!-- Bulma Navbar Burger Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-            if ($navbarBurgers.length > 0) {
-                $navbarBurgers.forEach( el => {
-                    el.addEventListener('click', () => {
-                        const target = el.dataset.target;
-                        const $target = document.getElementById(target);
-                        el.classList.toggle('is-active');
-                        $target.classList.toggle('is-active');
-                    });
-                });
-            }
-        });
-    </script>
-    {% block extra_js %}{% endblock %}
-</body>
-</html>
+  {% block content %}
+  <!-- content -->
+  {% endblock %}
+
+
+<!-- footer -->
+{% include 'includes/footer.html' %}

@@ -62,7 +62,7 @@ class PaymentListView(UserPassesTestMixin, ListView):
 
     def handle_no_permission(self):
         from django.http import HttpResponseForbidden
-        return HttpResponseForbidden("You do not have permission to view this page.")
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -99,7 +99,7 @@ class PaymentCreateView(UserPassesTestMixin, CreateView):
 
     def handle_no_permission(self):
         from django.http import HttpResponseForbidden
-        return HttpResponseForbidden("You do not have permission to view this page.")
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
 
 # --- Activity Views ---
 class ActivityListView(ListView):
