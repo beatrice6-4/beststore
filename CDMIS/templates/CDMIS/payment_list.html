@@ -5,11 +5,10 @@ body {
     background: #f8f9fa;
     font-family: 'Segoe UI', Arial, sans-serif;
 }
-h3 {
+h2 {
     color: #2d7a2d;
     font-weight: 700;
-    margin-top: 32px;
-    margin-bottom: 12px;
+    margin-bottom: 24px;
 }
 .table {
     background: #fff;
@@ -40,11 +39,17 @@ h3 {
 }
 @media (max-width: 700px) {
     .table th, .table td { padding: 8px 4px; font-size: 0.95em; }
-    h3 { font-size: 1.1em; }
+    h2 { font-size: 1.1em; }
 }
 </style>
 
-<h2 class="mb-4">Payments of The Groups</h2>
+<div class="text-end mb-3">
+    <button class="btn btn-outline-success" onclick="printPayments()">
+        <i class="fa fa-download"></i> Download Payments
+    </button>
+</div>
+
+<h2>Payments Grouped by Date</h2>
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -57,7 +62,7 @@ h3 {
     <tbody>
         {% for group in grouped_payments %}
             <tr style="background:#eafbe7;">
-                <td colspan="4"><strong>{{ group.date }}</strong> &mdash; <span style="color:#2d7a2d;">Total: {{ group.date_total }}</span></td>
+                <td colspan="4"><strong>{{ group.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ group.date_total }}</span></td>
             </tr>
             {% for payment in group.payments %}
             <tr>
@@ -85,4 +90,67 @@ h3 {
         </tr>
     </tbody>
 </table>
+
+<!-- Hidden printable section -->
+<div id="printable-payments" style="display:none;">
+    <div style="text-align:center; margin-bottom:20px;">
+        <img src="{% static 'images/gov.png' %}" alt="Logo" style="height:80px;">
+        <h2 style="margin-top:10px;">Payments of The Groups</h2>
+    </div>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">
+        <thead style="background:#eafbe7; color:#2d7a2d;">
+            <tr>
+                <th>Date</th>
+                <th>Group</th>
+                <th>Amount</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in grouped_payments %}
+                <tr style="background:#eafbe7;">
+                    <td colspan="4"><strong>{{ group.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ group.date_total }}</span></td>
+                </tr>
+                {% for payment in group.payments %}
+                <tr>
+                    <td></td>
+                    <td>{{ payment.group.name }}</td>
+                    <td>{{ payment.amount }}</td>
+                    <td>{{ payment.notes }}</td>
+                </tr>
+                {% endfor %}
+            {% empty %}
+                <tr><td colspan="4">No payments recorded.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
+        <thead style="background:#eafbe7; color:#2d7a2d;">
+            <tr>
+                <th>Total Amount of All Payments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ total_amount }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+function printPayments() {
+    var printContents = document.getElementById('printable-payments').innerHTML;
+    var win = window.open('', '', 'height=900,width=1200');
+    win.document.write('<html><head><title>Payments of The Groups</title>');
+    win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
+    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
+    win.document.write('</head><body>');
+    win.document.write(printContents);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.focus();
+    win.print();
+}
+</script>
 {% endblock %}
