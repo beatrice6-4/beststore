@@ -140,15 +140,18 @@
         <!-- Sidebar -->
         <div class="sidebar p-3" id="sidebar">
             <nav>
-                <h5 class="text-white">Main Navigation</h5>
-                <hr class="bg-light">
                 <a href="{% url 'home' %}"><i class="fa fa-home"></i> Home</a>
                 <a href="{% url 'customerDashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a>
                 <a href="{% url 'store' %}"><i class="fa fa-store"></i> Store</a>
+                <a href="#"><i class="fa fa-info-circle"></i> About Us</a>
+                <a href="#"><i class="fa fa-phone"></i> Contact Us</a>
                 <a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> Cart</a>
+                <a href="#"><i class="fa fa-heart"></i> Wishlist</a>
+                <a href="#"><i class="fa fa-user"></i> My Account</a>
                 <a href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i> Orders</a>
                 <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i>Your Community Groups MIS</a>
                 <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
+
             </nav>
         </div>
 
