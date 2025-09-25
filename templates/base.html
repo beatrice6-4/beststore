@@ -54,14 +54,30 @@
             height: 40px;
         }
         .hamburger {
-            font-size: 1.7em;
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: white;
-            margin-right: 18px;
-            display: none;
+        width: 36px;
+        height: 36px;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: none;
+        border: none;
+        padding: 0;
+        margin-right: 18px;
+        cursor: pointer;
         }
+        .hamburger .bar {
+        display: block;
+        width: 26px;
+        height: 4px;
+        margin: 4px 0;
+        background-color: white;
+        border-radius: 2px;
+        transition: 0.3s;
+    }
+    @media (max-width: 900px) {
+        .hamburger { display: flex; }
+    }
         .content-wrapper {
             display: flex;
             flex-grow: 1;
@@ -107,8 +123,10 @@
     <div class="header">
         <div class="logo">
             <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
-                <i class="fa fa-bars"></i>
-            </button>
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+</button>
             <img src="{% static 'images/logo.png' %}" alt="Gov Logo">
             <h4 class="mb-0">MAMAMAASAI BAKERS</h4>
         </div>
@@ -122,6 +140,10 @@
         <!-- Sidebar -->
         <div class="sidebar p-3" id="sidebar">
             <nav>
+                <h5 class="text-white">Main Navigation</h5>
+                <hr class="bg-light">
+                <a href="{% url 'home' %}"><i class="fa fa-home"></i> Home</a>
+                <a href="{% url 'customerDashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a>
                 <a href="{% url 'store' %}"><i class="fa fa-store"></i> Store</a>
                 <a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> Cart</a>
                 <a href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i> Orders</a>
@@ -140,7 +162,7 @@
 
     <!-- Footer -->
     <footer>
-        &copy; {{ year|default:2025 }} SCSDO [Kimili Sub County]. All rights reserved.
+        &copy; {{ year|default:2025 }}  [Kimili Sub County]. All rights reserved.
     </footer>
 
     <!-- Bootstrap JS -->
