@@ -15,105 +15,138 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: #f5f7fa;
+        }
+        .header {
+            background-color: #004080;
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo img {
+            height: 38px;
+            border-radius: 8px;
+        }
+        .hamburger {
+            width: 36px;
+            height: 36px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        .hamburger .bar {
+            display: block;
+            width: 26px;
+            height: 4px;
+            margin: 4px 0;
+            background-color: white;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+        .content-wrapper {
+            display: flex;
+            flex-grow: 1;
+            min-height: 0;
         }
         .sidebar {
             min-height: 100vh;
             background-color: #003366;
             color: white;
-            transition: width 0.3s;
+            transition: width 0.3s, left 0.3s;
             width: 220px;
+            position: relative;
+            z-index: 1050;
         }
-        .sidebar.collapsed {
-            width: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        .sidebar a {
+        .sidebar nav a {
             color: white;
             text-decoration: none;
             display: block;
-            padding: 12px 20px;
+            padding: 13px 22px;
+            font-size: 1.05em;
+            border-left: 4px solid transparent;
+            transition: background 0.2s, border-color 0.2s;
         }
-        .sidebar a:hover {
+        .sidebar nav a:hover, .sidebar nav a.active {
             background-color: #005599;
+            border-left: 4px solid #01ef55;
         }
-        .header {
-            background-color: #004080;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logo img {
-            height: 40px;
-        }
-        .hamburger {
-    width: 36px;
-    height: 36px;
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: none;
-    border: none;
-    padding: 0;
-    margin-right: 18px;
-    cursor: pointer;
-}
-        .hamburger .bar {
-        display: block;
-        width: 26px;
-        height: 4px;
-        margin: 4px 0;
-        background-color: white;
-        border-radius: 2px;
-        transition: 0.3s;
-    }
-    @media (max-width: 900px) {
-        .hamburger { display: flex; }
-    }
-        .content-wrapper {
-            display: flex;
-            flex-grow: 1;
+        .sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
         }
         .main-content {
             flex-grow: 1;
-            padding: 30px;
+            padding: 32px 18px 18px 18px;
             background-color: #f5f7fa;
+            min-width: 0;
             transition: margin-left 0.3s;
-        }
-        @media (max-width: 900px) {
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                z-index: 1000;
-                height: 100vh;
-                width: 220px;
-                transition: width 0.3s;
-            }
-            .sidebar.collapsed {
-                width: 0;
-                padding: 0;
-            }
-            .main-content {
-                padding: 18px 6px;
-            }
-            .hamburger {
-                display: inline-block;
-            }
         }
         footer {
             background-color: #004080;
             color: white;
             text-align: center;
             padding: 10px 0;
+            font-size: 0.98em;
+            margin-top: auto;
+        }
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -220px;
+                top: 0;
+                height: 100vh;
+                width: 220px;
+                box-shadow: 2px 0 12px #0002;
+                transition: left 0.3s;
+            }
+            .sidebar.show {
+                left: 0;
+            }
+            .main-content {
+                padding: 22px 4vw 12px 4vw;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.25);
+                z-index: 1040;
+            }
+            .overlay.show {
+                display: block;
+            }
+        }
+        @media (max-width: 600px) {
+            .main-content {
+                padding: 12px 2vw 8px 2vw;
+            }
+            .header {
+                padding: 10px 7px;
+            }
+            .logo img {
+                height: 30px;
+            }
         }
     </style>
 </head>
@@ -122,24 +155,35 @@
     <!-- Header -->
     <div class="header">
         <div class="logo">
-            
-            <img src="{% static 'images/logo.png' %}" alt="Gov Logo">
-           <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
-    <span class="bar"></span>
-    <span class="bar"></span>
-    <span class="bar"></span>
-</button>
+            <img src="{% static 'images/logo.png' %}" alt="Logo">
+            <span style="font-weight:700; letter-spacing:1px;">MAMAMAASAI BAKERS</span>
+            <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
         </div>
         <div>
             <span>Welcome, {{ user.username }}</span>
+            <span class="ms-3">|</span>
+            <a href="{% url 'logout' %}" class="ms-3 text-white">Logout</a>
+            <a href="{% url 'cart' %}" class="ms-3 text-white position-relative">
+                <i class="fa fa-shopping-cart"></i>
+                {% if cart_item_count and cart_item_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ cart_item_count }}
+                    <span class="visually-hidden">unread messages</span>
+                </span>
+                {% endif %}
+            </a>
         </div>
     </div>
 
     <!-- Sidebar + Main Content -->
     <div class="content-wrapper">
         <!-- Sidebar -->
-        <div class="sidebar p-3" id="sidebar">
-            <nav>
+        <div class="sidebar p-0" id="sidebar">
+            <nav class="pt-4">
                 <a href="{% url 'home' %}"><i class="fa fa-home"></i> Home</a>
                 <a href="{% url 'customerDashboard' %}"><i class="fa fa-dashboard"></i> Dashboard</a>
                 <a href="{% url 'store' %}"><i class="fa fa-store"></i> Store</a>
@@ -149,12 +193,12 @@
                 <a href="#"><i class="fa fa-heart"></i> Wishlist</a>
                 <a href="#"><i class="fa fa-user"></i> My Account</a>
                 <a href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i> Orders</a>
-                <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i>Your Community Groups MIS</a>
+                <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i> Community Groups MIS</a>
                 <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
-
             </nav>
         </div>
-
+        <!-- Overlay for mobile -->
+        <div class="overlay" id="sidebarOverlay"></div>
         <!-- Main Content -->
         <div class="main-content" id="mainContent">
             {% block content %}
@@ -165,17 +209,36 @@
 
     <!-- Footer -->
     <footer>
-        &copy; {{ year|default:2025 }}  [Kimili Sub County]. All rights reserved.
+        &copy; {{ year|default:2025 }} [Kimili Sub County]. All rights reserved.
+        <a href="#" class="ms-3 text-white">Privacy Policy</a>
+        <a href="#" class="ms-3 text-white">Terms of Service</a>
+        <a href="#" class="ms-3 text-white">Contact Us</a>
+        <a href="#" class="ms-3 text-white">About Us</a>
+
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Hamburger menu toggle
-        document.getElementById('sidebarToggle').onclick = function() {
-            var sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
+        // Hamburger menu toggle for mobile
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const overlay = document.getElementById('sidebarOverlay');
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        sidebarToggle.onclick = function() {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
         };
+        overlay.onclick = closeSidebar;
+        // Optional: close sidebar on navigation (mobile)
+        document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+            link.onclick = function() {
+                if(window.innerWidth <= 900) closeSidebar();
+            }
+        });
     </script>
 </body>
 </html>
