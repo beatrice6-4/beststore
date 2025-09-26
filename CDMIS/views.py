@@ -86,7 +86,12 @@ class PaymentListView(UserPassesTestMixin, ListView):
             })
 
         grouped_payments.sort(key=lambda x: x['date'])
-        context['grouped_payments'] = grouped_payments
+        # Chunk grouped_payments into groups of 5 dates each
+        def chunk_list(lst, n):
+            for i in range(0, len(lst), n):
+                yield lst[i:i + n]
+
+        context['grouped_payments_chunks'] = list(chunk_list(grouped_payments, 5))
         return context
 
 class PaymentCreateView(UserPassesTestMixin, CreateView):
