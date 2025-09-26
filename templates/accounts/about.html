@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us - BestStore</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .about-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 16px;
+        }
+        p {
+            color: #4a5568;
+            line-height: 1.7;
+        }
+        .team-section {
+            margin-top: 32px;
+        }
+        .team-member {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="about-container">
+        <h1>About BestStore</h1>
+        <p>
+            Welcome to BestStore! We are dedicated to providing you with the best online shopping experience.
+            Our mission is to offer high-quality products at competitive prices, backed by exceptional customer service.
+            We value integrity, transparency, and customer satisfaction above all else. We also strive to create a seamless and enjoyable shopping journey for all our customers.
+        </p>
+        <p>
+            Founded in 2024, BestStore has quickly grown into a trusted destination for shoppers seeking variety, value, and convenience.
+            We believe in making shopping easy, enjoyable, and secure for everyone.
+            Today, we continue to expand our product range and improve our services to meet the evolving needs of our customers.
+        </p>
+        <div class="team-section">
+            <h2>Our Team</h2>
+            <div class="team-member">
+                <strong>Bramwel Nyongesa</strong> – Developer & CEO
+            </div>
+            <div class="team-member">
+                <strong>Diana Nambuchi</strong> – Director & Owner of the Company
+            </div>
+            <div class="team-member">
+                <strong>Assumpta Sikolia</strong> – Operations Manager
+            </div>
+        </div>
+        <p style="margin-top:32px;">
+            Thank you for choosing BestStore. We look forward to serving you!
+        </p>
+    </div>
+</body>
+</html>
+{% endblock %}

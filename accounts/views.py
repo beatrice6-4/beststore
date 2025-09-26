@@ -399,3 +399,33 @@ def transactions(request):
 
 def recipes(request):
     return render(request, 'accounts/recipes.html')
+
+from .forms import ContactForm
+from .models import ContactMessage
+from django.contrib.auth.decorators import login_required
+@login_required
+def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact_message = form.save(commit=False)
+            contact_message.user = request.user
+            contact_message.save()
+            messages.success(request, 'Your message has been sent to the admin.')
+            return redirect('contact')
+    else:
+        form = ContactForm()
+    return render(request, 'accounts/contact.html', {'form': form})
+
+from .models import Wishlist
+@login_required
+def wishlist(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+    context = {
+        'wishlist_items': wishlist_items
+    }
+    return render(request, 'accounts/wishlist.html', context)
+
+
+def about(request):
+    return render(request, 'accounts/about.html')

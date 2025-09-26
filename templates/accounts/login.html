@@ -84,7 +84,8 @@ Already verified? <a href="{% url 'login' %}">Login</a>
 {% else %}
     <div class="card custom-login-card mx-auto" style="max-width: 380px;">
       <div class="card-body">
-      <h4 class="card-title mb-4">Sign in</h4>
+        <h4 class="card-title mb-4 text-center">Welcome Back!</h4>
+        <h4 class="card-title mb-4">Sign in</h4>
       {% include 'includes/alerts.html' %}
       <form action="{% url 'login' %}" method="POST">
         {% csrf_token %}

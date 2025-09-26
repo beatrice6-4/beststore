@@ -13,6 +13,9 @@ urlpatterns = [
     path('track_order/<int:order_id>/', views.track_order, name='track_order'),
     path('transactions/', views.transactions, name='transactions'),
     path('recipes/', views.recipes, name='recipes'),
+    path('contact/', views.contact, name='contact'),
+    path('wishlist/', views.wishlist, name='wishlist'),
+    path('about/', views.about, name='about'),
 
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('forgotPassword/', views.forgotPassword, name='forgotPassword'),
