@@ -429,3 +429,12 @@ def wishlist(request):
 
 def about(request):
     return render(request, 'accounts/about.html')
+
+@login_required
+def account(request):
+    userprofile = getattr(request.user, 'userprofile', None)
+    context = {
+        'user': request.user,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/account.html', context)

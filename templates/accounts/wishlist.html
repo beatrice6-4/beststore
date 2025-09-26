@@ -1,0 +1,145 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Wishlist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .wishlist-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+        }
+        h1 {
+            text-align: center;
+            color: #22223b;
+            margin-bottom: 32px;
+            letter-spacing: 1px;
+        }
+        .wishlist-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 0;
+            border-bottom: 1px solid #ececec;
+            transition: background 0.2s;
+        }
+        .wishlist-item:last-child {
+            border-bottom: none;
+        }
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .item-img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+        .item-title {
+            font-size: 1.1rem;
+            color: #22223b;
+            font-weight: 500;
+        }
+        .item-actions button {
+            background: #ff6f61;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        .item-actions button:hover {
+            background: #e85d4f;
+        }
+        @media (max-width: 600px) {
+            .wishlist-container {
+                padding: 16px 4px;
+            }
+            .item-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .item-img {
+                width: 48px;
+                height: 48px;
+            }
+        }
+        .empty-message {
+            text-align: center;
+            color: #888;
+            font-size: 1.1rem;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="wishlist-container">
+        <h1>My Wishlist</h1>
+        <!-- If wishlist is empty -->
+        <!-- <div class="empty-message">Your wishlist is empty. Start adding your favorite products!</div> -->
+
+        <!-- Wishlist items -->
+        <ul class="wishlist-list">
+            <li class="wishlist-item">
+                <div class="item-info">
+                    <img src="https://via.placeholder.com/64" alt="Product 1" class="item-img">
+                    <span class="item-title">Wireless Headphones</span>
+                </div>
+                <div class="item-actions">
+                    <button>Add to Cart</button>
+                    <button>Remove</button>
+                </div>
+            </li>
+            <li class="wishlist-item">
+                <div class="item-info">
+                    <img src="https://via.placeholder.com/64" alt="Product 2" class="item-img">
+                    <span class="item-title">Smart Watch</span>
+                </div>
+                <div class="item-actions">
+                    <button>Add to Cart</button>
+                    <button>Remove</button>
+                </div>
+            </li>
+            <li class="wishlist-item">
+                <div class="item-info">
+                    <img src="https://via.placeholder.com/64" alt="Product 3" class="item-img">
+                    <span class="item-title">Bluetooth Speaker</span>
+                </div>
+                <div class="item-actions">
+                    <button>Add to Cart</button>
+                    <button>Remove</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+{% endblock %}

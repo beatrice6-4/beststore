@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="account-container">
+    <h2>My Account</h2>
+    <div class="account-details">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <!-- Add more user details as needed -->
+    </div>
+    <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.account-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px 40px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+.account-container h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-weight: 600;
+}
+.account-details {
+    margin-bottom: 30px;
+    text-align: left;
+}
+.account-details p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+.logout-btn {
+    display: inline-block;
+    padding: 10px 30px;
+    background: #e74c3c;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.logout-btn:hover {
+    background: #c0392b;
+}
+</style>
+{% endblock %}
