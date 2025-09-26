@@ -4,6 +4,7 @@ from django.views.generic import ListView, DetailView, CreateView
 from .models import Group, Payment, Activity, Training, Service
 from django import forms
 from django.db.models import Sum
+from django.views import View
 from datetime import datetime
 from collections import defaultdict
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -136,3 +137,48 @@ class ServiceCreateView(CreateView):
     form_class = ServiceForm
     template_name = 'CDMIS/service_form.html'
     success_url = reverse_lazy('cdmis:service_list')
+
+
+
+
+class FinanceView(UserPassesTestMixin, View):
+    template_name = 'CDMIS/finance.html'
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+
+    def get(self, request, *args, **kwargs):
+        from collections import defaultdict
+        from .models import Group, Payment
+
+        # Fetch all payments, group by date
+        payments = Payment.objects.select_related('group').order_by('payment_date')
+        finance_data = defaultdict(list)
+        for payment in payments:
+            finance_data[payment.payment_date].append({
+                'group': payment.group.name,
+                'amount': payment.amount
+            })
+
+        # Prepare list for template: [{date, payments: [{group, amount}], date_total}]
+        finance_list = []
+        for date, items in finance_data.items():
+            date_total = sum(item['amount'] for item in items)
+            finance_list.append({
+                'date': date,
+                'payments': items,
+                'date_total': date_total
+            })
+        finance_list.sort(key=lambda x: x['date'])
+
+        # Grand total
+        grand_total = payments.aggregate(total=Sum('amount'))['total'] or 0
+
+        return render(request, self.template_name, {
+            'finance_list': finance_list,
+            'grand_total': grand_total,
+        })

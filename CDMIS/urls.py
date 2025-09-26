@@ -15,4 +15,6 @@ urlpatterns = [
     path('trainings/add/', views.TrainingCreateView.as_view(), name='training_add'),
     path('services/', views.ServiceListView.as_view(), name='service_list'),
     path('services/add/', views.ServiceCreateView.as_view(), name='service_add'),
+    path('finance/', views.FinanceView.as_view(), name='finance'),
+    
 ]
