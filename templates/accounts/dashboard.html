@@ -1,3 +1,8 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,7 +49,7 @@
                             {{ item.product.name }} (x{{ item.quantity }}){% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </td>
-                    <td>${{ order.total }}</td>
+                    <td>ksh {{ order.total }}</td>
                     <td class="status-{{ order.status|lower }}">{{ order.status }}</td>
                 </tr>
                 {% empty %}
@@ -57,3 +62,5 @@
     </div>
 </body>
 </html>
+
+{% endblock %}

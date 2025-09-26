@@ -1,4 +1,7 @@
+{% extends 'base.html' %}
+
 {% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,13 +12,13 @@
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #5cef1d;
+            background: hsl(103, 17%, 92%);
             margin: 0;
         }
         .container {
             max-width: 1100px;
             margin: 40px auto;
-            background: #f50505;
+            background: hsla(0, 22%, 96%, 0.945);
             border-radius: 18px;
             box-shadow: 0 4px 24px #e17007;
             padding: 40px 32px 32px 32px;
@@ -40,7 +43,7 @@
             flex-wrap: wrap;
         }
         .product-card {
-            background: hsl(190, 15%, 39%);
+            background: hwb(195 93% 5% / 0.9);
             border-radius: 10px;
             padding: 18px 12px;
             width: 180px;
@@ -63,14 +66,14 @@
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            background: #0adaed;
+            background: oklab(96.863% -0.00609 -0.00198);
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 8px #4dea09;
         }
         .orders-table th, .orders-table td {
             padding: 12px 10px;
-            border-bottom: 1px solid #f20909;
+            border-bottom: 1px solid #f0e4e4;
         }
         .orders-table th {
             background: #01ef55;
@@ -80,12 +83,12 @@
         .orders-table tr:last-child td {
             border-bottom: none;
         }
-        .status-pending { color: #ff9800; font-weight: 600; background: hsl(122, 96%, 47%); }
-        .status-inprogress { color: #2196f3; font-weight: 600; background: #7c02e0; }
-        .status-delivered { color: #4caf50; font-weight: 600; background: #06e218; }
+        .status-pending { color: hsla(330, 96%, 48%, 0.886); font-weight: 600; background: hwb(127 93% 4%); }
+        .status-inprogress { color: hsl(207, 93%, 45%); font-weight: 600; background: hsl(270, 14%, 89%); }
+        .status-delivered { color: #07e60e; font-weight: 600; background: hsl(120, 5%, 85%); }
         .btn {
-            background: #2aa6db;
-            color: #ca6666;
+            background: hsl(200, 10%, 89%);
+            color: #00f636;
             padding: 8px 18px;
             border: none;
             border-radius: 5px;
@@ -93,20 +96,20 @@
             font-weight: 500;
             font-size: 1em;
             transition: background 0.2s, box-shadow 0.2s;
-            box-shadow: 0 1px 4px #07c4ef;
+            box-shadow: 0 1px 4px #1401e4;
             cursor: pointer;
             display: inline-block;
         }
         .btn:hover, .btn:focus {
-            background: #8d3c1e;
-            color: #d16969;
+            background: #f9f5f4;
+            color: #d72121;
             box-shadow: 0 2px 8px #c60599;
         }
         .profile-section {
             background: #1178e0;
             padding: 18px 22px;
             border-radius: 10px;
-            box-shadow: 0 1px 4px #73dc8e;
+            box-shadow: 0 1px 4px #01d035;
         }
         .offers {
             background: linear-gradient(90deg, #f4cc06 60%, #2f11da 100%);
@@ -116,10 +119,10 @@
             box-shadow: 0 1px 4px #061dc9;
         }
         .support {
-            background: #084bf2;
+            background: hsl(220, 14%, 91%);
             padding: 18px 22px;
             border-radius: 10px;
-            box-shadow: 0 1px 4px #08cf30;
+            box-shadow: 0 1px 4px #0326f1;
         }
         .orders-table .btn {
             padding: 6px 14px;
@@ -132,8 +135,8 @@
             display: inline-block;
         }
         .track-details {
-            background: #0cb4e7;
-            border: 1px solid #f80a0a;
+            background: #e4e9eb;
+            border: 1px solid #1af80a;
             border-radius: 10px;
             margin: 18px 0 0 0;
             padding: 18px 22px;
@@ -311,3 +314,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+{% endblock %}
