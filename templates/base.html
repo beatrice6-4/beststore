@@ -151,32 +151,44 @@
     </style>
 </head>
 <body>
-
-    <!-- Header -->
-    <div class="header">
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Logo">
-            <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </button>
-        </div>
-        <div>
-            <span>Welcome, {{ user.username }}</span>
-            <span class="ms-3">|</span>
-            <a href="{% url 'logout' %}" class="ms-3 text-white">Logout</a>
-            <a href="{% url 'cart' %}" class="ms-3 text-white position-relative">
-                <i class="fa fa-shopping-cart"></i>
-                {% if cart_item_count and cart_item_count > 0 %}
-                <span class="badge badge-pill badge-danger notify">{{cart_count}}</span>
-                    <span class="visually-hidden">unread messages</span>
-                </span>
-                {% endif %}
-            </a>
-        </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'customerDashboard' %}">
+            <img id="navbar-logo"
+                 src="{% static 'images/barner.jpg' %}"
+                 alt="KIMBAKERY Logo"
+                 width="40" height="40"
+                 class="me-2"
+                 style="object-fit:contain;">
+            KIMBAKERY
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'customerDashboard' %}"><i class="fa fa-home"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i> My Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-truck"></i> Track Order</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-user-cog"></i> Edit Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-key"></i> Change Password</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
     </div>
-
+</nav>
     <!-- Sidebar + Main Content -->
     <div class="content-wrapper">
         <!-- Sidebar -->
@@ -228,8 +240,6 @@
         });
     </script>
 </body>
-  <!-- navbar -->
-  {% include 'includes/navbar.html' %}
 
 <!-- footer -->
 {% include 'includes/footer.html' %}
