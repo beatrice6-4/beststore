@@ -6,4 +6,25 @@
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Save Group</button>
 </form>
+{% endblock %}{% extends 'gov.html' %}
+{% block content %}
+<h2>Add Group</h2>
+<form method="post" class="row g-3 align-items-center">
+    {% csrf_token %}
+    <div class="col-auto">
+        <label for="{{ form.name.id_for_label }}" class="col-form-label">Name</label>
+        {{ form.name }}
+    </div>
+    <div class="col-auto">
+        <label for="{{ form.registration_date.id_for_label }}" class="col-form-label">Registration Date</label>
+        {{ form.registration_date }}
+    </div>
+    <div class="col-auto">
+        <label for="{{ form.description.id_for_label }}" class="col-form-label">Description</label>
+        {{ form.description }}
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary mt-4">Save Group</button>
+    </div>
+</form>
 {% endblock %}
