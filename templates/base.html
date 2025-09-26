@@ -47,7 +47,7 @@
             background: none;
             border: none;
             padding: 0;
-            margin-left: 8px;
+            margin-left: 10px;
             cursor: pointer;
         }
         .hamburger .bar {
@@ -151,32 +151,30 @@
     </style>
 </head>
 <body>
-    <a class="navbar-brand d-flex align-items-center" href="{% url 'customerDashboard' %}">
-    <img id="navbar-logo"
-         src="{% static 'images/barner.jpg' %}"
-         alt="KIMBAKERY Logo"
-         width="40" height="40"
-         class="me-2"
-         style="object-fit:contain;">
-    KIMBAKERY
-    <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar" type="button" style="margin-left:10px;">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-    </button>
-</a>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fa fa-key"></i> Change Password</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
-                </li>
-            </ul>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <a class="navbar-brand d-flex align-items-center text-white text-decoration-none" href="{% url 'customerDashboard' %}">
+                <img id="navbar-logo"
+                    src="{% static 'images/barner.jpg' %}"
+                    alt="KIMBAKERY Logo"
+                    width="40" height="40"
+                    class="me-2"
+                    style="object-fit:contain;">
+                KIMBAKERY
+            </a>
+            <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar" type="button">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+        <div>
+            <a class="text-white me-3" href="#"><i class="fa fa-key"></i> Change Password</a>
+            <a class="text-white" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
+        </div>
     </div>
-</nav>
+
     <!-- Sidebar + Main Content -->
     <div class="content-wrapper">
         <!-- Sidebar -->
@@ -227,8 +225,7 @@
             }
         });
     </script>
+    <!-- Footer -->
+    {% include 'includes/footer.html' %}
 </body>
-
-<!-- footer -->
-{% include 'includes/footer.html' %}
 </html>
