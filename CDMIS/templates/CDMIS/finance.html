@@ -1,6 +1,23 @@
 {% extends 'gov.html' %}
+{% load static %}
 {% block content %}
-<h2>Finance Summary by Date</h2>
+<style>
+    .download-btn {
+        float: right;
+        margin-bottom: 18px;
+    }
+    @media (max-width: 600px) {
+        .download-btn { float: none; width: 100%; margin-bottom: 14px; }
+    }
+</style>
+
+<!-- Download Button -->
+<button class="btn btn-outline-success download-btn" onclick="printFinance()">
+    <i class="fa fa-download"></i> Download Finance Summary
+</button>
+
+<h2 class="text-center mb-4">Financial Summary</h2>
+
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -38,4 +55,65 @@
         </tr>
     </tbody>
 </table>
+
+<!-- Hidden printable section -->
+<div id="printable-finance" style="display:none;">
+    <div style="text-align:center; margin-bottom:20px;">
+        <img src="{% static 'images/gov.png' %}" alt="Logo" style="height:80px;">
+        <h2 style="margin-top:10px;">Financial Summary</h2>
+    </div>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">
+        <thead style="background:#eafbe7; color:#2d7a2d;">
+            <tr>
+                <th>Date</th>
+                <th>Group</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in finance_list %}
+                <tr style="background:#eafbe7;">
+                    <td colspan="3"><strong>{{ item.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ item.date_total }}</span></td>
+                </tr>
+                {% for payment in item.payments %}
+                <tr>
+                    <td></td>
+                    <td>{{ payment.group }}</td>
+                    <td>{{ payment.amount }}</td>
+                </tr>
+                {% endfor %}
+            {% empty %}
+                <tr><td colspan="3">No payments found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
+        <thead style="background:#eafbe7; color:#2d7a2d;">
+            <tr>
+                <th>Grand Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ grand_total }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+function printFinance() {
+    var printContents = document.getElementById('printable-finance').innerHTML;
+    var win = window.open('', '', 'height=900,width=1200');
+    win.document.write('<html><head><title>Financial Summary</title>');
+    win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
+    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
+    win.document.write('</head><body>');
+    win.document.write(printContents);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.focus();
+    win.print();
+}
+</script>
 {% endblock %}
