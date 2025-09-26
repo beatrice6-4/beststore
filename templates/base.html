@@ -112,6 +112,16 @@
             font-size: 0.98em;
             margin-top: auto;
         }
+        /* Loader styles */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         @media (max-width: 900px) {
             .sidebar {
                 position: fixed;
@@ -136,7 +146,6 @@
                 padding-bottom: 60px; /* Space for footer */
                 margin-bottom: -60px; /* Pull up footer */
                 border-bottom: 1px solid #eee;
-                
             }
             .hamburger {
                 display: flex;
@@ -166,6 +175,13 @@
     </style>
 </head>
 <body>
+    <!-- Loader -->
+    <div id="loader">
+        <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="header">
         <div class="logo">
@@ -177,7 +193,6 @@
                     class="me-2"
                     style="object-fit:contain;">
                 <span class="fs-4 fw-bold">MAMAMAASAI BAKERS</span>
-
             </a>
             <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar" type="button">
                 <span class="bar"></span>
@@ -239,6 +254,12 @@
             link.onclick = function() {
                 if(window.innerWidth <= 900) closeSidebar();
             }
+        });
+
+        // Loader hide on page load
+        window.addEventListener('load', function() {
+            var loader = document.getElementById('loader');
+            if(loader) loader.style.display = 'none';
         });
     </script>
     <!-- Footer -->
