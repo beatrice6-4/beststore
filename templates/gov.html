@@ -146,6 +146,9 @@
         </div>
         <div>
             <span>Welcome, {{ user.username }}</span>
+            <span class="ms-3">|</span>
+            <a href="{% url 'logout' %}" class="ms-3 text-white">Logout</a>
+            
         </div>
     </div>
 
