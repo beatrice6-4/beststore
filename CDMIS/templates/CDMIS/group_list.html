@@ -1,14 +1,16 @@
 {% extends 'gov.html' %}
 {% block content %}
 <h2>Registered Groups</h2>
-<a href="{% url 'cdmis:group_add' %}" class="btn btn-success mb-3">Add Group</a>
-<table class="table table-striped">
+<a href="{% url 'cdmis:group_add' %}" class="btn btn-secondary mb-3"><i class="fa fa-plus me-2"></i>Add Group</a>
+<table id="dt-role" class="table table-striped table-bordered">
     <thead>
         <tr>
             <th>Name</th>
             <th>Registration Date</th>
             <th>Description</th>
             <th>Details</th>
+            <th>Actions</th>
+            
         </tr>
     </thead>
     <tbody>
