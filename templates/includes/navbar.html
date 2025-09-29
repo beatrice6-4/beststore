@@ -1,54 +1,28 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="{% url 'customerDashboard' %}">
-            <img id="navbar-logo"
-                 src="{% static 'images/barner.jpg' %}"
-                 alt="KIMBAKERY Logo"
-                 width="40" height="40"
-                 class="me-2"
-                 style="object-fit:contain;">
-            KIMBAKERY
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'customerDashboard' %}"><i class="fa fa-home"></i> Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'myOrders' %}"><i class="fa fa-shopping-bag"></i> My Orders</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fa fa-truck"></i> Track Order</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fa fa-user-cog"></i> Edit Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fa fa-key"></i> Change Password</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
-                </li>
-            </ul>
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+      <img src="{% static 'images/barner.jpg' %}" alt="Logo" width="32" height="32" class="d-inline-block align-text-top me-2">
+      MAMAMAASAI BAKERS
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+        {% endif %}
+      </ul>
     </div>
+  </div>
 </nav>
-<!-- Bootstrap JS (if not already included) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // List of logo image URLs (add as many as you want)
-    const logoImages = [
-        "{% static 'images/barner.jpg' %}",
-        "{% static 'images/loogo.jpg' %}",
-        "{% static 'images/delivery.jpg' %}"
-    ];
-    let currentLogo = 0;
-    setInterval(function() {
-        currentLogo = (currentLogo + 1) % logoImages.length;
-        document.getElementById('navbar-logo').src = logoImages[currentLogo];
-    }, 3000); // 3000 ms = 3 seconds
-</script>

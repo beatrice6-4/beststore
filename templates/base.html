@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}Dashboard{% endblock %}</title>
+  <title>{% block title %}My Dashboards{% endblock %}</title>
   <style>
     * {
       box-sizing: border-box;
@@ -51,14 +51,14 @@
     .sidebar li {
       margin-bottom: 10px;
       padding: 10px;
-      background-color: #34495e;
+      background-color: #087df2;
       border-radius: 4px;
       transition: background 0.2s;
       cursor: pointer;
     }
     .sidebar li:hover {
       background-color: #3d566e;
-    }
+            }
 
     .sidebar a {
       color: inherit;
@@ -76,6 +76,7 @@
   </style>
 </head>
 <body>
+  {% include 'navbar.html' %}
   <div class="dashboard">
     <div class="sidebar">
       <h2>Menu</h2>
