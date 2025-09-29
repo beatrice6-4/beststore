@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Scrollable Dashboard</title>
+  <title>{% block title %}Dashboard{% endblock %}</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,6 +15,7 @@
     body, html {
       height: 100%;
       font-family: Arial, sans-serif;
+      background: #ecf0f1;
     }
 
     .dashboard {
@@ -28,6 +30,7 @@
       color: white;
       overflow-y: auto;
       padding: 20px;
+      flex-shrink: 0;
     }
 
     .main-content {
@@ -50,6 +53,17 @@
       padding: 10px;
       background-color: #34495e;
       border-radius: 4px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .sidebar li:hover {
+      background-color: #3d566e;
+    }
+
+    .sidebar a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
     }
 
     .content-block {
@@ -64,34 +78,25 @@
 <body>
   <div class="dashboard">
     <div class="sidebar">
-      <h2>Sidebar Menu</h2>
+      <h2>Menu</h2>
       <ul>
-        <li>Dashboard</li>
-        <li>Reports</li>
-        <li>Analytics</li>
-        <li>Settings</li>
-        <li>Users</li>
-        <li>Notifications</li>
-        <li>Support</li>
-        <li>Logout</li>
-        <!-- Add more items to test scrolling -->
-        <li>Extra Item 1</li>
-        <li>Extra Item 2</li>
-        <li>Extra Item 3</li>
-        <li>Extra Item 4</li>
+        <li><a href="{% url 'home' %}">Dashboard</a></li>
+        <li><a href="{% url 'store' %}">Store</a></li>
+        <li><a href="{% url 'cart' %}">Cart</a></li>
+        <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+        <li><a href="{% url 'myOrders' %}">Orders</a></li>
+        <li><a href="{% url 'products' %}">Products</a></li>
+        <li><a href="{% url 'account' %}">Account</a></li>
+        <li><a href="{% url 'cdmis:group_list' %}">Community Groups</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+        <!-- Add more items as needed -->
       </ul>
     </div>
     <div class="main-content">
+      {% block content %}
       <h2>Main Content</h2>
-      <!-- Add multiple blocks to test scrolling -->
-      <div class="content-block">Content Block 1</div>
-      <div class="content-block">Content Block 2</div>
-      <div class="content-block">Content Block 3</div>
-      <div class="content-block">Content Block 4</div>
-      <div class="content-block">Content Block 5</div>
-      <div class="content-block">Content Block 6</div>
-      <div class="content-block">Content Block 7</div>
-      <div class="content-block">Content Block 8</div>
+      <!-- Page-specific content goes here -->
+      {% endblock %}
     </div>
   </div>
 </body>
