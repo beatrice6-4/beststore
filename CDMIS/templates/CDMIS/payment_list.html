@@ -1,158 +1,36 @@
-{% extends 'gov.html' %}
-{% load static %}
+{% extends 'base.html' %}
 {% block content %}
-<style>
-body {
-    background: #f8f9fa;
-    font-family: 'Segoe UI', Arial, sans-serif;
-}
-h2 {
-    color: #2d7a2d;
-    font-weight: 700;
-    margin-bottom: 24px;
-}
-.table {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px #e3e3e3;
-    margin-bottom: 24px;
-    overflow: hidden;
-}
-.table thead {
-    background: #eafbe7;
-    color: #2d7a2d;
-    font-weight: 600;
-}
-.table th, .table td {
-    padding: 12px 10px;
-    vertical-align: middle;
-    border-bottom: 1px solid #e3e3e3;
-}
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #f6fff4;
-}
-.table-striped tbody tr:hover {
-    background-color: #eafbe7;
-    transition: background 0.2s;
-}
-.mt-4 {
-    margin-top: 2rem !important;
-}
-@media (max-width: 700px) {
-    .table th, .table td { padding: 8px 4px; font-size: 0.95em; }
-    h2 { font-size: 1.1em; }
-}
-</style>
-
-<div class="text-end mb-3">
-    <button class="btn btn-outline-success" onclick="printPayments()">
-        <i class="fa fa-download"></i> Download Payments
-    </button>
-</div>
-
-<h2>Payments Grouped by Date</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Group</th>
-            <th>Amount</th>
-            <th>Notes</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for group in grouped_payments %}
-            <tr style="background:#eafbe7;">
-                <td colspan="4"><strong>{{ group.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ group.date_total }}</span></td>
-            </tr>
-            {% for payment in group.payments %}
-            <tr>
-                <td></td>
-                <td>{{ payment.group.name }}</td>
-                <td>{{ payment.amount }}</td>
-                <td>{{ payment.notes }}</td>
-            </tr>
-            {% endfor %}
-        {% empty %}
-            <tr><td colspan="4">No payments recorded.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<table class="table table-bordered mt-4">
-    <thead>
-        <tr>
-            <th>Total Amount of All Payments</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ total_amount }}</td>
-        </tr>
-    </tbody>
-</table>
-
-<!-- Hidden printable section -->
-<div id="printable-payments" style="display:none;">
-    <div style="text-align:center; margin-bottom:20px;">
-        <img src="{% static 'images/gov.png' %}" alt="Logo" style="height:80px;">
-        <h2 style="margin-top:10px;">Payments of The Groups</h2>
-    </div>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">
-        <thead style="background:#eafbe7; color:#2d7a2d;">
-            <tr>
-                <th>Date</th>
-                <th>Group</th>
-                <th>Amount</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for group in grouped_payments %}
-                <tr style="background:#eafbe7;">
-                    <td colspan="4"><strong>{{ group.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ group.date_total }}</span></td>
-                </tr>
-                {% for payment in group.payments %}
+<div class="container">
+    <h2 class="my-4 text-center">Payments Added by Admin</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td></td>
+                    <th>#</th>
+                    <th>Group</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Added By</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in all_payments %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ payment.group.name }}</td>
-                    <td>{{ payment.amount }}</td>
+                    <td>Ksh. {{ payment.amount }}</td>
+                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                    <td>{{ payment.added_by.username }}</td>
                     <td>{{ payment.notes }}</td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No payments have been added by admin yet.</td>
+                </tr>
                 {% endfor %}
-            {% empty %}
-                <tr><td colspan="4">No payments recorded.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
-        <thead style="background:#eafbe7; color:#2d7a2d;">
-            <tr>
-                <th>Total Amount of All Payments</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ total_amount }}</td>
-            </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<script>
-function printPayments() {
-    var printContents = document.getElementById('printable-payments').innerHTML;
-    var win = window.open('', '', 'height=900,width=1200');
-    win.document.write('<html><head><title>Payments of The Groups</title>');     
-    win.document.write('<html><head><title>Kimilili Sub County SCSDO</title>');
-    win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
-    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
-    win.document.write('</head><body>');
-    win.document.write(printContents);
-    win.document.write('</body></html>');
-    win.document.close();
-    win.focus();
-    win.print();
-}
-</script>
 {% endblock %}
