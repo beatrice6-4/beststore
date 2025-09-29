@@ -68,9 +68,10 @@ class PaymentListView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         all_payments = Payment.objects.all().order_by('payment_date')
+        context['all_payments'] = all_payments  # <-- Add this line
         context['total_amount'] = all_payments.aggregate(total=Sum('amount'))['total'] or 0
 
-        # Group payments by date and sum amounts
+        # ...existing grouping code...
         from collections import defaultdict
         payments_by_date = defaultdict(list)
         for payment in all_payments:
@@ -86,7 +87,6 @@ class PaymentListView(UserPassesTestMixin, ListView):
             })
 
         grouped_payments.sort(key=lambda x: x['date'])
-        # Chunk grouped_payments into groups of 5 dates each
         def chunk_list(lst, n):
             for i in range(0, len(lst), n):
                 yield lst[i:i + n]
