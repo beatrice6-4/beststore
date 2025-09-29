@@ -30,25 +30,12 @@
       flex-shrink: 0;
       position: relative;
       z-index: 100;
-      transition: left 0.3s;
-    }
-    .sidebar.hide {
-      left: -250px;
-      position: absolute;
-    }
-    .sidebar.show {
-      left: 0;
-      position: absolute;
     }
     .sidebar h2 {
       margin-bottom: 15px;
       text-align: center;
       font-size: 1.3em;
       letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
     }
     .sidebar ul {
       list-style: none;
@@ -75,7 +62,6 @@
       background-color: #ecf0f1;
       overflow-y: auto;
       padding: 32px 20px 20px 20px;
-      transition: margin-left 0.3s;
     }
     .content-block {
       margin-bottom: 20px;
@@ -83,39 +69,6 @@
       background-color: white;
       border-radius: 4px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .hamburger {
-      width: 36px;
-      height: 36px;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: none;
-      border: none;
-      outline: none;
-      padding: 0;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    .hamburger .bar {
-      display: block;
-      width: 26px;
-      height: 4px;
-      margin: 4px 0;
-      background-color: #fff;
-      border-radius: 2px;
-      transition: 0.3s;
-    }
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.25);
-      z-index: 99;
-    }
-    .overlay.show {
-      display: block;
     }
     footer {
       background: #2c3e50;
@@ -131,30 +84,12 @@
         flex-direction: column;
       }
       .sidebar {
-        width: 250px;
-        position: absolute;
-        left: -250px;
-        top: 0;
-        height: 100vh;
-        z-index: 101;
-        box-shadow: 2px 0 12px #0002;
-        transition: left 0.3s;
-      }
-      .sidebar.show {
-        left: 0;
+        width: 100%;
+        position: static;
+        padding: 10px 0;
       }
       .main-content {
         padding: 20px 8px 8px 8px;
-        margin-left: 0;
-      }
-      .hamburger {
-        display: flex;
-      }
-      .overlay {
-        display: none;
-      }
-      .overlay.show {
-        display: block;
       }
     }
     @media (max-width: 600px) {
@@ -170,15 +105,8 @@
 <body>
   {% include 'navbar.html' %}
   <div class="dashboard">
-    <div class="sidebar hide" id="sidebar">
-      <h2>
-        My Dashboard
-        <button class="hamburger" id="sidebarToggle" aria-label="Toggle sidebar" type="button">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </button>
-      </h2>
+    <div class="sidebar">
+      <h2>Menu</h2>
       <ul>
         <li><a href="{% url 'home' %}"><i class="fa fa-home me-2"></i>Dashboard</a></li>
         <li><a href="{% url 'store' %}"><i class="fa fa-store me-2"></i>Store</a></li>
@@ -191,8 +119,7 @@
         <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt me-2"></i>Logout</a></li>
       </ul>
     </div>
-    <div class="overlay" id="sidebarOverlay"></div>
-    <div class="main-content" id="mainContent">
+    <div class="main-content">
       {% block content %}
       <!-- Page-specific content goes here -->
       {% endblock %}
@@ -202,27 +129,5 @@
     &copy; {{ year|default:2025 }} Kimili Sub County. All rights reserved.
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Hamburger menu toggle for mobile
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('sidebarOverlay');
-    function closeSidebar() {
-      sidebar.classList.add('hide');
-      sidebar.classList.remove('show');
-      overlay.classList.remove('show');
-    }
-    sidebarToggle.onclick = function() {
-      sidebar.classList.toggle('show');
-      sidebar.classList.toggle('hide');
-      overlay.classList.toggle('show');
-    };
-    overlay.onclick = closeSidebar;
-    document.querySelectorAll('.sidebar ul a').forEach(function(link) {
-      link.onclick = function() {
-        if(window.innerWidth <= 900) closeSidebar();
-      }
-    });
-  </script>
 </body>
 </html>
