@@ -438,3 +438,12 @@ def account(request):
         'userprofile': userprofile,
     }
     return render(request, 'accounts/account.html', context)
+
+from store.models import Product
+@login_required
+def products(request):
+    products = Product.objects.all()
+    context = {
+        'products': products,
+    }
+    return render(request, 'accounts/products.html', context)
