@@ -1,16 +1,83 @@
-{% extends 'base.html' %}
+{% extends 'gov.html' %}
 {% block content %}
-<div class="container">
-    <h2 class="my-4 text-center">Payments Added by Admin</h2>
+<style>
+    .payments-table-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+        padding: 32px 24px;
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+    .payments-table-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4e54c8;
+        text-align: center;
+        margin-bottom: 30px;
+        letter-spacing: 1px;
+    }
+    .table-payments {
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    .table-payments thead {
+        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        color: #fff;
+        font-size: 1.1em;
+    }
+    .table-payments th, .table-payments td {
+        vertical-align: middle !important;
+        padding: 14px 12px;
+        border: none;
+    }
+    .table-payments tbody tr {
+        transition: background 0.2s;
+    }
+    .table-payments tbody tr:hover {
+        background: #eafbe7;
+    }
+    .table-payments td:first-child {
+        font-weight: 600;
+        color: #4e54c8;
+    }
+    .table-payments td:nth-child(3) {
+        color: #2d7a2d;
+        font-weight: 600;
+    }
+    .table-payments td:nth-child(5) {
+        color: #087df2;
+        font-weight: 500;
+    }
+    .table-payments .text-center {
+        color: #888;
+        font-style: italic;
+    }
+    @media (max-width: 600px) {
+        .payments-table-container {
+            padding: 16px 4px;
+        }
+        .payments-table-title {
+            font-size: 1.3rem;
+        }
+        .table-payments th, .table-payments td {
+            padding: 8px 4px;
+            font-size: 0.95em;
+        }
+    }
+</style>
+<div class="container payments-table-container">
+    <div class="payments-table-title">Payments Added by Admin</div>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle">
-            <thead class="table-dark">
+        <table class="table table-payments align-middle">
+            <thead>
                 <tr>
                     <th>#</th>
                     <th>Group</th>
                     <th>Amount</th>
                     <th>Date</th>
-                    <th>Added By</th>
+                    <th>Recorded By</th>
                     <th>Notes</th>
                 </tr>
             </thead>
@@ -21,12 +88,12 @@
                     <td>{{ payment.group.name }}</td>
                     <td>Ksh. {{ payment.amount }}</td>
                     <td>{{ payment.payment_date|date:"M d, Y" }}</td>
-                    <td>{{ payment.added_by.username }}</td>
+                    <td>{{ payment.added_by.first_name }}</td>
                     <td>{{ payment.notes }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">No payments have been added by admin yet.</td>
+                    <td colspan="6" class="text-center">No payments have been made.</td>
                 </tr>
                 {% endfor %}
             </tbody>
