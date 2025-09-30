@@ -34,8 +34,8 @@ urlpatterns = [
 
 
 
-     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('contact-messages/', views.contact_messages, name='contact_messages'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    
     path('carts/', views.cart_list, name='cart_list'),
     path('cart-items/', views.cart_items, name='cart_items'),
     path('categories/', views.category_list, name='category_list'),
@@ -43,6 +43,7 @@ urlpatterns = [
     path('payments/', views.payment_list, name='payment_list'),
     path('products/', views.product_list, name='product_list'),
     path('variations/', views.variation_list, name='variation_list'),
+    path('contact-messages/', views.contact_messages, name='contact_messages'),
     # CDMIS
     path('groups/', views.group_list, name='group_list'),
     path('activities/', views.activity_list, name='activity_list'),
