@@ -282,41 +282,50 @@ def activate_user(request, pk):
     user.save()
     messages.success(request, f"User {user.username} activated.")
     return redirect('cdmis:user_list')
-
 from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
 from .models import Payment
-import csv
-
-from django.http import HttpResponse
-from django.templatetags.static import static
-from django.conf import settings
-from .models import Payment
-from docx import Document
-from docx.shared import Inches
 import os
+from django.conf import settings
 
-def download_payments_by_date(request, date):
+def download_payments_pdf_by_date(request, date):
     payments = Payment.objects.filter(payment_date=date)
-    document = Document()
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="payments_{date}.pdf"'
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+
     # Add GOV logo
-    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov.png')
+    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov_logo.png')
     if os.path.exists(logo_path):
-        document.add_picture(logo_path, width=Inches(1.2))
-    document.add_heading(f'Payments for {date}', level=1)
-    table = document.add_table(rows=1, cols=4)
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = 'Group'
-    hdr_cells[1].text = 'Amount'
-    hdr_cells[2].text = 'Date'
-    hdr_cells[3].text = 'Notes'
-    for p in payments:
-        row_cells = table.add_row().cells
-        row_cells[0].text = str(p.group.name)
-        row_cells[1].text = f'Ksh. {p.amount}'
-        row_cells[2].text = str(p.payment_date)
-        row_cells[3].text = str(p.notes)
-    # Prepare response
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename="payments_{date}.docx"'
-    document.save(response)
+        p.drawImage(logo_path, inch, height - 1.5*inch, width=1.2*inch, preserveAspectRatio=True, mask='auto')
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(2.5*inch, height - 1*inch, f"Payments for {date}")
+
+    # Table headers
+    p.setFont("Helvetica-Bold", 11)
+    y = height - 2*inch
+    p.drawString(inch, y, "Group")
+    p.drawString(2.5*inch, y, "Amount")
+    p.drawString(3.5*inch, y, "Date")
+    p.drawString(5*inch, y, "Notes")
+    y -= 0.3*inch
+
+    # Table rows
+    p.setFont("Helvetica", 10)
+    for payment in payments:
+        p.drawString(inch, y, str(payment.group.name))
+        p.drawString(2.5*inch, y, f"Ksh. {payment.amount}")
+        p.drawString(3.5*inch, y, str(payment.payment_date))
+        p.drawString(5*inch, y, str(payment.notes)[:40])  # Truncate notes for layout
+        y -= 0.25*inch
+        if y < 1*inch:
+            p.showPage()
+            y = height - 1*inch
+
+    p.showPage()
+    p.save()
     return response
