@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            background: #f4f6fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .admin-sidebar {
+            background: linear-gradient(180deg, #4e54c8 0%, #8f94fb 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 0;
+        }
+        .admin-sidebar .nav-link {
+            color: #fff;
+            font-size: 1.08em;
+            padding: 16px 24px;
+            border-left: 4px solid transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .admin-sidebar .nav-link.active, .admin-sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.08);
+            border-left: 4px solid #fff;
+        }
+        .dashboard-header {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #fff;
+            padding: 18px 32px;
+            font-size: 1.5em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-radius: 0 0 12px 12px;
+            margin-bottom: 24px;
+        }
+        .dashboard-content {
+            padding: 32px 24px;
+        }
+        .dashboard-section {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+            padding: 28px 20px 20px 20px;
+            margin-bottom: 28px;
+        }
+        .dashboard-section h4 {
+            font-size: 1.18em;
+            font-weight: 600;
+            color: #4e54c8;
+            margin-bottom: 18px;
+        }
+        .dashboard-section .list-group-item {
+            border: none;
+            padding: 10px 0;
+            font-size: 1em;
+        }
+        .dashboard-section .list-group-item i {
+            color: #4e54c8;
+            margin-right: 8px;
+        }
+        @media (max-width: 900px) {
+            .admin-sidebar {
+                min-height: auto;
+            }
+            .dashboard-content {
+                padding: 18px 4vw;
+            }
+        }
+        @media (max-width: 600px) {
+            .dashboard-header {
+                font-size: 1.1em;
+                padding: 12px 8px;
+            }
+            .dashboard-content {
+                padding: 8px 2vw;
+            }
+            .dashboard-section {
+                padding: 12px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block admin-sidebar sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fa fa-tachometer-alt"></i> Dashboard Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#accounts-section"><i class="fa fa-users"></i> Accounts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#carts-section"><i class="fa fa-shopping-cart"></i> Carts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#categories-section"><i class="fa fa-list"></i> Categories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#orders-section"><i class="fa fa-shopping-bag"></i> Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#store-section"><i class="fa fa-store"></i> Store</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#cdmis-section"><i class="fa fa-layer-group"></i> CDMIS</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="dashboard-header">
+                <i class="fa fa-cogs"></i> Admin Dashboard
+            </div>
+            <div class="dashboard-content">
+                <!-- Accounts Section -->
+                <div class="dashboard-section" id="accounts-section">
+                    <h4><i class="fa fa-users"></i> Accounts Management</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fa fa-user"></i>
+                            <a href="{% url 'cdmis:user_list' %}">Registered Accounts</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-envelope"></i>
+                            <a href="{% url 'cdmis:contact_messages' %}">Contact Messages</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Carts Section -->
+                <div class="dashboard-section" id="carts-section">
+                    <h4><i class="fa fa-shopping-cart"></i> Carts Management</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fa fa-shopping-cart"></i>
+                            <a href="{% url 'cdmis:cart_list' %}">All Carts</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-box"></i>
+                            <a href="{% url 'cdmis:cart_items' %}">Cart Items</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Categories Section -->
+                <div class="dashboard-section" id="categories-section">
+                    <h4><i class="fa fa-list"></i> Categories Management</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fa fa-list"></i>
+                            <a href="{% url 'cdmis:category_list' %}">Manage Categories</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Orders Section -->
+                <div class="dashboard-section" id="orders-section">
+                    <h4><i class="fa fa-shopping-bag"></i> Orders Management</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fa fa-shopping-bag"></i>
+                            <a href="{% url 'cdmis:order_list' %}">All Orders</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-money-bill"></i>
+                            <a href="{% url 'cdmis:payment_list' %}">Payments</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Store Section -->
+                <div class="dashboard-section" id="store-section">
+                    <h4><i class="fa fa-store"></i> Store Management</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fa fa-box"></i>
+                            <a href="{% url 'cdmis:product_list' %}">Products</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-cubes"></i>
+                            <a href="{% url 'cdmis:variation_list' %}">Product Variations</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- CDMIS Section -->
+                <div class="dashboard-section" id="cdmis-section">
+                    <h4><i class="fa fa-layer-group"></i> CDMIS Management</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fa fa-users"></i>
+                            <a href="{% url 'cdmis:group_list' %}">Groups</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-tasks"></i>
+                            <a href="{% url 'cdmis:activity_list' %}">Activities</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-money-bill"></i>
+                            <a href="{% url 'cdmis:payment_list' %}">Payments</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-concierge-bell"></i>
+                            <a href="{% url 'cdmis:service_list' %}">Services</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fa fa-chalkboard-teacher"></i>
+                            <a href="{% url 'cdmis:training_list' %}">Trainings</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

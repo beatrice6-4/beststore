@@ -282,6 +282,12 @@ def activate_user(request, pk):
     user.save()
     messages.success(request, f"User {user.username} activated.")
     return redirect('cdmis:user_list')
+
+
+
+
+
+
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas

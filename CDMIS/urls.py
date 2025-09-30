@@ -20,7 +20,7 @@ urlpatterns = [
     path('groups/<int:pk>/edit/', views.GroupUpdateView.as_view(), name='group_edit'),
     path('groups/<int:pk>/delete/', views.GroupDeleteView.as_view(), name='group_delete'),
     path('payments/download/pdf/<date>/', views.download_payments_pdf_by_date, name='download_payments_pdf_by_date'),
-    path('payments/download/<date>/', views.download_payments_by_date, name='download_payments_by_date'),
+    
     path('users/', UserListView.as_view(), name='user_list'),
     path('users/<int:pk>/edit/', views.UserUpdateView.as_view(), name='user_edit'),
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),

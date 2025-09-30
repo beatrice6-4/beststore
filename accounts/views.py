@@ -447,3 +447,77 @@ def products(request):
         'products': products,
     }
     return render(request, 'accounts/products.html', context)
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+
+def admin_required(view_func):
+    return user_passes_test(lambda u: u.is_staff or u.is_superuser)(view_func)
+
+@admin_required
+def admin_dashboard(request):
+    return render(request, 'accounts/admin_dashboard.html')
+
+@admin_required
+def contact_messages(request):
+    # Fetch contact messages from your model
+    # messages = ContactMessage.objects.all()
+    return render(request, 'accounts/contact_messages.html')  # Pass messages in context
+
+@admin_required
+def cart_list(request):
+    # carts = Cart.objects.all()
+    return render(request, 'accounts/cart_list.html')
+
+@admin_required
+def cart_items(request):
+    # items = CartItem.objects.all()
+    return render(request, 'accounts/cart_items.html')
+
+@admin_required
+def category_list(request):
+    # categories = Category.objects.all()
+    return render(request, 'accounts/category_list.html')
+
+@admin_required
+def order_list(request):
+    # orders = Order.objects.all()
+    return render(request, 'accounts/order_list.html')
+
+@admin_required
+def payment_list(request):
+    # payments = Payment.objects.all()
+    return render(request, 'accounts/payment_list.html')
+
+@admin_required
+def product_list(request):
+    # products = Product.objects.all()
+    return render(request, 'accounts/product_list.html')
+
+@admin_required
+def variation_list(request):
+    # variations = Variation.objects.all()
+    return render(request, 'accounts/variation_list.html')
+
+# CDMIS sections
+@admin_required
+def group_list(request):
+    # groups = Group.objects.all()
+    return render(request, 'accounts/group_list.html')
+
+@admin_required
+def activity_list(request):
+    # activities = Activity.objects.all()
+    return render(request, 'accounts/activity_list.html')
+
+@admin_required
+def service_list(request):
+    # services = Service.objects.all()
+    return render(request, 'accounts/service_list.html')
+
+@admin_required
+def training_list(request):
+    # trainings = Training.objects.all()
+    return render(request, 'accounts/training_list.html')

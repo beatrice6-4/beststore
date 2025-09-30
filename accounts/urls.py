@@ -29,4 +29,23 @@ urlpatterns = [
     path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('change_password/', views.change_password, name='change_password'),
     path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'),
+
+
+
+
+
+     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('contact-messages/', views.contact_messages, name='contact_messages'),
+    path('carts/', views.cart_list, name='cart_list'),
+    path('cart-items/', views.cart_items, name='cart_items'),
+    path('categories/', views.category_list, name='category_list'),
+    path('orders/', views.order_list, name='order_list'),
+    path('payments/', views.payment_list, name='payment_list'),
+    path('products/', views.product_list, name='product_list'),
+    path('variations/', views.variation_list, name='variation_list'),
+    # CDMIS
+    path('groups/', views.group_list, name='group_list'),
+    path('activities/', views.activity_list, name='activity_list'),
+    path('services/', views.service_list, name='service_list'),
+    path('trainings/', views.training_list, name='training_list')
 ]
