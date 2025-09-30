@@ -282,3 +282,18 @@ def activate_user(request, pk):
     user.save()
     messages.success(request, f"User {user.username} activated.")
     return redirect('cdmis:user_list')
+
+from django.http import HttpResponse
+from .models import Payment
+import csv
+
+def download_payments_by_date(request, date):
+    # date is expected as 'YYYY-MM-DD'
+    payments = Payment.objects.filter(payment_date=date)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="payments_{date}.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Group', 'Amount', 'Date', 'Recorded By', 'Notes'])
+    for p in payments:
+        writer.writerow([p.group.name, p.amount, p.payment_date, p.added_by.first_name, p.notes])
+    return response
