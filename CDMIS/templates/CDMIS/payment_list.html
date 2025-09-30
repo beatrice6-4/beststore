@@ -38,22 +38,6 @@
     .table-payments tbody tr:hover {
         background: #eafbe7;
     }
-    .table-payments td:first-child {
-        font-weight: 600;
-        color: #4e54c8;
-    }
-    .table-payments td:nth-child(3) {
-        color: #2d7a2d;
-        font-weight: 600;
-    }
-    .table-payments td:nth-child(5) {
-        color: #087df2;
-        font-weight: 500;
-    }
-    .table-payments .text-center {
-        color: #888;
-        font-style: italic;
-    }
     .date-separator {
         background: #f1f3fa;
         color: #4e54c8;
@@ -61,6 +45,11 @@
         text-align: left;
         padding-left: 10px;
         border-top: 2px solid #8f94fb;
+    }
+    .date-total-row {
+        background: #eafbe7;
+        color: #2d7a2d;
+        font-weight: 600;
     }
     @media (max-width: 600px) {
         .payments-table-container {
@@ -77,7 +66,7 @@
 </style>
 <div class="container payments-table-container">
     <div class="payments-table-title">Payments Recorded</div>
-    <div class="table-striped">
+    <div class="table-responsive">
         <table class="table table-payments align-middle">
             <thead>
                 <tr>
@@ -91,25 +80,33 @@
             </thead>
             <tbody>
                 {% regroup all_payments by payment_date as date_groups %}
-                {% for chunk in date_groups|slice:":9999" %}
-                    {% if forloop.counter0|divisibleby:5 and not forloop.first %}
-                        <tr class="date-separator">
-                            <td colspan="6">----- Next 5 Dates -----</td>
-                        </tr>
-                    {% endif %}
+                {% for date_group in date_groups %}
                     <tr class="date-separator">
-                        <td colspan="6">{{ chunk.grouper|date:"M d, Y" }}</td>
+                        <td colspan="6">{{ date_group.grouper|date:"M d, Y" }}</td>
                     </tr>
-                    {% for payment in chunk.list %}
-                    <tr>
-                        <td>{{ forloop.parentloop.counter }}</td>
-                        <td>{{ payment.group.name }}</td>
-                        <td>Ksh. {{ payment.amount }}</td>
-                        <td>{{ payment.payment_date|date:"M d, Y" }}</td>
-                        <td>{{ payment.added_by.first_name }}</td>
-                        <td>{{ payment.notes }}</td>
-                    </tr>
+                    {% with date_total=0 %}
+                    {% for payment in date_group.list %}
+                        <tr>
+                            <td>{{ forloop.parentloop.counter }}</td>
+                            <td>{{ payment.group.name }}</td>
+                            <td>Ksh. {{ payment.amount }}</td>
+                            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                            <td>{{ payment.added_by.first_name }}</td>
+                            <td>{{ payment.notes }}</td>
+                        </tr>
+                        {% widthratio payment.amount 1 1 as amt %}
+                        {% with date_total=date_total|add:amt %}
+                        {% endwith %}
                     {% endfor %}
+                    <tr class="date-total-row">
+                        <td colspan="2"></td>
+                        <td colspan="4">Total for {{ date_group.grouper|date:"M d, Y" }}: 
+                            Ksh. {{
+                                date_group.list|sum:"amount"
+                            }}
+                        </td>
+                    </tr>
+                    {% endwith %}
                 {% empty %}
                 <tr>
                     <td colspan="6" class="text-center">No payments have been made.</td>
