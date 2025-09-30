@@ -15,6 +15,7 @@ class Payment(models.Model):
         return self.payment_id if self.payment_id else "No Mpesa Code"
 
 class Order(models.Model):
+    user = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='orders_orders')
     STATUS = (
         ('Pending', 'Pending'),
         ('Accepted', 'Accepted'),
