@@ -1,5 +1,6 @@
 from . import views
 from django.urls import path
+from .views import UserListView, UserUpdateView, UserDeleteView, activate_user, GroupUpdateView, GroupDeleteView
 
 app_name = 'cdmis'
 
@@ -18,8 +19,8 @@ urlpatterns = [
     path('finance/', views.FinanceView.as_view(), name='finance'),
     path('groups/<int:pk>/edit/', views.GroupUpdateView.as_view(), name='group_edit'),
     path('groups/<int:pk>/delete/', views.GroupDeleteView.as_view(), name='group_delete'),
-    path('user-management/', views.UserManagementView.as_view(), name='user_management'),
-    path('users/', views.UserListView.as_view(), name='user_list'),
+    
+    path('users/', UserListView.as_view(), name='user_list'),
     path('users/<int:pk>/edit/', views.UserUpdateView.as_view(), name='user_edit'),
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
     path('users/<int:pk>/activate/', views.activate_user, name='user_activate'),
