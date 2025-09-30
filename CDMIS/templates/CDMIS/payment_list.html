@@ -1,4 +1,5 @@
 {% extends 'gov.html' %}
+{% load dict_extras %}
 {% block content %}
 <style>
     .payments-table-container {
@@ -98,7 +99,7 @@
     <td colspan="2"></td>
     <td colspan="4">
         Total for {{ date_group.grouper|date:"M d, Y" }}: 
-        Ksh. {{ date_group.list|map:"amount"|sum }}
+        Ksh. {{ date_totals|dict_get:date_group.grouper }}
     </td>
 </tr>
                 {% empty %}
