@@ -108,7 +108,7 @@
                         <a class="nav-link" href="#orders-section"><i class="fa fa-shopping-bag"></i> Orders</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#store-section"><i class="fa fa-store"></i> Store</a>
+                        <a class="nav-link" href="{% url 'store' %}"><i class="fa fa-store"></i> Store</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#cdmis-section"><i class="fa fa-layer-group"></i> CDMIS</a>
@@ -166,7 +166,7 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <i class="fa fa-shopping-bag"></i>
-                            <a href="#">All Orders</a>
+                            <a href="{% url 'cdmis:order_list' %}">All Orders</a>
                         </li>
                         <li class="list-group-item">
                             <i class="fa fa-money-bill"></i>

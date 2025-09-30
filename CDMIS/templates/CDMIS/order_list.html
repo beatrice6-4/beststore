@@ -1,0 +1,39 @@
+{% extends 'accounts/admin_dashboard.html' %}
+{% block content %}
+<div class="dashboard-section">
+    <h4>All Orders</h4>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>{{ order.product.name }}</td>
+                <td>Ksh. {{ order.amount }}</td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-center">No orders found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+    <h5>Add Order for User</h5>
+    <form method="post" class="mb-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Add Order</button>
+    </form>
+</div>
+{% endblock %}

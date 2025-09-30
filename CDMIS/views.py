@@ -345,3 +345,25 @@ def download_payments_pdf_by_date(request, date):
 def contact_messages(request):
     # Your logic here (fetch messages if you have a model)
     return render(request, 'CDMIS/contact_messages.html')
+
+
+
+
+
+
+from django.shortcuts import render, redirect
+from .models import Order  # Adjust import to your actual Order model
+from .forms import OrderForm  # Create this form for adding orders
+from django.contrib.auth.decorators import user_passes_test
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def order_list(request):
+    orders = Order.objects.all().order_by('-created_at')
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('cdmis:order_list')
+    else:
+        form = OrderForm()
+    return render(request, 'CDMIS/order_list.html', {'orders': orders, 'form': form})
