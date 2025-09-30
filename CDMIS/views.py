@@ -53,6 +53,13 @@ class GroupCreateView(CreateView):
     success_url = reverse_lazy('cdmis:group_list')
 
 # --- Payment Views ---
+from django.shortcuts import render
+from django.views.generic import ListView
+from .models import Payment
+from django.db.models import Sum
+from collections import defaultdict
+from django.contrib.auth.mixins import UserPassesTestMixin
+
 class PaymentListView(UserPassesTestMixin, ListView):
     model = Payment
     template_name = 'CDMIS/payment_list.html'
@@ -68,30 +75,21 @@ class PaymentListView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         all_payments = Payment.objects.all().order_by('payment_date')
-        context['all_payments'] = all_payments  # <-- Add this line
-        context['total_amount'] = all_payments.aggregate(total=Sum('amount'))['total'] or 0
+        context['all_payments'] = all_payments
 
-        # ...existing grouping code...
-        from collections import defaultdict
+        # Calculate totals per date
+        date_totals = defaultdict(int)
+        for payment in all_payments:
+            date_totals[payment.payment_date] += payment.amount
+        context['date_totals'] = date_totals
+
+        # Group payments by date for easy template rendering
         payments_by_date = defaultdict(list)
         for payment in all_payments:
             payments_by_date[payment.payment_date].append(payment)
+        # Create a sorted list of (date, payments) tuples
+        context['payments_by_date'] = sorted(payments_by_date.items())
 
-        grouped_payments = []
-        for date, payments in payments_by_date.items():
-            date_total = sum(p.amount for p in payments)
-            grouped_payments.append({
-                'date': date,
-                'payments': payments,
-                'date_total': date_total
-            })
-
-        grouped_payments.sort(key=lambda x: x['date'])
-        def chunk_list(lst, n):
-            for i in range(0, len(lst), n):
-                yield lst[i:i + n]
-
-        context['grouped_payments_chunks'] = list(chunk_list(grouped_payments, 5))
         return context
 
 class PaymentCreateView(UserPassesTestMixin, CreateView):

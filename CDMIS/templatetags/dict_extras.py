@@ -3,4 +3,6 @@ register = template.Library()
 
 @register.filter
 def dict_get(d, key):
-    return d.get(key, 0)
+    if isinstance(d, dict):
+        return d.get(key, 0)
+    return 0
