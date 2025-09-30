@@ -217,3 +217,63 @@ class FinanceView(UserPassesTestMixin, View):
             'finance_list': finance_list,
             'grand_total': grand_total,
         })
+    
+
+
+
+from django.contrib.auth.models import User
+from django.views.generic import ListView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+
+class UserListView(UserPassesTestMixin, ListView):
+    model = User
+    template_name = 'CDMIS/user_list.html'
+    context_object_name = 'users'
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+
+    def get_queryset(self):
+        return User.objects.all().order_by('-date_joined')
+
+class UserUpdateView(UserPassesTestMixin, UpdateView):
+    model = User
+    fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_staff']
+    template_name = 'CDMIS/user_form.html'
+    success_url = reverse_lazy('cdmis:user_list')
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+
+class UserDeleteView(UserPassesTestMixin, DeleteView):
+    model = User
+    template_name = 'CDMIS/user_confirm_delete.html'
+    success_url = reverse_lazy('cdmis:user_list')
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+
+def activate_user(request, pk):
+    if not (request.user.is_staff or request.user.is_superuser):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+    user = get_object_or_404(User, pk=pk)
+    user.is_active = True
+    user.save()
+    messages.success(request, f"User {user.username} activated.")
+    return redirect('cdmis:user_list')
