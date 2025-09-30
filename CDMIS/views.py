@@ -242,8 +242,11 @@ class UserListView(UserPassesTestMixin, ListView):
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
 
-    def get_queryset(self):
-        return User.objects.all().order_by('-date_joined')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['inactive_users'] = User.objects.filter(is_active=False).order_by('-date_joined')
+        context['active_users'] = User.objects.filter(is_active=True).order_by('-date_joined')
+        return context
 
 class UserUpdateView(UserPassesTestMixin, UpdateView):
     model = User

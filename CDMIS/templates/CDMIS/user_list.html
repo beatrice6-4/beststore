@@ -1,46 +1,100 @@
 {% extends 'gov.html' %}
 {% block content %}
 <div class="container mt-4">
-    <h2>All Users</h2>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Date Joined</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.get_full_name }}</td>
-                <td>{{ user.email }}</td>
-                <td>
-                    {% if user.is_active %}
-                        <span class="badge bg-success">Active</span>
-                    {% else %}
-                        <span class="badge bg-secondary">Inactive</span>
-                    {% endif %}
-                </td>
-                <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                <td>
-                    <a href="{% url 'cdmis:user_edit' user.pk %}" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="{% url 'cdmis:user_delete' user.pk %}" class="btn btn-sm btn-danger"
-                       onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
-                    {% if not user.is_active %}
+    <h2>User Management</h2>
+    <div class="mb-3">
+        <select class="form-select w-auto d-inline" id="userTypeSelect" onchange="toggleUserTable()">
+            <option value="active">Registrations (Active Users)</option>
+            <option value="inactive">Self Registrations (Inactive Users)</option>
+        </select>
+    </div>
+    <!-- Active Users Table -->
+    <div id="activeUsersTable">
+        <h5 class="mb-3">Active Users</h5>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Date Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in active_users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'cdmis:user_edit' user.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="{% url 'cdmis:user_delete' user.pk %}" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" class="text-center">No active users found.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- Inactive Users Table -->
+    <div id="inactiveUsersTable" style="display:none;">
+        <h5 class="mb-3">Self Registrations (Inactive Users)</h5>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Date Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in inactive_users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td><span class="badge bg-secondary">Inactive</span></td>
+                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'cdmis:user_edit' user.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="{% url 'cdmis:user_delete' user.pk %}" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                         <a href="{% url 'cdmis:user_activate' user.pk %}" class="btn btn-sm btn-success"
                            onclick="return confirm('Activate this user?');">Activate</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" class="text-center">No inactive users found.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+<script>
+function toggleUserTable() {
+    var select = document.getElementById('userTypeSelect');
+    var activeTable = document.getElementById('activeUsersTable');
+    var inactiveTable = document.getElementById('inactiveUsersTable');
+    if (select.value === 'active') {
+        activeTable.style.display = '';
+        inactiveTable.style.display = 'none';
+    } else {
+        activeTable.style.display = 'none';
+        inactiveTable.style.display = '';
+    }
+}
+</script>
 {% endblock %}
