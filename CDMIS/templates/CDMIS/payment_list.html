@@ -84,7 +84,6 @@
                     <tr class="date-separator">
                         <td colspan="6">{{ date_group.grouper|date:"M d, Y" }}</td>
                     </tr>
-                    {% with date_total=0 %}
                     {% for payment in date_group.list %}
                         <tr>
                             <td>{{ forloop.parentloop.counter }}</td>
@@ -94,19 +93,16 @@
                             <td>{{ payment.added_by.first_name }}</td>
                             <td>{{ payment.notes }}</td>
                         </tr>
-                        {% widthratio payment.amount 1 1 as amt %}
-                        {% with date_total=date_total|add:amt %}
-                        {% endwith %}
                     {% endfor %}
                     <tr class="date-total-row">
                         <td colspan="2"></td>
-                        <td colspan="4">Total for {{ date_group.grouper|date:"M d, Y" }}: 
+                        <td colspan="4">
+                            Total for {{ date_group.grouper|date:"M d, Y" }}: 
                             Ksh. {{
-                                date_group.list|sum:"amount"
+                                date_group.list|map:"amount"|sum
                             }}
                         </td>
                     </tr>
-                    {% endwith %}
                 {% empty %}
                 <tr>
                     <td colspan="6" class="text-center">No payments have been made.</td>
