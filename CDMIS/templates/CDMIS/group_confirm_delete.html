@@ -1,0 +1,14 @@
+-{% extends 'gov.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning">
+        <h4 class="alert-heading">Confirm Delete</h4>
+        <p>Are you sure you want to delete the group <strong>{{ object.name }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <a href="{% url 'cdmis:group_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
