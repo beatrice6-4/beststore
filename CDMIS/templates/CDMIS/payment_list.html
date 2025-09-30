@@ -22,6 +22,7 @@
         border-radius: 8px;
         overflow: hidden;
         background: #f8f9fa;
+        font-size: 0.97em;
     }
     .table-payments thead {
         background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
@@ -31,13 +32,16 @@
     .table-payments th, .table-payments td {
         vertical-align: middle !important;
         padding: 14px 12px;
-        border: none;
+        border: 1px solid #e0e0e0;
     }
-    .table-payments tbody tr {
-        transition: background 0.2s;
+    .table-payments tbody tr:nth-child(odd) {
+        background: #f4f8fb;
+    }
+    .table-payments tbody tr:nth-child(even) {
+        background: #eafbe7;
     }
     .table-payments tbody tr:hover {
-        background: #eafbe7;
+        background: #d1e7fd;
     }
     .date-separator {
         background: #f1f3fa;
@@ -51,6 +55,9 @@
         background: #eafbe7;
         color: #2d7a2d;
         font-weight: 600;
+    }
+    .text-center {
+        text-align: center;
     }
     @media (max-width: 600px) {
         .payments-table-container {
@@ -67,8 +74,8 @@
 </style>
 <div class="container payments-table-container">
     <div class="payments-table-title">Payments Recorded</div>
-    <div class="table-bordered">
-        <table class="table table-payments align-middle">
+    <div class="table-responsive">
+        <table class="table table-payments table-bordered table-striped align-middle">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -96,12 +103,12 @@
                         </tr>
                     {% endfor %}
                     <tr class="date-total-row">
-    <td colspan="2"></td>
-    <td colspan="4">
-        Total for {{ date_group.grouper|date:"M d, Y" }}: 
-        Ksh. {{ date_totals|dict_get:date_group.grouper }}
-    </td>
-</tr>
+                        <td colspan="2"></td>
+                        <td colspan="4">
+                            Total for {{ date_group.grouper|date:"M d, Y" }}: 
+                            Ksh. {{ date_totals|dict_get:date_group.grouper }}
+                        </td>
+                    </tr>
                 {% empty %}
                 <tr>
                     <td colspan="6" class="text-center">No payments have been made.</td>
