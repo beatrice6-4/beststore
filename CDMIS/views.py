@@ -335,3 +335,13 @@ def download_payments_pdf_by_date(request, date):
     p.showPage()
     p.save()
     return response
+
+
+
+
+
+
+
+def contact_messages(request):
+    # Your logic here (fetch messages if you have a model)
+    return render(request, 'CDMIS/contact_messages.html')
