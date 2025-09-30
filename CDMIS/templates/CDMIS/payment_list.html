@@ -98,9 +98,7 @@
                         <td colspan="2"></td>
                         <td colspan="4">
                             Total for {{ date_group.grouper|date:"M d, Y" }}: 
-                            Ksh. {{
-                                date_group.list|map:"amount"|sum
-                            }}
+                            Ksh. {{ sum:"amount" }}
                         </td>
                     </tr>
                 {% empty %}
