@@ -16,5 +16,7 @@ urlpatterns = [
     path('services/', views.ServiceListView.as_view(), name='service_list'),
     path('services/add/', views.ServiceCreateView.as_view(), name='service_add'),
     path('finance/', views.FinanceView.as_view(), name='finance'),
-    
+    path('groups/<int:pk>/edit/', views.GroupUpdateView.as_view(), name='group_edit'),
+    path('groups/<int:pk>/delete/', views.GroupDeleteView.as_view(), name='group_delete'),
+
 ]

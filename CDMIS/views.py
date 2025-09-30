@@ -35,6 +35,38 @@ class ServiceForm(forms.ModelForm):
         model = Service
         fields = ['group', 'name', 'service_date', 'description']
 
+
+
+from django.views.generic import UpdateView, DeleteView
+
+class GroupUpdateView(UserPassesTestMixin, UpdateView):
+    model = Group
+    form_class = GroupForm
+    template_name = 'CDMIS/group_form.html'
+    success_url = reverse_lazy('cdmis:group_list')
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+
+class GroupDeleteView(UserPassesTestMixin, DeleteView):
+    model = Group
+    template_name = 'CDMIS/group_confirm_delete.html'
+    success_url = reverse_lazy('cdmis:group_list')
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
+
+
+
+
 # --- Group Views ---
 class GroupListView(ListView):
     model = Group

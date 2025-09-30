@@ -8,22 +8,22 @@
             <th>Name</th>
             <th>Registration Date</th>
             <th>Description</th>
-            <th>Details</th>
             <th>Actions</th>
-            
         </tr>
     </thead>
     <tbody>
-        {% for group in groups %}
+    {% for group in groups %}
         <tr>
             <td>{{ group.name }}</td>
             <td>{{ group.registration_date }}</td>
             <td>{{ group.description }}</td>
-            <td><a href="{% url 'cdmis:group_detail' group.pk %}" class="btn btn-info btn-sm">View</a></td>
+            <td>
+                <a href="{% url 'cdmis:group_edit' group.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'cdmis:group_delete' group.pk %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Are you sure you want to delete this group?');">Delete</a>
+            </td>
         </tr>
-        {% empty %}
-        <tr><td colspan="4">No groups registered.</td></tr>
-        {% endfor %}
+    {% endfor %}
     </tbody>
 </table>
 {% endblock %}
