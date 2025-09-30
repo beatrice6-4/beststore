@@ -95,12 +95,12 @@
                         </tr>
                     {% endfor %}
                     <tr class="date-total-row">
-                        <td colspan="2"></td>
-                        <td colspan="4">
-                            Total for {{ date_group.grouper|date:"M d, Y" }}: 
-                            Ksh. {{ sum:"amount" }}
-                        </td>
-                    </tr>
+    <td colspan="2"></td>
+    <td colspan="4">
+        Total for {{ date_group.grouper|date:"M d, Y" }}: 
+        Ksh. {{ date_group.list|map:"amount"|sum }}
+    </td>
+</tr>
                 {% empty %}
                 <tr>
                     <td colspan="6" class="text-center">No payments have been made.</td>
