@@ -293,7 +293,7 @@ def download_payments_by_date(request, date):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="payments_{date}.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Group', 'Amount', 'Date', 'Recorded By', 'Notes'])
+    writer.writerow(['Group', 'Amount', 'Date', 'Notes'])
     for p in payments:
-        writer.writerow([p.group.name, p.amount, p.payment_date, p.added_by.first_name, p.notes])
+        writer.writerow([p.group.name, p.amount, p.payment_date, p.notes])
     return response
