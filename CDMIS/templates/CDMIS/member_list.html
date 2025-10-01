@@ -1,0 +1,32 @@
+{% extends 'gov.html' %}
+{% block content %}
+<h2>Members List</h2>
+<table>
+    <tr>
+        <th>#</th>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>ID No</th>
+        <th>Date of Birth</th>
+        <th>Gender</th>
+        <th>Email</th>
+        <th>Mobile</th>
+        <th>Role</th>
+        <th>Disability</th>
+    </tr>
+    {% for member in members %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ member.first_name }}</td>
+        <td>{{ member.middle_name }}</td>
+        <td>{{ member.id_no }}</td>
+        <td>{{ member.date_of_birth }}</td>
+        <td>{{ member.gender }}</td>
+        <td>{{ member.email }}</td>
+        <td>{{ member.mobile }}</td>
+        <td>{{ member.member_role }}</td>
+        <td>{{ member.disability }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
