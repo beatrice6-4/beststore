@@ -1,236 +1,186 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Minimal Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            background: #f4f6fa;
+            margin: 0; padding: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f7f8fa;
+            color: #222;
         }
-        .admin-sidebar {
-            background: linear-gradient(180deg, #4e54c8 0%, #8f94fb 100%);
+        .dashboard-container {
+            display: flex;
             min-height: 100vh;
-            color: #fff;
-            padding: 0;
         }
-        .admin-sidebar .nav-link {
+        .sidebar {
+            background: #2d3250;
             color: #fff;
-            font-size: 1.08em;
+            width: 220px;
+            min-width: 180px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            font-size: 1.3em;
+            font-weight: 700;
+            padding: 24px 24px 12px 24px;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .nav li {
+            margin: 0;
+        }
+        .nav-link {
+            display: block;
+            color: #fff;
+            text-decoration: none;
             padding: 16px 24px;
+            font-size: 1.08em;
             border-left: 4px solid transparent;
             transition: background 0.2s, border-color 0.2s;
             cursor: pointer;
         }
-        .admin-sidebar .nav-link.active, .admin-sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.08);
-            border-left: 4px solid #fff;
+        .nav-link.active, .nav-link:hover {
+            background: #23263a;
+            border-left: 4px solid #6c63ff;
         }
-        .dashboard-header {
-            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-            color: #fff;
-            padding: 18px 32px;
-            font-size: 1.5em;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-radius: 0 0 12px 12px;
-            margin-bottom: 24px;
+        .main-content {
+            flex: 1;
+            padding: 40px 32px;
+            background: #f7f8fa;
+            min-width: 0;
         }
-        .dashboard-content {
-            padding: 32px 24px;
-        }
-        .dashboard-section {
+        .section {
+            display: none;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-            padding: 28px 20px 20px 20px;
+            padding: 32px 24px;
             margin-bottom: 28px;
         }
-        .dashboard-section h4 {
-            font-size: 1.18em;
-            font-weight: 600;
-            color: #4e54c8;
-            margin-bottom: 18px;
+        .section.active {
+            display: block;
         }
-        .dashboard-section .list-group-item {
-            border: none;
-            padding: 10px 0;
-            font-size: 1em;
+        .section h3 {
+            margin-top: 0;
+            color: #6c63ff;
+            font-size: 1.2em;
         }
-        .dashboard-section .list-group-item i {
-            color: #4e54c8;
-            margin-right: 8px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+        th, td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        th {
+            background: #f3f3fa;
+            color: #444;
         }
         @media (max-width: 900px) {
-            .admin-sidebar {
-                min-height: auto;
-            }
-            .dashboard-content {
-                padding: 18px 4vw;
-            }
+            .dashboard-container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; min-width: 0; }
+            .nav { display: flex; flex-direction: row; }
+            .nav-link { padding: 14px 12px; font-size: 1em; }
+            .main-content { padding: 18px 4vw; }
         }
         @media (max-width: 600px) {
-            .dashboard-header {
-                font-size: 1.1em;
-                padding: 12px 8px;
-            }
-            .dashboard-content {
-                padding: 8px 2vw;
-            }
-            .dashboard-section {
-                padding: 12px 6px;
-            }
+            .main-content { padding: 8px 2vw; }
+            .section { padding: 12px 6px; }
         }
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block admin-sidebar sidebar collapse">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="showSection('dashboard-home', this)"><i class="fa fa-tachometer-alt"></i> Dashboard Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('accounts-section', this)"><i class="fa fa-users"></i> Accounts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('carts-section', this)"><i class="fa fa-shopping-cart"></i> Carts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('categories-section', this)"><i class="fa fa-list"></i> Categories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('orders-section', this)"><i class="fa fa-shopping-bag"></i> Orders</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('store-section', this)"><i class="fa fa-store"></i> Store</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('cdmis-section', this)"><i class="fa fa-layer-group"></i> CDMIS</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="dashboard-header">
-                <i class="fa fa-cogs"></i> Admin Dashboard
-            </div>
-            <div class="dashboard-content">
-                <div id="dashboard-home" class="dashboard-section">
-                    <h4>Welcome to the Admin Dashboard</h4>
-                    <p>Select a section from the sidebar to manage.</p>
-                </div>
-                <div id="accounts-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-users"></i> Accounts Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-user"></i>
-                            <a href="{% url 'cdmis:user_list' %}">Registered Accounts</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-envelope"></i>
-                            <a href="{% url 'cdmis:contact_messages' %}">Contact Messages</a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="carts-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-shopping-cart"></i> Carts Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-shopping-cart"></i>
-                            <a href="#">All Carts</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-box"></i>
-                            <a href="#">Cart Items</a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="categories-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-list"></i> Categories Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-list"></i>
-                            <a href="#">Manage Categories</a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="orders-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-shopping-bag"></i> Orders Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-shopping-bag"></i>
-                            <a href="{% url 'cdmis:order_list' %}">All Orders</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-money-bill"></i>
-                            <a href="#">Payments</a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="store-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-store"></i> Store Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-box"></i>
-                            <a href="#">Products</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-cubes"></i>
-                            <a href="#">Product Variations</a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="cdmis-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-layer-group"></i> CDMIS Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-users"></i>
-                            <a href="#">Groups</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-tasks"></i>
-                            <a href="#">Activities</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-money-bill"></i>
-                            <a href="{% url 'cdmis:payment_list' %}">Payments</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-concierge-bell"></i>
-                            <a href="#">Services</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-chalkboard-teacher"></i>
-                            <a href="#">Trainings</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </main>
-    </div>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>Admin</h2>
+        <ul class="nav">
+            <li><a class="nav-link active" onclick="showSection('accounts')">Accounts</a></li>
+            <li><a class="nav-link" onclick="showSection('carts')">Carts</a></li>
+            <li><a class="nav-link" onclick="showSection('orders')">Orders</a></li>
+            <li><a class="nav-link" onclick="showSection('store')">Store</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <section id="section-accounts" class="section active">
+            <h3>Accounts</h3>
+            <ul>
+                <li>User: John Doe (john@example.com)</li>
+                <li>User: Jane Smith (jane@example.com)</li>
+                <li>User: Alice Lee (alice@example.com)</li>
+            </ul>
+        </section>
+        <section id="section-carts" class="section">
+            <h3>Carts</h3>
+            <ul>
+                <li>Cart #1001 - 2 items - John Doe</li>
+                <li>Cart #1002 - 1 item - Jane Smith</li>
+            </ul>
+        </section>
+        <section id="section-orders" class="section">
+            <h3>Orders</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>5001</td>
+                        <td>John Doe</td>
+                        <td>Product A</td>
+                        <td>Shipped</td>
+                        <td>2024-06-01</td>
+                    </tr>
+                    <tr>
+                        <td>5002</td>
+                        <td>Jane Smith</td>
+                        <td>Product B</td>
+                        <td>Pending</td>
+                        <td>2024-06-02</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section id="section-store" class="section">
+            <h3>Store</h3>
+            <ul>
+                <li>Product: Product A - $10</li>
+                <li>Product: Product B - $20</li>
+                <li>Product: Product C - $15</li>
+            </ul>
+        </section>
+    </main>
 </div>
 <script>
-function showSection(sectionId, el) {
-    // Hide all sections
-    var sections = document.querySelectorAll('.dashboard-section');
-    sections.forEach(function(sec) { sec.style.display = 'none'; });
-    // Show selected section
-    document.getElementById(sectionId).style.display = '';
-    // Remove active from all sidebar links
-    var links = document.querySelectorAll('.admin-sidebar .nav-link');
-    links.forEach(function(link) { link.classList.remove('active'); });
-    // Set active on clicked link
-    if(el) el.classList.add('active');
+function showSection(section) {
+    // Sidebar active state
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.textContent.trim().toLowerCase() === section) link.classList.add('active');
+    });
+    // Section display
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById('section-' + section).classList.add('active');
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
