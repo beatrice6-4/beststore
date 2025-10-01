@@ -99,17 +99,19 @@
                     <th>Notes</th>
                 </tr>
             </thead>
-            <tbody>
-                {% regroup all_payments by payment_date as date_groups %}
-                {% for date_group in date_groups %}
+            {% regroup all_payments by payment_date as date_groups %}
+            {% for date_group in date_groups %}
+                <tbody id="print-group-{{ date_group.grouper|date:'Ymd' }}">
                     <tr class="date-separator">
                         <td colspan="5">
                             {{ date_group.grouper|date:"M d, Y" }}
                         </td>
                         <td class="text-end">
-                            <a href="{% url 'cdmis:download_payments_by_date' date_group.grouper|date:'Y-m-d' %}" class="btn btn-sm btn-success download-btn">
-                                <i class="fa fa-download"></i> Download
-                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-success download-btn"
+                                    onclick="printGroup('print-group-{{ date_group.grouper|date:'Ymd' }}')">
+                                <i class="fa fa-print"></i> Print
+                            </button>
                         </td>
                     </tr>
                     {% for payment in date_group.list %}
@@ -129,28 +131,30 @@
                             Ksh. {{ date_totals|dict_get:date_group.grouper }}
                         </td>
                     </tr>
-                {% empty %}
+                </tbody>
+            {% empty %}
+                <tbody>
                     <tr>
                         <td colspan="6" class="text-center">No payments have been made.</td>
                     </tr>
-                {% endfor %}
-            </tbody>
+                </tbody>
+            {% endfor %}
         </table>
     </div>
-    <script>
-function printFinance() {
-    var printContents = document.getElementById('printable-finance').innerHTML;
+</div>
+<script>
+function printGroup(groupId) {
+    var printContents = document.getElementById(groupId).outerHTML;
     var win = window.open('', '', 'height=900,width=1200');
-    win.document.write('<html><head><title>payment</title>');
+    win.document.write('<html><head><title>Payments</title>');
     win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
-    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
+    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;width:100%;border-collapse:collapse;} th,td{padding:8px 10px;border:1px solid #ccc;} .date-separator{background:#f1f3fa;color:#2d7a2d;font-weight:700;} .date-total-row{background:#eafbe7;color:#2d7a2d;font-weight:600;}</style>');
     win.document.write('</head><body>');
-    win.document.write(printContents);
+    win.document.write('<table>' + printContents + '</table>');
     win.document.write('</body></html>');
     win.document.close();
     win.focus();
     win.print();
 }
 </script>
-</div>
 {% endblock %}
