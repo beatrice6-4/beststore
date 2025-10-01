@@ -297,20 +297,26 @@ from .models import Payment
 import os
 from django.conf import settings
 
-def download_payments_pdf_by_date(request, date):
-    payments = Payment.objects.filter(payment_date=date)
+def download_payments_pdf_by_date(request, payment_date):
+    payments = Payment.objects.filter(payment_date=payment_date)
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="payments_{date}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="payments_{payment_date}.pdf"'
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import inch
+    import os
+    from django.conf import settings
+
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4
 
     # Add GOV logo
-    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov_logo.png')
+    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov.png')
     if os.path.exists(logo_path):
         p.drawImage(logo_path, inch, height - 1.5*inch, width=1.2*inch, preserveAspectRatio=True, mask='auto')
 
     p.setFont("Helvetica-Bold", 16)
-    p.drawString(2.5*inch, height - 1*inch, f"Payments for {date}")
+    p.drawString(2.5*inch, height - 1*inch, f"Payments for {payment_date}")
 
     # Table headers
     p.setFont("Helvetica-Bold", 11)
