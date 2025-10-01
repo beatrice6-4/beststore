@@ -137,5 +137,20 @@
             </tbody>
         </table>
     </div>
+    <script>
+function printFinance() {
+    var printContents = document.getElementById('printable-finance').innerHTML;
+    var win = window.open('', '', 'height=900,width=1200');
+    win.document.write('<html><head><title>payment</title>');
+    win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
+    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
+    win.document.write('</head><body>');
+    win.document.write(printContents);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.focus();
+    win.print();
+}
+</script>
 </div>
 {% endblock %}
