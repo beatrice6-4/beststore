@@ -137,9 +137,9 @@
                     </li>
                     <!-- Orders Submenu -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="toggleMenu('orders-submenu', 'orders-section', this)">
-                            <i class="fa fa-shopping-bag"></i> Orders <i class="fa fa-caret-down float-end"></i>
-                        </a>
+                        <a class="nav-link" href="{% url 'cdmis:order_list' %}">
+    <i class="fa fa-shopping-bag"></i> Orders
+</a>
                         <ul class="submenu nav flex-column" id="orders-submenu" style="display:none;">
                             <li>
                                 <a class="nav-link" href="#" onclick="showOrdersContent('orders', this)">
@@ -282,28 +282,8 @@
                             <a href="#">Manage Categories</a>
                         </li>
                     </ul>
+
                 </div>
-                <!-- Orders Section -->
-                <div id="orders-section" class="dashboard-section" style="display:none;">
-                    <div id="orders-orders" class="orders-content">
-                        <h4><i class="fa fa-shopping-bag"></i> Orders</h4>
-                        <a href="#">View Orders</a>
-                    </div>
-                    <div id="orders-payments" class="orders-content" style="display:none;">
-                        <h4><i class="fa fa-money-bill"></i> Payments</h4>
-                        <a href="{% url 'cdmis:payment_list' %}">View Payments</a>
-                    </div>
-                </div>
-                <!-- Store Section -->
-                <div id="store-section" class="dashboard-section" style="display:none;">
-                    <div id="store-products" class="store-content">
-                        <h4><i class="fa fa-box"></i> Products</h4>
-                        <a href="#">Manage Products</a>
-                    </div>
-                    <div id="store-variations" class="store-content" style="display:none;">
-                        <h4><i class="fa fa-cubes"></i> Variations</h4>
-                        <a href="#">Manage Variations</a>
-                    </div>
                 </div>
                 <!-- CDMIS Section -->
                 <div id="cdmis-section" class="dashboard-section" style="display:none;">
@@ -375,7 +355,7 @@ function showOrdersContent(subsection, el) {
     var contents = document.querySelectorAll('.orders-content');
     contents.forEach(function(sec) { sec.style.display = 'none'; });
     document.getElementById('orders-' + subsection).style.display = '';
-    var submenuLinks = document.querySelectorAll('#orders-submenu .nav-link');
+    var submenuLinks = document.querySelectorAll('orders-submenu .nav-link');
     submenuLinks.forEach(function(link) { link.classList.remove('active'); });
     if(el) el.classList.add('active');
 }
@@ -383,7 +363,7 @@ function showStoreContent(subsection, el) {
     var contents = document.querySelectorAll('.store-content');
     contents.forEach(function(sec) { sec.style.display = 'none'; });
     document.getElementById('store-' + subsection).style.display = '';
-    var submenuLinks = document.querySelectorAll('#store-submenu .nav-link');
+    var submenuLinks = document.querySelectorAll('store-submenu .nav-link');
     submenuLinks.forEach(function(link) { link.classList.remove('active'); });
     if(el) el.classList.add('active');
 }

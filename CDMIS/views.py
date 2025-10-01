@@ -367,3 +367,40 @@ def order_list(request):
     else:
         form = OrderForm()
     return render(request, 'CDMIS/order_list.html', {'orders': orders, 'form': form})
+
+
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Order
+from .forms import OrderForm
+
+def order_list(request):
+    orders = Order.objects.all()
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('cdmis:order_list')
+    else:
+        form = OrderForm()
+    return render(request, 'CDMIS/order_list.html', {'orders': orders, 'form': form})
+
+def order_edit(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            return redirect('cdmis:order_list')
+    else:
+        form = OrderForm(instance=order)
+    return render(request, 'CDMIS/order_edit.html', {'form': form, 'order': order})
+
+def order_delete(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if request.method == 'POST':
+        order.delete()
+        return redirect('cdmis:order_list')
+    return render(request, 'CDMIS/order_delete.html', {'order': order})
