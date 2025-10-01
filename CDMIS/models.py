@@ -65,6 +65,7 @@ class Order(models.Model):
 from django.db import models
 
 class Member(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='members', null=True, blank=True)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True)
     id_no = models.CharField(max_length=20, unique=True)
