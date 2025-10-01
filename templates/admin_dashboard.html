@@ -64,6 +64,25 @@
             color: #4e54c8;
             margin-right: 8px;
         }
+        .cdmis-submenu {
+            background: rgba(44,62,80,0.08);
+            border-radius: 0 0 8px 8px;
+            margin-left: 10px;
+            margin-bottom: 8px;
+            padding-left: 12px;
+        }
+        .cdmis-submenu .nav-link {
+            color: #fff;
+            font-size: 1em;
+            padding: 8px 0 8px 16px;
+            border: none;
+            background: none;
+        }
+        .cdmis-submenu .nav-link.active, .cdmis-submenu .nav-link:hover {
+            color: #4e54c8;
+            background: #fff;
+            border-radius: 6px;
+        }
         @media (max-width: 900px) {
             .admin-sidebar {
                 min-height: auto;
@@ -112,7 +131,24 @@
                         <a class="nav-link" href="#" onclick="showSection('store-section', this)"><i class="fa fa-store"></i> Store</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('cdmis-section', this)"><i class="fa fa-layer-group"></i> CDMIS</a>
+                        <a class="nav-link" href="#" onclick="toggleCdmisMenu(this)"><i class="fa fa-layer-group"></i> CDMIS <i class="fa fa-caret-down float-end"></i></a>
+                        <ul class="cdmis-submenu nav flex-column" id="cdmis-submenu" style="display:none;">
+                            <li>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('groups', this)"><i class="fa fa-users"></i> Groups</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('activities', this)"><i class="fa fa-tasks"></i> Activities</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('payments', this)"><i class="fa fa-money-bill"></i> Payments</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('services', this)"><i class="fa fa-concierge-bell"></i> Services</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('trainings', this)"><i class="fa fa-chalkboard-teacher"></i> Trainings</a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -188,30 +224,28 @@
                         </li>
                     </ul>
                 </div>
+                <!-- CDMIS Main Section -->
                 <div id="cdmis-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-layer-group"></i> CDMIS Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-users"></i>
-                            <a href="#">Groups</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-tasks"></i>
-                            <a href="#">Activities</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-money-bill"></i>
-                            <a href="{% url 'cdmis:payment_list' %}">Payments</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-concierge-bell"></i>
-                            <a href="#">Services</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-chalkboard-teacher"></i>
-                            <a href="#">Trainings</a>
-                        </li>
-                    </ul>
+                    <div id="cdmis-groups" class="cdmis-content">
+                        <h4><i class="fa fa-users"></i> Groups</h4>
+                        <a href="{% url 'cdmis:group_list' %}">Manage Groups</a>
+                    </div>
+                    <div id="cdmis-activities" class="cdmis-content" style="display:none;">
+                        <h4><i class="fa fa-tasks"></i> Activities</h4>
+                        <a href="{% url 'cdmis:activity_list' %}">Manage Activities</a>
+                    </div>
+                    <div id="cdmis-payments" class="cdmis-content" style="display:none;">
+                        <h4><i class="fa fa-money-bill"></i> Payments</h4>
+                        <a href="{% url 'cdmis:payment_list' %}">Manage Payments</a>
+                    </div>
+                    <div id="cdmis-services" class="cdmis-content" style="display:none;">
+                        <h4><i class="fa fa-concierge-bell"></i> Services</h4>
+                        <a href="{% url 'cdmis:service_list' %}">Manage Services</a>
+                    </div>
+                    <div id="cdmis-trainings" class="cdmis-content" style="display:none;">
+                        <h4><i class="fa fa-chalkboard-teacher"></i> Trainings</h4>
+                        <a href="{% url 'cdmis:training_list' %}">Manage Trainings</a>
+                    </div>
                 </div>
             </div>
         </main>
@@ -228,6 +262,29 @@ function showSection(sectionId, el) {
     var links = document.querySelectorAll('.admin-sidebar .nav-link');
     links.forEach(function(link) { link.classList.remove('active'); });
     // Set active on clicked link
+    if(el) el.classList.add('active');
+    // Hide CDMIS submenu if not CDMIS
+    if(sectionId !== 'cdmis-section') {
+        document.getElementById('cdmis-submenu').style.display = 'none';
+    }
+}
+function toggleCdmisMenu(el) {
+    showSection('cdmis-section', el);
+    var submenu = document.getElementById('cdmis-submenu');
+    submenu.style.display = submenu.style.display === 'none' ? '' : 'none';
+    // Show Groups by default
+    showCdmisContent('groups');
+}
+function showCdmisContent(subsection, el) {
+    // Hide all CDMIS content
+    var cdmisContents = document.querySelectorAll('.cdmis-content');
+    cdmisContents.forEach(function(sec) { sec.style.display = 'none'; });
+    // Show selected subsection
+    document.getElementById('cdmis-' + subsection).style.display = '';
+    // Remove active from all submenu links
+    var submenuLinks = document.querySelectorAll('#cdmis-submenu .nav-link');
+    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
+    // Set active on clicked submenu link
     if(el) el.classList.add('active');
 }
 </script>
