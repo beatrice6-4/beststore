@@ -99,211 +99,130 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar + Main Content -->
-    <div class="content-wrapper">
-        <!-- Sidebar -->
-        <div class="sidebar p-3" id="sidebar">
-            <nav class="col-md-3 col-lg-2 d-md-block admin-sidebar sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#" onclick="showSection('dashboard-home', this)"><i class="fa fa-tachometer-alt"></i> Dashboard Home</a>
-                    </li>
-                    <!-- Accounts Submenu -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="toggleMenu('accounts-submenu', 'accounts-section', this)">
-                            <i class="fa fa-users"></i> Accounts <i class="fa fa-caret-down float-end"></i>
-                        </a>
-                        <ul class="submenu nav flex-column" id="accounts-submenu" style="display:none;">
-                            <li>
-                                <a class="nav-link" href="#" onclick="showAccountsContent('self', this)">
-                                    <i class="fa fa-user-plus"></i> Self Registrations
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showAccountsContent('registered', this)">
-                                    <i class="fa fa-user-check"></i> Registrations
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showAccountsContent('messages', this)">
-                                    <i class="fa fa-envelope"></i> Contact Messages
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('carts-section', this)"><i class="fa fa-shopping-cart"></i> Carts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('categories-section', this)"><i class="fa fa-list"></i> Categories</a>
-                    </li>
-                    <!-- Orders Submenu -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'cdmis:order_list' %}">
-    <i class="fa fa-shopping-bag"></i> Orders
-</a>
-                        <ul class="submenu nav flex-column" id="orders-submenu" style="display:none;">
-                            <li>
-                                <a class="nav-link" href="#" onclick="showOrdersContent('orders', this)">
-                                    <i class="fa fa-shopping-bag"></i> Orders
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showOrdersContent('payments', this)">
-                                    <i class="fa fa-money-bill"></i> Payments
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Store Submenu -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="toggleMenu('store-submenu', 'store-section', this)">
-                            <i class="fa fa-store"></i> Store <i class="fa fa-caret-down float-end"></i>
-                        </a>
-                        <ul class="submenu nav flex-column" id="store-submenu" style="display:none;">
-                            <li>
-                                <a class="nav-link" href="#" onclick="showStoreContent('products', this)">
-                                    <i class="fa fa-box"></i> Products
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showStoreContent('variations', this)">
-                                    <i class="fa fa-cubes"></i> Variations
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- CDMIS Submenu -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="toggleMenu('cdmis-submenu', 'cdmis-section', this)">
-                            <i class="fa fa-layer-group"></i> CDMIS <i class="fa fa-caret-down float-end"></i>
-                        </a>
-                        <ul class="submenu nav flex-column" id="cdmis-submenu" style="display:none;">
-                            <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('groups', this)">
-                                    <i class="fa fa-users"></i> Groups
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('activities', this)">
-                                    <i class="fa fa-tasks"></i> Activities
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('payments', this)">
-                                    <i class="fa fa-money-bill"></i> Payments
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('services', this)">
-                                    <i class="fa fa-concierge-bell"></i> Services
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('trainings', this)">
-                                    <i class="fa fa-chalkboard-teacher"></i> Trainings
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-        <!-- Main Content  goes here-->
-                <!-- Accounts Section -->
-                <div id="accounts-section" class="dashboard-section" style="display:none;">
-                    <div id="accounts-self" class="accounts-content">
-                        <h4><i class="fa fa-user-plus"></i> Self Registrations</h4>
-                        <a href="#">View Self Registrations</a>
-                    </div>
-                    <div id="accounts-registered" class="accounts-content" style="display:none;">
-    <h4><i class="fa fa-user-check"></i> Registered Users</h4>
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Date Joined</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in registered_users %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.get_full_name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No registered users found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+       <!-- Main Content -->
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="dashboard-header">
+        <i class="fa fa-cogs"></i> Admin Dashboard
     </div>
-</div>
-                    <div id="accounts-messages" class="accounts-content" style="display:none;">
-                        <h4><i class="fa fa-envelope"></i> Contact Messages</h4>
-                        <a href="{% url 'cdmis:contact_messages' %}">View Contact Messages</a>
-                    </div>
-                </div>
-                <!-- Carts Section -->
-                <div id="carts-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-shopping-cart"></i> Carts Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-shopping-cart"></i>
-                            <a href="#">All Carts</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-box"></i>
-                            <a href="#">Cart Items</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- Categories Section -->
-                <div id="categories-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-list"></i> Categories Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-list"></i>
-                            <a href="#">Manage Categories</a>
-                        </li>
-                    </ul>
-
-                </div>
-                </div>
-                <!-- CDMIS Section -->
-                <div id="cdmis-section" class="dashboard-section" style="display:none;">
-                    <div id="cdmis-groups" class="cdmis-content">
-                        <h4><i class="fa fa-users"></i> Groups</h4>
-                        <a href="{% url 'cdmis:group_list' %}">Manage Groups</a>
-                    </div>
-                    <div id="cdmis-activities" class="cdmis-content" style="display:none;">
-                        <h4><i class="fa fa-tasks"></i> Activities</h4>
-                        <a href="{% url 'cdmis:activity_list' %}">Manage Activities</a>
-                    </div>
-                    <div id="cdmis-payments" class="cdmis-content" style="display:none;">
-                        <h4><i class="fa fa-money-bill"></i> Payments</h4>
-                        <a href="{% url 'cdmis:payment_list' %}">Manage Payments</a>
-                    </div>
-                    <div id="cdmis-services" class="cdmis-content" style="display:none;">
-                        <h4><i class="fa fa-concierge-bell"></i> Services</h4>
-                        <a href="{% url 'cdmis:service_list' %}">Manage Services</a>
-                    </div>
-                    <div id="cdmis-trainings" class="cdmis-content" style="display:none;">
-                        <h4><i class="fa fa-chalkboard-teacher"></i> Trainings</h4>
-                        <a href="{% url 'cdmis:training_list' %}">Manage Trainings</a>
-                    </div>
+    <div class="dashboard-content" id="main-content">
+        <!-- Dashboard Home -->
+        <div id="dashboard-home" class="dashboard-section">
+            <h4>Welcome to the Admin Dashboard</h4>
+            <p>Select a section from the sidebar to manage.</p>
+        </div>
+        <!-- Accounts Section -->
+        <div id="accounts-section" class="dashboard-section" style="display:none;">
+            <div id="accounts-self" class="accounts-content">
+                <h4><i class="fa fa-user-plus"></i> Self Registrations</h4>
+                <a href="#">View Self Registrations</a>
+            </div>
+            <div id="accounts-registered" class="accounts-content" style="display:none;">
+                <h4><i class="fa fa-user-check"></i> Registered Users</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Date Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in registered_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.get_full_name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No registered users found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </main>
+            <div id="accounts-messages" class="accounts-content" style="display:none;">
+                <h4><i class="fa fa-envelope"></i> Contact Messages</h4>
+                <a href="{% url 'cdmis:contact_messages' %}">View Contact Messages</a>
+            </div>
+        </div>
+        <!-- Carts Section -->
+        <div id="carts-section" class="dashboard-section" style="display:none;">
+            <h4><i class="fa fa-shopping-cart"></i> Carts Management</h4>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <i class="fa fa-shopping-cart"></i>
+                    <a href="#">All Carts</a>
+                </li>
+                <li class="list-group-item">
+                    <i class="fa fa-box"></i>
+                    <a href="#">Cart Items</a>
+                </li>
+            </ul>
+        </div>
+        <!-- Categories Section -->
+        <div id="categories-section" class="dashboard-section" style="display:none;">
+            <h4><i class="fa fa-list"></i> Categories Management</h4>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <i class="fa fa-list"></i>
+                    <a href="#">Manage Categories</a>
+                </li>
+            </ul>
+        </div>
+        <!-- Orders Section -->
+        <div id="orders-section" class="dashboard-section" style="display:none;">
+            <div id="orders-orders" class="orders-content">
+                <h4><i class="fa fa-shopping-bag"></i> Orders</h4>
+                <a href="{% url 'cdmis:order_list' %}">View Orders</a>
+            </div>
+            <div id="orders-payments" class="orders-content" style="display:none;">
+                <h4><i class="fa fa-money-bill"></i> Payments</h4>
+                <a href="{% url 'cdmis:payment_list' %}">View Payments</a>
+            </div>
+        </div>
+        <!-- Store Section -->
+        <div id="store-section" class="dashboard-section" style="display:none;">
+            <div id="store-products" class="store-content">
+                <h4><i class="fa fa-box"></i> Products</h4>
+                <a href="{% url 'cdmis:product_list' %}">Manage Products</a>
+            </div>
+            <div id="store-variations" class="store-content" style="display:none;">
+                <h4><i class="fa fa-cubes"></i> Variations</h4>
+                <a href="{% url 'cdmis:variation_list' %}">Manage Variations</a>
+            </div>
+        </div>
+        <!-- CDMIS Section -->
+        <div id="cdmis-section" class="dashboard-section" style="display:none;">
+            <div id="cdmis-groups" class="cdmis-content">
+                <h4><i class="fa fa-users"></i> Groups</h4>
+                <a href="{% url 'cdmis:group_list' %}">Manage Groups</a>
+            </div>
+            <div id="cdmis-activities" class="cdmis-content" style="display:none;">
+                <h4><i class="fa fa-tasks"></i> Activities</h4>
+                <a href="{% url 'cdmis:activity_list' %}">Manage Activities</a>
+            </div>
+            <div id="cdmis-payments" class="cdmis-content" style="display:none;">
+                <h4><i class="fa fa-money-bill"></i> Payments</h4>
+                <a href="{% url 'cdmis:payment_list' %}">Manage Payments</a>
+            </div>
+            <div id="cdmis-services" class="cdmis-content" style="display:none;">
+                <h4><i class="fa fa-concierge-bell"></i> Services</h4>
+                <a href="{% url 'cdmis:service_list' %}">Manage Services</a>
+            </div>
+            <div id="cdmis-trainings" class="cdmis-content" style="display:none;">
+                <h4><i class="fa fa-chalkboard-teacher"></i> Trainings</h4>
+                <a href="{% url 'cdmis:training_list' %}">Manage Trainings</a>
+            </div>
+        </div>
+    </div>
+</main>
     </div>
 </div>
 <script>
