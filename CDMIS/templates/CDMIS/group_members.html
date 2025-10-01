@@ -1,0 +1,111 @@
+{% extends 'gov.html' %}
+{% block content %}
+<style>
+    body {
+        background: #f7f8fa;
+    }
+    .group-members-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .group-members-header h2 {
+        color: #4e54c8;
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+    .btn-upload {
+        background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 8px 28px;
+        transition: background 0.2s;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-upload:hover {
+        background: linear-gradient(90deg, #185a9d 0%, #43cea2 100%);
+        color: #fff;
+        text-decoration: none;
+    }
+    .members-table {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+        width: 100%;
+        margin-top: 10px;
+    }
+    .members-table th, .members-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #e0e0ef;
+        text-align: left;
+    }
+    .members-table thead th {
+        background: #f3f3fa;
+        color: #4e54c8;
+        font-weight: 700;
+        border-bottom: 2px solid #e0e0ef;
+        font-size: 1.08em;
+    }
+    .members-table tbody tr:nth-of-type(odd) {
+        background: #f7f8fa;
+    }
+    @media (max-width: 700px) {
+        .group-members-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .members-table {
+            font-size: 0.98em;
+        }
+    }
+</style>
+<div class="group-members-header">
+    <h2><i class="fa fa-users me-2"></i>Members of {{ group.name }}</h2>
+    <a href="{% url 'cdmis:upload_members' %}" class="btn-upload">
+        <i class="fa fa-upload me-2"></i>Upload Members
+    </a>
+</div>
+<table class="members-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>First Name</th>
+            <th>Middle Name</th>
+            <th>ID No</th>
+            <th>Date of Birth</th>
+            <th>Gender</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Disability</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ member.first_name }}</td>
+            <td>{{ member.middle_name }}</td>
+            <td>{{ member.id_no }}</td>
+            <td>{{ member.date_of_birth }}</td>
+            <td>{{ member.gender }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.member_role }}</td>
+            <td>{{ member.disability }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" class="text-center">No members found for this group.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
