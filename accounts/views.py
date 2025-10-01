@@ -458,7 +458,11 @@ def admin_required(view_func):
 
 @admin_required
 def admin_dashboard(request):
-    return render(request, 'accounts/admin_dashboard.html')
+    User = get_user_model()
+    registered_users = User.objects.all()
+    return render(request, 'accounts/admin_dashboard.html', {
+        'registered_users': registered_users,
+    })
 
 @admin_required
 def contact_messages(request):
