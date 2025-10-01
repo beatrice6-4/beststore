@@ -34,5 +34,5 @@ urlpatterns = [
     path('groups/<int:pk>/members/', views.group_members, name='group_members'),
     path('members/upload/', views.upload_members, name='upload_members'),
     path('members/', views.member_list, name='member_list'),
-    path('payments/download/<str:payment_date>/', views.download_payments_by_date, name='download_payments_by_date'),
+    path('payments/download/<str:payment_date>/', views.download_payments_pdf_by_date, name='download_payments_by_date'),
 ]
