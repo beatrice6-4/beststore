@@ -1,7 +1,70 @@
 {% extends 'gov.html' %}
 {% block content %}
-<h2>Group Trainings</h2>
-<a href="{% url 'cdmis:training_add' %}" class="btn btn-success mb-3">Add Training</a>
+<style>
+    body {
+        background: #f7f8fa;
+    }
+    .training-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .training-header h2 {
+        color: #4e54c8;
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+    .btn-success {
+        background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 8px 28px;
+        transition: background 0.2s;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+    }
+    .btn-success:hover {
+        background: linear-gradient(90deg, #185a9d 0%, #43cea2 100%);
+        color: #fff;
+    }
+    .table {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+    }
+    .table thead th {
+        background: #f3f3fa;
+        color: #4e54c8;
+        font-weight: 700;
+        border-bottom: 2px solid #e0e0ef;
+        font-size: 1.08em;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background: #f7f8fa;
+    }
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #e0e0ef !important;
+    }
+    @media (max-width: 700px) {
+        .training-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .table {
+            font-size: 0.98em;
+        }
+    }
+</style>
+<div class="training-header">
+    <h2><i class="fa fa-chalkboard-teacher me-2"></i>Group Trainings</h2>
+    <a href="{% url 'cdmis:training_add' %}" class="btn btn-success">Add Training</a>
+</div>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -9,7 +72,7 @@
             <th>Topic</th>
             <th>Trainer</th>
             <th>Date</th>
-            <th>Notes</th>
+            <th>Conclusions and Recommendations</th>
         </tr>
     </thead>
     <tbody>
