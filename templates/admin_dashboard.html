@@ -1,294 +1,186 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Minimal Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            background: #f4f6fa;
+            margin: 0; padding: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f7f8fa;
+            color: #222;
         }
-        .admin-sidebar {
-            background: linear-gradient(180deg, #4e54c8 0%, #8f94fb 100%);
+        .dashboard-container {
+            display: flex;
             min-height: 100vh;
-            color: #fff;
-            padding: 0;
         }
-        .admin-sidebar .nav-link {
+        .sidebar {
+            background: #2d3250;
             color: #fff;
-            font-size: 1.08em;
+            width: 220px;
+            min-width: 180px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            font-size: 1.3em;
+            font-weight: 700;
+            padding: 24px 24px 12px 24px;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .nav li {
+            margin: 0;
+        }
+        .nav-link {
+            display: block;
+            color: #fff;
+            text-decoration: none;
             padding: 16px 24px;
+            font-size: 1.08em;
             border-left: 4px solid transparent;
             transition: background 0.2s, border-color 0.2s;
             cursor: pointer;
         }
-        .admin-sidebar .nav-link.active, .admin-sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.08);
-            border-left: 4px solid #fff;
+        .nav-link.active, .nav-link:hover {
+            background: #23263a;
+            border-left: 4px solid #6c63ff;
         }
-        .submenu {
-            background: rgba(44,62,80,0.08);
-            border-radius: 0 0 8px 8px;
-            margin-left: 10px;
-            margin-bottom: 8px;
-            padding-left: 12px;
+        .main-content {
+            flex: 1;
+            padding: 40px 32px;
+            background: #f7f8fa;
+            min-width: 0;
         }
-        .submenu .nav-link {
-            color: #fff;
-            font-size: 1em;
-            padding: 8px 0 8px 16px;
-            border: none;
-            background: none;
-        }
-        .submenu .nav-link.active, .submenu .nav-link:hover {
-            color: #4e54c8;
-            background: #fff;
-            border-radius: 6px;
-        }
-        .dashboard-header {
-            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-            color: #fff;
-            padding: 18px 32px;
-            font-size: 1.5em;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-radius: 0 0 12px 12px;
-            margin-bottom: 24px;
-        }
-        .dashboard-content {
-            padding: 32px 24px;
-        }
-        .dashboard-section {
+        .section {
+            display: none;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-            padding: 28px 20px 20px 20px;
+            padding: 32px 24px;
             margin-bottom: 28px;
         }
-        .dashboard-section h4 {
-            font-size: 1.18em;
-            font-weight: 600;
-            color: #4e54c8;
-            margin-bottom: 18px;
+        .section.active {
+            display: block;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #6c63ff;
+            font-size: 1.2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+        th, td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        th {
+            background: #f3f3fa;
+            color: #444;
         }
         @media (max-width: 900px) {
-            .admin-sidebar {
-                min-height: auto;
-            }
-            .dashboard-content {
-                padding: 18px 4vw;
-            }
+            .dashboard-container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; min-width: 0; }
+            .nav { display: flex; flex-direction: row; }
+            .nav-link { padding: 14px 12px; font-size: 1em; }
+            .main-content { padding: 18px 4vw; }
         }
         @media (max-width: 600px) {
-            .dashboard-header {
-                font-size: 1.1em;
-                padding: 12px 8px;
-            }
-            .dashboard-content {
-                padding: 8px 2vw;
-            }
-            .dashboard-section {
-                padding: 12px 6px;
-            }
+            .main-content { padding: 8px 2vw; }
+            .section { padding: 12px 6px; }
         }
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-       <!-- Main Content -->
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div class="dashboard-header">
-        <i class="fa fa-cogs"></i> Admin Dashboard
-    </div>
-    <div class="dashboard-content" id="main-content">
-        <!-- Dashboard Home -->
-        <div id="dashboard-home" class="dashboard-section">
-            <h4>Welcome to the Admin Dashboard</h4>
-            <p>Select a section from the sidebar to manage.</p>
-        </div>
-        <!-- Accounts Section -->
-        <div id="accounts-section" class="dashboard-section" style="display:none;">
-            <div id="accounts-self" class="accounts-content">
-                <h4><i class="fa fa-user-plus"></i> Self Registrations</h4>
-                <a href="#">View Self Registrations</a>
-            </div>
-            <div id="accounts-registered" class="accounts-content" style="display:none;">
-                <h4><i class="fa fa-user-check"></i> Registered Users</h4>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Username</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Date Joined</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in registered_users %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.get_full_name }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center">No registered users found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div id="accounts-messages" class="accounts-content" style="display:none;">
-                <h4><i class="fa fa-envelope"></i> Contact Messages</h4>
-                <a href="{% url 'cdmis:contact_messages' %}">View Contact Messages</a>
-            </div>
-        </div>
-        <!-- Carts Section -->
-        <div id="carts-section" class="dashboard-section" style="display:none;">
-            <h4><i class="fa fa-shopping-cart"></i> Carts Management</h4>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <i class="fa fa-shopping-cart"></i>
-                    <a href="#">All Carts</a>
-                </li>
-                <li class="list-group-item">
-                    <i class="fa fa-box"></i>
-                    <a href="#">Cart Items</a>
-                </li>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>Admin</h2>
+        <ul class="nav">
+            <li><a class="nav-link active" onclick="showSection('accounts')">Accounts</a></li>
+            <li><a class="nav-link" onclick="showSection('carts')">Carts</a></li>
+            <li><a class="nav-link" onclick="showSection('orders')">Orders</a></li>
+            <li><a class="nav-link" onclick="showSection('store')">Store</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <section id="section-accounts" class="section active">
+            <h3>Accounts</h3>
+            <ul>
+                <li>User: John Doe (john@example.com)</li>
+                <li>User: Jane Smith (jane@example.com)</li>
+                <li>User: Alice Lee (alice@example.com)</li>
             </ul>
-        </div>
-        <!-- Categories Section -->
-        <div id="categories-section" class="dashboard-section" style="display:none;">
-            <h4><i class="fa fa-list"></i> Categories Management</h4>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <i class="fa fa-list"></i>
-                    <a href="#">Manage Categories</a>
-                </li>
+        </section>
+        <section id="section-carts" class="section">
+            <h3>Carts</h3>
+            <ul>
+                <li>Cart #1001 - 2 items - John Doe</li>
+                <li>Cart #1002 - 1 item - Jane Smith</li>
             </ul>
-        </div>
-        <!-- Orders Section -->
-        <div id="orders-section" class="dashboard-section" style="display:none;">
-            <div id="orders-orders" class="orders-content">
-                <h4><i class="fa fa-shopping-bag"></i> Orders</h4>
-                <a href="{% url 'cdmis:order_list' %}">View Orders</a>
-            </div>
-            <div id="orders-payments" class="orders-content" style="display:none;">
-                <h4><i class="fa fa-money-bill"></i> Payments</h4>
-                <a href="{% url 'cdmis:payment_list' %}">View Payments</a>
-            </div>
-        </div>
-        <!-- Store Section -->
-        <div id="store-section" class="dashboard-section" style="display:none;">
-            <div id="store-products" class="store-content">
-                <h4><i class="fa fa-box"></i> Products</h4>
-                <a href="#">Manage Products</a>
-            </div>
-            <div id="store-variations" class="store-content" style="display:none;">
-                <h4><i class="fa fa-cubes"></i> Variations</h4>
-                <a href="#">Manage Variations</a>
-            </div>
-        </div>
-        <!-- CDMIS Section -->
-        <div id="cdmis-section" class="dashboard-section" style="display:none;">
-            <div id="cdmis-groups" class="cdmis-content">
-                <h4><i class="fa fa-users"></i> Groups</h4>
-                <a href="{% url 'cdmis:group_list' %}">Manage Groups</a>
-            </div>
-            <div id="cdmis-activities" class="cdmis-content" style="display:none;">
-                <h4><i class="fa fa-tasks"></i> Activities</h4>
-                <a href="{% url 'cdmis:activity_list' %}">Manage Activities</a>
-            </div>
-            <div id="cdmis-payments" class="cdmis-content" style="display:none;">
-                <h4><i class="fa fa-money-bill"></i> Payments</h4>
-                <a href="{% url 'cdmis:payment_list' %}">Manage Payments</a>
-            </div>
-            <div id="cdmis-services" class="cdmis-content" style="display:none;">
-                <h4><i class="fa fa-concierge-bell"></i> Services</h4>
-                <a href="{% url 'cdmis:service_list' %}">Manage Services</a>
-            </div>
-            <div id="cdmis-trainings" class="cdmis-content" style="display:none;">
-                <h4><i class="fa fa-chalkboard-teacher"></i> Trainings</h4>
-                <a href="{% url 'cdmis:training_list' %}">Manage Trainings</a>
-            </div>
-        </div>
-    </div>
-</main>
-    </div>
+        </section>
+        <section id="section-orders" class="section">
+            <h3>Orders</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>5001</td>
+                        <td>John Doe</td>
+                        <td>Product A</td>
+                        <td>Shipped</td>
+                        <td>2024-06-01</td>
+                    </tr>
+                    <tr>
+                        <td>5002</td>
+                        <td>Jane Smith</td>
+                        <td>Product B</td>
+                        <td>Pending</td>
+                        <td>2024-06-02</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section id="section-store" class="section">
+            <h3>Store</h3>
+            <ul>
+                <li>Product: Product A - $10</li>
+                <li>Product: Product B - $20</li>
+                <li>Product: Product C - $15</li>
+            </ul>
+        </section>
+    </main>
 </div>
 <script>
-function showSection(sectionId, el) {
-    // Hide all sections
-    var sections = document.querySelectorAll('.dashboard-section');
-    sections.forEach(function(sec) { sec.style.display = 'none'; });
-    // Show selected section
-    document.getElementById(sectionId).style.display = '';
-    // Remove active from all sidebar links
-    var links = document.querySelectorAll('.admin-sidebar .nav-link');
-    links.forEach(function(link) { link.classList.remove('active'); });
-    // Set active on clicked link
-    if(el) el.classList.add('active');
-    // Hide all submenus
-    ['accounts-submenu','orders-submenu','store-submenu','cdmis-submenu'].forEach(function(id){
-        document.getElementById(id).style.display = 'none';
+function showSection(section) {
+    // Sidebar active state
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.textContent.trim().toLowerCase() === section) link.classList.add('active');
     });
-}
-function toggleMenu(submenuId, sectionId, el) {
-    showSection(sectionId, el);
-    // Hide other submenus
-    ['accounts-submenu','orders-submenu','store-submenu','cdmis-submenu'].forEach(function(id){
-        if(id !== submenuId) document.getElementById(id).style.display = 'none';
-    });
-    var submenu = document.getElementById(submenuId);
-    submenu.style.display = submenu.style.display === 'none' ? '' : 'none';
-    // Show first sub-content by default
-    if(submenuId === 'accounts-submenu') showAccountsContent('self');
-    if(submenuId === 'orders-submenu') showOrdersContent('orders');
-    if(submenuId === 'store-submenu') showStoreContent('products');
-    if(submenuId === 'cdmis-submenu') showCdmisContent('groups');
-}
-function showAccountsContent(subsection, el) {
-    var contents = document.querySelectorAll('.accounts-content');
-    contents.forEach(function(sec) { sec.style.display = 'none'; });
-    document.getElementById('accounts-' + subsection).style.display = '';
-    var submenuLinks = document.querySelectorAll('#accounts-submenu .nav-link');
-    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
-    if(el) el.classList.add('active');
-}
-function showOrdersContent(subsection, el) {
-    var contents = document.querySelectorAll('.orders-content');
-    contents.forEach(function(sec) { sec.style.display = 'none'; });
-    document.getElementById('orders-' + subsection).style.display = '';
-    var submenuLinks = document.querySelectorAll('orders-submenu .nav-link');
-    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
-    if(el) el.classList.add('active');
-}
-function showStoreContent(subsection, el) {
-    var contents = document.querySelectorAll('.store-content');
-    contents.forEach(function(sec) { sec.style.display = 'none'; });
-    document.getElementById('store-' + subsection).style.display = '';
-    var submenuLinks = document.querySelectorAll('store-submenu .nav-link');
-    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
-    if(el) el.classList.add('active');
-}
-function showCdmisContent(subsection, el) {
-    var contents = document.querySelectorAll('.cdmis-content');
-    contents.forEach(function(sec) { sec.style.display = 'none'; });
-    document.getElementById('cdmis-' + subsection).style.display = '';
-    var submenuLinks = document.querySelectorAll('#cdmis-submenu .nav-link');
-    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
-    if(el) el.classList.add('active');
+    // Section display
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById('section-' + section).classList.add('active');
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
