@@ -42,7 +42,7 @@
             overflow: hidden;
         }
         .header {
-            background-color: #004080;
+            background-color: #4ff005;
             color: white;
             padding: 15px 20px;
             display: flex;
@@ -147,7 +147,9 @@
         <div>
             <span>Welcome, {{ user.username }}</span>
             <span class="ms-3">|</span>
+            <a href="{% url 'cdmis:profile' %}" class="ms-3 text-white">Profile</a>
             <a href="{% url 'logout' %}" class="ms-3 text-white">Logout</a>
+
             
         </div>
     </div>

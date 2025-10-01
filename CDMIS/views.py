@@ -404,3 +404,9 @@ def order_delete(request, pk):
         order.delete()
         return redirect('cdmis:order_list')
     return render(request, 'CDMIS/order_delete.html', {'order': order})
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def profile(request):
+    return render(request, 'CDMIS/profile.html')
