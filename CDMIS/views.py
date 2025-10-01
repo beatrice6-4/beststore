@@ -72,6 +72,7 @@ class GroupListView(ListView):
     model = Group
     template_name = 'CDMIS/group_list.html'
     context_object_name = 'groups'
+    paginate_by = 5  # Show 5 groups per page
 
 class GroupDetailView(DetailView):
     model = Group
