@@ -427,6 +427,8 @@ from .models import Member
 import openpyxl
 from django.contrib.auth.decorators import user_passes_test
 
+import datetime
+
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def upload_members(request):
     if request.method == 'POST':
@@ -446,6 +448,12 @@ def upload_members(request):
                 email = row[5] if len(row) > 5 else ''
                 member_role = row[6] if len(row) > 6 else ''
                 disability = row[7] if len(row) > 7 else ''
+
+                # Handle date_of_birth: convert to string if needed
+                if isinstance(date_of_birth, (datetime.datetime, datetime.date)):
+                    date_of_birth = date_of_birth.strftime('%Y-%m-%d')
+                elif date_of_birth is None:
+                    date_of_birth = None  # or set a default date if you want
 
                 Member.objects.update_or_create(
                     id_no=id_no,
