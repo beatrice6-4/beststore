@@ -419,6 +419,12 @@ def group_members(request, pk):
     members = group.members.all()  # Assuming related_name='members'
     return render(request, 'CDMIS/group_members.html', {'group': group, 'members': members})
 
+from .models import Member
+
+def member_list(request):
+    members = Member.objects.all()
+    return render(request, 'CDMIS/member_list.html', {'members': members})
+
 # views.py
 from django.contrib import messages
 from django.shortcuts import render, redirect

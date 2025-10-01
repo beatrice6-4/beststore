@@ -33,4 +33,5 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('groups/<int:pk>/members/', views.group_members, name='group_members'),
     path('members/upload/', views.upload_members, name='upload_members'),
+    path('members/', views.member_list, name='member_list'),
 ]
