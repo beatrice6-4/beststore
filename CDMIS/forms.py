@@ -18,3 +18,9 @@ class GroupForm(forms.ModelForm):
             'registration_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
         }
+
+# forms.py
+from django import forms
+
+class MemberUploadForm(forms.Form):
+    excel_file = forms.FileField(label="Upload Excel File")

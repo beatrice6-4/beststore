@@ -1,0 +1,14 @@
+{% extends 'gov.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Upload Members (Excel)</h2>
+    <form method="post" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+    <div class="alert alert-info mt-3">
+        <strong>Excel columns order:</strong> First Name, Middle Name, ID No, DateOfBirth (YYYY-MM-DD), Gender, Email (optional), Member Role, Disability
+    </div>
+</div>
+{% endblock %}

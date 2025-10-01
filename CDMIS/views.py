@@ -410,3 +410,54 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def profile(request):
     return render(request, 'CDMIS/profile.html')
+
+
+
+
+
+
+# views.py
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from .forms import MemberUploadForm
+from .models import Member
+import openpyxl
+from django.contrib.auth.decorators import user_passes_test
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def upload_members(request):
+    if request.method == 'POST':
+        form = MemberUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['excel_file']
+            wb = openpyxl.load_workbook(excel_file)
+            ws = wb.active
+            rows = list(ws.iter_rows(min_row=2, values_only=True))  # skip header
+
+            for row in rows:
+                first_name = row[0]
+                middle_name = row[1]
+                id_no = row[2]
+                date_of_birth = row[3]
+                gender = row[4]
+                email = row[5] if len(row) > 5 else ''
+                member_role = row[6] if len(row) > 6 else ''
+                disability = row[7] if len(row) > 7 else ''
+
+                Member.objects.update_or_create(
+                    id_no=id_no,
+                    defaults={
+                        'first_name': first_name,
+                        'middle_name': middle_name,
+                        'date_of_birth': date_of_birth,
+                        'gender': gender,
+                        'email': email,
+                        'member_role': member_role,
+                        'disability': disability,
+                    }
+                )
+            messages.success(request, "Members uploaded successfully!")
+            return redirect('cdmis:member_list')
+    else:
+        form = MemberUploadForm()
+    return render(request, 'CDMIS/upload_members.html', {'form': form})
