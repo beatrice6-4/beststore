@@ -66,11 +66,11 @@ from django.db import models
 
 class Member(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='members', null=True, blank=True)
-    first_name = models.CharField(max_length=50)
-    middle_name = models.CharField(max_length=50, blank=True)
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
     id_no = models.CharField(max_length=30, unique=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    gender = models.CharField(max_length=30)
+    gender = models.CharField(max_length=30, null=True, blank=True)
     email = models.EmailField(blank=True, null=True)
     mobile = models.CharField(max_length=15, blank=True, null=True)
     member_role = models.CharField(max_length=50, null=True, blank=True)
