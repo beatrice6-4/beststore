@@ -411,7 +411,7 @@ from django.contrib.auth.decorators import login_required
 def profile(request):
     return render(request, 'CDMIS/profile.html')
 
-
+from .models import Group
 
 
 def group_members(request, group_id):
