@@ -1,22 +1,68 @@
 {% extends 'gov.html' %}
 {% block content %}
-<h2>Add Group</h2>
-<form method="post" class="row g-3 align-items-center">
-    {% csrf_token %}
-    <div class="col-auto">
-        <label for="{{ form.name.id_for_label }}" class="col-form-label">Name</label>
-        {{ form.name }}
-    </div>
-    <div class="col-auto">
-        <label for="{{ form.registration_date.id_for_label }}" class="col-form-label">Registration Date</label>
-        {{ form.registration_date }}
-    </div>
-    <div class="col-auto">
-        <label for="{{ form.description.id_for_label }}" class="col-form-label">Description</label>
-        {{ form.description }}
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary mt-4">Save Group</button>
-    </div>
-</form>
+<style>
+    .group-form-container {
+        max-width: 540px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+        padding: 36px 32px 28px 32px;
+    }
+    .group-form-title {
+        color: #4e54c8;
+        font-weight: 700;
+        margin-bottom: 28px;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+    .form-label {
+        color: #4e54c8;
+        font-weight: 600;
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #e0e0ef;
+        box-shadow: none;
+        transition: border-color 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #4e54c8;
+        box-shadow: 0 0 0 0.1rem #4e54c855;
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        border: none;
+        border-radius: 24px;
+        font-weight: 600;
+        padding: 10px 36px;
+        margin-top: 12px;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        transition: background 0.2s;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+    }
+</style>
+<div class="group-form-container">
+    <h2 class="group-form-title">Add Group</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+            {{ form.name|add_class:"form-control" }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.registration_date.id_for_label }}" class="form-label">Registration Date</label>
+            {{ form.registration_date|add_class:"form-control" }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+            {{ form.description|add_class:"form-control" }}
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Save Group</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
