@@ -414,11 +414,10 @@ def profile(request):
 from .models import Group
 
 
-def group_members(request, group_id):
-    group = get_object_or_404(Group, id=group_id)
-    members = group.members.all()  # Assuming a related_name='members' in Member model's ForeignKey to Group
+def group_members(request, pk):
+    group = get_object_or_404(Group, id=pk)
+    members = group.members.all()  # Assuming related_name='members'
     return render(request, 'CDMIS/group_members.html', {'group': group, 'members': members})
-
 
 # views.py
 from django.contrib import messages
