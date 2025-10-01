@@ -50,15 +50,15 @@
         {% csrf_token %}
         <div class="mb-3">
             <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
-            {{ form.name|add_class:"form-control" }}
+            {{ form.name }}
         </div>
         <div class="mb-3">
             <label for="{{ form.registration_date.id_for_label }}" class="form-label">Registration Date</label>
-            {{ form.registration_date|add_class:"form-control" }}
+            {{ form.registration_date }}
         </div>
         <div class="mb-3">
             <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-            {{ form.description|add_class:"form-control" }}
+            {{ form.description }}
         </div>
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Save Group</button>
