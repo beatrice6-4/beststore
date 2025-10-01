@@ -69,7 +69,7 @@ class Member(models.Model):
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True)
     id_no = models.CharField(max_length=30, unique=True)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=30)
     email = models.EmailField(blank=True)
     member_role = models.CharField(max_length=50)
