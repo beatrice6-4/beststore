@@ -100,38 +100,39 @@
                 </tr>
             </thead>
             <tbody>
-                {% regroup all_payments by payment_date as date_groups %}
                 {% for date_group in date_groups %}
-                    <tr class="date-separator">
-                        <td colspan="6">
-                            {{ date_group.grouper|date:"M d, Y" }}
-                            <a href="{% url 'cdmis:download_payments_by_date' date_group.grouper|date:'Y-m-d' %}" class="btn btn-sm btn-primary download-btn">
-                                <i class="fa fa-download"></i> Download
-                            </a>
-                        </td>
-                    </tr>
-                    {% for payment in date_group.list %}
-                        <tr>
-                            <td>{{ forloop.parentloop.counter }}</td>
-                            <td>{{ payment.group.name }}</td>
-                            <td>Ksh. {{ payment.amount }}</td>
-                            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
-                            <td>{{ payment.added_by.first_name }}</td>
-                            <td>{{ payment.notes }}</td>
-                        </tr>
-                    {% endfor %}
-                    <tr class="date-total-row">
-                        <td colspan="2"></td>
-                        <td colspan="4">
-                            Total for {{ date_group.grouper|date:"M d, Y" }}: 
-                            Ksh. {{ date_totals|dict_get:date_group.grouper }}
-                        </td>
-                    </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">No payments have been made.</td>
-                </tr>
-                {% endfor %}
+    <tr class="date-separator">
+        <td colspan="5">
+            {{ date_group.grouper|date:"M d, Y" }}
+        </td>
+        <td class="text-end">
+            <a href="{% url 'cdmis:download_payments_by_date' date_group.grouper %}" class="btn btn-sm btn-success download-btn">
+                <i class="fa fa-download"></i> Download
+            </a>
+        </td>
+    </tr>
+    {% for payment in date_group.list %}
+        <tr>
+            <td>{{ forloop.parentloop.counter }}</td>
+            <td>{{ payment.group.name }}</td>
+            <td>Ksh. {{ payment.amount }}</td>
+            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+            <td>{{ payment.added_by.first_name }}</td>
+            <td>{{ payment.notes }}</td>
+        </tr>
+    {% endfor %}
+    <tr class="date-total-row">
+        <td colspan="2"></td>
+        <td colspan="4">
+            Total for {{ date_group.grouper|date:"M d, Y" }}: 
+            Ksh. {{ date_totals|dict_get:date_group.grouper }}
+        </td>
+    </tr>
+{% empty %}
+<tr>
+    <td colspan="6" class="text-center">No payments have been made.</td>
+</tr>
+{% endfor %}
             </tbody>
         </table>
     </div>
