@@ -148,8 +148,10 @@ function printGroup(groupId) {
     var win = window.open('', '', 'height=900,width=1200');
     win.document.write('<html><head><title>Payments</title>');
     win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
-    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;width:100%;border-collapse:collapse;} th,td{padding:8px 10px;border:1px solid #ccc;} .date-separator{background:#f1f3fa;color:#2d7a2d;font-weight:700;} .date-total-row{background:#eafbe7;color:#2d7a2d;font-weight:600;}</style>');
+    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;width:100%;border-collapse:collapse;} th,td{padding:8px 10px;border:1px solid #ccc;} .date-separator{background:#f1f3fa;color:#2d7a2d;font-weight:700;} .date-total-row{background:#eafbe7;color:#2d7a2d;font-weight:600;} .gov-logo{text-align:center;margin-bottom:12px;} .gov-logo img{height:70px;} .gov-title{text-align:center;font-size:1.5em;font-weight:700;margin-bottom:18px;}</style>');
     win.document.write('</head><body>');
+    win.document.write('<div class="gov-logo"><img src="/static/images/gov.png" alt="GOV Logo"></div>');
+    win.document.write('<div class="gov-title">Payments</div>');
     win.document.write('<table>' + printContents + '</table>');
     win.document.write('</body></html>');
     win.document.close();
