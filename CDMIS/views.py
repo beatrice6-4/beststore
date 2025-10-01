@@ -449,18 +449,24 @@ def upload_members(request):
                 member_role = row[6] if len(row) > 6 else ''
                 disability = row[7] if len(row) > 7 else ''
 
-                # Handle date_of_birth: convert to string if needed
-                if isinstance(date_of_birth, (datetime.datetime, datetime.date)):
-                    date_of_birth = date_of_birth.strftime('%Y-%m-%d')
+                # Robust date_of_birth handling
+                dob = None
+                if isinstance(date_of_birth, datetime.date):
+                    dob = date_of_birth
+                elif isinstance(date_of_birth, str):
+                    try:
+                        dob = datetime.date.fromisoformat(date_of_birth)
+                    except Exception:
+                        dob = None
                 elif date_of_birth is None:
-                    date_of_birth = None  # or set a default date if you want
+                    dob = None
 
                 Member.objects.update_or_create(
                     id_no=id_no,
                     defaults={
                         'first_name': first_name,
                         'middle_name': middle_name,
-                        'date_of_birth': date_of_birth,
+                        'date_of_birth': dob,
                         'gender': gender,
                         'email': email,
                         'member_role': member_role,
