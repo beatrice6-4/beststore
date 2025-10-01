@@ -100,6 +100,7 @@
                 </tr>
             </thead>
             <tbody>
+                {% regroup all_payments by payment_date as date_groups %}
                 {% for date_group in date_groups %}
                     <tr class="date-separator">
                         <td colspan="5">
