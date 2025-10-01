@@ -29,6 +29,25 @@
             background: rgba(255,255,255,0.08);
             border-left: 4px solid #fff;
         }
+        .submenu {
+            background: rgba(44,62,80,0.08);
+            border-radius: 0 0 8px 8px;
+            margin-left: 10px;
+            margin-bottom: 8px;
+            padding-left: 12px;
+        }
+        .submenu .nav-link {
+            color: #fff;
+            font-size: 1em;
+            padding: 8px 0 8px 16px;
+            border: none;
+            background: none;
+        }
+        .submenu .nav-link.active, .submenu .nav-link:hover {
+            color: #4e54c8;
+            background: #fff;
+            border-radius: 6px;
+        }
         .dashboard-header {
             background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
             color: #fff;
@@ -54,34 +73,6 @@
             font-weight: 600;
             color: #4e54c8;
             margin-bottom: 18px;
-        }
-        .dashboard-section .list-group-item {
-            border: none;
-            padding: 10px 0;
-            font-size: 1em;
-        }
-        .dashboard-section .list-group-item i {
-            color: #4e54c8;
-            margin-right: 8px;
-        }
-        .cdmis-submenu {
-            background: rgba(44,62,80,0.08);
-            border-radius: 0 0 8px 8px;
-            margin-left: 10px;
-            margin-bottom: 8px;
-            padding-left: 12px;
-        }
-        .cdmis-submenu .nav-link {
-            color: #fff;
-            font-size: 1em;
-            padding: 8px 0 8px 16px;
-            border: none;
-            background: none;
-        }
-        .cdmis-submenu .nav-link.active, .cdmis-submenu .nav-link:hover {
-            color: #4e54c8;
-            background: #fff;
-            border-radius: 6px;
         }
         @media (max-width: 900px) {
             .admin-sidebar {
@@ -115,8 +106,28 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="#" onclick="showSection('dashboard-home', this)"><i class="fa fa-tachometer-alt"></i> Dashboard Home</a>
                     </li>
+                    <!-- Accounts Submenu -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('accounts-section', this)"><i class="fa fa-users"></i> Accounts</a>
+                        <a class="nav-link" href="#" onclick="toggleMenu('accounts-submenu', 'accounts-section', this)">
+                            <i class="fa fa-users"></i> Accounts <i class="fa fa-caret-down float-end"></i>
+                        </a>
+                        <ul class="submenu nav flex-column" id="accounts-submenu" style="display:none;">
+                            <li>
+                                <a class="nav-link" href="#" onclick="showAccountsContent('self', this)">
+                                    <i class="fa fa-user-plus"></i> Self Registrations
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showAccountsContent('registered', this)">
+                                    <i class="fa fa-user-check"></i> Registrations
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showAccountsContent('messages', this)">
+                                    <i class="fa fa-envelope"></i> Contact Messages
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showSection('carts-section', this)"><i class="fa fa-shopping-cart"></i> Carts</a>
@@ -124,29 +135,72 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showSection('categories-section', this)"><i class="fa fa-list"></i> Categories</a>
                     </li>
+                    <!-- Orders Submenu -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('orders-section', this)"><i class="fa fa-shopping-bag"></i> Orders</a>
+                        <a class="nav-link" href="#" onclick="toggleMenu('orders-submenu', 'orders-section', this)">
+                            <i class="fa fa-shopping-bag"></i> Orders <i class="fa fa-caret-down float-end"></i>
+                        </a>
+                        <ul class="submenu nav flex-column" id="orders-submenu" style="display:none;">
+                            <li>
+                                <a class="nav-link" href="#" onclick="showOrdersContent('orders', this)">
+                                    <i class="fa fa-shopping-bag"></i> Orders
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showOrdersContent('payments', this)">
+                                    <i class="fa fa-money-bill"></i> Payments
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+                    <!-- Store Submenu -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showSection('store-section', this)"><i class="fa fa-store"></i> Store</a>
+                        <a class="nav-link" href="#" onclick="toggleMenu('store-submenu', 'store-section', this)">
+                            <i class="fa fa-store"></i> Store <i class="fa fa-caret-down float-end"></i>
+                        </a>
+                        <ul class="submenu nav flex-column" id="store-submenu" style="display:none;">
+                            <li>
+                                <a class="nav-link" href="#" onclick="showStoreContent('products', this)">
+                                    <i class="fa fa-box"></i> Products
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="#" onclick="showStoreContent('variations', this)">
+                                    <i class="fa fa-cubes"></i> Variations
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+                    <!-- CDMIS Submenu -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="toggleCdmisMenu(this)"><i class="fa fa-layer-group"></i> CDMIS <i class="fa fa-caret-down float-end"></i></a>
-                        <ul class="cdmis-submenu nav flex-column" id="cdmis-submenu" style="display:none;">
+                        <a class="nav-link" href="#" onclick="toggleMenu('cdmis-submenu', 'cdmis-section', this)">
+                            <i class="fa fa-layer-group"></i> CDMIS <i class="fa fa-caret-down float-end"></i>
+                        </a>
+                        <ul class="submenu nav flex-column" id="cdmis-submenu" style="display:none;">
                             <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('groups', this)"><i class="fa fa-users"></i> Groups</a>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('groups', this)">
+                                    <i class="fa fa-users"></i> Groups
+                                </a>
                             </li>
                             <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('activities', this)"><i class="fa fa-tasks"></i> Activities</a>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('activities', this)">
+                                    <i class="fa fa-tasks"></i> Activities
+                                </a>
                             </li>
                             <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('payments', this)"><i class="fa fa-money-bill"></i> Payments</a>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('payments', this)">
+                                    <i class="fa fa-money-bill"></i> Payments
+                                </a>
                             </li>
                             <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('services', this)"><i class="fa fa-concierge-bell"></i> Services</a>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('services', this)">
+                                    <i class="fa fa-concierge-bell"></i> Services
+                                </a>
                             </li>
                             <li>
-                                <a class="nav-link" href="#" onclick="showCdmisContent('trainings', this)"><i class="fa fa-chalkboard-teacher"></i> Trainings</a>
+                                <a class="nav-link" href="#" onclick="showCdmisContent('trainings', this)">
+                                    <i class="fa fa-chalkboard-teacher"></i> Trainings
+                                </a>
                             </li>
                         </ul>
                     </li>
@@ -163,19 +217,22 @@
                     <h4>Welcome to the Admin Dashboard</h4>
                     <p>Select a section from the sidebar to manage.</p>
                 </div>
+                <!-- Accounts Section -->
                 <div id="accounts-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-users"></i> Accounts Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-user"></i>
-                            <a href="{% url 'cdmis:user_list' %}">Registered Accounts</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-envelope"></i>
-                            <a href="{% url 'cdmis:contact_messages' %}">Contact Messages</a>
-                        </li>
-                    </ul>
+                    <div id="accounts-self" class="accounts-content">
+                        <h4><i class="fa fa-user-plus"></i> Self Registrations</h4>
+                        <a href="{% url 'cdmis:self_registrations' %}">View Self Registrations</a>
+                    </div>
+                    <div id="accounts-registered" class="accounts-content" style="display:none;">
+                        <h4><i class="fa fa-user-check"></i> Registrations</h4>
+                        <a href="{% url 'cdmis:registrations' %}">View Registrations</a>
+                    </div>
+                    <div id="accounts-messages" class="accounts-content" style="display:none;">
+                        <h4><i class="fa fa-envelope"></i> Contact Messages</h4>
+                        <a href="{% url 'cdmis:contact_messages' %}">View Contact Messages</a>
+                    </div>
                 </div>
+                <!-- Carts Section -->
                 <div id="carts-section" class="dashboard-section" style="display:none;">
                     <h4><i class="fa fa-shopping-cart"></i> Carts Management</h4>
                     <ul class="list-group">
@@ -189,6 +246,7 @@
                         </li>
                     </ul>
                 </div>
+                <!-- Categories Section -->
                 <div id="categories-section" class="dashboard-section" style="display:none;">
                     <h4><i class="fa fa-list"></i> Categories Management</h4>
                     <ul class="list-group">
@@ -198,33 +256,29 @@
                         </li>
                     </ul>
                 </div>
+                <!-- Orders Section -->
                 <div id="orders-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-shopping-bag"></i> Orders Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-shopping-bag"></i>
-                            <a href="{% url 'cdmis:order_list' %}">All Orders</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-money-bill"></i>
-                            <a href="#">Payments</a>
-                        </li>
-                    </ul>
+                    <div id="orders-orders" class="orders-content">
+                        <h4><i class="fa fa-shopping-bag"></i> Orders</h4>
+                        <a href="{% url 'cdmis:order_list' %}">View Orders</a>
+                    </div>
+                    <div id="orders-payments" class="orders-content" style="display:none;">
+                        <h4><i class="fa fa-money-bill"></i> Payments</h4>
+                        <a href="{% url 'cdmis:payment_list' %}">View Payments</a>
+                    </div>
                 </div>
+                <!-- Store Section -->
                 <div id="store-section" class="dashboard-section" style="display:none;">
-                    <h4><i class="fa fa-store"></i> Store Management</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fa fa-box"></i>
-                            <a href="#">Products</a>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fa fa-cubes"></i>
-                            <a href="#">Product Variations</a>
-                        </li>
-                    </ul>
+                    <div id="store-products" class="store-content">
+                        <h4><i class="fa fa-box"></i> Products</h4>
+                        <a href="{% url 'cdmis:product_list' %}">Manage Products</a>
+                    </div>
+                    <div id="store-variations" class="store-content" style="display:none;">
+                        <h4><i class="fa fa-cubes"></i> Variations</h4>
+                        <a href="{% url 'cdmis:variation_list' %}">Manage Variations</a>
+                    </div>
                 </div>
-                <!-- CDMIS Main Section -->
+                <!-- CDMIS Section -->
                 <div id="cdmis-section" class="dashboard-section" style="display:none;">
                     <div id="cdmis-groups" class="cdmis-content">
                         <h4><i class="fa fa-users"></i> Groups</h4>
@@ -263,28 +317,55 @@ function showSection(sectionId, el) {
     links.forEach(function(link) { link.classList.remove('active'); });
     // Set active on clicked link
     if(el) el.classList.add('active');
-    // Hide CDMIS submenu if not CDMIS
-    if(sectionId !== 'cdmis-section') {
-        document.getElementById('cdmis-submenu').style.display = 'none';
-    }
+    // Hide all submenus
+    ['accounts-submenu','orders-submenu','store-submenu','cdmis-submenu'].forEach(function(id){
+        document.getElementById(id).style.display = 'none';
+    });
 }
-function toggleCdmisMenu(el) {
-    showSection('cdmis-section', el);
-    var submenu = document.getElementById('cdmis-submenu');
+function toggleMenu(submenuId, sectionId, el) {
+    showSection(sectionId, el);
+    // Hide other submenus
+    ['accounts-submenu','orders-submenu','store-submenu','cdmis-submenu'].forEach(function(id){
+        if(id !== submenuId) document.getElementById(id).style.display = 'none';
+    });
+    var submenu = document.getElementById(submenuId);
     submenu.style.display = submenu.style.display === 'none' ? '' : 'none';
-    // Show Groups by default
-    showCdmisContent('groups');
+    // Show first sub-content by default
+    if(submenuId === 'accounts-submenu') showAccountsContent('self');
+    if(submenuId === 'orders-submenu') showOrdersContent('orders');
+    if(submenuId === 'store-submenu') showStoreContent('products');
+    if(submenuId === 'cdmis-submenu') showCdmisContent('groups');
+}
+function showAccountsContent(subsection, el) {
+    var contents = document.querySelectorAll('.accounts-content');
+    contents.forEach(function(sec) { sec.style.display = 'none'; });
+    document.getElementById('accounts-' + subsection).style.display = '';
+    var submenuLinks = document.querySelectorAll('#accounts-submenu .nav-link');
+    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
+    if(el) el.classList.add('active');
+}
+function showOrdersContent(subsection, el) {
+    var contents = document.querySelectorAll('.orders-content');
+    contents.forEach(function(sec) { sec.style.display = 'none'; });
+    document.getElementById('orders-' + subsection).style.display = '';
+    var submenuLinks = document.querySelectorAll('#orders-submenu .nav-link');
+    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
+    if(el) el.classList.add('active');
+}
+function showStoreContent(subsection, el) {
+    var contents = document.querySelectorAll('.store-content');
+    contents.forEach(function(sec) { sec.style.display = 'none'; });
+    document.getElementById('store-' + subsection).style.display = '';
+    var submenuLinks = document.querySelectorAll('#store-submenu .nav-link');
+    submenuLinks.forEach(function(link) { link.classList.remove('active'); });
+    if(el) el.classList.add('active');
 }
 function showCdmisContent(subsection, el) {
-    // Hide all CDMIS content
-    var cdmisContents = document.querySelectorAll('.cdmis-content');
-    cdmisContents.forEach(function(sec) { sec.style.display = 'none'; });
-    // Show selected subsection
+    var contents = document.querySelectorAll('.cdmis-content');
+    contents.forEach(function(sec) { sec.style.display = 'none'; });
     document.getElementById('cdmis-' + subsection).style.display = '';
-    // Remove active from all submenu links
     var submenuLinks = document.querySelectorAll('#cdmis-submenu .nav-link');
     submenuLinks.forEach(function(link) { link.classList.remove('active'); });
-    // Set active on clicked submenu link
     if(el) el.classList.add('active');
 }
 </script>
