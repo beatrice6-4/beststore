@@ -487,8 +487,8 @@ def category_list(request):
 
 @admin_required
 def order_list(request):
-    # orders = Order.objects.all()
-    return render(request, 'accounts/order_list.html')
+    orders = Order.objects.all().order_by('-created_at')  # Fetch all orders, newest first
+    return render(request, 'accounts/order_list.html', {'orders': orders})
 
 @admin_required
 def payment_list(request):

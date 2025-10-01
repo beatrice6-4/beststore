@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Minimal Admin Dashboard</title>
+    <title> Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
@@ -110,8 +110,9 @@
         <ul class="nav">
             <li><a class="nav-link active" onclick="showSection('accounts')">Accounts</a></li>
             <li><a class="nav-link" onclick="showSection('carts')">Carts</a></li>
-            <li><a class="nav-link" onclick="showSection('orders')">Orders</a></li>
-            <li><a class="nav-link" onclick="showSection('store')">Store</a></li>
+           <li><a class="nav-link" href="{% url 'order_list' %}">Orders</a></li>
+            <li><a class="nav-link" href="{% url 'store' %}">Store</a></li>
+            
         </ul>
     </nav>
     <main class="main-content">

@@ -1,0 +1,36 @@
+{% extends "admin_dashboard.html" %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Orders</title>
+</head>
+<body>
+    <h2>Orders List</h2>
+    <p>This is the orders page.</p>
+    {% if orders %}
+        <table border="1">
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Product</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+            {% for order in orders %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.user }}</td>
+                <td>{{ order.product }}</td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No orders found.</p>
+    {% endif %}
+</body>
+</html>
+{% endblock %}
