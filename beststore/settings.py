@@ -40,7 +40,7 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to Mama Maasai Bakers Admin",
     "copyright": "Mama Maasai Bakers © 2025",
     "search_model": ["accounts.Account", "store.Product", "orders.Order"],
-    "user_avatar": "profile.avatar",
+    "user_avatar": "accounts/static/images/logo.png",
 
     "show_sidebar": True,
     "navigation_expanded": True,
