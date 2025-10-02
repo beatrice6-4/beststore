@@ -44,12 +44,15 @@
         overflow: hidden;
         box-shadow: 0 2px 12px rgba(44,62,80,0.06);
         margin-bottom: 24px;
+        border: 1px solid #e0e0ef;
+    }
+    .finance-table th, .finance-table td {
+        border: 1px solid #e0e0ef !important;
     }
     .finance-table thead th {
         background: #f3f3fa;
         color: #4e54c8;
         font-weight: 700;
-        border-bottom: 2px solid #e0e0ef;
         font-size: 1.08em;
     }
     .finance-table tbody tr.date-row {
@@ -127,16 +130,12 @@
         </div>
     </form>
 
-    <table class="table finance-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Group</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-        </table>
-    </table>
+    <table class="table finance-table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Group</th>
+                <th>Amount</th>
             </tr>
         </thead>
         <tbody>
@@ -171,7 +170,6 @@
 
 <script>
 function printSelectedFinance() {
-    // Get checked dates
     var checked = document.querySelectorAll('input[name="dates"]:checked');
     var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
 
@@ -180,7 +178,6 @@ function printSelectedFinance() {
         return;
     }
 
-    // Prepare printable HTML
     var printable = '<div style="text-align:center; margin-bottom:20px;">' +
         '<img src="{% static "images/gov.png" %}" alt="Logo" style="height:80px;">' +
         '<h2 style="margin-top:10px;">Financial Summary</h2></div>' +
