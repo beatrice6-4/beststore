@@ -30,6 +30,58 @@ INSTALLED_APPS = [
     'CDMIS',
 ]
 
+
+
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Mama Maasai Bakers Admin",
+    "site_header": "Mama Maasai Bakers",
+    "site_brand": "Mama Maasai Bakers",
+    "welcome_sign": "Welcome to Mama Maasai Bakers Admin",
+    "copyright": "Mama Maasai Bakers © 2025",
+    "search_model": ["accounts.Account", "store.Product", "orders.Order"],
+    "user_avatar": "profile.avatar",
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["accounts", "store", "orders", "finance", "CDMIS"],
+
+    "custom_links": {
+        "accounts": [{
+            "name": "User Guide",
+            "url": "https://mamamaasaibakers.com/help/",
+            "icon": "fas fa-book",
+            "target": "_blank",
+        }]
+    },
+
+    "icons": {
+        "accounts.Account": "fas fa-user",
+        "store.Product": "fas fa-bread-slice",
+        "orders.Order": "fas fa-shopping-cart",
+        "finance.Payment": "fas fa-money-bill-wave",
+        "CDMIS.Group": "fas fa-users",
+        "CDMIS.Member": "fas fa-user-friends",
+    },
+
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "accounts.Account": "single",
+        "store.Product": "collapsible",
+    },
+
+    "show_ui_builder": True,
+
+    "theme": "cosmo",  # Try "cosmo", "flatly", "darkly", "cyborg", etc.
+
+    "custom_css": None,  # Path to your custom CSS file in static if needed
+    "custom_js": None,   # Path to your custom JS file in static if needed
+}
+
+
+
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
