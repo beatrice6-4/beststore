@@ -2,59 +2,147 @@
 {% load static %}
 {% block content %}
 <style>
-    .download-btn {
-        float: right;
-        margin-bottom: 18px;
+    .finance-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+        padding: 32px 24px;
+        margin: 40px auto;
+        max-width: 900px;
     }
-    @media (max-width: 600px) {
-        .download-btn { float: none; width: 100%; margin-bottom: 14px; }
+    .finance-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+    .finance-header h2 {
+        color: #004080;
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+    .download-btn {
+        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 8px 28px;
+        transition: background 0.2s;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        font-size: 1.08em;
+    }
+    .download-btn:hover {
+        background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+        color: #fff;
+    }
+    .finance-table {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+        margin-bottom: 24px;
+    }
+    .finance-table thead th {
+        background: #f3f3fa;
+        color: #4e54c8;
+        font-weight: 700;
+        border-bottom: 2px solid #e0e0ef;
+        font-size: 1.08em;
+    }
+    .finance-table tbody tr.date-row {
+        background: #eafbe7;
+        color: #2d7a2d;
+        font-weight: 600;
+    }
+    .finance-table tbody tr.payment-row {
+        background: #f7f8fa;
+    }
+    .finance-table tbody tr.payment-row:nth-of-type(even) {
+        background: #f3f3fa;
+    }
+    .grand-total-card {
+        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        color: #fff;
+        border-radius: 12px;
+        padding: 18px 24px;
+        font-size: 1.3em;
+        font-weight: 700;
+        text-align: center;
+        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+        margin-bottom: 24px;
+    }
+    .gov-logo {
+        display: block;
+        margin: 0 auto 18px auto;
+        height: 80px;
+    }
+    @media (max-width: 700px) {
+        .finance-card {
+            padding: 16px 4px;
+        }
+        .finance-header h2 {
+            font-size: 1.3rem;
+        }
+        .download-btn {
+            padding: 8px 12px;
+            font-size: 1em;
+        }
+        .grand-total-card {
+            font-size: 1em;
+            padding: 12px 8px;
+        }
     }
 </style>
 
-<!-- Download Button -->
-<button class="btn btn-outline-success download-btn" onclick="printFinance()">
-    <i class="fa fa-download"></i> Download Finance Summary
-</button>
+<div class="finance-card">
+    <img src="{% static 'images/gov.png' %}" alt="Logo" class="gov-logo">
+    <div class="finance-header">
+        <h2><i class="fa fa-coins me-2 text-success"></i> Financial Summary</h2>
+        <button class="download-btn" onclick="printFinance()">
+            <i class="fa fa-download"></i> Download / Print
+        </button>
+    </div>
 
-<h2 class="text-center mb-4">Financial Summary</h2>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Group</th>
-            <th>Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in finance_list %}
-            <tr style="background:#eafbe7;">
-                <td colspan="3"><strong>{{ item.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ item.date_total }}</span></td>
-            </tr>
-            {% for payment in item.payments %}
+    <table class="table finance-table">
+        <thead>
             <tr>
-                <td></td>
-                <td>{{ payment.group }}</td>
-                <td>{{ payment.amount }}</td>
+                <th>Date</th>
+                <th>Group</th>
+                <th>Amount</th>
             </tr>
+        </thead>
+        <tbody>
+            {% for item in finance_list %}
+                <tr class="date-row">
+                    <td colspan="3">
+                        <i class="fa fa-calendar-alt text-success"></i>
+                        <strong>{{ item.date }}</strong>
+                        <span class="float-end" style="color:#2d7a2d;">
+                            <i class="fa fa-sack-dollar"></i> Total: {{ item.date_total }}
+                        </span>
+                    </td>
+                </tr>
+                {% for payment in item.payments %}
+                <tr class="payment-row">
+                    <td></td>
+                    <td><i class="fa fa-users text-primary"></i> {{ payment.group }}</td>
+                    <td>Ksh. {{ payment.amount }}</td>
+                </tr>
+                {% endfor %}
+            {% empty %}
+                <tr><td colspan="3" class="text-center">No payments found.</td></tr>
             {% endfor %}
-        {% empty %}
-            <tr><td colspan="3">No payments found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-<table class="table table-bordered mt-4">
-    <thead>
-        <tr>
-            <th>Grand Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ grand_total }}</td>
-        </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+
+    <div class="grand-total-card">
+        <i class="fa fa-calculator me-2"></i>
+        Grand Total: Ksh. {{ grand_total }}
+    </div>
+</div>
 
 <!-- Hidden printable section -->
 <div id="printable-finance" style="display:none;">

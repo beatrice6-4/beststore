@@ -177,6 +177,17 @@ class ServiceCreateView(CreateView):
 
 
 
+from django import forms
+from django.http import HttpResponse
+
+class FinanceDateForm(forms.Form):
+    dates = forms.MultipleChoiceField(
+        choices=[],
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select Dates"
+    )
+
 class FinanceView(UserPassesTestMixin, View):
     template_name = 'CDMIS/finance.html'
 
@@ -191,16 +202,16 @@ class FinanceView(UserPassesTestMixin, View):
         from collections import defaultdict
         from .models import Group, Payment
 
-        # Fetch all payments, group by date
         payments = Payment.objects.select_related('group').order_by('payment_date')
         finance_data = defaultdict(list)
+        date_choices = set()
         for payment in payments:
             finance_data[payment.payment_date].append({
                 'group': payment.group.name,
                 'amount': payment.amount
             })
+            date_choices.add(payment.payment_date)
 
-        # Prepare list for template: [{date, payments: [{group, amount}], date_total}]
         finance_list = []
         for date, items in finance_data.items():
             date_total = sum(item['amount'] for item in items)
@@ -211,14 +222,50 @@ class FinanceView(UserPassesTestMixin, View):
             })
         finance_list.sort(key=lambda x: x['date'])
 
-        # Grand total
         grand_total = payments.aggregate(total=Sum('amount'))['total'] or 0
+
+        # Prepare date choices for the form
+        date_choices = sorted(list(date_choices))
+        form = FinanceDateForm()
+        form.fields['dates'].choices = [(str(d), d.strftime("%b %d, %Y")) for d in date_choices]
 
         return render(request, self.template_name, {
             'finance_list': finance_list,
             'grand_total': grand_total,
+            'form': form,
         })
-    
+
+    def post(self, request, *args, **kwargs):
+        # Handle download request
+        form = FinanceDateForm(request.POST)
+        payments = Payment.objects.select_related('group').order_by('payment_date')
+        date_choices = sorted(set(payment.payment_date for payment in payments))
+        form.fields['dates'].choices = [(str(d), d.strftime("%b %d, %Y")) for d in date_choices]
+
+        if form.is_valid():
+            selected_dates = form.cleaned_data['dates']
+            selected_payments = payments.filter(payment_date__in=selected_dates)
+
+            # Prepare CSV response
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename=finance_summary.csv'
+            import csv
+            writer = csv.writer(response)
+            writer.writerow(['Date', 'Group', 'Amount'])
+            total = 0
+            for payment in selected_payments:
+                writer.writerow([
+                    payment.payment_date.strftime("%Y-%m-%d"),
+                    payment.group.name,
+                    payment.amount
+                ])
+                total += payment.amount
+            writer.writerow([])
+            writer.writerow(['', 'Total', total])
+            return response
+
+        # If form is not valid, re-render page
+        return self.get(request)
 
 
 
