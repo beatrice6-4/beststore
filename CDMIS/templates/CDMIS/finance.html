@@ -102,9 +102,30 @@
     <div class="finance-header">
         <h2><i class="fa fa-coins me-2 text-success"></i> Financial Summary</h2>
         <button class="download-btn" onclick="printFinance()">
-            <i class="fa fa-download"></i> Download / Print
+            <i class="fa fa-print"></i> Print
         </button>
     </div>
+
+    <!-- Date selection form for CSV download -->
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="card p-3 mb-3">
+            <h5><i class="fa fa-calendar-alt text-primary"></i> Download Finance Summary by Date</h5>
+            <div class="row">
+                {% for item in finance_list %}
+                    <div class="col-md-3 col-6 mb-2">
+                        <label>
+                            <input type="checkbox" name="dates" value="{{ item.date }}">
+                            {{ item.date }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-success mt-2">
+                <i class="fa fa-download"></i> Download Selected Dates Summary
+            </button>
+        </div>
+    </form>
 
     <table class="table finance-table">
         <thead>
@@ -150,25 +171,6 @@
         <img src="{% static 'images/gov.png' %}" alt="Logo" style="height:80px;">
         <h2 style="margin-top:10px;">Financial Summary</h2>
     </div>
-    <form method="post" class="mb-4">
-    {% csrf_token %}
-    <div class="card p-3 mb-3">
-        <h5><i class="fa fa-calendar-alt text-primary"></i> Download Finance Summary by Date</h5>
-        <div class="row">
-            {% for item in finance_list %}
-                <div class="col-md-3 col-6 mb-2">
-                    <label>
-                        <input type="checkbox" name="dates" value="{{ item.date }}">
-                        {{ item.date }}
-                    </label>
-                </div>
-            {% endfor %}
-        </div>
-        <button type="submit" class="btn btn-success mt-2">
-            <i class="fa fa-download"></i> Download Selected Dates Summary
-        </button>
-    </div>
-</form>
     <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">
         <thead style="background:#eafbe7; color:#2d7a2d;">
             <tr>
