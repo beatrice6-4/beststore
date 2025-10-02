@@ -9,7 +9,7 @@ SECRET_KEY = 'django-insecure-^+e$ae-he)jy#6e0d(h*+0-c=*j9%)v_a$z6y#-6qxsxuq&ydb
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['mamamaasaibakers.com' ]
 
 INSTALLED_APPS = [
     'django_adminlte3',
