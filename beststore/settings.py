@@ -74,7 +74,7 @@ JAZZMIN_SETTINGS = {
 
     "show_ui_builder": True,
 
-    "theme": "cosmo",  # Try "cosmo", "flatly", "darkly", "cyborg", etc.
+    "theme": "green",  # Try "cosmo", "flatly", "green", "cyborg", etc.
 
     "custom_css": None,  # Path to your custom CSS file in static if needed
     "custom_js": None,   # Path to your custom JS file in static if needed
