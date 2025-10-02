@@ -16,23 +16,33 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: linear-gradient(135deg, #f5f7fa 0%, #eaf6fb 100%);
         }
         header {
-            background-color: #4ff005;
+            background: linear-gradient(90deg, #4ff005 0%, #004080 100%);
             color: white;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.07);
         }
         .header-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            padding: 18px 32px;
         }
         .logo img {
-            height: 40px;
+            height: 48px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(232,15,15,0.08);
+        }
+        .logo h4 {
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0;
         }
         .hamburger {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -42,35 +52,47 @@
             cursor: pointer;
         }
         .hamburger .bar {
-            width: 26px;
+            width: 28px;
             height: 4px;
             margin: 4px 0;
             background-color: white;
             border-radius: 2px;
+            transition: all 0.3s;
         }
         .sidebar {
-            background-color: #003366;
+            background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
             color: white;
-            width: 220px;
+            width: 230px;
             min-height: 100vh;
             transition: transform 0.3s ease;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
         }
         .sidebar nav a {
             color: white;
-            padding: 12px 20px;
-            display: block;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             text-decoration: none;
+            font-size: 1.08em;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            transition: background 0.2s, color 0.2s;
         }
-        .sidebar nav a:hover {
-            background-color: #005599;
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #fff;
+            color: #004080;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
         .sidebar.collapsed {
             transform: translateX(-100%);
         }
         .main-content {
             flex-grow: 1;
-            padding: 30px;
+            padding: 36px 32px;
             background-color: #f5f7fa;
+            min-height: 80vh;
         }
         .content-wrapper {
             display: flex;
@@ -88,16 +110,34 @@
         }
         footer {
             text-align: center;
-            padding: 12px;
-            background-color: #003366;
+            padding: 16px;
+            background: linear-gradient(90deg, #004080 0%, #4ff005 100%);
             color: white;
+            font-size: 1.08em;
+            letter-spacing: 1px;
+            box-shadow: 0 -2px 8px rgba(44,62,80,0.07);
+        }
+        .header-inner .d-flex.align-items-center span,
+        .header-inner .d-flex.align-items-center a {
+            font-size: 1.08em;
+        }
+        .header-inner .d-flex.align-items-center a {
+            margin-left: 8px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .header-inner .d-flex.align-items-center a:hover {
+            background: #fff;
+            color: #004080;
+            text-decoration: none;
         }
 
         @media (max-width: 900px) {
             .sidebar {
                 position: fixed;
                 top: 0;
-                left: -220px;
+                left: -230px;
                 height: 100%;
                 z-index: 1050;
                 box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
@@ -119,10 +159,19 @@
                 padding: 10px 7px;
             }
             .logo img {
-                height: 30px;
+                height: 32px;
             }
             .main-content {
                 padding: 10px 2vw 8px 2vw;
+            }
+            .sidebar {
+                width: 100vw;
+                min-width: 100vw;
+                padding-top: 60px;
+            }
+            .sidebar nav a {
+                font-size: 1em;
+                padding: 12px 10vw;
             }
         }
     </style>
@@ -144,10 +193,10 @@
                 </div>
             </div>
             <div class="d-flex align-items-center">
-                <span>Welcome, {{ user.username }}</span>
+                <span><i class="fa fa-user-circle me-1"></i> Welcome, {{ user.username }}</span>
                 <span class="mx-2">|</span>
-                <a href="{% url 'cdmis:profile' %}" class="text-white text-decoration-none me-3">Profile</a>
-                <a href="{% url 'logout' %}" class="text-white text-decoration-none">Logout</a>
+                <a href="{% url 'cdmis:profile' %}" class="text-white text-decoration-none me-3"><i class="fa fa-user"></i> Profile</a>
+                <a href="{% url 'logout' %}" class="text-white text-decoration-none"><i class="fa fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
     </header>
