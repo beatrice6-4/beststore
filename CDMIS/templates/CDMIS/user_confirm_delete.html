@@ -1,15 +1,92 @@
 {% extends 'gov.html' %}
 {% block content %}
-<div class="container mt-5" style="max-width: 500px;">
-    <h2 class="mb-4 text-center text-danger">Delete User</h2>
-    <div class="alert alert-warning text-center">
-        <strong>Are you sure you want to delete this user?</strong>
+<style>
+    .delete-user-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(232,15,15,0.10);
+        padding: 36px 28px;
+        margin: 60px auto;
+        max-width: 480px;
+        border-top: 6px solid #e80f0f;
+    }
+    .delete-user-title {
+        color: #e80f0f;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 18px;
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+    .delete-user-alert {
+        background: linear-gradient(90deg, #fffbe6 0%, #ffe6e6 100%);
+        color: #d35400;
+        border-radius: 8px;
+        padding: 16px 10px;
+        font-size: 1.15em;
+        margin-bottom: 22px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(232,15,15,0.06);
+    }
+    .delete-user-actions {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        margin-top: 18px;
+    }
+    .btn-danger {
+        background: linear-gradient(90deg, #e80f0f 0%, #c0392b 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 8px 28px;
+        font-size: 1.08em;
+        box-shadow: 0 2px 8px rgba(232,15,15,0.08);
+        transition: background 0.2s;
+    }
+    .btn-danger:hover {
+        background: linear-gradient(90deg, #c0392b 0%, #e80f0f 100%);
+        color: #fff;
+    }
+    .btn-secondary {
+        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 8px 28px;
+        font-size: 1.08em;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        transition: background 0.2s;
+    }
+    .btn-secondary:hover {
+        background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+        color: #fff;
+    }
+    @media (max-width: 600px) {
+        .delete-user-card {
+            padding: 18px 4px;
+        }
+        .delete-user-title {
+            font-size: 1.3rem;
+        }
+        .delete-user-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+<div class="delete-user-card">
+    <h2 class="delete-user-title"><i class="fa fa-user-times me-2"></i>Delete User</h2>
+    <div class="delete-user-alert">
+        <strong><i class="fa fa-exclamation-triangle me-2"></i>Are you sure you want to delete this user?</strong>
     </div>
     <form method="post">
         {% csrf_token %}
-        <div class="text-center">
-            <button type="submit" class="btn btn-danger">Yes, Delete</button>
-            <a href="{% url 'cdmis:member_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+        <div class="delete-user-actions">
+            <button type="submit" class="btn btn-danger"><i class="fa fa-trash-alt me-2"></i>Yes, Delete</button>
+            <a href="{% url 'cdmis:member_list' %}" class="btn btn-secondary"><i class="fa fa-times-circle me-2"></i>Cancel</a>
         </div>
     </form>
 </div>
