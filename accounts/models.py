@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
 class MyAccountManager(BaseUserManager):
@@ -38,7 +38,7 @@ class MyAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class Account(AbstractBaseUser):
+class Account(AbstractUser):
     class Role(models.TextChoices):
         ADMINISTRATOR = 'administrator', 'Administrator'
         FINANCE = 'finance', 'Finance'
