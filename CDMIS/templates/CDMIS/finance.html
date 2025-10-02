@@ -101,13 +101,13 @@
     <img src="{% static 'images/gov.png' %}" alt="Logo" class="gov-logo">
     <div class="finance-header">
         <h2><i class="fa fa-coins me-2 text-success"></i> Financial Summary</h2>
-        <button class="download-btn" onclick="printFinance()">
-            <i class="fa fa-print"></i> Print
+        <button class="download-btn" onclick="printSelectedFinance()">
+            <i class="fa fa-print"></i> Print Selected Dates
         </button>
     </div>
 
-    <!-- Date selection form for CSV download -->
-    <form method="post" class="mb-4">
+    <!-- Date selection form for CSV download and print -->
+    <form method="post" id="datesForm" class="mb-4">
         {% csrf_token %}
         <div class="card p-3 mb-3">
             <h5><i class="fa fa-calendar-alt text-primary"></i> Download Finance Summary by Date</h5>
@@ -165,60 +165,48 @@
     </div>
 </div>
 
-<!-- Hidden printable section -->
-<div id="printable-finance" style="display:none;">
-    <div style="text-align:center; margin-bottom:20px;">
-        <img src="{% static 'images/gov.png' %}" alt="Logo" style="height:80px;">
-        <h2 style="margin-top:10px;">Financial Summary</h2>
-    </div>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">
-        <thead style="background:#eafbe7; color:#2d7a2d;">
-            <tr>
-                <th>Date</th>
-                <th>Group</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in finance_list %}
-                <tr style="background:#eafbe7;">
-                    <td colspan="3"><strong>{{ item.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ item.date_total }}</span></td>
-                </tr>
-                {% for payment in item.payments %}
-                <tr>
-                    <td></td>
-                    <td>{{ payment.group }}</td>
-                    <td>{{ payment.amount }}</td>
-                </tr>
-                {% endfor %}
-            {% empty %}
-                <tr><td colspan="3">No payments found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
-        <thead style="background:#eafbe7; color:#2d7a2d;">
-            <tr>
-                <th>Grand Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ grand_total }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
 <script>
-function printFinance() {
-    var printContents = document.getElementById('printable-finance').innerHTML;
+function printSelectedFinance() {
+    // Get checked dates
+    var checked = document.querySelectorAll('input[name="dates"]:checked');
+    var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
+
+    if (selectedDates.length === 0) {
+        alert("Please select at least one date to print.");
+        return;
+    }
+
+    // Prepare printable HTML
+    var printable = '<div style="text-align:center; margin-bottom:20px;">' +
+        '<img src="{% static "images/gov.png" %}" alt="Logo" style="height:80px;">' +
+        '<h2 style="margin-top:10px;">Financial Summary</h2></div>' +
+        '<table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">' +
+        '<thead style="background:#eafbe7; color:#2d7a2d;"><tr><th>Date</th><th>Group</th><th>Amount</th></tr></thead><tbody>';
+
+    var grandTotal = 0;
+
+    {% for item in finance_list %}
+        if (selectedDates.includes("{{ item.date }}")) {
+            var dateTotal = {{ item.date_total }};
+            grandTotal += dateTotal;
+            printable += '<tr style="background:#eafbe7;"><td colspan="3"><strong>{{ item.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ item.date_total }}</span></td></tr>';
+            {% for payment in item.payments %}
+                printable += '<tr><td></td><td>{{ payment.group }}</td><td>{{ payment.amount }}</td></tr>';
+            {% endfor %}
+        }
+    {% endfor %}
+
+    printable += '</tbody></table>';
+    printable += '<table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">' +
+        '<thead style="background:#eafbe7; color:#2d7a2d;"><tr><th>Grand Total</th></tr></thead>' +
+        '<tbody><tr><td>' + grandTotal + '</td></tr></tbody></table>';
+
     var win = window.open('', '', 'height=900,width=1200');
     win.document.write('<html><head><title>Financial Summary</title>');
     win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
     win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
     win.document.write('</head><body>');
-    win.document.write(printContents);
+    win.document.write(printable);
     win.document.write('</body></html>');
     win.document.close();
     win.focus();
