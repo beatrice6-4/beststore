@@ -12,7 +12,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
-    'adminlte3',
+    'django_adminlte3',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
