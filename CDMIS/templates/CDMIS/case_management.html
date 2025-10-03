@@ -1,0 +1,113 @@
+{% extends 'gov.html' %}
+{% block content %}
+<style>
+    .case-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+        padding: 36px 28px;
+        margin: 40px auto;
+        max-width: 600px;
+    }
+    .case-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    .case-header h2 {
+        color: #004080;
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+    .case-header p {
+        color: #2d7a2d;
+        font-size: 1.1em;
+        margin-bottom: 0;
+    }
+    .case-form label {
+        font-weight: 600;
+        color: #004080;
+        margin-bottom: 4px;
+    }
+    .case-form .form-control, .case-form .form-select {
+        border-radius: 8px;
+        border: 1px solid #e0e0ef;
+        margin-bottom: 16px;
+        font-size: 1.05em;
+    }
+    .case-form textarea {
+        min-height: 80px;
+    }
+    .case-btn {
+        background: linear-gradient(90deg, #4ff005 0%, #004080 100%);
+        color: #fff;
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 10px 32px;
+        font-size: 1.1em;
+        border: none;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        transition: background 0.2s;
+    }
+    .case-btn:hover {
+        background: linear-gradient(90deg, #004080 0%, #4ff005 100%);
+        color: #fff;
+    }
+    .case-message {
+        margin-bottom: 18px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #eafbe7;
+        color: #2d7a2d;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+    }
+    @media (max-width: 700px) {
+        .case-card {
+            padding: 16px 4px;
+        }
+        .case-header h2 {
+            font-size: 1.3rem;
+        }
+        .case-btn {
+            padding: 8px 12px;
+            font-size: 1em;
+        }
+    }
+</style>
+<div class="case-card">
+    <div class="case-header">
+        <h2><i class="fa fa-briefcase me-2"></i>Case Management</h2>
+        <p>Manage group cases: office bearers, members, corrections</p>
+    </div>
+    {% if message %}
+        <div class="case-message">
+            <i class="fa fa-check-circle me-2"></i>{{ message }}
+        </div>
+    {% endif %}
+    <form method="post" class="case-form">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.case_type.label_tag }}
+            {{ form.case_type }}
+        </div>
+        <div class="mb-3">
+            {{ form.group.label_tag }}
+            {{ form.group }}
+        </div>
+        <div class="mb-3">
+            {{ form.member.label_tag }}
+            {{ form.member }}
+        </div>
+        <div class="mb-3">
+            {{ form.details.label_tag }}
+            {{ form.details }}
+        </div>
+        <button type="submit" class="case-btn">
+            <i class="fa fa-save me-2"></i>Submit Case
+        </button>
+    </form>
+</div>
+{% endblock %}

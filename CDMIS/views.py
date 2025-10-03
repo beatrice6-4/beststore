@@ -567,3 +567,61 @@ def cdmis_reports(request):
         'total_trainings': total_trainings,
     }
     return render(request, 'CDMIS/reports.html', context)
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import user_passes_test
+from django import forms
+from .models import Group, Member
+
+# --- Case Management Form ---
+class CaseManagementForm(forms.Form):
+    CASE_CHOICES = [
+        ('change_office_bearers', 'Change of Office Bearers'),
+        ('add_member', 'Addition of Group Member'),
+        ('exit_member', 'Exit of Group Member'),
+        ('correct_member', 'Correction of Member Details'),
+    ]
+    case_type = forms.ChoiceField(choices=CASE_CHOICES, label="Case Type")
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), label="Group")
+    member = forms.ModelChoiceField(queryset=Member.objects.all(), required=False, label="Member (if applicable)")
+    details = forms.CharField(widget=forms.Textarea, required=False, label="Details / Notes")
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def case_management(request):
+    form = CaseManagementForm(request.POST or None)
+    message = None
+
+    if request.method == 'POST' and form.is_valid():
+        case_type = form.cleaned_data['case_type']
+        group = form.cleaned_data['group']
+        member = form.cleaned_data.get('member')
+        details = form.cleaned_data.get('details')
+
+        # Example logic for each case type
+        if case_type == 'change_office_bearers':
+            # You would implement logic to change office bearers here
+            message = f"Office bearers for group '{group.name}' have been updated."
+        elif case_type == 'add_member':
+            # You would implement logic to add a member here
+            message = f"Member added to group '{group.name}'."
+        elif case_type == 'exit_member':
+            # You would implement logic to remove a member here
+            if member:
+                message = f"Member '{member.first_name} {member.last_name}' exited from group '{group.name}'."
+            else:
+                message = "Please select a member to exit."
+        elif case_type == 'correct_member':
+            # You would implement logic to correct member details here
+            if member:
+                message = f"Details for member '{member.first_name} {member.last_name}' have been corrected."
+            else:
+                message = "Please select a member to correct."
+
+        # You can save a Case record or log here if you have a Case model
+
+    return render(request, 'CDMIS/case_management.html', {
+        'form': form,
+        'message': message,
+    })

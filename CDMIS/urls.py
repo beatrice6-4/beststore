@@ -27,6 +27,7 @@ urlpatterns = [
     path('users/<int:pk>/activate/', views.activate_user, name='user_activate'),
     path('orders/', views.order_list, name='order_list'),
     path('reports/', views.cdmis_reports, name='reports'),
+    path('case-management/', views.case_management, name='case_management'),
 
 
     path('orders/', views.order_list, name='order_list'),
