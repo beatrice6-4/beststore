@@ -158,6 +158,8 @@
             <a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> <span>Cart</span></a>
             <a href="{% url 'myOrders' %}"><i class="fa fa-box"></i> <span>Orders</span></a>
             <a href="{% url 'contact' %}"><i class="fa fa-envelope"></i> <span>Contact Us</span></a>
+            <a href="{% url 'about' %}"><i class="fa fa-info-circle"></i> <span>About Us</span></a>
+            <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i> <span>Community Groups</span></a>
             {% if user.is_authenticated %}
                 <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> <span>Logout</span></a>
             {% else %}
