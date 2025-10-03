@@ -87,30 +87,33 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="hamburger" id="hamburger">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <span class="navbar-title">CDMIS Dashboard</span>
-        <div class="user-info">
-            <span class="user-name">Welcome, {{ user.username }}</span>
-            <a href="{% url 'logout' %}" class="logout">Logout</a>
-        </div>
+   <div class="navbar">
+    <div class="hamburger" id="hamburger">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
     </div>
-    <script>
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        hamburger.onclick = function() {
-            sidebar.classList.toggle('active');
-        };
-        // Optional: close sidebar when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
-                sidebar.classList.remove('active');
+    <span class="navbar-title">CDMIS Dashboard</span>
+    <div class="user-info">
+        <span class="user-name">Welcome, {{ user.username }}</span>
+        <a href="{% url 'logout' %}" class="logout">Logout</a>
+    </div>
+</div>
+<script>
+    // This script toggles the sidebar in gov.html
+    document.getElementById('hamburger').onclick = function() {
+        var sidebar = document.getElementById('Sidebar');
+        var mainContent = document.getElementById('mainContent');
+        if (sidebar) {
+            sidebar.classList.toggle('collapsed');
+            // Adjust main content margin
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '0';
+            } else {
+                mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
             }
-        });
-    </script>
+        }
+    };
+</script>
 </body>
 </html>
