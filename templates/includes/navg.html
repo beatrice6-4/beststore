@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CDMIS Navbar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f8;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            background: #2d3748;
+            color: #fff;
+            padding: 0 1.5rem;
+            height: 60px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .hamburger {
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        .bar {
+            height: 4px;
+            width: 100%;
+            background: #fff;
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+        .navbar-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -220px;
+            width: 220px;
+            height: 100%;
+            background: #1a202c;
+            color: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+            transition: left 0.3s;
+            z-index: 1000;
+            padding-top: 70px;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 15px 25px;
+            border-bottom: 1px solid #2d3748;
+        }
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            display: block;
+        }
+        .sidebar ul li a:hover {
+            background: #2d3748;
+            border-radius: 4px;
+        }
+        @media (max-width: 600px) {
+            .navbar-title {
+                font-size: 1rem;
+            }
+            .sidebar {
+                width: 160px;
+                padding-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="hamburger" id="hamburger">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <span class="navbar-title">CDMIS Dashboard</span>
+    </div>
+    <nav class="sidebar" id="sidebar">
+        <ul>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+    </nav>
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        hamburger.onclick = function() {
+            sidebar.classList.toggle('active');
+        };
+        // Optional: close sidebar when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
