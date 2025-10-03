@@ -538,3 +538,33 @@ def upload_members(request):
     else:
         form = MemberUploadForm()
     return render(request, 'CDMIS/upload_members.html', {'form': form})
+
+
+
+from django.shortcuts import render
+from django.db.models import Sum, Count
+from .models import Group, Payment, Training
+
+def cdmis_reports(request):
+    # Total financials
+    total_financials = Payment.objects.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Groups with total paid below 5,000 and above/equal 5,000
+    group_payments = (
+        Group.objects
+        .annotate(total_paid=Sum('payment__amount'))
+        .values('name', 'total_paid')
+    )
+    below_5000 = [g for g in group_payments if (g['total_paid'] or 0) < 5000]
+    above_5000 = [g for g in group_payments if (g['total_paid'] or 0) >= 5000]
+
+    # Total trainings covered
+    total_trainings = Training.objects.count()
+
+    context = {
+        'total_financials': total_financials,
+        'below_5000_groups': below_5000,
+        'above_5000_groups': above_5000,
+        'total_trainings': total_trainings,
+    }
+    return render(request, 'CDMIS/reports.html', context)

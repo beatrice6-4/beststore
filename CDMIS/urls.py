@@ -26,6 +26,8 @@ urlpatterns = [
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
     path('users/<int:pk>/activate/', views.activate_user, name='user_activate'),
     path('orders/', views.order_list, name='order_list'),
+    path('reports/', views.cdmis_reports, name='reports'),
+
 
     path('orders/', views.order_list, name='order_list'),
     path('orders/edit/<int:pk>/', views.order_edit, name='order_edit'),
