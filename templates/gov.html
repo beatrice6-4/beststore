@@ -22,17 +22,18 @@
                 <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher me-2"></i> Trainings</a>
             </nav>
         </div>
-    </body>
-    <div class="content">
-        <div class="header">
-            <div class="logo">
-                <img src="{% static 'images/gov.png' %}" alt="Government Logo">
-                <h4>Government Services Dashboard</h4>
-            </div>
-            <div class="user-actions">
-                <span>Welcome, {{ user.username }}</span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm"><i class="fa fa-sign-out-alt"></i> Logout</a>
-            </div>
+
+        <div class="main-content">
+            <header class="header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="{% static 'images/gov.png' %}" alt="Logo" class="header-logo me-3">
+                    <h4>Government Services Dashboard</h4>
+                </div>
+                <div class="user-info d-flex align-items-center">
+                    <i class="fa fa-user-circle me-2"></i>
+                    <span>Welcome, {{ user.username }}</span>
+                </div>
+            </header>
         </div>
-        {% block content %}
-        {% endblock %}
+    </body>
+</html>
