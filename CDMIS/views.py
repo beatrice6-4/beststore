@@ -599,27 +599,27 @@ def case_management(request):
         member = form.cleaned_data.get('member')
         details = form.cleaned_data.get('details')
 
-        # Example logic for each case type
         if case_type == 'change_office_bearers':
-            # You would implement logic to change office bearers here
             message = f"Office bearers for group '{group.name}' have been updated."
         elif case_type == 'add_member':
-            # You would implement logic to add a member here
-            message = f"Member added to group '{group.name}'."
-        elif case_type == 'exit_member':
-            # You would implement logic to remove a member here
             if member:
+                group.members.add(member)  # Ensure member is added to group
+                group.save()
+                message = f"Member '{member.first_name} {member.last_name}' added to group '{group.name}'."
+            else:
+                message = "Please select a member to add."
+        elif case_type == 'exit_member':
+            if member:
+                group.members.remove(member)
+                group.save()
                 message = f"Member '{member.first_name} {member.last_name}' exited from group '{group.name}'."
             else:
                 message = "Please select a member to exit."
         elif case_type == 'correct_member':
-            # You would implement logic to correct member details here
             if member:
                 message = f"Details for member '{member.first_name} {member.last_name}' have been corrected."
             else:
                 message = "Please select a member to correct."
-
-        # You can save a Case record or log here if you have a Case model
 
     return render(request, 'CDMIS/case_management.html', {
         'form': form,
