@@ -94,12 +94,11 @@
             <div class="bar"></div>
         </div>
         <span class="navbar-title">CDMIS Dashboard</span>
+        <div class="user-info">
+            <span class="user-name">Welcome, {{ user.username }}</span>
+            <a href="{% url 'logout' %}" class="logout">Logout</a>
+        </div>
     </div>
-    <nav class="sidebar" id="sidebar">
-        <ul>
-            <li><a href="{% url 'logout' %}">Logout</a></li>
-        </ul>
-    </nav>
     <script>
         const hamburger = document.getElementById('hamburger');
         const sidebar = document.getElementById('sidebar');
