@@ -1,39 +1,178 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Government Services</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    </head>
-    <body>
-        <div class="Sidebar">
-            <div class="logo-section">
-                <img src="{% static 'images/gov.png' %}" alt="Government Logo" class="logo">
-                <h2>Government Services</h2>
-            </div>
-            <nav class="nav flex-column">
-                <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users me-2"></i> Community Groups</a>
-                <a href="{% url 'cdmis:finance' %}"><i class="fa fa-sack-dollar me-2"></i> Financial Summary</a>
-                <a href="{% url 'cdmis:activity_list' %}"><i class="fa fa-tasks me-2"></i> Activities to Groups</a>
-                <a href="{% url 'cdmis:payment_list' %}"><i class="fa fa-money-check-alt me-2"></i> Payments</a>
-                <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher me-2"></i> Trainings</a>
-            </nav>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .Sidebar {
+            background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
+            color: white;
+            width: 240px;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+            padding: 32px 18px 18px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .logo-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo-section .logo {
+            height: 60px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+        .logo-section h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .Sidebar .nav a {
+            color: white;
+            font-size: 1.08em;
+            padding: 12px 0;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .Sidebar .nav a:hover, .Sidebar .nav a.active {
+            background: #fff;
+            color: #004080;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 40px 32px;
+        }
+        .header--wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .header--title span {
+            color: #4e54c8;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        .header--title h2 {
+            font-weight: 700;
+            margin: 0;
+            color: #004080;
+            letter-spacing: 1px;
+        }
+        .user--info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .user--name {
+            font-weight: 500;
+            color: #2d7a2d;
+            font-size: 1.08em;
+        }
+        .btn-outline-danger.btn-sm {
+            border-radius: 20px;
+            padding: 4px 18px;
+            font-weight: 600;
+            font-size: 1em;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-outline-danger.btn-sm:hover {
+            background: #e80f0f;
+            color: #fff;
+            border-color: #e80f0f;
+        }
+        @media (max-width: 900px) {
+            .Sidebar {
+                width: 70px;
+                padding: 18px 4px;
+            }
+            .Sidebar .nav a span {
+                display: none;
+            }
+            .main-content {
+                margin-left: 70px;
+                padding: 18px 8px;
+            }
+        }
+        @media (max-width: 600px) {
+            .Sidebar {
+                width: 100vw;
+                min-width: 100vw;
+                position: static;
+                flex-direction: row;
+                padding: 8px 2vw;
+                height: auto;
+            }
+            .logo-section {
+                margin-bottom: 0;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 10px 2vw 8px 2vw;
+            }
+            .header--wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="Sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/gov.png' %}" alt="Government Logo" class="logo">
+            <h2>Government Services</h2>
         </div>
+        <nav class="nav flex-column w-100">
+            <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users me-2"></i> <span>Community Groups</span></a>
+            <a href="{% url 'cdmis:finance' %}"><i class="fa fa-sack-dollar me-2"></i> <span>Financial Summary</span></a>
+            <a href="{% url 'cdmis:activity_list' %}"><i class="fa fa-tasks me-2"></i> <span>Activities to Groups</span></a>
+            <a href="{% url 'cdmis:payment_list' %}"><i class="fa fa-money-check-alt me-2"></i> <span>Payments</span></a>
+            <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher me-2"></i> <span>Trainings</span></a>
+        </nav>
+    </div>
 
-        <div class="main-content">
-            <header class="header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <img src="{% static 'images/gov.png' %}" alt="Logo" class="header-logo me-3">
-                    <h4>Government Services Dashboard</h4>
-                </div>
-                <div class="user-info d-flex align-items-center">
-                    <i class="fa fa-user-circle me-2"></i>
-                    <span>Welcome, {{ user.username }}</span>
-                </div>
-            </header>
+    <div class="main-content">
+        <div class="header--wrapper">
+            <div class="header--title">
+                <span>User Dashboard</span>
+                <h2>Dashboard</h2>
+            </div>
+            <div class="user--info">
+                <span class="user--name">Welcome, {{ user.username }}</span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
+                    <i class="fa fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
         </div>
-    </body>
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
+    </div>
+</body>
 </html>
