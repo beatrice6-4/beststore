@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MAMAMAASAI BAKERS | One Stop Solution for All Your Baking Needs</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -46,14 +46,14 @@
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
         .logo-section h2 {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 700;
             margin: 0;
             letter-spacing: 1px;
         }
         .Sidebar .nav a {
             color: white;
-            font-size: 1.08em;
+            font-size: 1em;
             padding: 12px 0;
             border-radius: 6px;
             margin-bottom: 6px;
@@ -77,6 +77,7 @@
             z-index: 1060;
             width: calc(100vw - 240px);
             transition: left 0.3s, width 0.3s;
+            background: #fff;
         }
         .Sidebar.collapsed ~ .navbar-fixed {
             left: 0;
@@ -84,8 +85,8 @@
         }
         .main-content {
             margin-left: 240px;
-            margin-top: 70px; /* Height of navbar */
-            padding: 32px;
+            margin-top: 70px;
+            padding: 16px;
             height: calc(100vh - 70px);
             overflow-y: auto;
             background: transparent;
@@ -93,6 +94,25 @@
         }
         .Sidebar.collapsed ~ .main-content {
             margin-left: 0;
+        }
+        /* Hamburger for mobile */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-left: 5px;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 4px;
+            background: #004080;
+            margin: 5px 0;
+            border-radius: 2px;
+            transition: all 0.3s;
         }
         @media (max-width: 900px) {
             .Sidebar {
@@ -112,9 +132,16 @@
             }
             .main-content {
                 margin-left: 70px;
+                padding: 10px 4px;
             }
             .Sidebar.collapsed ~ .main-content {
                 margin-left: 0;
+            }
+            .logo-section .logo {
+                height: 36px;
+            }
+            .logo-section h2 {
+                font-size: 1rem;
             }
         }
         @media (max-width: 600px) {
@@ -141,8 +168,11 @@
             .main-content {
                 margin-left: 0;
                 margin-top: 120px;
-                padding: 10px 2vw 8px 2vw;
+                padding: 8px 2vw 8px 2vw;
                 height: calc(100vh - 120px);
+            }
+            .hamburger {
+                display: block;
             }
         }
     </style>
@@ -169,6 +199,11 @@
         </nav>
     </div>
     <div class="navbar-fixed" id="navbarFixed">
+        <button class="hamburger" id="hamburger" aria-label="Toggle sidebar">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         {% include 'includes/navbar.html' %}
     </div>
     <div class="main-content" id="mainContent">
@@ -183,21 +218,25 @@
             var mainContent = document.getElementById('mainContent');
             var navbarFixed = document.getElementById('navbarFixed');
             var hamburger = document.getElementById('hamburger');
+            function adjustLayout() {
+                if (sidebar.classList.contains('collapsed')) {
+                    mainContent.style.marginLeft = '0';
+                    navbarFixed.style.left = '0';
+                    navbarFixed.style.width = '100vw';
+                } else {
+                    mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
+                    navbarFixed.style.left = window.innerWidth <= 900 ? '70px' : '240px';
+                    navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 70px)' : 'calc(100vw - 240px)';
+                }
+            }
             if (hamburger) {
                 hamburger.onclick = function() {
                     sidebar.classList.toggle('collapsed');
-                    // Adjust main content and navbar position
-                    if (sidebar.classList.contains('collapsed')) {
-                        mainContent.style.marginLeft = '0';
-                        navbarFixed.style.left = '0';
-                        navbarFixed.style.width = '100vw';
-                    } else {
-                        mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
-                        navbarFixed.style.left = window.innerWidth <= 900 ? '70px' : '240px';
-                        navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 70px)' : 'calc(100vw - 240px)';
-                    }
+                    adjustLayout();
                 };
             }
+            window.addEventListener('resize', adjustLayout);
+            adjustLayout();
         });
     </script>
 </body>
