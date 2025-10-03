@@ -12,12 +12,14 @@
             background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
         .Sidebar {
             background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
             color: white;
             width: 240px;
-            min-height: 100vh;
+            height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
@@ -26,32 +28,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s;
             z-index: 1050;
-        }
-        .Sidebar.collapsed {
-            transform: translateX(-100%);
-        }
-        .hamburger-btn {
-            background: none;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            margin-bottom: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-        .hamburger-bar {
-            width: 28px;
-            height: 4px;
-            background: white;
-            margin: 3px 0;
-            border-radius: 2px;
-            transition: all 0.3s;
         }
         .logo-section {
             text-align: center;
@@ -88,52 +65,21 @@
             font-weight: 600;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
+        .navbar-fixed {
+            position: fixed;
+            top: 0;
+            left: 240px;
+            right: 0;
+            z-index: 1060;
+            width: calc(100vw - 240px);
+        }
         .main-content {
             margin-left: 240px;
-            padding: 40px 32px;
-            transition: margin-left 0.3s;
-        }
-        .Sidebar.collapsed ~ .main-content {
-            margin-left: 0;
-        }
-        .header--wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-        .header--title span {
-            color: #4e54c8;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-        .header--title h2 {
-            font-weight: 700;
-            margin: 0;
-            color: #004080;
-            letter-spacing: 1px;
-        }
-        .user--info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .user--name {
-            font-weight: 500;
-            color: #2d7a2d;
-            font-size: 1.08em;
-        }
-        .btn-outline-danger.btn-sm {
-            border-radius: 20px;
-            padding: 4px 18px;
-            font-weight: 600;
-            font-size: 1em;
-            transition: background 0.2s, color 0.2s;
-        }
-        .btn-outline-danger.btn-sm:hover {
-            background: #e80f0f;
-            color: #fff;
-            border-color: #e80f0f;
+            margin-top: 70px; /* Height of navbar */
+            padding: 32px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            background: transparent;
         }
         @media (max-width: 900px) {
             .Sidebar {
@@ -143,48 +89,46 @@
             .Sidebar .nav a span {
                 display: none;
             }
+            .navbar-fixed {
+                left: 70px;
+                width: calc(100vw - 70px);
+            }
             .main-content {
                 margin-left: 70px;
-                padding: 18px 8px;
             }
         }
         @media (max-width: 600px) {
             .Sidebar {
                 width: 100vw;
                 min-width: 100vw;
-                position: static;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 60px;
                 flex-direction: row;
                 padding: 8px 2vw;
-                height: auto;
+                align-items: center;
+                z-index: 1050;
             }
             .logo-section {
                 margin-bottom: 0;
             }
+            .navbar-fixed {
+                left: 0;
+                top: 60px;
+                width: 100vw;
+            }
             .main-content {
                 margin-left: 0;
+                margin-top: 120px;
                 padding: 10px 2vw 8px 2vw;
+                height: calc(100vh - 120px);
             }
-            .header--wrapper {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-        }
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.25);
-            z-index: 1040;
-        }
-        .sidebar-overlay.show {
-            display: block;
         }
     </style>
 </head>
 <body>
     <div class="Sidebar" id="Sidebar">
-       
         <div class="logo-section">
             <img src="{% static 'images/gov.png' %}" alt="Government Logo" class="logo">
             <h2>CDMIS Management</h2>
@@ -197,42 +141,13 @@
             <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher me-2"></i> <span>Trainings</span></a>
         </nav>
     </div>
-      <!-- navbar -->
-       {% include 'includes/navg.html' %}
-            </div>
-        </div>
+    <div class="navbar-fixed">
+        {% include 'includes/navg.html' %}
+    </div>
+    <div class="main-content" id="mainContent">
         {% block content %}
         <!-- Page-specific content goes here -->
         {% endblock %}
     </div>
-    <script>
-        const sidebar = document.getElementById('Sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const overlay = document.getElementById('sidebarOverlay');
-        const mainContent = document.getElementById('mainContent');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            overlay.classList.toggle('show');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '0';
-            } else {
-                mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
-            }
-        }
-        function closeSidebar() {
-            sidebar.classList.add('collapsed');
-            overlay.classList.remove('show');
-            mainContent.style.marginLeft = '0';
-        }
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', closeSidebar);
-        // Optional: auto-close sidebar on link click (mobile)
-        document.querySelectorAll('.Sidebar .nav a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 900) closeSidebar();
-            });
-        });
-    </script>
 </body>
 </html>
