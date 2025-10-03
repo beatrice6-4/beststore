@@ -1,28 +1,120 @@
-{% load static %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-      <img src="{% static 'images/barner.jpg' %}" alt="Logo" width="32" height="32" class="d-inline-block align-text-top me-2">
-      MAMAMAASAI BAKERS
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNavbar">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-          </li>
-        {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}">Register</a>
-          </li>
-        {% endif %}
-      </ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MAMAMAASAI BAKERS | One Stop Solution for All Your Baking Needs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f8;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            background: #2d3748;
+            color: #fff;
+            padding: 0 1.5rem;
+            height: 60px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .hamburger {
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        .bar {
+            height: 4px;
+            width: 100%;
+            background: #fff;
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+        .navbar-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -220px;
+            width: 220px;
+            height: 100%;
+            background: #ed0909;
+            color: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+            transition: left 0.3s;
+            z-index: 1000;
+            padding-top: 70px;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 15px 25px;
+            border-bottom: 1px solid #2d4832;
+        }
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            display: block;
+        }
+        .sidebar ul li a:hover {
+            background: #2d3748;
+            border-radius: 4px;
+        }
+        @media (max-width: 600px) {
+            .navbar-title {
+                font-size: 1rem;
+            }
+            .sidebar {
+                width: 160px;
+                padding-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+   <div class="navbar d-flex align-items-center justify-content-between px-3" style="height:70px; background:linear-gradient(90deg,#004080 0%,#4ff005 100%); color:#fff;">
+    <div class="d-flex align-items-center gap-3">
+        <button id="hamburger" style="background:none; border:none; outline:none; cursor:pointer;">
+            <span style="display:block; width:28px; height:4px; background:#fff; margin:5px 0; border-radius:2px;"></span>
+            <span style="display:block; width:28px; height:4px; background:#fff; margin:5px 0; border-radius:2px;"></span>
+            <span style="display:block; width:28px; height:4px; background:#fff; margin:5px 0; border-radius:2px;"></span>
+        </button>
+        <span class="navbar-title fw-bold">MAMAMAASAI BAKERS</span>
     </div>
-  </div>
-</nav>
+    <div class="user-info d-flex align-items-center gap-3">
+        <span class="user-name">Welcome, {{ user.username }}</span>
+        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
+    </div>
+</div>
+<script>
+    document.getElementById('hamburger').onclick = function() {
+        var sidebar = document.getElementById('Sidebar');
+        var mainContent = document.getElementById('mainContent');
+        if (sidebar) {
+            sidebar.classList.toggle('collapsed');
+            // Adjust main content margin
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '0';
+            } else {
+                mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
+            }
+        }
+    };
+</script>
+</body>
+</html>
