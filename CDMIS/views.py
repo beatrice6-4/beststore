@@ -557,11 +557,13 @@ def cdmis_reports(request):
     above_5000 = [g for g in group_payments if (g['total_paid'] or 0) >= 5000]
 
     total_trainings = Training.objects.count()
+    total_groups = Group.objects.count()
 
     context = {
         'total_financials': total_financials,
         'below_5000_groups': below_5000,
         'above_5000_groups': above_5000,
+        'total_groups': total_groups,
         'total_trainings': total_trainings,
     }
     return render(request, 'CDMIS/reports.html', context)
