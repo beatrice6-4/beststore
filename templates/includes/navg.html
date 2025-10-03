@@ -87,20 +87,21 @@
     </style>
 </head>
 <body>
-   <div class="navbar">
-    <div class="hamburger" id="hamburger">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
+   <<div class="navbar d-flex align-items-center justify-content-between px-3" style="height:70px; background:linear-gradient(90deg,#004080 0%,#4ff005 100%); color:#fff;">
+    <div class="d-flex align-items-center gap-3">
+        <button id="hamburger" style="background:none; border:none; outline:none; cursor:pointer;">
+            <span style="display:block; width:28px; height:4px; background:#fff; margin:5px 0; border-radius:2px;"></span>
+            <span style="display:block; width:28px; height:4px; background:#fff; margin:5px 0; border-radius:2px;"></span>
+            <span style="display:block; width:28px; height:4px; background:#fff; margin:5px 0; border-radius:2px;"></span>
+        </button>
+        <span class="navbar-title fw-bold">CDMIS Dashboard</span>
     </div>
-    <span class="navbar-title">CDMIS Dashboard</span>
-    <div class="user-info">
+    <div class="user-info d-flex align-items-center gap-3">
         <span class="user-name">Welcome, {{ user.username }}</span>
-        <a href="{% url 'logout' %}" class="logout">Logout</a>
+        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
 </div>
 <script>
-    // This script toggles the sidebar in gov.html
     document.getElementById('hamburger').onclick = function() {
         var sidebar = document.getElementById('Sidebar');
         var mainContent = document.getElementById('mainContent');

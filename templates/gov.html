@@ -124,6 +124,17 @@
                 padding: 10px 2vw 8px 2vw;
                 height: calc(100vh - 120px);
             }
+            .Sidebar.collapsed {
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+        @media (max-width: 900px) {
+            .Sidebar.collapsed {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                transition: margin-left 0.3s;
+            }
         }
     </style>
 </head>
