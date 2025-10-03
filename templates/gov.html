@@ -184,11 +184,7 @@
 </head>
 <body>
     <div class="Sidebar" id="Sidebar">
-        <button class="hamburger-btn" id="sidebarToggle" aria-label="Toggle sidebar">
-            <span class="hamburger-bar"></span>
-            <span class="hamburger-bar"></span>
-            <span class="hamburger-bar"></span>
-        </button>
+       
         <div class="logo-section">
             <img src="{% static 'images/gov.png' %}" alt="Government Logo" class="logo">
             <h2>CDMIS Management</h2>
@@ -208,6 +204,11 @@
                 <span>User Dashboard</span>
                 <h2>Dashboard</h2>
             </div>
+             <button class="hamburger-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+        </button>
             <div class="user--info">
                 <span class="user--name">Welcome, {{ user.username }}</span>
                 <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
