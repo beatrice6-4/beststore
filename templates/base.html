@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        html { font-size: 16px; }
         body {
             background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
             min-height: 100vh;
@@ -18,13 +19,13 @@
         .Sidebar {
             background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
             color: white;
-            width: 240px;
+            width: 220px;
             height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
             box-shadow: 2px 0 12px rgba(0,0,0,0.08);
-            padding: 32px 18px 18px 18px;
+            padding: 24px 10px 10px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -36,27 +37,27 @@
         }
         .logo-section {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
         .logo-section .logo {
-            height: 60px;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            height: 48px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             background: #fff;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
         .logo-section h2 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             margin: 0;
             letter-spacing: 1px;
         }
         .Sidebar .nav a {
             color: white;
-            font-size: 1em;
-            padding: 12px 0;
+            font-size: 1.05rem;
+            padding: 10px 0;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             transition: background 0.2s, color 0.2s;
             display: flex;
             align-items: center;
@@ -72,15 +73,15 @@
         .navbar-fixed {
             position: fixed;
             top: 0;
-            left: 240px;
+            left: 220px;
             right: 0;
             z-index: 1060;
-            width: calc(100vw - 240px);
+            width: calc(100vw - 220px);
             transition: left 0.3s, width 0.3s;
             background: #fff;
             display: flex;
             align-items: center;
-            height: 70px;
+            height: 60px;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
         .Sidebar.collapsed ~ .navbar-fixed {
@@ -88,11 +89,10 @@
             width: 100vw;
         }
         .main-content {
-            margin-left: 240px;
-            margin-top: 70px;
-            padding: 16px;
-            height: calc(100vh - 70px);
-            overflow-y: auto;
+            margin-left: 220px;
+            margin-top: 60px;
+            padding: 12px 2vw;
+            min-height: calc(100vh - 60px);
             background: transparent;
             transition: margin-left 0.3s;
         }
@@ -110,53 +110,55 @@
         }
         .hamburger span {
             display: block;
-            width: 28px;
+            width: 26px;
             height: 4px;
             background: #004080;
-            margin: 5px 0;
+            margin: 4px 0;
             border-radius: 2px;
             transition: all 0.3s;
         }
         @media (max-width: 900px) {
+            html { font-size: 15px; }
             .Sidebar {
-                width: 70px;
-                padding: 18px 4px;
+                width: 60px;
+                padding: 12px 2px;
             }
             .Sidebar .nav a span {
                 display: none;
             }
             .navbar-fixed {
-                left: 70px;
-                width: calc(100vw - 70px);
+                left: 60px;
+                width: calc(100vw - 60px);
             }
             .Sidebar.collapsed ~ .navbar-fixed {
                 left: 0;
                 width: 100vw;
             }
             .main-content {
-                margin-left: 70px;
-                padding: 10px 4px;
+                margin-left: 60px;
+                padding: 10px 2vw;
             }
             .Sidebar.collapsed ~ .main-content {
                 margin-left: 0;
             }
             .logo-section .logo {
-                height: 36px;
+                height: 32px;
             }
             .logo-section h2 {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
         }
         @media (max-width: 600px) {
+            html { font-size: 14px; }
             .Sidebar {
-                width: 70px;
-                min-width: 70px;
+                width: 60px;
+                min-width: 60px;
                 height: 100vh;
                 position: fixed;
                 top: 0;
                 left: 0;
                 flex-direction: column;
-                padding: 8px 2vw;
+                padding: 8px 1vw;
                 align-items: center;
                 z-index: 1050;
             }
@@ -164,23 +166,33 @@
                 margin-bottom: 0;
             }
             .navbar-fixed {
-                left: 70px;
+                left: 60px;
                 top: 0;
-                width: calc(100vw - 70px);
+                width: calc(100vw - 60px);
+                height: 54px;
             }
             .Sidebar.collapsed ~ .navbar-fixed {
                 left: 0;
                 width: 100vw;
             }
             .main-content {
-                margin-left: 70px;
-                margin-top: 70px;
+                margin-left: 60px;
+                margin-top: 54px;
                 padding: 8px 2vw 8px 2vw;
-                height: calc(100vh - 70px);
+                min-height: calc(100vh - 54px);
             }
             .Sidebar.collapsed ~ .main-content {
                 margin-left: 0;
             }
+        }
+        footer {
+            text-align: center;
+            padding: 12px 0;
+            background: linear-gradient(90deg, #004080 0%, #4ff005 100%);
+            color: white;
+            font-size: 1em;
+            letter-spacing: 1px;
+            box-shadow: 0 -2px 8px rgba(44,62,80,0.07);
         }
     </style>
 </head>
@@ -218,6 +230,9 @@
         <!-- Page-specific content goes here -->
         {% endblock %}
     </div>
+    <footer>
+        &copy; {{ year|default:2025 }} MAMAMAASAI BAKERS. All rights reserved.
+    </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var sidebar = document.getElementById('Sidebar');
@@ -230,9 +245,9 @@
                     navbarFixed.style.left = '0';
                     navbarFixed.style.width = '100vw';
                 } else {
-                    mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
-                    navbarFixed.style.left = window.innerWidth <= 900 ? '70px' : '240px';
-                    navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 70px)' : 'calc(100vw - 240px)';
+                    mainContent.style.marginLeft = window.innerWidth <= 900 ? '60px' : '220px';
+                    navbarFixed.style.left = window.innerWidth <= 900 ? '60px' : '220px';
+                    navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 60px)' : 'calc(100vw - 220px)';
                 }
             }
             if (hamburger) {
