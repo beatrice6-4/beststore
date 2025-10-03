@@ -603,21 +603,30 @@ def case_management(request):
             message = f"Office bearers for group '{group.name}' have been updated."
         elif case_type == 'add_member':
             if member:
-                group.members.add(member)  # Ensure member is added to group
+                group.members.add(member)  # Add member to group
                 group.save()
-                message = f"Member '{member.first_name} {member.last_name}' added to group '{group.name}'."
+                member_name = member.first_name
+                if hasattr(member, 'middle_name') and member.middle_name:
+                    member_name += f" {member.middle_name}"
+                message = f"Member '{member_name}' added to group '{group.name}'."
             else:
                 message = "Please select a member to add."
         elif case_type == 'exit_member':
             if member:
                 group.members.remove(member)
                 group.save()
-                message = f"Member '{member.first_name} {member.last_name}' exited from group '{group.name}'."
+                member_name = member.first_name
+                if hasattr(member, 'middle_name') and member.middle_name:
+                    member_name += f" {member.middle_name}"
+                message = f"Member '{member_name}' exited from group '{group.name}'."
             else:
                 message = "Please select a member to exit."
         elif case_type == 'correct_member':
             if member:
-                message = f"Details for member '{member.first_name} {member.last_name}' have been corrected."
+                member_name = member.first_name
+                if hasattr(member, 'middle_name') and member.middle_name:
+                    member_name += f" {member.middle_name}"
+                message = f"Details for member '{member_name}' have been corrected."
             else:
                 message = "Please select a member to correct."
 
