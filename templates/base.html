@@ -3,262 +3,147 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAMAMAASAI BAKERS | One Stop Solution for All Your Baking Needs</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        html { font-size: 16px; }
-        body {
-            background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .Sidebar {
-            background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
-            color: white;
-            width: 220px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
-            padding: 24px 10px 10px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 1050;
-            transition: transform 0.3s;
-        }
-        .Sidebar.collapsed {
-            transform: translateX(-100%);
-        }
-        .logo-section {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .logo-section .logo {
-            height: 48px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        }
-        .logo-section h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: 1px;
-        }
-        .Sidebar .nav a {
-            color: white;
-            font-size: 1.05rem;
-            padding: 10px 0;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            transition: background 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-        .Sidebar .nav a:hover, .Sidebar .nav a.active {
-            background: #fff;
-            color: #004080;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        }
-        .navbar-fixed {
-            position: fixed;
-            top: 0;
-            left: 220px;
-            right: 0;
-            z-index: 1060;
-            width: calc(100vw - 220px);
-            transition: left 0.3s, width 0.3s;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            height: 60px;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        }
-        .Sidebar.collapsed ~ .navbar-fixed {
-            left: 0;
-            width: 100vw;
-        }
-        .main-content {
-            margin-left: 220px;
-            margin-top: 60px;
-            padding: 12px 2vw;
-            min-height: calc(100vh - 60px);
-            background: transparent;
-            transition: margin-left 0.3s;
-        }
-        .Sidebar.collapsed ~ .main-content {
-            margin-left: 0;
-        }
-        .hamburger {
-            display: block;
-            background: none;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-left: 5px;
-        }
-        .hamburger span {
-            display: block;
-            width: 26px;
-            height: 4px;
-            background: #004080;
-            margin: 4px 0;
-            border-radius: 2px;
-            transition: all 0.3s;
-        }
-        @media (max-width: 900px) {
-            html { font-size: 15px; }
-            .Sidebar {
-                width: 60px;
-                padding: 12px 2px;
-            }
-            .Sidebar .nav a span {
-                display: none;
-            }
-            .navbar-fixed {
-                left: 60px;
-                width: calc(100vw - 60px);
-            }
-            .Sidebar.collapsed ~ .navbar-fixed {
-                left: 0;
-                width: 100vw;
-            }
-            .main-content {
-                margin-left: 60px;
-                padding: 10px 2vw;
-            }
-            .Sidebar.collapsed ~ .main-content {
-                margin-left: 0;
-            }
-            .logo-section .logo {
-                height: 32px;
-            }
-            .logo-section h2 {
-                font-size: 0.95rem;
-            }
-        }
-        @media (max-width: 600px) {
-            html { font-size: 14px; }
-            .Sidebar {
-                width: 60px;
-                min-width: 60px;
-                height: 100vh;
-                position: fixed;
-                top: 0;
-                left: 0;
-                flex-direction: column;
-                padding: 8px 1vw;
-                align-items: center;
-                z-index: 1050;
-            }
-            .logo-section {
-                margin-bottom: 0;
-            }
-            .navbar-fixed {
-                left: 60px;
-                top: 0;
-                width: calc(100vw - 60px);
-                height: 54px;
-            }
-            .Sidebar.collapsed ~ .navbar-fixed {
-                left: 0;
-                width: 100vw;
-            }
-            .main-content {
-                margin-left: 60px;
-                margin-top: 54px;
-                padding: 8px 2vw 8px 2vw;
-                min-height: calc(100vh - 54px);
-            }
-            .Sidebar.collapsed ~ .main-content {
-                margin-left: 0;
-            }
-        }
-        footer {
-            text-align: center;
-            padding: 12px 0;
-            background: linear-gradient(90deg, #004080 0%, #4ff005 100%);
-            color: white;
-            font-size: 1em;
-            letter-spacing: 1px;
-            box-shadow: 0 -2px 8px rgba(44,62,80,0.07);
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MAMAMAASAI BAKERS Admin{% endblock %}</title>
+    <!-- AdminLTE3 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    {% block extrastyle %}{% endblock %}
 </head>
-<body>
-    <div class="Sidebar" id="Sidebar">
-        <div class="logo-section">
-            <img src="{% static 'images/logo.png' %}" alt="MAMAMAASAI BAKERS Logo" class="logo">
-            <h2>MAMAMAASAI BAKERS</h2>
-        </div>
-        <nav class="nav flex-column w-100">
-            <a href="{% url 'store' %}"><i class="fa fa-store"></i> <span>Store</span></a>
-            <a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> <span>Cart</span></a>
-            <a href="{% url 'myOrders' %}"><i class="fa fa-box"></i> <span>Orders</span></a>
-            <a href="{% url 'contact' %}"><i class="fa fa-envelope"></i> <span>Contact Us</span></a>
-            <a href="{% url 'about' %}"><i class="fa fa-info-circle"></i> <span>About Us</span></a>
-            <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users"></i> <span>Community Groups</span></a>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="{% url 'home' %}" class="nav-link">Home</a>
+            </li>
+        </ul>
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> <span>Logout</span></a>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
             {% else %}
-                <a href="{% url 'login' %}"><i class="fa fa-sign-in-alt"></i> <span>Login</span></a>
-                <a href="{% url 'register' %}"><i class="fa fa-user-plus"></i> <span>Register</span></a>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </li>
             {% endif %}
-        </nav>
+        </ul>
+    </nav>
+    <!-- /.navbar -->
+
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="{% url 'home' %}" class="brand-link">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+            <span class="brand-text font-weight-light">MAMAMAASAI BAKERS</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar user panel -->
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <img src="{% static 'images/user.png' %}" class="img-circle elevation-2" alt="User Image">
+                </div>
+                <div class="info">
+                    {% if user.is_authenticated %}
+                        <a href="#" class="d-block">{{ user.username }}</a>
+                    {% else %}
+                        <a href="#" class="d-block">Guest</a>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'store' %}" class="nav-link">
+                            <i class="nav-icon fas fa-store"></i>
+                            <p>Store</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:group_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Community Groups</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:finance' %}" class="nav-link">
+                            <i class="nav-icon fas fa-coins"></i>
+                            <p>Financials</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:training_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                            <p>Trainings</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:reports' %}" class="nav-link">
+                            <i class="nav-icon fas fa-chart-bar"></i>
+                            <p>Reports</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'case_management' %}" class="nav-link">
+                            <i class="nav-icon fas fa-briefcase"></i>
+                            <p>Case Management</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content pt-3">
+            <div class="container-fluid">
+                {% block content %}
+                <!-- Page content goes here -->
+                {% endblock %}
+            </div>
+        </section>
+        <!-- /.content -->
     </div>
-    <div class="navbar-fixed" id="navbarFixed">
-        <button class="hamburger" id="hamburger" aria-label="Toggle sidebar">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        {% include 'includes/navbar.html' %}
-    </div>
-    <div class="main-content" id="mainContent">
-        {% block content %}
-        <!-- Page-specific content goes here -->
-        {% endblock %}
-    </div>
-    <footer>
-        &copy; {{ year|default:2025 }} MAMAMAASAI BAKERS. All rights reserved.
+    <!-- /.content-wrapper -->
+
+    <!-- Main Footer -->
+    <footer class="main-footer text-center">
+        <strong>&copy; {{ year|default:2025 }} MAMAMAASAI BAKERS.</strong> All rights reserved.
     </footer>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidebar = document.getElementById('Sidebar');
-            var mainContent = document.getElementById('mainContent');
-            var navbarFixed = document.getElementById('navbarFixed');
-            var hamburger = document.getElementById('hamburger');
-            function adjustLayout() {
-                if (sidebar.classList.contains('collapsed')) {
-                    mainContent.style.marginLeft = '0';
-                    navbarFixed.style.left = '0';
-                    navbarFixed.style.width = '100vw';
-                } else {
-                    mainContent.style.marginLeft = window.innerWidth <= 900 ? '60px' : '220px';
-                    navbarFixed.style.left = window.innerWidth <= 900 ? '60px' : '220px';
-                    navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 60px)' : 'calc(100vw - 220px)';
-                }
-            }
-            if (hamburger) {
-                hamburger.onclick = function() {
-                    sidebar.classList.toggle('collapsed');
-                    adjustLayout();
-                };
-            }
-            window.addEventListener('resize', adjustLayout);
-            adjustLayout();
-        });
-    </script>
+</div>
+<!-- ./wrapper -->
+
+<!-- AdminLTE3 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+{% block extrascript %}{% endblock %}
 </body>
 </html>
