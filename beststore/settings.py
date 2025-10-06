@@ -28,10 +28,20 @@ INSTALLED_APPS = [
     'finance',
     'storages',
     'CDMIS',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dhklmtpxy',
+    'API_KEY': '345437392578237',
+    'API_SECRET': 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA',
+}
+
+# Make cloudinary the default file storage
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
