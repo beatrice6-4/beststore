@@ -5,11 +5,11 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-^+e$ae-he)jy#6e0d(h*+0-c=*j9%)v_a$z6y#-6qxsxuq&ydb'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-^+e$ae-he)jy#6e0d(h*+0-c=*j9%)v_a$z6y#-6qxsxuq&ydb')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['mamamaasaibakers.com' ]
+ALLOWED_HOSTS = ['mamamaasaibakers.com']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -32,15 +32,12 @@ INSTALLED_APPS = [
     'cloudinary',
 ]
 
-
-
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dhklmtpxy',
-    'API_KEY': '345437392578237',
-    'API_SECRET': 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dhklmtpxy'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '345437392578237'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA'),
 }
 
-# Make cloudinary the default file storage
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 JAZZMIN_SETTINGS = {
@@ -51,13 +48,11 @@ JAZZMIN_SETTINGS = {
     "copyright": "Mama Maasai Bakers © 2025",
     "search_model": ["accounts.Account", "store.Product", "orders.Order"],
     "user_avatar": "accounts/static/images/logo.png",
-
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
     "order_with_respect_to": ["accounts", "store", "orders", "finance", "CDMIS"],
-
     "custom_links": {
         "accounts": [{
             "name": "User Guide",
@@ -66,7 +61,6 @@ JAZZMIN_SETTINGS = {
             "target": "_blank",
         }]
     },
-
     "icons": {
         "accounts.Account": "fas fa-user",
         "store.Product": "fas fa-bread-slice",
@@ -75,22 +69,16 @@ JAZZMIN_SETTINGS = {
         "CDMIS.Group": "fas fa-users",
         "CDMIS.Member": "fas fa-user-friends",
     },
-
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {
         "accounts.Account": "single",
         "store.Product": "collapsible",
     },
-
     "show_ui_builder": True,
-
-    "theme": "green",  # Try "cosmo", "flatly", "green", "cyborg", etc.
-
-    "custom_css": None,  # Path to your custom CSS file in static if needed
-    "custom_js": None,   # Path to your custom JS file in static if needed
+    "theme": "green",
+    "custom_css": None,
+    "custom_js": None,
 }
-
-
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -106,7 +94,6 @@ MIDDLEWARE = [
 SESSION_EXPIRE_SECONDS = 3600  # 1 hour
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 SESSION_TIMEOUT_REDIRECT = 'accounts/login'
-
 
 ROOT_URLCONF = 'beststore.urls'
 
@@ -132,13 +119,12 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
+# Production database: Heroku Postgres via dj_database_url
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL')
     )
 }
-
- 
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -155,27 +141,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-
-
-
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images, APKs)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # Place your apk file in static/apk/
+    BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (user-uploaded content)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
@@ -185,9 +162,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mamamaassaibakers@gmail.com'
-EMAIL_HOST_PASSWORD = 'ujqc yeoo sagb zajx'
-DEFAULT_FROM_EMAIL = 'mamamaassaibakers@gmail.com'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
-# Heroku static files support
 django_heroku.settings(locals())
