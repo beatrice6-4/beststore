@@ -1,10 +1,9 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Government Services</title>
+    <title>{% block title %}MAMAMAASAI AKERS{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -59,10 +58,13 @@
             margin-bottom: 6px;
             transition: background 0.2s, color 0.2s;
             display: flex;
+
             align-items: center;
             gap: 10px;
-            text-decoration: none;
-        }
+
+
+
+            text-decoration: none;        }
         .Sidebar .nav a:hover, .Sidebar .nav a.active {
             background: #fff;
             color: #004080;
@@ -72,128 +74,141 @@
         .navbar-fixed {
             position: fixed;
             top: 0;
-            left: 240px;
+            left: 0;
             right: 0;
             z-index: 1060;
-            width: calc(100vw - 240px);
+            width: 100%;
             transition: left 0.3s, width 0.3s;
+            background: white;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
+
         .Sidebar.collapsed ~ .navbar-fixed {
             left: 0;
-            width: 100vw;
+            width: 100%;
         }
-        .main-content {
+
+        .content {
             margin-left: 240px;
-            margin-top: 70px; /* Height of navbar */
-            padding: 32px;
-            height: calc(100vh - 70px);
-            overflow-y: auto;
-            background: transparent;
+            padding: 80px 24px 24px 24px;
             transition: margin-left 0.3s;
         }
-        .Sidebar.collapsed ~ .main-content {
+        .Sidebar.collapsed ~ .content {
             margin-left: 0;
         }
-        @media (max-width: 900px) {
+        .main-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+            min-height: calc(100vh - 160px);
+        }
+        .footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .footer a {
+            color: #004080;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
             .Sidebar {
-                width: 70px;
-                padding: 18px 4px;
+                width: 200px;
+                padding: 24px 12px 12px 12px;
             }
-            .Sidebar .nav a span {
-                display: none;
+            .content {
+                margin-left: 200px;
+                padding: 80px 16px 16px 16px;
             }
-            .navbar-fixed {
-                left: 70px;
-                width: calc(100vw - 70px);
-            }
-            .Sidebar.collapsed ~ .navbar-fixed {
-                left: 0;
-                width: 100vw;
-            }
-            .main-content {
-                margin-left: 70px;
-            }
-            .Sidebar.collapsed ~ .main-content {
+            .Sidebar.collapsed ~ .content {
                 margin-left: 0;
             }
         }
-        @media (max-width: 600px) {
+        @media (max-width: 576px) {
             .Sidebar {
-                width: 100vw;
-                min-width: 100vw;
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 60px;
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
                 flex-direction: row;
-                padding: 8px 2vw;
-                align-items: center;
-                z-index: 1050;
+                justify-content: space-between;
+                padding: 12px 18px;
             }
-            .logo-section {
-                margin-bottom: 0;
+            .Sidebar .nav {
+                flex-direction: row;
+                gap: 12px;
             }
-            .navbar-fixed {
-                left: 0;
-                top: 60px;
-                width: 100vw;
+            .Sidebar .nav a {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+            .content {
+                margin-left: 0;
+                padding: 140px 16px 16px 16px;
             }
             .main-content {
-                margin-left: 0;
-                margin-top: 120px;
-                padding: 10px 2vw 8px 2vw;
-                height: calc(100vh - 120px);
+                min-height: auto;
+            }
+        }
+        @media (max-width: 400px) {
+            .Sidebar .nav a {
+                font-size: 0.8em;
+                padding: 6px 8px;
+            }
+            .logo-section h2 {
+                font-size: 1.2rem;
             }
         }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <div class="Sidebar" id="Sidebar">
+    <div class="Sidebar" id="sidebar">
         <div class="logo-section">
-            <img src="{% static 'images/gov.png' %}" alt="Government Logo" class="logo">
-            <h2>CDMIS Management</h2>
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo">
+            <h2>MAMAMAASAI AKERS</h2>
         </div>
         <nav class="nav flex-column w-100">
-            <a href="{% url 'cdmis:group_list' %}"><i class="fa fa-users me-2"></i> <span>Community Groups</span></a>
-            <a href="{% url 'cdmis:finance' %}"><i class="fa fa-sack-dollar me-2"></i> <span>Financial Summary</span></a>
-            <a href="{% url 'cdmis:activity_list' %}"><i class="fa fa-tasks me-2"></i> <span>Activities to Groups</span></a>
-            <a href="{% url 'cdmis:payment_list' %}"><i class="fa fa-money-check-alt me-2"></i> <span>Payments</span></a>
-            <a href="{% url 'cdmis:training_list' %}"><i class="fa fa-chalkboard-teacher me-2"></i> <span>Trainings</span></a>
-            <a href="{% url 'cdmis:reports' %}"><i class="fa fa-file-alt me-2"></i> <span>Reports</span></a>
-            <a href="{% url 'cdmis:case_management' %}"><i class="fa fa-briefcase me-2"></i> <span>Case Management</span></a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'store' %}" class="{% if request.resolver_match.url_name == 'store' %}active{% endif %}"><i class="fa fa-store"></i> Store</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}"><i class="fa fa-money-bill-wave"></i> Finances</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'activity_list' %}active{% endif %}"><i class="fa fa-tasks"></i> Activities</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'training_list' %}active{% endif %}"><i class="fa fa-chalkboard-teacher"></i> Trainings</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'service_list' %}active{% endif %}"><i class="fa fa-concierge-bell"></i> Services</a>
+            <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
         </nav>
     </div>
-    <div class="navbar-fixed" id="navbarFixed">
-        {% include 'includes/navg.html' %}
+    <div class="navbar-fixed">
+        <nav class="navbar navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="btn btn-outline-primary" id="toggleSidebar"><i class="fa fa-bars"></i></button>
+                <span class="navbar-text">
+                    Welcome, {{ user.username }}
+                </span>
+            </div>
+        </nav>
     </div>
-    <div class="main-content" id="mainContent">
-        {% block content %}
-        <!-- Page-specific content goes here -->
-        {% endblock %}
+    <div class="content">
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="footer">
+            &copy; 2024 <a href="#">MAMAMAASAI AKERS</a>. All rights reserved.
+        </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Hamburger toggles sidebar collapse/expand
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidebar = document.getElementById('Sidebar');
-            var mainContent = document.getElementById('mainContent');
-            var navbarFixed = document.getElementById('navbarFixed');
-            var hamburger = document.getElementById('hamburger');
-            if (hamburger) {
-                hamburger.onclick = function() {
-                    sidebar.classList.toggle('collapsed');
-                    // Adjust main content and navbar position
-                    if (sidebar.classList.contains('collapsed')) {
-                        mainContent.style.marginLeft = '0';
-                        navbarFixed.style.left = '0';
-                        navbarFixed.style.width = '100vw';
-                    } else {
-                        mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
-                        navbarFixed.style.left = window.innerWidth <= 900 ? '70px' : '240px';
-                        navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 70px)' : 'calc(100vw - 240px)';
-                    }
-                };
-            }
+        $(document).ready(function() {
+            $('#toggleSidebar').click(function() {
+                $('#sidebar').toggleClass('collapsed');
+            });
         });
     </script>
-</body>
-</html>
+    
