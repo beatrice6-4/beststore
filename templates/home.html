@@ -140,7 +140,7 @@
     <div class="col-md-3 col-sm-6 col-12">
         <div class="card card-product-grid">
             <a href="{% url 'product_detail' product.category.slug product.slug %}" class="img-wrap">
-                <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                <img src="{{ object.image.url }}" alt="Image">
             </a>
             <figcaption class="info-wrap">
                 <a href="{% url 'product_detail' product.category.slug product.slug %}" class="title">{{ product.product_name }}</a>
