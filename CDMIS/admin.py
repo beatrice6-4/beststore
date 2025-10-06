@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Group, Payment, Activity, Training, Service
+from .models import Group, Payment, Activity, Training, Service, Finance
 from django.http import HttpResponse
 import csv
 
@@ -7,6 +7,7 @@ admin.site.register(Group)
 admin.site.register(Activity)
 admin.site.register(Training)
 admin.site.register(Service)
+admin.site.register(Finance)
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
