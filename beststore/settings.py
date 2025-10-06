@@ -81,10 +81,11 @@ else:
     }
 
 # Cloudinary storage for media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dhklmtpxy'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '345437392578237'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA'),
+    'CLOUD_NAME': 'dhklmtpxy',
+    'API_KEY': '345437392578237',
+    'API_SECRET': 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA',
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
