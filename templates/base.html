@@ -170,12 +170,8 @@
             <h2>MAMAMAASAI BAKERS</h2>
         </div>
         <nav class="nav flex-column w-100">
-            <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
-            <a href="{% url 'store' %}" class="{% if request.resolver_match.url_name == 'store' %}active{% endif %}"><i class="fa fa-store"></i> Store</a>
-            <a href="{% url 'payment_list' %}" class="{% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}"><i class="fa fa-money-bill-wave"></i> Finances</a>
-            <a href="{% url 'activity_list' %}" class="{% if request.resolver_match.url_name == 'activity_list' %}active{% endif %}"><i class="fa fa-tasks"></i> Activities</a>
-            <a href="{% url 'training_list' %}" class="{% if request.resolver_match.url_name == 'training_list' %}active{% endif %}"><i class="fa fa-chalkboard-teacher"></i> Trainings</a>
-            <a href="{% url 'service_list' %}" class="{% if request.resolver_match.url_name == 'service_list' %}active{% endif %}"><i class="fa fa-concierge-bell"></i> Services</a>
+             <a href="{% url 'store' %}"><i class="fa fa-store"></i> Store</a>
+            <a href="{% url 'Myorders' %}"><i class="fa fa-shopping-cart"></i> Orders</a>
             <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a>
         </nav>
     </div>
