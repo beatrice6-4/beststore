@@ -132,6 +132,8 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
+
+
 DATABASES = {
     'default': dj_database_url.config(default='postgres://localhost')
 }
