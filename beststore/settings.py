@@ -133,10 +133,7 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(default='postgres://localhost')
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -154,22 +151,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-
-
-# Use Bucketeer environment variables
-BUCKETEER_BUCKET_NAME = os.environ.get('BUCKETEER_BUCKET_NAME')
-BUCKETEER_AWS_ACCESS_KEY_ID = os.environ.get('BUCKETEER_AWS_ACCESS_KEY_ID')
-BUCKETEER_AWS_SECRET_ACCESS_KEY = os.environ.get('BUCKETEER_AWS_SECRET_ACCESS_KEY')
-BUCKETEER_REGION = os.environ.get('BUCKETEER_AWS_REGION', 'us-east-1')
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = BUCKETEER_AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY = BUCKETEER_AWS_SECRET_ACCESS_KEY
-AWS_STORAGE_BUCKET_NAME = BUCKETEER_BUCKET_NAME
-AWS_S3_REGION_NAME = BUCKETEER_REGION
-AWS_QUERYSTRING_AUTH = False  # Optional: makes URLs more readable
-MEDIA_URL = f'https://{BUCKETEER_BUCKET_NAME}.s3.amazonaws.com/'
 
 
 
