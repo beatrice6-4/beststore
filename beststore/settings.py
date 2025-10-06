@@ -40,46 +40,6 @@ CLOUDINARY_STORAGE = {
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-JAZZMIN_SETTINGS = {
-    "site_title": "Mama Maasai Bakers Admin",
-    "site_header": "Mama Maasai Bakers",
-    "site_brand": "Mama Maasai Bakers",
-    "welcome_sign": "Welcome to Mama Maasai Bakers Admin",
-    "copyright": "Mama Maasai Bakers © 2025",
-    "search_model": ["accounts.Account", "store.Product", "orders.Order"],
-    "user_avatar": "accounts/static/images/logo.png",
-    "show_sidebar": True,
-    "navigation_expanded": True,
-    "hide_apps": [],
-    "hide_models": [],
-    "order_with_respect_to": ["accounts", "store", "orders", "finance", "CDMIS"],
-    "custom_links": {
-        "accounts": [{
-            "name": "User Guide",
-            "url": "https://mamamaasaibakers.com/help/",
-            "icon": "fas fa-book",
-            "target": "_blank",
-        }]
-    },
-    "icons": {
-        "accounts.Account": "fas fa-user",
-        "store.Product": "fas fa-bread-slice",
-        "orders.Order": "fas fa-shopping-cart",
-        "finance.Payment": "fas fa-money-bill-wave",
-        "CDMIS.Group": "fas fa-users",
-        "CDMIS.Member": "fas fa-user-friends",
-    },
-    "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {
-        "accounts.Account": "single",
-        "store.Product": "collapsible",
-    },
-    "show_ui_builder": True,
-    "theme": "green",
-    "custom_css": None,
-    "custom_js": None,
-}
-
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -90,10 +50,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-SESSION_EXPIRE_SECONDS = 3600  # 1 hour
-SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
-SESSION_TIMEOUT_REDIRECT = 'accounts/login'
 
 ROOT_URLCONF = 'beststore.urls'
 
@@ -157,6 +113,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
