@@ -1,1 +1,1 @@
-web gunicorn beststore.wsgi:application --log-file -
+web gunicorn beststore.wsgi
