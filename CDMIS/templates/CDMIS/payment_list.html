@@ -1,6 +1,14 @@
 {% extends 'gov.html' %}
 {% load dict_extras %}
 {% block content %}
+<nav aria-label="breadcrumb" style="margin-top:24px;">
+  <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Payments</li>
+  </ol>
+</nav>
+
 <style>
     .payments-table-container {
         background: #fff;
