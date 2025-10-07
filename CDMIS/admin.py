@@ -38,3 +38,7 @@ from .models import Requirement
 class RequirementAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title',)
+
+
+
+
