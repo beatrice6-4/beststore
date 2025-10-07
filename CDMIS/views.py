@@ -671,12 +671,20 @@ def create_requirement(request):
         form = RequirementForm()
     return render(request, 'CDMIS/create_requirement.html', {'form': form})
 
-def download_requirements(request):
+from django.http import HttpResponse
+from .models import Requirement
+from docx import Document
+
+def download_requirements_word(request):
     requirements = Requirement.objects.all()
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=group_requirements.csv'
-    writer = csv.writer(response)
-    writer.writerow(['Title', 'Description'])
+    document = Document()
+    document.add_heading('Group Registration Requirements', 0)
+
     for req in requirements:
-        writer.writerow([req.title, req.description])
+        document.add_heading(req.title, level=1)
+        document.add_paragraph(req.description)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = 'attachment; filename=group_requirements.docx'
+    document.save(response)
     return response

@@ -4,7 +4,7 @@
 {% if user.is_staff or user.is_superuser %}
     <a href="{% url 'cdmis:create_requirement' %}" class="btn btn-success mb-3">Add Requirement</a>
 {% endif %}
-<a href="{% url 'cdmis:download_requirements' %}" class="btn btn-primary mb-3">Download Requirements</a>
+<a href="{% url 'cdmis:download_requirements_word' %}" class="btn btn-info mb-3">Download Requirements (Word)</a>
 <ul class="list-group">
     {% for req in requirements %}
         <li class="list-group-item">
