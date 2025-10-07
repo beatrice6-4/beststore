@@ -199,7 +199,7 @@
                                 {% if product.image %}
                                     <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
                                 {% else %}
-                                    <img src="{% static 'images/no-image.png' %}" alt="No image available">
+                                    <img src="https://res.cloudinary.com/.../image/{{ product.id }}.png" alt="No image available">
                                 {% endif %}
                             </div>
                             <figcaption class="info-wrap">
