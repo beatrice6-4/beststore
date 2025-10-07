@@ -28,6 +28,7 @@ urlpatterns = [
     path('orders/', views.order_list, name='order_list'),
     path('reports/', views.cdmis_reports, name='reports'),
     path('case-management/', views.case_management, name='case_management'),
+    path('groups/create/', views.group_create, name='group_create'),
 
 
     path('orders/', views.order_list, name='order_list'),

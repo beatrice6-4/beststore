@@ -634,3 +634,16 @@ def case_management(request):
         'form': form,
         'message': message,
     })
+
+from django.shortcuts import render, redirect
+from .forms import GroupForm
+
+def group_create(request):
+    if request.method == 'POST':
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('cdmis:groups')
+    else:
+        form = GroupForm()
+    return render(request, 'CDMIS/group_form.html', {'form': form})
