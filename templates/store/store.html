@@ -197,7 +197,7 @@
                         <figure class="card card-product-grid">
                            <div class="img-wrap">
                             {% if product.image %}
-    <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+    <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
 {% else %}
     <img src="{% static 'images/no-image.png' %}" alt="No image available">
 {% endif %}
