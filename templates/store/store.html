@@ -196,12 +196,12 @@
                     <div class="col-md-4">
                         <figure class="card card-product-grid">
                             <div class="img-wrap">
-                                {% if product.image %}
-                                    <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
-                                {% else %}
-                                    <img src="https://res.cloudinary.com/.../image/{{ product.id }}.png" alt="No image available">
-                                {% endif %}
-                            </div>
+    {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+    {% else %}
+        <img src="{% static 'images/no-image.png' %}" alt="No image available">
+    {% endif %}
+</div>
                             <figcaption class="info-wrap">
                                 <div class="fix-height">
                                     <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
