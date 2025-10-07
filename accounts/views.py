@@ -525,3 +525,12 @@ def service_list(request):
 def training_list(request):
     # trainings = Training.objects.all()
     return render(request, 'accounts/training_list.html')
+
+@login_required
+def profile(request):
+    userprofile = getattr(request.user, 'userprofile', None)
+    context = {
+        'user': request.user,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/profile.html', context)

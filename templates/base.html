@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="/static/vendor/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/static/vendor/adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="/static/jazzmin/css/main.css">
-    <link rel="shortcut icon" href="/static/vendor/adminlte/img/AdminLTELogo.png" type="image/png">
-    <link rel="icon" href="/static/vendor/adminlte/img/AdminLTELogo.png" sizes="32x32" type="image/png">
+    <link rel="shortcut icon" href="{% static 'images/logo.png' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     {% block extra_head %}{% endblock %}
 </head>
@@ -88,9 +88,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{% url 'contact' %}" class="nav-link">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>Contact Messages</p>
+
+                    <li class="nav-item">
+                        <a href="{% url 'profile' %}" class="nav-link">
+                            <i class="nav-icon fas fa-user"></i>
+                            <p>Profile</p>
+                    </li>
                         </a>
                     </li>
                 </ul>
