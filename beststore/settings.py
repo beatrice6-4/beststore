@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import django_heroku
 import dj_database_url
+import cloudinary_storage
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
