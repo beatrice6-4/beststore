@@ -1,196 +1,1066 @@
-{% load static %}
+
+
+
+
+
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAMAMAASAI BAKERS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .Sidebar {
-            background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
-            color: white;
-            width: 240px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
-            padding: 32px 18px 18px 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 1050;
-            transition: transform 0.3s;
-        }
-        .Sidebar.collapsed {
-            transform: translateX(-100%);
-        }
-        .logo-section {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .logo-section .logo {
-            height: 60px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        }
-        .logo-section h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: 1px;
-        }
-        .Sidebar .nav a {
-            color: white;
-            font-size: 1.08em;
-            padding: 12px 0;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            transition: background 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-        .Sidebar .nav a:hover, .Sidebar .nav a.active {
-            background: #fff;
-            color: #004080;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        }
-        .navbar-fixed {
-            position: fixed;
-            top: 0;
-            left: 240px;
-            right: 0;
-            z-index: 1060;
-            width: calc(100vw - 240px);
-            transition: left 0.3s, width 0.3s;
-        }
-        .Sidebar.collapsed ~ .navbar-fixed {
-            left: 0;
-            width: 100vw;
-        }
-        .main-content {
-            margin-left: 240px;
-            margin-top: 70px; /* Height of navbar */
-            padding: 32px;
-            height: calc(100vh - 70px);
-            overflow-y: auto;
-            background: transparent;
-            transition: margin-left 0.3s;
-        }
-        .Sidebar.collapsed ~ .main-content {
-            margin-left: 0;
-        }
-        @media (max-width: 900px) {
-            .Sidebar {
-                width: 70px;
-                padding: 18px 4px;
-            }
-            .Sidebar .nav a span {
-                display: none;
-            }
-            .navbar-fixed {
-                left: 70px;
-                width: calc(100vw - 70px);
-            }
-            .Sidebar.collapsed ~ .navbar-fixed {
-                left: 0;
-                width: 100vw;
-            }
-            .main-content {
-                margin-left: 70px;
-            }
-            .Sidebar.collapsed ~ .main-content {
-                margin-left: 0;
-            }
-        }
-        @media (max-width: 600px) {
-            .Sidebar {
-                width: 100vw;
-                min-width: 100vw;
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 60px;
-                flex-direction: row;
-                padding: 8px 2vw;
-                align-items: center;
-                z-index: 1050;
-            }
-            .logo-section {
-                margin-bottom: 0;
-            }
-            .navbar-fixed {
-                left: 0;
-                top: 60px;
-                width: 100vw;
-            }
-            .main-content {
-                margin-left: 0;
-                margin-top: 120px;
-                padding: 10px 2vw 8px 2vw;
-                height: calc(100vh - 120px);
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="Sidebar" id="Sidebar">
-        <div class="logo-section">
-            <img src="{% static 'images/logo.png' %}" alt="Government Logo" class="logo">
-            <h2>MAMAMAASAI BAKERS</h2>
-        </div>
-        <nav class="nav flex-column w-100">
-            <a href="{% url 'store' %}"><i class="fa fa-store"></i> <span>Store</span></a>
-            <a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> <span>Cart</span></a>
-            <a href="{% url 'myOrders' %}"><i class="fa fa-tasks me-2"></i> <span>Orders</span></a>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <!--  Prevent admin panel being crawled by search engines -->
+    <meta name="robots" content="none, noarchive">
+
+    <title>Site administration | Django site admin</title>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="/static/vendor/fontawesome-free/css/all.min.css">
+
+    <!-- Bootstrap and adminLTE -->
+    <link rel="stylesheet" href="/static/vendor/adminlte/css/adminlte.min.css" id="adminlte-css">
+
+    <!-- Bootswatch theme -->
     
+
+    
+
+    <!-- Custom fixes for django -->
+    <link rel="stylesheet" href="/static/jazzmin/css/main.css">
+
+    
+
+    <!-- favicons -->
+    <link rel="shortcut icon" href="/static/vendor/adminlte/img/AdminLTELogo.png" type="image/png">
+    <link rel="icon" href="/static/vendor/adminlte/img/AdminLTELogo.png" sizes="32x32" type="image/png">
+
+    
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    
+
+     
+     
+</head>
+<body class="hold-transition sidebar-mini   dashboard accent-primary theme-default " data-admin-utc-offset="10800">
+
+<div class="wrapper">
+
+    
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light" id="jazzy-navbar">
+            <ul class="navbar-nav">
+
+                
+                    <li class="nav-item">
+                        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                    </li>
+                
+
+                
+                
+            </ul>
+
+            
+
+            <ul class="navbar-nav ml-auto">
+
+                
+                
+
+                
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link btn" data-toggle="dropdown" href="#" title="superadmin@gmail.com">
+                        <i class="far fa-user" aria-hidden="true"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-left" id="jazzy-usermenu">
+                        <span class="dropdown-header">Account</span>
+                        <div class="dropdown-divider"></div>
+                        <a href="/admin/password_change/" class="dropdown-item">
+                            <i class="fas fa-key mr-2"></i> Change password
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form id="logout-form" method="post" action="/admin/logout/">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="pIvl5nOywP0ZTQ44PZkEtCMWQsHeWEpcw7sqNJwkViuLIYnrimuPfGOQ7o4On2zz">
+                            <button type="submit" class="dropdown-item"><i class="fas fa-users mr-2"></i> Log out</button>
+                        </form>
+                        
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                            <a href="/admin/accounts/account/2/change/" class="dropdown-item dropdown-footer">See Profile</a>
+                        
+                    </div>
+                </li>
+            </ul>
         </nav>
+        
+        
+            
+
+            <aside class="main-sidebar elevation-4 sidebar-dark-primary" id="jazzy-sidebar">
+                <a href="/admin/" class="brand-link " id="jazzy-logo">
+                    <img src="/static/vendor/adminlte/img/AdminLTELogo.png" alt="Django administration Logo" class="img-circle brand-image elevation-3" style="opacity: .8">
+                    <span class="brand-text font-weight-light">Django administration</span>
+                </a>
+
+                <div class="sidebar">
+                    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                        <div class="image">
+                            
+                                <i class="fas fa-inverse user-profile fa-user-circle"></i>
+                            
+                        </div>
+                        <div class="info">
+                            
+                                <a href="/admin/accounts/account/2/change/" class="d-block">superadmin@gmail.com</a>
+                            
+                        </div>
+                    </div>
+
+                    <nav class="mt-2">
+                        <ul class="nav nav-pills nav-sidebar flex-column " data-widget="treeview" role="menu" data-collapsible="false">
+
+                            <li class="nav-item">
+                                <a href="/admin/" class="nav-link">
+                                    <i class="nav-icon fas fa-th-large"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+
+                            
+                                
+                                    <li class="nav-header">Accounts</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/accounts/contactmessage/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Contact messages</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/accounts/transaction/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Transactions</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/accounts/account/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Users</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Authentication and Authorization</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/auth/group/" class="nav-link">
+                                                <i class="nav-icon fas fa-users"></i> <p>Groups</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Carts</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/carts/cartitem/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Cart items</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/carts/cart/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Carts</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Category</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/category/category/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Categories</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Cdmis</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/CDMIS/activity/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Activitys</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/CDMIS/group/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Groups</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/CDMIS/payment/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Payments</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/CDMIS/service/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Services</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/CDMIS/training/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Trainings</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Finance</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/finance/financerecord/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Finance records</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Orders</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/orders/orderproduct/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Order products</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/orders/order/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Orders</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/orders/payment/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Payments</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                                    <li class="nav-header">Store</li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/store/productgallery/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Product gallerys</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/store/product/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Products</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/store/reviewrating/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Review ratings</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                        <li class="nav-item">
+                                            
+                                            <a href="/admin/store/variation/" class="nav-link">
+                                                <i class="nav-icon fas fa-circle"></i> <p>Variations</p>
+                                            </a>
+                                        
+                                        </li>
+                                    
+                                
+                            
+                        </ul>
+                    </nav>
+                </div>
+            </aside>
+        
+        
+    
+
+    <div class="content-wrapper" >
+        
+            
+            <div class="content border-bottom mb-2">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12 col-md-auto d-flex flex-grow-1 align-items-center">
+                            <h1 class="h4 m-0 pr-3 mr-3 border-right"> Dashboard </h1>
+                            
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin/">Home</a></li>
+        <li class="breadcrumb-item">Dashboard</li>
+    </ol>
+
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="content">
+                <div class="container-fluid">
+                    <section id="content" class="content">
+                        
+                            
+                        
+                        <div class="row">
+                            
+    
+    
+        
+    
+
+    <div class="col-lg-9 col-12">
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Accounts</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/accounts/contactmessage/">Contact messages</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/accounts/contactmessage/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/accounts/contactmessage/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/accounts/transaction/">Transactions</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/accounts/transaction/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/accounts/transaction/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/accounts/account/">Users</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/accounts/account/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/accounts/account/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Authentication and Authorization</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/auth/group/">Groups</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/auth/group/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/auth/group/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Carts</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/carts/cartitem/">Cart items</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/carts/cartitem/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/carts/cartitem/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/carts/cart/">Carts</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/carts/cart/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/carts/cart/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Category</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/category/category/">Categories</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/category/category/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/category/category/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Cdmis</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/CDMIS/activity/">Activitys</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/CDMIS/activity/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/CDMIS/activity/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/CDMIS/group/">Groups</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/CDMIS/group/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/CDMIS/group/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/CDMIS/payment/">Payments</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/CDMIS/payment/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/CDMIS/payment/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/CDMIS/service/">Services</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/CDMIS/service/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/CDMIS/service/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/CDMIS/training/">Trainings</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/CDMIS/training/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/CDMIS/training/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Finance</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/finance/financerecord/">Finance records</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/finance/financerecord/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/finance/financerecord/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Orders</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/orders/orderproduct/">Order products</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/orders/orderproduct/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/orders/orderproduct/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/orders/order/">Orders</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/orders/order/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/orders/order/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/orders/payment/">Payments</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/orders/payment/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/orders/payment/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="m-0">Store</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/store/productgallery/">Product gallerys</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/store/productgallery/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/store/productgallery/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/store/product/">Products</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/store/product/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/store/product/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/store/reviewrating/">Review ratings</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/store/reviewrating/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/store/reviewrating/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>
+                                            <a href="/admin/store/variation/">Variations</a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group float-right">
+                                                
+                                                    <a href="/admin/store/variation/add/" class="btn btn-xs btn-success addlink">Add</a>
+                                                
+                                                
+                                                    
+                                                        <a href="/admin/store/variation/" class="btn btn-xs btn-info changelink">Change</a>
+                                                    
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+
+                
+                </div>
+        </div>
+
     </div>
-    <div class="navbar-fixed" id="navbarFixed">
-        {% include 'includes/navbar.html' %}
+    <div class="col-lg-3 col-12">
+        <div id="content-related">
+            <div class="module" id="recent-actions-module">
+                <h4 class="mb-3">Recent actions</h4>
+                
+                
+                
+                    <div class="timeline">
+                        
+                            <div>
+                                
+                                    <i class="fas fa-edit bg-gray text-xs"></i>
+                                
+
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fas fa-clock"></i> 41 minutes ago</span>
+                                    <h3 class="timeline-header no-border">
+                                        
+                                            <a href="/admin/accounts/account/2/change/">superadmin@gmail.com</a>
+                                        
+
+                                        
+                                    </h3>
+                                    
+                                        <div class="timeline-body">
+                                            
+                                                <ul style="list-style: none; padding: 0;">
+                                                    
+                                                    
+                                                        <li><strong>Changed</strong> Groups and Phone number.</li>
+                                                    
+                                                </ul>
+                                            
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        
+                            <div>
+                                
+                                    <i class="fas fa-plus-circle bg-success text-xs"></i>
+                                
+
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fas fa-clock"></i> 12 hours, 34 minutes ago</span>
+                                    <h3 class="timeline-header no-border">
+                                        
+                                            <a href="/admin/store/variation/268/change/">2Kgs</a>
+                                        
+
+                                        
+                                    </h3>
+                                    
+                                        <div class="timeline-body">
+                                            
+                                                Added “2Kgs”.
+                                            
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        
+                            <div>
+                                
+                                    <i class="fas fa-plus-circle bg-success text-xs"></i>
+                                
+
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fas fa-clock"></i> 12 hours, 34 minutes ago</span>
+                                    <h3 class="timeline-header no-border">
+                                        
+                                            <a href="/admin/store/variation/267/change/">Grey cake</a>
+                                        
+
+                                        
+                                    </h3>
+                                    
+                                        <div class="timeline-body">
+                                            
+                                                Added “Grey cake”.
+                                            
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        
+                            <div>
+                                
+                                    <i class="fas fa-plus-circle bg-success text-xs"></i>
+                                
+
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fas fa-clock"></i> 12 hours, 35 minutes ago</span>
+                                    <h3 class="timeline-header no-border">
+                                        
+                                            <a href="/admin/store/product/308/change/">Beef cakes</a>
+                                        
+
+                                        
+                                    </h3>
+                                    
+                                        <div class="timeline-body">
+                                            
+                                                Added “Beef cakes”.
+                                            
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        
+                            <div>
+                                
+                                    <i class="fas fa-plus-circle bg-success text-xs"></i>
+                                
+
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fas fa-clock"></i> 12 hours, 35 minutes ago</span>
+                                    <h3 class="timeline-header no-border">
+                                        
+                                            <a href="/admin/store/product/307/change/">Pound cake</a>
+                                        
+
+                                        
+                                    </h3>
+                                    
+                                        <div class="timeline-body">
+                                            
+                                                Added “Pound cake”.
+                                            
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        
+                            <div>
+                                
+                                    <i class="fas fa-trash bg-danger text-xs"></i>
+                                
+
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fas fa-clock"></i> 12 hours, 36 minutes ago</span>
+                                    <h3 class="timeline-header no-border">
+                                        
+                                            PINK CAKE
+                                        
+
+                                        
+                                    </h3>
+                                    
+                                </div>
+                            </div>
+                        
+                        <div>
+                            <i class="fa fa-clock bg-gray"></i>
+                        </div>
+                    </div>
+                
+            </div>
+        </div>
     </div>
-    <div class="main-content" id="mainContent">
-        {% block content %}
-        <!-- Page-specific content goes here -->
-        {% endblock %}
+
+
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+
+        
     </div>
-    <script>
-        // Hamburger toggles sidebar collapse/expand
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidebar = document.getElementById('Sidebar');
-            var mainContent = document.getElementById('mainContent');
-            var navbarFixed = document.getElementById('navbarFixed');
-            var hamburger = document.getElementById('hamburger');
-            if (hamburger) {
-                hamburger.onclick = function() {
-                    sidebar.classList.toggle('collapsed');
-                    // Adjust main content and navbar position
-                    if (sidebar.classList.contains('collapsed')) {
-                        mainContent.style.marginLeft = '0';
-                        navbarFixed.style.left = '0';
-                        navbarFixed.style.width = '100vw';
-                    } else {
-                        mainContent.style.marginLeft = window.innerWidth <= 900 ? '70px' : '240px';
-                        navbarFixed.style.left = window.innerWidth <= 900 ? '70px' : '240px';
-                        navbarFixed.style.width = window.innerWidth <= 900 ? 'calc(100vw - 70px)' : 'calc(100vw - 240px)';
-                    }
-                };
-            }
-        });
-    </script>
+
+
+    
+        <footer class="main-footer ">
+            <div class="float-right d-none d-sm-inline">
+                <b>Jazzmin version</b> 3.0.1
+            </div>
+            
+                <strong>Copyright &copy; 2025 .</strong> All rights reserved.
+            
+        </footer>
+        
+    
+
+
+</div>
+
+
+
+<!-- jQuery -->
+<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/vendor/adminlte/js/adminlte.min.js"></script>
+<!-- Django customisations -->
+<script src="/static/jazzmin/js/main.js"></script>
+
+
+
+
+
+
+
 </body>
 </html>
