@@ -60,7 +60,7 @@
                     <i class="fas fa-user-circle fa-2x text-white"></i>
                 </div>
                 <div class="info">
-                    <a href="#" class="d-block">{{ user.username }}</a>
+                    <a href="{% url 'profile' %}" class="d-block">{{ user.username }}</a>
                 </div>
             </div>
             <nav class="mt-2">
@@ -91,7 +91,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'cdmis:finance' %}" class="nav-link">
-                            <i class="nav-icon fas fa-financial"></i>
+                            <i class="nav-icon fas fa-chart-line"></i>
                             <p>Financials</p>
                         </a>
                     </li>
