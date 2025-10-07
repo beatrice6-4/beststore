@@ -34,13 +34,15 @@
         .sidebar .nav-link {
             color: #fff !important;
             font-weight: 500;
+
             border-radius: 8px;
+            padding: 10px 15px;
             margin-bottom: 6px;
             transition: background 0.2s, color 0.2s;
         }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: #fff !important;
-            color: #004080 !important;
+            background: #ee0505 !important;
+            color: hsl(210, 96%, 47%) !important;
             font-weight: 700;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
@@ -121,7 +123,7 @@
                 <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="#" class="nav-link">Dashboard</a>
+                <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
             </li>
         </ul>
         <ul class="navbar-nav ml-auto">

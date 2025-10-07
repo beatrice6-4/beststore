@@ -1,66 +1,42 @@
-
-{% extends 'base.html' %}
-{% load static %}
-{% block content %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; }
-        .dashboard-container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 32px; }
-        h2 { margin-top: 0; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 24px; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f0f2f5; }
-        .status-completed { color: #27ae60; font-weight: bold; }
-        .status-pending { color: #e67e22; font-weight: bold; }
-        .status-cancelled { color: #c0392b; font-weight: bold; }
-        @media (max-width: 600px) {
-            .dashboard-container { padding: 12px; }
-            table, th, td { font-size: 14px; }
-        }
-    </style>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
-    <div class="dashboard-container">
-        <h2>Welcome, {{ user.username }}!</h2>
-        <p>Here are your recent orders:</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Order #</th>
-                    <th>Date</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.date|date:"M d, Y" }}</td>
-                    <td>
-                        {% for item in order.items.all %}
-                            {{ item.product.name }} (x{{ item.quantity }}){% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>ksh {{ order.total }}</td>
-                    <td class="status-{{ order.status|lower }}">{{ order.status }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align:center;">You have no orders yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <header>
+        <h1>Welcome to Your Dashboard, {{ user.username }}</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+                <li><a href="{% url 'accounts:orders' %}">Orders</a></li>
+                <li><a href="{% url 'accounts:logout' %}">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Account Overview</h2>
+            <p>Email: {{ user.email }}</p>
+            <p>Joined: {{ user.date_joined|date:"F d, Y" }}</p>
+        </section>
+        <section>
+            <h2>Recent Orders</h2>
+            {% if orders %}
+                <ul>
+                    {% for order in orders %}
+                        <li>
+                            Order #{{ order.id }} - {{ order.status }} - {{ order.created_at|date:"M d, Y" }}
+                            <a href="{% url 'accounts:order_detail' order.id %}">View Details</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No recent orders.</p>
+            {% endif %}
+        </section>
+    </main>
 </body>
 </html>
-
-{% endblock %}

@@ -19,6 +19,8 @@ urlpatterns = [
     path('account/', views.account, name='account'),
     path('products/', views.products, name='products'),
     path('profile/', views.profile, name='profile'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+
 
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('forgotPassword/', views.forgotPassword, name='forgotPassword'),

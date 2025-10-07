@@ -534,3 +534,21 @@ def profile(request):
         'userprofile': userprofile,
     }
     return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+def dashboard(request):
+    # Add any context data you want to show on the dashboard
+    orders_count = Order.objects.filter(user=request.user).count()
+    products = Product.objects.all()[:6]
+    categories = Category.objects.all()
+    userprofile = getattr(request.user, 'userprofile', None)
+    context = {
+        'orders_count': orders_count,
+        'products': products,
+        'categories': categories,
+        'user': request.user,
+        'userprofile': userprofile,
+        
+    }
+    return render(request, 'accounts/dashboard.html', context)
