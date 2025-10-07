@@ -647,3 +647,36 @@ def group_create(request):
     else:
         form = GroupForm()
     return render(request, 'CDMIS/group_form.html', {'form': form})
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponse
+from .models import Requirement
+from .forms import RequirementForm
+import csv
+
+def requirements_list(request):
+    requirements = Requirement.objects.all()
+    return render(request, 'CDMIS/requirements.html', {'requirements': requirements})
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def create_requirement(request):
+    if request.method == 'POST':
+        form = RequirementForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('cdmis:requirements')
+    else:
+        form = RequirementForm()
+    return render(request, 'CDMIS/create_requirement.html', {'form': form})
+
+def download_requirements(request):
+    requirements = Requirement.objects.all()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=group_requirements.csv'
+    writer = csv.writer(response)
+    writer.writerow(['Title', 'Description'])
+    for req in requirements:
+        writer.writerow([req.title, req.description])
+    return response

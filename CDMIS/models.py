@@ -78,3 +78,10 @@ class Member(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.middle_name} ({self.id_no})"
+
+
+from django.db import models
+
+class Requirement(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()

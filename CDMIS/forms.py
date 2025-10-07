@@ -24,3 +24,11 @@ from django import forms
 
 class MemberUploadForm(forms.Form):
     excel_file = forms.FileField(label="Upload Excel File")
+
+from django import forms
+from .models import Requirement
+
+class RequirementForm(forms.ModelForm):
+    class Meta:
+        model = Requirement
+        fields = ['title', 'description']

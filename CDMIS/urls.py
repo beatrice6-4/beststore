@@ -29,7 +29,9 @@ urlpatterns = [
     path('reports/', views.cdmis_reports, name='reports'),
     path('case-management/', views.case_management, name='case_management'),
     path('groups/create/', views.group_create, name='group_create'),
-
+    path('requirements/', views.requirements_list, name='requirements'),
+    path('requirements/create/', views.create_requirement, name='create_requirement'),
+    path('requirements/download/', views.download_requirements, name='download_requirements'),
 
     path('orders/', views.order_list, name='order_list'),
     path('orders/edit/<int:pk>/', views.order_edit, name='order_edit'),

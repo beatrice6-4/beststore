@@ -1,0 +1,17 @@
+{% extends 'gov.html' %}
+{% block content %}
+<h2>Group Registration Requirements</h2>
+{% if user.is_staff or user.is_superuser %}
+    <a href="{% url 'cdmis:create_requirement' %}" class="btn btn-success mb-3">Add Requirement</a>
+{% endif %}
+<a href="{% url 'cdmis:download_requirements' %}" class="btn btn-primary mb-3">Download Requirements</a>
+<ul class="list-group">
+    {% for req in requirements %}
+        <li class="list-group-item">
+            <strong>{{ req.title }}</strong>: {{ req.description }}
+        </li>
+    {% empty %}
+        <li class="list-group-item">No requirements found.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
