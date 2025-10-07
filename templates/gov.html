@@ -24,7 +24,7 @@
                 <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="#" class="nav-link">Dashboard</a>
+                <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
             </li>
         </ul>
         <ul class="navbar-nav ml-auto">
@@ -72,28 +72,29 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'cdmis:groups' %}" class="nav-link">
+                        <a href="{% url 'cdmis:group_list' %}" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
                             <p>Community groups</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'cdmis:trainings' %}" class="nav-link">
+                        <a href="{% url 'cdmis:training_list' %}" class="nav-link">
                             <i class="nav-icon fas fa-chalkboard-teacher"></i>
                             <p>Trainings</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'cdmis:payments' %}" class="nav-link">
+                        <a href="{% url 'cdmis:payment_list' %}" class="nav-link">
                             <i class="nav-icon fas fa-money-bill-wave"></i>
                             <p>Payments</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'cdmis:reports' %}" class="nav-link">
+                        <a href="{% url 'cdmis:report_list' %}" class="nav-link">
                             <i class="nav-icon fas fa-file-alt"></i>
                             <p>Reports</p>
-
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="{% url 'profile' %}" class="nav-link">
                             <i class="nav-icon fas fa-user"></i>
