@@ -1,7 +1,7 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-    {% load static %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}User Dashboard | Mama Maasai Bakers{% endblock %}</title>
@@ -11,6 +11,104 @@
     <link rel="shortcut icon" href="{% static 'images/logo.png' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/logo.png' %}" sizes="32x32" type="image/png">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+        }
+        .brand-link {
+            background: linear-gradient(90deg, #004080 0%, #4ff005 100%);
+            color: #fff !important;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #198754;
+        }
+        .brand-link .brand-text {
+            font-size: 1.2rem;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #004080 0%, #4ff005 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .sidebar .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #fff !important;
+            color: #004080 !important;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+        .user-panel .fa-user-circle {
+            color: #4ff005;
+            background: #fff;
+            border-radius: 50%;
+            padding: 4px;
+        }
+        .main-header {
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+            background: #fff;
+        }
+        .navbar-nav .nav-link {
+            font-size: 1.08em;
+            font-weight: 500;
+        }
+        .content-wrapper {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding-bottom: 24px;
+        }
+        .content {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .main-footer {
+            background: #fff;
+            border-top: 1px solid #e9ecef;
+            padding: 16px 0;
+            font-size: 0.95em;
+            color: #666;
+        }
+        .breadcrumb {
+            background: none;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        .breadcrumb-item a {
+            color: #198754;
+            font-weight: 600;
+        }
+        .breadcrumb-item.active {
+            color: #004080;
+        }
+        @media (max-width: 991.98px) {
+            .content {
+                padding: 16px;
+            }
+            .sidebar {
+                min-height: auto;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .sidebar {
+                padding: 12px 0;
+            }
+            .content-wrapper {
+                padding-bottom: 12px;
+            }
+            .content {
+                padding: 10px;
+            }
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="hold-transition sidebar-mini accent-primary theme-default">
@@ -34,7 +132,7 @@
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-left">
                     <span class="dropdown-header">Account</span>
                     <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
+                    <a href="{% url 'profile' %}" class="dropdown-item">
                         <i class="fas fa-user mr-2"></i> Profile
                     </a>
                     <div class="dropdown-divider"></div>
@@ -49,8 +147,8 @@
 
     <!-- Sidebar -->
     <aside class="main-sidebar elevation-4 sidebar-dark-primary">
-        <a href="{% url 'dashboard' %}" class="brand-link">
-            <img src="/static/vendor/adminlte/img/AdminLTELogo.png" alt="Logo" class="img-circle brand-image elevation-3" style="opacity: .8">
+        <a href="#" class="brand-link">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-circle brand-image elevation-3" style="opacity: .8">
             <span class="brand-text font-weight-light">Mama Maasai Bakers</span>
         </a>
         <div class="sidebar">
@@ -59,7 +157,7 @@
                     <i class="fas fa-user-circle fa-2x text-white"></i>
                 </div>
                 <div class="info">
-                    <a href="#" class="d-block">{{ user.username }}</a>
+                    <a href="{% url 'profile' %}" class="d-block">{{ user.username }}</a>
                 </div>
             </div>
             <nav class="mt-2">
@@ -89,15 +187,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'contact' %}" class="nav-link">
+                        <a href="{% url 'contact_messages' %}" class="nav-link">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>Contact Messages</p>
-
-                    <li class="nav-item">
-                        <a href="{% url 'profile' %}" class="nav-link">
-                            <i class="nav-icon fas fa-user"></i>
-                            <p>Profile</p>
-                    </li>
                         </a>
                     </li>
                 </ul>
@@ -114,7 +206,7 @@
                     <div class="col-12 col-md-auto d-flex flex-grow-1 align-items-center">
                         <h1 class="h4 m-0 pr-3 mr-3 border-right">{% block page_title %}Dashboard{% endblock %}</h1>
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
                             <li class="breadcrumb-item">{% block breadcrumb %}Dashboard{% endblock %}</li>
                         </ol>
                     </div>
@@ -135,9 +227,9 @@
 </div>
 <!-- ./wrapper -->
 
-<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
-<script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="/static/vendor/adminlte/js/adminlte.min.js"></script>
-<script src="/static/jazzmin/js/main.js"></script>
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'vendor/adminlte/js/adminlte.min.js' %}"></script>
+<script src="{% static 'jazzmin/js/main.js' %}"></script>
 </body>
 </html>
