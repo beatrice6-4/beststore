@@ -31,6 +31,49 @@ INSTALLED_APPS = [
     'cloudinary',
 ]
 
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Mama Maasai Bakers Admin",
+    "site_header": "Mama Maasai Bakers",
+    "site_brand": "Mama Maasai Bakers",
+    "welcome_sign": "Welcome to Mama Maasai Bakers Admin Dashboard",
+    "copyright": "Mama Maasai Bakers",
+    "search_model": ["accounts.Account", "store.Product", "category.Category"],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["accounts", "store", "category", "orders", "CDMIS", "finance"],
+    "custom_links": {
+        "accounts": [{
+            "name": "View Site",
+            "url": "https://mamamaasaibakers.com",
+            "icon": "fas fa-globe",
+            "new_window": True
+        }]
+    },
+    "icons": {
+        "accounts.Account": "fas fa-user",
+        "store.Product": "fas fa-bread-slice",
+        "category.Category": "fas fa-list",
+        "orders.Order": "fas fa-shopping-cart",
+        "CDMIS.Group": "fas fa-users",
+        "finance.Payment": "fas fa-money-bill-wave",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": True,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "accounts.Account": "single",
+        "store.Product": "collapsible",
+    },
+}
+
+
+
 SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 
