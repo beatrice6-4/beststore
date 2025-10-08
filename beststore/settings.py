@@ -125,7 +125,6 @@ else:
     }
 
 # Cloudinary storage for media files
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dmgwc5b2t',
     'API_KEY': '191412321311827',
