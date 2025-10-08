@@ -553,3 +553,33 @@ def dashboard(request):
     }
     return render(request, 'accounts/dashboard.html', context)
 
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+
+def admin_required(view_func):
+    return user_passes_test(lambda u: u.is_staff or u.is_superuser)(view_func)
+
+@admin_required
+def users_view(request):
+    User = get_user_model()
+    users = User.objects.all()
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        user = get_object_or_404(User, pk=user_id)
+        if action == 'activate':
+            user.is_active = True
+            user.save()
+            messages.success(request, f'User {user.username} activated.')
+        elif action == 'deactivate':
+            user.is_active = False
+            user.save()
+            messages.success(request, f'User {user.username} deactivated.')
+        elif action == 'delete':
+            user.delete()
+            messages.success(request, f'User deleted.')
+        return redirect('users')
+    return render(request, 'accounts/users.html', {'users': users})
