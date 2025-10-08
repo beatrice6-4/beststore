@@ -4,7 +4,7 @@ from store.models import Product, Variation
 
 class Payment(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    payment_id = models.CharField(max_length=100, null=True, blank=True)  # <-- Ensure this is set
+    payment_id = models.CharField(max_length=100, null=True, blank=True)
     reference_code = models.CharField(max_length=20, unique=True, blank=True, null=True)
     payment_method = models.CharField(max_length=100)
     amount_paid = models.CharField(max_length=100)
@@ -15,7 +15,6 @@ class Payment(models.Model):
         return self.payment_id if self.payment_id else "No Mpesa Code"
 
 class Order(models.Model):
-    user = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='orders_orders')
     STATUS = (
         ('Pending', 'Pending'),
         ('Accepted', 'Accepted'),
@@ -23,13 +22,13 @@ class Order(models.Model):
         ('Cancelled', 'Cancelled'),
     )
 
-    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='orders')
     payment = models.ForeignKey(
         Payment,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name='order_payment'
+        related_name='orders'
     )
     order_number = models.CharField(max_length=20)
     first_name = models.CharField(max_length=50)
@@ -57,13 +56,13 @@ class Order(models.Model):
         return f'{self.address_line_1} {self.address_line_2}'
 
     def __str__(self):
-        return self.first_name
+        return f'Order {self.order_number} by {self.full_name()}'
 
 class OrderProduct(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_products')
+    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True, related_name='order_products')
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='order_products')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_products')
     variations = models.ManyToManyField(Variation, blank=True)
     quantity = models.PositiveIntegerField(default=1)
     product_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -72,4 +71,4 @@ class OrderProduct(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.product.product_name
+        return f'{self.product.product_name} (Order {self.order.order_number})'
