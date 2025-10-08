@@ -583,3 +583,17 @@ def users_view(request):
             messages.success(request, f'User deleted.')
         return redirect('users')
     return render(request, 'accounts/users.html', {'users': users})
+
+
+from django.shortcuts import render, redirect
+from .forms import CategoryForm
+
+def add_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('categories')  # or wherever you want to redirect
+    else:
+        form = CategoryForm()
+    return render(request, 'accounts/add_category.html', {'form': form})
