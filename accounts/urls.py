@@ -20,6 +20,7 @@ urlpatterns = [
     path('products/', views.products, name='products'),
     path('profile/', views.profile, name='profile'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('categories/', views.category_list, name='categories'),
 
 
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
