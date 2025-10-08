@@ -553,9 +553,3 @@ def dashboard(request):
     }
     return render(request, 'accounts/dashboard.html', context)
 
-from .forms import CategoryForm
-from .models import Category
-@admin_required
-def category_list(request):
-    categories = Category.objects.all()
-    return render(request, 'accounts/category_list.html', {'categories': categories})
