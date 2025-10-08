@@ -127,9 +127,9 @@ else:
 # Cloudinary storage for media files
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dhklmtpxy',
-    'API_KEY': '345437392578237',
-    'API_SECRET': 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA',
+    'CLOUD_NAME': 'dmgwc5b2t',
+    'API_KEY': '191412321311827',
+    'API_SECRET': 'CKl1zIOVvWfU_ObPtlVIlKyUCNE',
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
