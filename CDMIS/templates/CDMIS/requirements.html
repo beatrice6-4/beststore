@@ -1,4 +1,7 @@
 {% extends 'gov.html' %}
+{% block page_title %}Group Registration Requirements{% endblock %}
+{% block breadcrumb %}Group Registration Requirements{% endblock %}
+{% load static %}
 {% block content %}
 <h2>Group Registration Requirements</h2>
 {% if user.is_staff or user.is_superuser %}
