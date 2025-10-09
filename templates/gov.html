@@ -51,7 +51,7 @@
     <!-- Sidebar -->
     <aside class="main-sidebar elevation-4 sidebar-dark-primary">
         <a href="{% url 'dashboard' %}" class="brand-link">
-            <img src="/static/vendor/adminlte/img/AdminLTELogo.png" alt="Logo" class="img-circle brand-image elevation-3" style="opacity: .8">
+            <img src="{% static 'images/gov.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3" style="opacity: .8">
             <span class="brand-text font-weight-light">CDMIS MANAGEMENT</span>
         </a>
         <div class="sidebar">
@@ -105,6 +105,12 @@
                         <a href="{% url 'cdmis:reports' %}" class="nav-link">
                             <i class="nav-icon fas fa-file-alt"></i>
                             <p>Reports</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:updates' %}" class="nav-link">
+                            <i class="nav-icon fas fa-bullhorn"></i>
+                            <p>Updates</p>
                         </a>
                     </li>
                     <li class="nav-item">

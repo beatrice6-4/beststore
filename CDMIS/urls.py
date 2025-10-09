@@ -31,6 +31,7 @@ urlpatterns = [
     path('groups/create/', views.group_create, name='group_create'),
     path('requirements/', views.requirements_list, name='requirements'),
     path('requirements/create/', views.create_requirement, name='create_requirement'),
+    path('updates/', views.updates, name='updates'),
 
     path('requirements/download_word/', views.download_requirements_word, name='download_requirements_word'),
 

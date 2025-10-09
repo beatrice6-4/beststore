@@ -688,3 +688,14 @@ def download_requirements_word(request):
     response['Content-Disposition'] = 'attachment; filename=group_requirements.docx'
     document.save(response)
     return response
+
+
+from django.shortcuts import render
+
+def updates(request):
+    # You can fetch updates from your model if you have one, or use static data
+    updates_list = [
+        {"title": "New Training Announced", "date": "2025-10-09", "content": "Join our new training session next week."},
+        {"title": "Financial Report Released", "date": "2025-10-08", "content": "The latest financial report is now available."},
+    ]
+    return render(request, 'CDMIS/updates.html', {'updates': updates_list})
