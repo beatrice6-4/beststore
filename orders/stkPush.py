@@ -36,9 +36,9 @@ def initiate_stk_push(request, order_number):
 
         # Prepare STK Push parameters for sandbox payments
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = '174379'
+        business_short_code = '6391014'  # <-- Use your actual Till Number here
         process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        callback_url = 'https://your-dev-callback-url.com/orders/mpesa/callback/'  # Use a test callback URL
+        callback_url = 'https://your-dev-callback-url.com/orders/mpesa/callback/'
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
         account_reference = 'MAMAMAASAI BAKERS'
@@ -53,10 +53,10 @@ def initiate_stk_push(request, order_number):
             'BusinessShortCode': business_short_code,
             'Password': password,
             'Timestamp': timestamp,
-            'TransactionType': 'CustomerPayBillOnline',
+            'TransactionType': 'CustomerBuyGoodsOnline',  # <-- For Till Number
             'Amount': amount,
             'PartyA': phone,
-            'PartyB': business_short_code,
+            'PartyB': business_short_code,                # <-- Till Number
             'PhoneNumber': phone,
             'CallBackURL': callback_url,
             'AccountReference': account_reference,
