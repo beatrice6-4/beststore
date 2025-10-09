@@ -56,8 +56,8 @@ def initiate_stk_push(request, order_number):
             'TransactionType': 'CustomerBuyGoodsOnline',  # <-- For Till Number
             'Amount': amount,
             'PartyA': phone,
-            'PartyB': business_short_code,                # <-- Till Number
-            'PhoneNumber': phone,
+            'PartyB': 6391014,                # <-- Till Number
+            'PhoneNumber': phone, # 2547XXXXXXXX
             'CallBackURL': callback_url,
             'AccountReference': account_reference,
             'TransactionDesc': transaction_desc 
