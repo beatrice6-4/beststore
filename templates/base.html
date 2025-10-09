@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{% static 'vendor/fontawesome-free/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/adminlte/css/adminlte.min.css' %}">
     <link rel="stylesheet" href="{% static 'jazzmin/css/main.css' %}">
-    <link rel="shortcut icon" href="{% static 'images/logo.png' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'images/donut.png' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/logo.png' %}" sizes="32x32" type="image/png">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     <style>
@@ -192,6 +192,10 @@
                         <a href="{% url 'contact_messages' %}" class="nav-link">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>Contact Messages</p>
+                    <li class="nav-item">
+                        <a href="{% url 'about' %}" class="nav-link">
+                            <i class="nav-icon far fa-address-card"></i>
+                            <p>About Us</p>
                         </a>
                     </li>
                 </ul>
