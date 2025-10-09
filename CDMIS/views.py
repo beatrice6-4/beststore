@@ -699,3 +699,25 @@ def updates(request):
         {"title": "Financial Report Released", "date": "2025-10-08", "content": "The latest financial report is now available."},
     ]
     return render(request, 'CDMIS/updates.html', {'updates': updates_list})
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Document
+from .forms import DocumentForm
+
+@login_required
+def docs(request):
+    documents = Document.objects.all().order_by('-uploaded_at')
+    if request.user.is_staff or request.user.is_superuser:
+        if request.method == 'POST':
+            form = DocumentForm(request.POST, request.FILES)
+            if form.is_valid():
+                doc = form.save(commit=False)
+                doc.uploaded_by = request.user
+                doc.save()
+                return redirect('cdmis:docs')
+        else:
+            form = DocumentForm()
+    else:
+        form = None
+    return render(request, 'CDMIS/docs.html', {'documents': documents, 'form': form})
