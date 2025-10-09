@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-{% load static %}
 <link rel="stylesheet" href="{% static 'css/orders.css' %}">
 <style>
     body {
-        background: #fff8f0;
+        background: #f8f9fa;
         font-family: 'Segoe UI', Arial, sans-serif;
     }
     .section-content {
@@ -13,18 +13,23 @@
     }
     .card {
         border-radius: 16px;
-        box-shadow: 0 4px 24px #f3e1d0;
+        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
         border: none;
         background: #fff;
     }
     .card-header {
-        background: linear-gradient(90deg, #ffe5d0 60%, #fff8f0 100%);
+        background: linear-gradient(90deg, #4ff005 60%, #eaf6fb 100%);
         border-radius: 16px 16px 0 0;
-        color: #b85c38;
+        color: #004080;
         font-size: 1.3em;
         font-weight: 700;
         padding: 20px 28px;
-        border-bottom: 1px solid #f3e1d0;
+        border-bottom: 1px solid #eaf6fb;
+        display: flex;
+        align-items: center;
+    }
+    .card-header i {
+        margin-right: 10px;
     }
     .card-body {
         padding: 28px;
@@ -33,38 +38,38 @@
         background: #fff;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 8px #f3e1d0;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
     }
     .table thead {
-        background: #ffe5d0;
-        color: #b85c38;
+        background: #eaf6fb;
+        color: #004080;
         font-weight: 600;
     }
     .table th, .table td {
         padding: 14px 12px;
         vertical-align: middle;
-        border-bottom: 1px solid #f0e6e6;
+        border-bottom: 1px solid #e9ecef;
     }
     .table th {
-        background: #ffe5d0;
-        color: #b85c38;
+        background: #eaf6fb;
+        color: #004080;
         font-weight: 700;
     }
     .table-striped tbody tr:nth-of-type(odd) {
-        background-color: #fff3e6;
+        background-color: #f4f8fb;
     }
     .table-hover tbody tr:hover {
-        background-color: #fffbe7;
+        background-color: #d1e7fd;
         transition: background 0.2s;
     }
     a {
-        color: #b85c38;
+        color: #004080;
         font-weight: 600;
         text-decoration: none;
         transition: color 0.2s;
     }
     a:hover {
-        color: #8d3c1e;
+        color: #198754;
         text-decoration: underline;
     }
     .text-center {
@@ -91,7 +96,7 @@
                 <article class="card">
                     <header class="card-header">
                         <i class="fa fa-history"></i>
-                        <span class="d-inline-block ml-2">Your Order History</span>
+                        <span>Your Order History</span>
                     </header>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -115,7 +120,7 @@
                                         </th>
                                         <td>{{ order.full_name }}</td>
                                         <td>{{ order.phone }}</td>
-                                        <td>Ksh.{{ order.order_total }}</td>
+                                        <td><span class="fw-bold text-success">Ksh.{{ order.order_total }}</span></td>
                                         <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
                                     </tr>
                                     {% empty %}
@@ -125,6 +130,11 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <a href="{% url 'store' %}" class="btn btn-primary">
+                                <i class="fa fa-shopping-bag"></i> Continue Shopping
+                            </a>
                         </div>
                     </div>
                 </article>
