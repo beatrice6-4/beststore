@@ -1,4 +1,4 @@
-{% extends 'admin_dashboard.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         <div class="card-body">
             <form method="post" novalidate>
                 {% csrf_token %}
-
+                
                 <div class="mb-3">
                     <label for="group_id" class="form-label">Group (optional)</label>
                     <select id="group_id" name="group_id" class="form-select">
