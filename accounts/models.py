@@ -161,7 +161,7 @@ from accounts.models import Account
 class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255)
-    created_by = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='created_payments')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

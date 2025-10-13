@@ -62,3 +62,12 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ['category_name', 'description']  # Add other fields if needed
+
+
+from django import forms
+from .models import Payment
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = ['amount', 'description']
