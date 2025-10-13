@@ -90,6 +90,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'beststore.urls'
 
+LOGIN_REDIRECT_URL = 'redirect_after_login'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

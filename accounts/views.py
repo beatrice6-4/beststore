@@ -697,3 +697,13 @@ def user_detail(request, user_id):
             messages.success(request, f'User {user.username} role changed to {new_role}.')
         return redirect('user_detail', user_id=user.id)
     return render(request, 'accounts/user_detail.html', {'user_obj': user})
+
+
+# accounts/views.py
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def redirect_after_login(request):
+    if request.user.role == 'finance':
+        return redirect('finance_dashboard')
+    return redirect('dashboard')
