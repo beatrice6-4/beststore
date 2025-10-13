@@ -7,7 +7,7 @@ import cloudinary_storage
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['mamamaasaibakers.com']
 
 INSTALLED_APPS = [
@@ -126,9 +126,9 @@ else:
 
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dmgwc5b2t',
-    'API_KEY': '191412321311827',
-    'API_SECRET': 'CKl1zIOVvWfU_ObPtlVIlKyUCNE',
+    'CLOUD_NAME': 'dhklmtpxy',
+    'API_KEY': '345437392578237',
+    'API_SECRET': 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA',
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
