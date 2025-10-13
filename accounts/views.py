@@ -599,21 +599,69 @@ def finance_dashboard(request):
     payments = Payment.objects.filter(created_by=request.user)
     return render(request, 'finance/dashboard.html', {'payments': payments})
 
+# ...existing code...
+from django.contrib.auth.models import Group
+from decimal import Decimal, InvalidOperation
+
 @login_required
 def add_payment(request):
-    if not request.user.role == 'finance':
+    """
+    Finance-only view to add a payment.
+    - Passes available groups to the template for selection.
+    - Expects POST: group_id (optional), amount, description.
+    - If Payment model has a 'group' FK, it will be set. Otherwise the group name is prepended to the description.
+    """
+    if not getattr(request.user, 'role', None) == 'finance':
         return redirect('dashboard')
-    if request.method == 'POST':
-        form = PaymentForm(request.POST)
-        if form.is_valid():
-            payment = form.save(commit=False)
-            payment.created_by = request.user
-            payment.save()
-            return redirect('finance_dashboard')
-    else:
-        form = PaymentForm()
-    return render(request, 'finance/add_payment.html', {'form': form})
 
+    groups = Group.objects.all()
+
+    if request.method == 'POST':
+        group_id = request.POST.get('group_id')
+        amount_raw = request.POST.get('amount', '').strip()
+        description = request.POST.get('description', '').strip()
+
+        # validate amount
+        try:
+            amount = Decimal(amount_raw)
+            if amount <= 0:
+                raise InvalidOperation()
+        except (InvalidOperation, TypeError):
+            messages.error(request, 'Please enter a valid positive amount.')
+            return render(request, 'finance/add_payment.html', {
+                'groups': groups,
+                'amount': amount_raw,
+                'description': description,
+            })
+
+        # create Payment instance
+        payment = Payment(amount=amount, description=description, created_by=request.user)
+
+        # attach group if model supports it, otherwise include group in description
+        if group_id:
+            try:
+                group = Group.objects.get(pk=group_id)
+            except Group.DoesNotExist:
+                messages.error(request, 'Selected group not found.')
+                return render(request, 'finance/add_payment.html', {
+                    'groups': groups,
+                    'amount': amount_raw,
+                    'description': description,
+                })
+
+            if hasattr(payment, 'group'):
+                payment.group = group
+            else:
+                # prepend group info to description to preserve association
+                payment.description = f"[Group: {group.name}] {payment.description}"
+
+        payment.save()
+        messages.success(request, 'Payment added successfully.')
+        return redirect('finance_dashboard')
+
+    # GET -> show form with groups
+    return render(request, 'finance/add_payment.html', {'groups': groups})
+# ...existing code...
 
 
 from django.contrib.auth import get_user_model
