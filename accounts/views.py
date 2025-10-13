@@ -76,14 +76,10 @@ def login(request):
                 is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
                 if is_cart_item_exists:
                     cart_item = CartItem.objects.filter(cart=cart)
-
-                    # Getting the product variations by cart id
                     product_variation = []
                     for item in cart_item:
                         variation = item.variations.all()
                         product_variation.append(list(variation))
-
-                    # Get the cart items from the user to access his product variations
                     cart_item = CartItem.objects.filter(user=user)
                     ex_var_list = []
                     id = []
@@ -91,10 +87,6 @@ def login(request):
                         existing_variation = item.variations.all()
                         ex_var_list.append(list(existing_variation))
                         id.append(item.id)
-
-                    # product_variation = [1, 2, 3, 4, 6]
-                    # ex_var_list = [4, 6, 3, 5]
-
                     for pr in product_variation:
                         if pr in ex_var_list:
                             index = ex_var_list.index(pr)
@@ -112,16 +104,18 @@ def login(request):
                 pass
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
-            url = request.META.get('HTTP_REFERER')
-            try:
-                query = requests.utils.urlparse(url).query
-                # next=/cart/checkout/
-                params = dict(x.split('=') for x in query.split('&'))
-                if 'next' in params:
-                    nextPage = params['next']
-                    return redirect(nextPage)
-            except:
-                return redirect('store')
+
+            # Role-based redirect
+            if hasattr(user, 'role'):
+                if user.role == 'finance':
+                    return redirect('finance_dashboard')
+                elif user.role == 'admin':
+                    return redirect('admin_dashboard')
+                else:
+                    return redirect('dashboard')
+            else:
+                return redirect('dashboard')
+
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
@@ -597,3 +591,33 @@ def add_category(request):
     else:
         form = CategoryForm()
     return render(request, 'accounts/add_category.html', {'form': form})
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Payment
+from .forms import PaymentForm
+
+@login_required
+def finance_dashboard(request):
+    if not request.user.role == 'finance':
+        return redirect('dashboard')
+    payments = Payment.objects.filter(created_by=request.user)
+    return render(request, 'finance/dashboard.html', {'payments': payments})
+
+@login_required
+def add_payment(request):
+    if not request.user.role == 'finance':
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.created_by = request.user
+            payment.save()
+            return redirect('finance_dashboard')
+    else:
+        form = PaymentForm()
+    return render(request, 'finance/add_payment.html', {'form': form})

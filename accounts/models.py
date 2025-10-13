@@ -38,23 +38,23 @@ class MyAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+# accounts/models.py
+from django.contrib.auth.models import AbstractUser
+
 class Account(AbstractUser):
-    class Role(models.TextChoices):
-        ADMINISTRATOR = 'administrator', 'Administrator'
-        FINANCE = 'finance', 'Finance'
-        NORMAL = 'normal', 'Normal User'
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('finance', 'Finance'),
+        ('user', 'User'),
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=50)
-    role = models.CharField(
-        max_length=20,
-        choices=Role.choices,
-        default=Role.NORMAL,
-        help_text="User role. Default is Normal User."
-    )
+    phone_number = models.CharField(max_length=50, blank=True, null=True)
+
 
 
 
@@ -153,3 +153,16 @@ class Category(models.Model):
 
     def __str__(self):
         return self.category_name
+
+
+from django.db import models
+from accounts.models import Account
+
+class Payment(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.CharField(max_length=255)
+    created_by = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.amount} - {self.description}"

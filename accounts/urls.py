@@ -24,6 +24,9 @@ urlpatterns = [
     path('add_category/', views.add_category, name='add_category'),
     path('users/', views.users_view, name='users'),
 
+    path('dashboard/', views.finance_dashboard, name='finance_dashboard'),
+    path('add-payment/', views.add_payment, name='add_payment'),
+
 
 
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
