@@ -26,6 +26,9 @@ urlpatterns = [
 
     path('dashboard/', views.finance_dashboard, name='finance_dashboard'),
     path('add-payment/', views.add_payment, name='add_payment'),
+    path('users/', views.user_management, name='user_management'),
+    path('users/add/', views.add_user, name='add_user'),
+    path('users/<int:user_id>/', views.user_detail, name='user_detail'),
 
 
 

@@ -621,3 +621,79 @@ def add_payment(request):
     else:
         form = PaymentForm()
     return render(request, 'finance/add_payment.html', {'form': form})
+
+
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .forms import RegistrationForm, UserForm
+
+def admin_required(view_func):
+    return user_passes_test(lambda u: u.is_staff or u.is_superuser)(view_func)
+
+@admin_required
+def user_management(request):
+    User = get_user_model()
+    users = User.objects.all()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        user_id = request.POST.get('user_id')
+        user = get_object_or_404(User, pk=user_id)
+        if action == 'activate':
+            user.is_active = True
+            user.save()
+            messages.success(request, f'User {user.username} activated.')
+        elif action == 'deactivate':
+            user.is_active = False
+            user.save()
+            messages.success(request, f'User {user.username} deactivated.')
+        elif action == 'delete':
+            user.delete()
+            messages.success(request, f'User deleted.')
+        elif action == 'change_role':
+            new_role = request.POST.get('new_role')
+            user.role = new_role
+            user.save()
+            messages.success(request, f'User {user.username} role changed to {new_role}.')
+        return redirect('user_management')
+    return render(request, 'accounts/user_management.html', {'users': users})
+
+@admin_required
+def add_user(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User added successfully.')
+            return redirect('user_management')
+    else:
+        form = RegistrationForm()
+    return render(request, 'accounts/add_user.html', {'form': form})
+
+@admin_required
+def user_detail(request, user_id):
+    User = get_user_model()
+    user = get_object_or_404(User, pk=user_id)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'activate':
+            user.is_active = True
+            user.save()
+            messages.success(request, f'User {user.username} activated.')
+        elif action == 'deactivate':
+            user.is_active = False
+            user.save()
+            messages.success(request, f'User {user.username} deactivated.')
+        elif action == 'delete':
+            user.delete()
+            messages.success(request, f'User deleted.')
+            return redirect('user_management')
+        elif action == 'change_role':
+            new_role = request.POST.get('new_role')
+            user.role = new_role
+            user.save()
+            messages.success(request, f'User {user.username} role changed to {new_role}.')
+        return redirect('user_detail', user_id=user.id)
+    return render(request, 'accounts/user_detail.html', {'user_obj': user})
