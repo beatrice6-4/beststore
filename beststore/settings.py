@@ -50,6 +50,12 @@ JAZZMIN_SETTINGS = {
             "url": "https://mamamaasaibakers.com",
             "icon": "fas fa-globe",
             "new_window": True
+        }, {
+            "name": "visit CDMIS",
+            "url": "https://mamamaasaibakers.com/cdmis/groups",
+            "icon": "fas fa-users",
+            "new_window": True
+            
         }]
     },
     "icons": {
