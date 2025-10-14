@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
@@ -7,42 +6,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .dashboard-header {
+            background-color: #004080;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-section {
+            margin-bottom: 20px;
+        }
+        .dashboard-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #004080;
+        }
+        .dashboard-section p {
+            margin: 0;
+            font-size: 1rem;
+            color: #555;
+        }
+        .recent-orders ul {
+            list-style: none;
+            padding: 0;
+        }
+        .recent-orders li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .recent-orders li:last-child {
+            border-bottom: none;
+        }
+        .recent-orders a {
+            text-decoration: none;
+            color: #004080;
+            font-weight: bold;
+        }
+        .recent-orders a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #004080;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            background-color: #003060;
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <header class="dashboard-header">
         <h1>Welcome to Your Dashboard, {{ user.username }}</h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'profile' %}">Profile</a></li>
-                <li><a href="{% url 'myOrders' %}">Orders</a></li>
-                <li><a href="{% url 'logout' %}">Logout</a></li>
-            </ul>
-        </nav>
     </header>
-    <main>
-        <section>
+    <div class="dashboard-container">
+        <!-- Account Overview Section -->
+        <div class="dashboard-section">
             <h2>Account Overview</h2>
-            <p>Email: {{ user.email }}</p>
-            <p>Joined: {{ user.date_joined|date:"F d, Y" }}</p>
-        </section>
-        <section>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Joined:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+        </div>
+
+        <!-- Recent Orders Section -->
+        <div class="dashboard-section recent-orders">
             <h2>Recent Orders</h2>
             {% if orders %}
                 <ul>
                     {% for order in orders %}
                         <li>
-                            Order #{{ order.id }} - {{ order.status }} - {{ order.created_at|date:"M d, Y" }}
-                            <a href="{% url 'accounts:order_detail' order.id %}">View Details</a>
+                            <span>Order #{{ order.id }} - {{ order.status }} - {{ order.created_at|date:"M d, Y" }}</span>
+                            <a href="{% url 'accounts:order_detail' order.id %}" class="btn">View Details</a>
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
                 <p>No recent orders.</p>
             {% endif %}
-        </section>
-    </main>
+        </div>
+
+        <!-- Quick Links Section -->
+        <div class="dashboard-section">
+            <h2>Quick Links</h2>
+            <a href="{% url 'profile' %}" class="btn">Edit Profile</a>
+            <a href="{% url 'change_password' %}" class="btn">Change Password</a>
+            <a href="{% url 'logout' %}" class="btn">Logout</a>
+            <a href="{% url 'myOrders' %}" class="btn">Order History</a>
+        </div>
+    </div>
 </body>
 </html>
 {% endblock %}
