@@ -55,7 +55,7 @@ JAZZMIN_SETTINGS = {
             "url": "https://mamamaasaibakers.com/cdmis/groups",
             "icon": "fas fa-users",
             "new_window": True
-            
+
         }]
     },
     "icons": {
@@ -75,6 +75,11 @@ JAZZMIN_SETTINGS = {
     "changeform_format_overrides": {
         "accounts.Account": "single",
         "store.Product": "collapsible",
+        "category.Category": "vertical_tabs",
+        "orders.Order": "horizontal_tabs",
+        "CDMIS.Group": "collapsible",
+        "finance.Payment": "horizontal_tabs",
+        
     },
 }
 
