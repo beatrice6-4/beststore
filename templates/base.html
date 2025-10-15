@@ -225,6 +225,19 @@
         });
     });
 
+
+
+    if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+        .register("{% static 'service-worker.js' %}")
+        .then((registration) => {
+            console.log("Service Worker registered with scope:", registration.scope);
+        })
+        .catch((error) => {
+            console.error("Service Worker registration failed:", error);
+        });
+}
+
     // Hide the install button if the app is already installed
     window.addEventListener("appinstalled", () => {
         console.log("PWA was installed");
