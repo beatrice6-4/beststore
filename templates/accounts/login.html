@@ -1,7 +1,6 @@
 {% extends 'bases.html' %}
 {% load static %}
 
-
 {% block content %}
 
 <style>
@@ -71,6 +70,22 @@
         color: #145c32;
         text-decoration: underline;
     }
+    #installApp {
+        display: none;
+        background-color: #198754;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        width: 100%;
+    }
+    #installApp:hover {
+        background-color: #157347;
+    }
 </style>
 
 <section class="section-conten padding-y" style="min-height:84vh">
@@ -84,7 +99,7 @@ Already verified? <a href="{% url 'login' %}">Login</a>
 {% else %}
     <div class="card custom-login-card mx-auto" style="max-width: 380px;">
       <div class="card-body">
-        <h4 class="card-title mb-4 text-center">Welcome Back!</h4>
+        <h4 class="card-title mb-4 text-center">Hi Guest, Welcome Back!</h4>
         <h4 class="card-title mb-4">Sign in</h4>
       {% include 'includes/alerts.html' %}
       <form action="{% url 'login' %}" method="POST">
@@ -108,5 +123,49 @@ Already verified? <a href="{% url 'login' %}">Login</a>
     <br><br>
 {% endif %}
 
+<!-- Install App Button -->
+<div class="text-center">
+    <button id="installApp">Install App</button>
+</div>
+
 </section>
+
+<script>
+    let deferredPrompt;
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault(); // Prevent the default install prompt
+        deferredPrompt = e; // Save the event for later use
+
+        // Show the install button
+        const installButton = document.getElementById("installApp");
+        if (installButton) {
+            installButton.style.display = "block";
+
+            // Handle the install button click
+            installButton.addEventListener("click", () => {
+                deferredPrompt.prompt(); // Show the install prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === "accepted") {
+                        console.log("User accepted the install prompt");
+                    } else {
+                        console.log("User dismissed the install prompt");
+                    }
+                    deferredPrompt = null; // Reset the deferred prompt
+                });
+            });
+        }
+    });
+
+    // Hide the install button if the app is already installed
+    window.addEventListener("appinstalled", () => {
+        console.log("PWA was installed");
+        const installButton = document.getElementById("installApp");
+        if (installButton) {
+            installButton.style.display = "none";
+        }
+    });
+</script>
+
 {% endblock %}
