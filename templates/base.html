@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{% static 'vendor/fontawesome-free/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/adminlte/css/adminlte.min.css' %}">
     <link rel="stylesheet" href="{% static 'jazzmin/css/main.css' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#004080">
     <link rel="shortcut icon" href="{% static 'images/donut.png' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/donut.png' %}" sizes="32x32" type="image/png">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
@@ -34,7 +36,6 @@
         .sidebar .nav-link {
             color: #fff !important;
             font-weight: 500;
-
             border-radius: 8px;
             padding: 10px 15px;
             margin-bottom: 6px;
@@ -46,69 +47,22 @@
             font-weight: 700;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
-        .user-panel .fa-user-circle {
-            color: #4ff005;
-            background: #fff;
-            border-radius: 50%;
-            padding: 4px;
+        .install-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #004080;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-        .main-header {
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-            background: #fff;
-        }
-        .navbar-nav .nav-link {
-            font-size: 1.08em;
-            font-weight: 500;
-        }
-        .content-wrapper {
-            background: #f8f9fa;
-            min-height: 100vh;
-            padding-bottom: 24px;
-        }
-        .content {
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-        .main-footer {
-            background: #fff;
-            border-top: 1px solid #e9ecef;
-            padding: 16px 0;
-            font-size: 0.95em;
-            color: #666;
-        }
-        .breadcrumb {
-            background: none;
-            padding: 0;
-            margin-bottom: 0;
-        }
-        .breadcrumb-item a {
-            color: #198754;
-            font-weight: 600;
-        }
-        .breadcrumb-item.active {
-            color: #004080;
-        }
-        @media (max-width: 991.98px) {
-            .content {
-                padding: 16px;
-            }
-            .sidebar {
-                min-height: auto;
-            }
-        }
-        @media (max-width: 767.98px) {
-            .sidebar {
-                padding: 12px 0;
-            }
-            .content-wrapper {
-                padding-bottom: 12px;
-            }
-            .content {
-                padding: 10px;
-            }
+        .install-btn:hover {
+            background-color: #003060;
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -238,6 +192,43 @@
 
 </div>
 <!-- ./wrapper -->
+
+<!-- Install App Button -->
+<button id="installApp" class="install-btn">Install App</button>
+
+<script>
+    let deferredPrompt;
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Show the install button
+        const installButton = document.getElementById("installApp");
+        installButton.style.display = "block";
+
+        // Handle the install button click
+        installButton.addEventListener("click", () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === "accepted") {
+                    console.log("User accepted the install prompt");
+                } else {
+                    console.log("User dismissed the install prompt");
+                }
+                deferredPrompt = null;
+            });
+        });
+    });
+
+    // Hide the install button if the app is already installed
+    window.addEventListener("appinstalled", () => {
+        console.log("PWA was installed");
+        const installButton = document.getElementById("installApp");
+        installButton.style.display = "none";
+    });
+</script>
 
 <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
