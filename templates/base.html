@@ -49,9 +49,6 @@
         }
         .install-btn {
             display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
             background-color: #004080;
             color: #fff;
             border: none;
@@ -152,11 +149,20 @@
                         <a href="{% url 'contact_messages' %}" class="nav-link">
                             <i class="nav-icon fas fa-envelope"></i>
                             <p>Contact Messages</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="{% url 'about' %}" class="nav-link">
                             <i class="nav-icon far fa-address-card"></i>
                             <p>About Us</p>
                         </a>
+                    </li>
+                    <!-- Install App Button -->
+                    <li class="nav-item">
+                        <button id="installApp" class="install-btn nav-link">
+                            <i class="nav-icon fas fa-download"></i>
+                            <p>Install App</p>
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -192,9 +198,6 @@
 
 </div>
 <!-- ./wrapper -->
-
-<!-- Install App Button -->
-<button id="installApp" class="install-btn">Install App</button>
 
 <script>
     let deferredPrompt;
