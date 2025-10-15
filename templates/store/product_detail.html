@@ -2,197 +2,290 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* General Styles */
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    .section-content {
+        padding: 20px 0;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-wrap {
+        text-align: center;
+    }
+
+    .img-big-wrap img {
+        max-width: 100%;
+        border-radius: 10px;
+    }
+
+    .thumb {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        gap: 10px;
+    }
+
+    .thumb img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.2s ease;
+    }
+
+    .thumb img:hover {
+        border-color: #004080;
+    }
+
+    .content-body {
+        padding: 20px;
+    }
+
+    .title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #004080;
+    }
+
+    .price {
+        font-size: 1.5rem;
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .rating-star {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+
+    .btn-primary {
+        background-color: #004080;
+        border-color: #004080;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #003060;
+        border-color: #003060;
+    }
+
+    .item-option-select {
+        margin-bottom: 15px;
+    }
+
+    .item-option-select h6 {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        border-radius: 5px;
+    }
+
+    .alert {
+        margin-top: 10px;
+    }
+
+    /* Reviews Section */
+    .box {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #fff;
+    }
+
+    .box h6 {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .box p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .rate {
+        display: flex;
+        gap: 5px;
+    }
+
+    .rate input {
+        display: none;
+    }
+
+    .rate label {
+        font-size: 1.5rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .rate input:checked ~ label,
+    .rate label:hover,
+    .rate label:hover ~ label {
+        color: #ffc107;
+    }
+
+    .rate label.half {
+        font-size: 1.2rem;
+    }
+
+    .section-heading h3 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #004080;
+        margin-bottom: 15px;
+    }
+
+    .section-heading .rating-star {
+        font-size: 1.2rem;
+        color: #ffc107;
+    }
+</style>
 
 <section class="section-content padding-y bg">
-	<div class="container">
+    <div class="container">
+        <!-- Product Detail Card -->
+        <div class="card">
+            <div class="row no-gutters">
+                <!-- Product Image -->
+                <aside class="col-md-6">
+                    <article class="gallery-wrap">
+                        <div class="img-big-wrap mainImage">
+                            <center><img src="{{ single_product.image.url }}" alt="{{ single_product.product_name }}"></center>
+                        </div>
+                        <ul class="thumb">
+                            <li>
+                                <a href="{{ single_product.image.url }}" target="mainImage"><img src="{{ single_product.image.url }}" alt="Product Image"></a>
+                                {% for i in product_gallery %}
+                                <a href="{{ i.image.url }}" target="mainImage"><img src="{{ i.image.url }}" alt="Product Image"></a>
+                                {% endfor %}
+                            </li>
+                        </ul>
+                    </article>
+                </aside>
 
-		<!-- ============================ COMPONENT 1 ================================= -->
-		<div class="card">
-			<div class="row no-gutters">
-				<aside class="col-md-6">
-					<article class="gallery-wrap">
-						<div class="img-big-wrap mainImage">
-							<center><img src="{{ single_product.images.url }}"></center>
-						</div> <!-- img-big-wrap.// -->
+                <!-- Product Info -->
+                <main class="col-md-6 border-left">
+                    <form action="{% url 'add_cart' single_product.id %}" method="POST">
+                        {% csrf_token %}
+                        <article class="content-body">
+                            <h2 class="title">{{ single_product.product_name }}</h2>
+                            <div class="rating-star">
+                                <span>
+                                    <i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                    <span>{{ single_product.countReview }} reviews</span>
+                                </span>
+                            </div>
 
-					</article> <!-- gallery-wrap .end// -->
-					<ul class="thumb">
-						<li>
-							<a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Product Image"></a>
-							{% for i in product_gallery %}
-							<a href="{{i.image.url}}" target="mainImage"><img src="{{i.image.url}}" alt="Product Image"></a>
-							{% endfor %}
-						</li>
-					</ul>
-				</aside>
-				<main class="col-md-6 border-left">
+                            <div class="mb-3">
+                                <var class="price h4">$ {{ single_product.price }}</var>
+                            </div>
 
-					<form action="{% url 'add_cart' single_product.id %}" method="POST">
-						{% csrf_token %}
-						<article class="content-body">
+                            <p>{{ single_product.description }}</p>
 
-							<h2 class="title">{{ single_product.product_name }}</h2>
-							<div class="rating-star">
-								<span>
-									<i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-	<span>{{single_product.countReview}} reviews</span>
-									</span>
-							</div>
+                            <hr>
+                            <div class="row">
+                                <div class="item-option-select">
+                                    <h6>Choose Color</h6>
+                                    <select name="color" class="form-control" required>
+                                        <option value="" disabled selected>Select</option>
+                                        {% for i in single_product.variation_set.colors %}
+                                        <option value="{{ i.variation_value|lower }}">{{ i.variation_value|capfirst }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="item-option-select">
+                                    <h6>Select Size</h6>
+                                    <select name="size" class="form-control" required>
+                                        <option value="" disabled selected>Select</option>
+                                        {% for i in single_product.variation_set.sizes %}
+                                        <option value="{{ i.variation_value|lower }}">{{ i.variation_value|capfirst }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <hr>
+                            {% if single_product.stock <= 0 %}
+                            <h5 class="text-danger">Out of Stock</h5>
+                            {% else %}
+                            <button type="submit" class="btn btn-primary"> <span class="text">Add to Cart</span> <i class="fa fa-shopping-cart"></i> </button>
+                            {% endif %}
+                        </article>
+                    </form>
+                </main>
+            </div>
+        </div>
+        <!-- End Product Detail Card -->
 
+        <br>
 
-							<div class="mb-3">
-								<var class="price h4">$ {{single_product.price}}</var>
-							</div>
+        <!-- Customer Reviews -->
+        <div class="row">
+            <div class="col-md-9">
+                <header class="section-heading">
+                    <h3>Customer Reviews</h3>
+                    <div class="rating-star">
+                        <span>
+                            <i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+                            <i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+                            <i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+                            <i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+                            <i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+                            <span>{{ single_product.countReview }} reviews</span>
+                        </span>
+                    </div>
+                </header>
 
-							<p>{{ single_product.description }}</p>
-
-
-							<hr>
-							<div class="row">
-								<div class="item-option-select">
-									<h6>Choose Color</h6>
-									<select name="color" class="form-control" required>
-										<option value="" disabled selected>Select</option>
-										{% for i in single_product.variation_set.colors %}
-										<option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<div class="row">
-								<div class="item-option-select">
-									<h6>Select Size</h6>
-									<select name="size" class="form-control" required>
-										<option value="" disabled selected>Select</option>
-										{% for i in single_product.variation_set.sizes %}
-										<option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
-										{% endfor %}
-									</select>
-								</div>
-							</div>
-							<hr>
-							{% if single_product.stock <= 0 %}
-							<h5 class="text-danger">Out of Stock</h5>
-							{% else %}
-							<button type="submit" class="btn  btn-primary"> <span class="text">Add to Cart</span> <i class="fa fa-shopping-cart"></i> </button>
-							{% endif %}
-						</article> <!-- product-info-aside .// -->
-					</form>
-				</main> <!-- col.// -->
-			</div> <!-- row.// -->
-		</div> <!-- card.// -->
-		<!-- ============================ COMPONENT 1 END .// ================================= -->
-
-		<br>
-
-		<div class="row">
-			<div class="col-md-9">
-
-
-
-				<form action="{% url 'submit_review' single_product.id %}" method="POST">
-					{% csrf_token %}
-					<h5>Write Your Review</h5>
-
-					<div>
-						<!-- Rating stars -->
-						<label>How do you rate this product?</label>
-						<br>
-						<div class="rate">
-							<input type="radio" name="rating" id="rating10" value="5" required /><label for="rating10" title="5"></label>
-							<input type="radio" name="rating" id="rating9" value="4.5" required /><label for="rating9" title="4.5" class="half"></label>
-							<input type="radio" name="rating" id="rating8" value="4" required /><label for="rating8" title="4"></label>
-							<input type="radio" name="rating" id="rating7" value="3.5" required /><label for="rating7" title="3.5" class="half"></label>
-							<input type="radio" name="rating" id="rating6" value="3" required /><label for="rating6" title="3"></label>
-							<input type="radio" name="rating" id="rating5" value="2.5" required /><label for="rating5" title="2.5" class="half"></label>
-							<input type="radio" name="rating" id="rating4" value="2" required /><label for="rating4" title="2"></label>
-							<input type="radio" name="rating" id="rating3" value="1.5" required /><label for="rating3" title="1.5" class="half"></label>
-							<input type="radio" name="rating" id="rating2" value="1" required /><label for="rating2" title="1"></label>
-							<input type="radio" name="rating" id="rating1" value="0.5" required /><label for="rating1" title="0.5" class="half"></label>
-						</div>
-<br>
-						Review Title:
-						<input type="text" class="form-control" name="subject">
-						<br>
-						Review:
-						<textarea name="review" rows="4" class="form-control"></textarea>
-						<br>
-						<!-- {% if user.is_authenticated %}
-							{% if orderproduct %}
-								<input type="submit" value="Submit Review" class="btn btn-primary">
-							{% else %}
-								<p>You must purchase this product to post a review.</p>
-							{% endif %}
-						{% else %}
-						<p>You must be logged in to post a review. <span><a href="{% url 'login' %}">Login now</a></span></p>
-						{% endif %} -->
-
-						{% if user.is_authenticated %}
-								<input type="submit" value="Submit Review" class="btn btn-primary">
-						{% else %}
-						<p>You must be logged in to post a review. <span><a href="{% url 'login' %}">Login now</a></span></p>
-						{% endif %}
-						<div class="alert alert-danger" role="alert" style="margin-top:10px;">
-  2-Factor Review Submission is disabled for demo purpose.
-</div>
-
-					</div>
-{% include 'includes/alerts.html' %}
-				</form>
-<br>
-<header class="section-heading">
-	<h3>Customer Reviews </h3>
-	<div class="rating-star">
-		<span>
-			<i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-			<i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-			<i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-			<i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-			<i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-	<span>{{single_product.countReview}} reviews</span>
-			</span>
-	</div>
-
-</header>
-
-{% for review in reviews %}
-				<article class="box mb-3">
-					<div class="icontext w-100">
-
-						<div class="text">
-							<span class="date text-muted float-md-right">{{review.updated_at}} </span>
-							<h6 class="mb-1">{{review.user.full_name}} </h6>
-							<div class="rating-star">
-								<span>
-									<i class="fa fa-star{% if review.rating == 0.5 %}-half-o{% elif review.rating < 1 %}-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if review.rating == 1.5 %}-half-o{% elif review.rating < 2 %}-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if review.rating == 2.5 %}-half-o{% elif review.rating < 3 %}-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if review.rating == 3.5 %}-half-o{% elif review.rating < 4 %}-o {% endif %}" aria-hidden="true"></i>
-									<i class="fa fa-star{% if review.rating == 4.5 %}-half-o{% elif review.rating < 5 %}-o {% endif %}" aria-hidden="true"></i>
-								</span>
-							</div>
-						</div>
-					</div> <!-- icontext.// -->
-					<div class="mt-3">
-						<h6>{{review.subject}}</h6>
-						<p>
-							{{review.review}}
-						</p>
-					</div>
-				</article>
-{% endfor %}
-
-
-			</div> <!-- col.// -->
-		</div> <!-- row.// -->
-
-
-	</div> <!-- container .//  -->
+                {% for review in reviews %}
+                <article class="box mb-3">
+                    <div class="icontext w-100">
+                        <div class="text">
+                            <span class="date text-muted float-md-right">{{ review.updated_at }}</span>
+                            <h6 class="mb-1">{{ review.user.full_name }}</h6>
+                            <div class="rating-star">
+                                <span>
+                                    <i class="fa fa-star{% if review.rating == 0.5 %}-half-o{% elif review.rating < 1 %}-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if review.rating == 1.5 %}-half-o{% elif review.rating < 2 %}-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if review.rating == 2.5 %}-half-o{% elif review.rating < 3 %}-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if review.rating == 3.5 %}-half-o{% elif review.rating < 4 %}-o {% endif %}" aria-hidden="true"></i>
+                                    <i class="fa fa-star{% if review.rating == 4.5 %}-half-o{% elif review.rating < 5 %}-o {% endif %}" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>{{ review.subject }}</h6>
+                        <p>{{ review.review }}</p>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- End Customer Reviews -->
+    </div>
 </section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
-
 {% endblock %}
