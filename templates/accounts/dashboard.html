@@ -19,42 +19,45 @@ body {
 
 /* Header */
 h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: #004080;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 /* Product Cards */
 .card {
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: #fff;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .card-img-top {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    height: 200px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    height: 220px;
     object-fit: cover;
 }
 
 .card-title {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: bold;
     color: #004080;
+    margin-bottom: 10px;
 }
 
 .card-text {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #555;
+    margin-bottom: 10px;
 }
 
 .card-text strong {
@@ -64,7 +67,10 @@ h1 {
 .btn-primary {
     background-color: #004080;
     border-color: #004080;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 15px;
 }
 
 .btn-primary:hover {
@@ -74,14 +80,16 @@ h1 {
 
 /* Empty State */
 .text-muted {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #888;
+    text-align: center;
+    margin-top: 20px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .card-img-top {
-        height: 150px;
+        height: 180px;
     }
 
     .card-title {
@@ -93,8 +101,9 @@ h1 {
     }
 }
 </style>
-<div class="container py-4">
-    <h1 class="mb-4">Product Dashboard</h1>
+
+<div class="container py-5">
+    <h1 class="mb-5">Product Dashboard</h1>
 
     <div class="row">
         {% for product in products %}
@@ -105,13 +114,13 @@ h1 {
                     <h5 class="card-title">{{ product.name }}</h5>
                     <p class="card-text">{{ product.description|truncatechars:100 }}</p>
                     <p class="card-text"><strong>Price:</strong> Ksh {{ product.price }}</p>
-                   <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn btn-primary">View Details</a>
+                    <a href="{% url 'product_detail' product.category.slug product.slug %}" class="btn btn-primary">View Details</a>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12">
-            <p class="text-center text-muted">No products available.</p>
+            <p class="text-muted">No products available.</p>
         </div>
         {% endfor %}
     </div>
