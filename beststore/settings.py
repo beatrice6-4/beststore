@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'cloudinary',
 ]
 
-
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
     "site_header": "Mama Maasai Bakers",
@@ -82,8 +81,6 @@ JAZZMIN_SETTINGS = {
         
     },
 }
-
-
 
 SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True
@@ -165,11 +162,14 @@ TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
+# Static files configuration
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Main static directory
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Directory for collected static files
 
-
+# Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
