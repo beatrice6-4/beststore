@@ -138,16 +138,15 @@ def activate(request, uidb64, token):
         return redirect('register')
 
 
+from store.models import Product  # Import the Product model
+
 @login_required
 def dashboard(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    orders_count = orders.count()
-    userprofile = getattr(request.user, 'userprofile', None)
+    # Fetch all products
+    products = Product.objects.all()
+
     context = {
-        'orders_count': orders_count,
-        'orders': orders,
-        'user': request.user,
-        'userprofile': userprofile,
+        'products': products,  # Pass all products to the template
     }
     return render(request, 'accounts/dashboard.html', context)
 

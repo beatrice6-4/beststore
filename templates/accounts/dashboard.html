@@ -1,126 +1,119 @@
 {% extends "base.html" %}
 {% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
+<style>
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        .dashboard-header {
-            background-color: #004080;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        .dashboard-header h1 {
-            margin: 0;
-            font-size: 2rem;
-        }
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .dashboard-section {
-            margin-bottom: 20px;
-        }
-        .dashboard-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #004080;
-        }
-        .dashboard-section p {
-            margin: 0;
-            font-size: 1rem;
-            color: #555;
-        }
-        .recent-orders ul {
-            list-style: none;
-            padding: 0;
-        }
-        .recent-orders li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .recent-orders li:last-child {
-            border-bottom: none;
-        }
-        .recent-orders a {
-            text-decoration: none;
-            color: #004080;
-            font-weight: bold;
-        }
-        .recent-orders a:hover {
-            text-decoration: underline;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #004080;
-            color: #fff;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 1rem;
-        }
-        .btn:hover {
-            background-color: #003060;
-        }
-    </style>
-</head>
-<body>
-    <header class="dashboard-header">
-        <h1>Welcome to Your Dashboard, {{ user.username }}</h1>
-    </header>
-    <div class="dashboard-container">
-        <!-- Account Overview Section -->
-        <div class="dashboard-section">
-            <h2>Account Overview</h2>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Joined:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
-        </div>
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-        <!-- Recent Orders Section -->
-        <div class="dashboard-section recent-orders">
-            <h2>Recent Orders</h2>
-            {% if orders %}
-                <ul>
-                    {% for order in orders %}
-                        <li>
-                            <span>Order #{{ order.id }} - {{ order.status }} - {{ order.created_at|date:"M d, Y" }}</span>
-                            <a href="{% url 'accounts:order_detail' order.id %}" class="btn">View Details</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No recent orders.</p>
-            {% endif %}
+/* Header */
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #004080;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Product Cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #004080;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.card-text strong {
+    color: #333;
+}
+
+.btn-primary {
+    background-color: #004080;
+    border-color: #004080;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #003060;
+    border-color: #003060;
+}
+
+/* Empty State */
+.text-muted {
+    font-size: 1.1rem;
+    color: #888;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-img-top {
+        height: 150px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
+}
+</style>
+<div class="container py-4">
+    <h1 class="mb-4">Product Dashboard</h1>
+
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                    <p class="card-text"><strong>Price:</strong> Ksh {{ product.price }}</p>
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-primary">View Details</a>
+                </div>
             </div>
-            <h2>Manage Your Account</h2>
-            <a href="{% url 'profile' %}" class="btn">Edit Profile</a>
-        <!-- Quick Links Section -->
-        <div class="dashboard-section">
-            <h2>Quick Links</h2>
-            <a href="{% url 'profile' %}" class="btn">Edit Profile</a>
-            <a href="{% url 'change_password' %}" class="btn">Change Password</a>
-            <a href="{% url 'logout' %}" class="btn">Logout</a>
-            <a href="{% url 'myOrders' %}" class="btn">Order History</a>
         </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted">No products available.</p>
+        </div>
+        {% endfor %}
     </div>
-</body>
-</html>
+</div>
 {% endblock %}
