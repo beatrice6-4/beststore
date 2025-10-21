@@ -735,3 +735,51 @@ def docs(request):
     return render(request, 'CDMIS/docs.html', {'documents': documents, 'form': form})
 
 
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import FinancialAccount, Withdrawal
+from django.utils.timezone import now
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import FinancialAccount, Withdrawal
+from django.utils.timezone import now
+
+@login_required
+def withdraw_funds(request):
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        phone_number = request.POST.get('phone_number')
+
+        try:
+            amount = float(amount)
+        except ValueError:
+            messages.error(request, "Invalid amount entered.")
+            return redirect('withdraw_funds')
+
+        # Get the user's financial account
+        account = FinancialAccount.objects.get(user=request.user)
+
+        # Check if the user has sufficient balance
+        if amount > account.balance:
+            messages.error(request, "Insufficient balance.")
+        elif amount <= 0:
+            messages.error(request, "Withdrawal amount must be greater than zero.")
+        elif not phone_number:
+            messages.error(request, "Phone number is required.")
+        else:
+            # Deduct the amount and create a withdrawal request
+            account.balance -= amount
+            account.save()
+
+            Withdrawal.objects.create(user=request.user, amount=amount, phone_number=phone_number, status='Pending')
+            messages.success(request, f"Withdrawal request for {amount} has been submitted.")
+
+        return redirect('withdraw_funds')
+
+    # Get the user's financial account
+    account = FinancialAccount.objects.get(user=request.user)
+    return render(request, 'CDMIS/withdraw_funds.html', {'account': account})

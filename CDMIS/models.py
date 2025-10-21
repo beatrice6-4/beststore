@@ -121,3 +121,27 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.user.username} booked {self.update.title}"
+
+
+
+from django.db import models
+from django.conf import settings
+
+class FinancialAccount(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='financial_account')
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)  # Phone number for withdrawals
+
+    def __str__(self):
+        return f"{self.user.username}'s Account"
+
+class Withdrawal(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='withdrawals')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    phone_number = models.CharField(max_length=15)  # Phone number for this withdrawal
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} ({self.status})"

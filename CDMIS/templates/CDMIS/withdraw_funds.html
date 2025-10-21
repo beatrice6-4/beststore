@@ -1,0 +1,29 @@
+{% extends 'gov.html' %}
+{% block content %}
+<h1>Withdraw Funds</h1>
+
+<div>
+    <p><strong>Current Balance:</strong> {{ account.balance }}</p>
+</div>
+
+<form method="POST" action="">
+    {% csrf_token %}
+    <div>
+        <label for="amount">Withdrawal Amount:</label>
+        <input type="number" step="0.01" name="amount" id="amount" required>
+    </div>
+    <div>
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" name="phone_number" id="phone_number" value="{{ account.phone_number }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Withdraw</button>
+</form>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

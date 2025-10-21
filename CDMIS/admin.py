@@ -71,3 +71,17 @@ class BookingAdmin(admin.ModelAdmin):
     list_display = ('user', 'update', 'booked_at')  # Display user, update, and booking date
     search_fields = ('user__username', 'update__title')  # Search by user or update title
     list_filter = ('booked_at', 'update')  # Filter by booking date and update
+
+
+from django.contrib import admin
+from .models import FinancialAccount, Withdrawal
+
+@admin.register(FinancialAccount)
+class FinancialAccountAdmin(admin.ModelAdmin):
+    list_display = ('user', 'balance', 'phone_number')
+
+@admin.register(Withdrawal)
+class WithdrawalAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'phone_number', 'status', 'requested_at', 'processed_at')
+    list_filter = ('status', 'requested_at')
+    search_fields = ('user__username', 'phone_number')
