@@ -690,14 +690,26 @@ def download_requirements_word(request):
     return response
 
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Update, Booking
+from django.contrib import messages
 
+@login_required
 def updates(request):
-    # You can fetch updates from your model if you have one, or use static data
-    updates_list = [
-        {"title": "New Training Announced", "date": "2025-10-09", "content": "Join our new training session next week."},
-        {"title": "Financial Report Released", "date": "2025-10-08", "content": "The latest financial report is now available."},
-    ]
+    updates_list = Update.objects.all().order_by('-date')  # Fetch updates from the database
+
+    if request.method == 'POST':
+        update_id = request.POST.get('update_id')
+        update = get_object_or_404(Update, id=update_id)
+
+        # Check if the user has already booked this update
+        if Booking.objects.filter(user=request.user, update=update).exists():
+            messages.error(request, "You have already booked this update.")
+        else:
+            Booking.objects.create(user=request.user, update=update)
+            messages.success(request, "You have successfully booked this update.")
+
     return render(request, 'CDMIS/updates.html', {'updates': updates_list})
 
 from django.shortcuts import render, redirect

@@ -2,24 +2,27 @@
 {% block page_title %}Updates{% endblock %}
 {% block breadcrumb %}Updates{% endblock %}
 {% block content %}
-<div class="card mt-4">
-    <div class="card-header bg-primary text-white">
-        <h4 class="mb-0"><i class="fas fa-bullhorn"></i> Latest Updates</h4>
+<h1>Updates</h1>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% for update in updates %}
+    <div class="update">
+        <h2>{{ update.title }}</h2>
+        <p>{{ update.content }}</p>
+        <p><small>Posted on: {{ update.date }}</small></p>
+        <form method="POST" action="">
+            {% csrf_token %}
+            <input type="hidden" name="update_id" value="{{ update.id }}">
+            <button type="submit" class="btn btn-primary">Book This Update</button>
+        </form>
     </div>
-    <div class="card-body">
-        {% if updates %}
-            <ul class="list-group">
-                {% for update in updates %}
-                <li class="list-group-item">
-                    <h5 class="mb-1">{{ update.title }}</h5>
-                    <small class="text-muted">{{ update.date }}</small>
-                    <p class="mb-0">{{ update.content }}</p>
-                </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <div class="alert alert-info">No updates available.</div>
-        {% endif %}
-    </div>
-</div>
+    <hr>
+{% endfor %}
 {% endblock %}
