@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Group, Payment, Activity, Training, Service
+from .models import Group, Payment, Activity, Training, Service, Update
 from django.http import HttpResponse
 import csv
 
@@ -47,3 +47,24 @@ class DocumentAdmin(admin.ModelAdmin):
     search_fields = ('title',)
 
 
+@admin.register(Update)
+class UpdateAdmin(admin.ModelAdmin):
+    list_display = ('title', 'date', 'created_by')
+    search_fields = ('title', 'content')
+    list_filter = ('date', 'created_by')
+    actions = ['download_updates_csv']
+
+    def download_updates_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=updates.csv'
+        writer = csv.writer(response)
+        writer.writerow(['Title', 'Content', 'Date', 'Created By'])
+        for update in queryset:
+            writer.writerow([
+                update.title,
+                update.content,
+                update.date,
+                update.created_by.username if update.created_by else '',
+            ])
+        return response
+    download_updates_csv.short_description = "Download selected updates as CSV"
