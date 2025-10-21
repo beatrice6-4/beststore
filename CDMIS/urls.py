@@ -34,7 +34,9 @@ urlpatterns = [
     path('updates/', views.updates, name='updates'),
     path('docs/', views.docs, name='docs'),
 
+   
     path('withdraw/', views.withdraw_funds, name='withdraw_funds'),
+
 
     
 
