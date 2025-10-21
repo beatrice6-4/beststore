@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Group, Payment, Activity, Training, Service, Update
+from .models import Group, Payment, Activity, Training, Service, Update, Booking, Requirement, Document
 from django.http import HttpResponse
 import csv
 
@@ -31,16 +31,12 @@ class PaymentAdmin(admin.ModelAdmin):
     download_payments_csv.short_description = "Download selected payments as CSV"
 
 
-from django.contrib import admin
-from .models import Requirement
-
 @admin.register(Requirement)
 class RequirementAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title',)
 
-from django.contrib import admin
-from .models import Document
+
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_by', 'uploaded_at')
@@ -68,3 +64,10 @@ class UpdateAdmin(admin.ModelAdmin):
             ])
         return response
     download_updates_csv.short_description = "Download selected updates as CSV"
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'update', 'booked_at')  # Display user, update, and booking date
+    search_fields = ('user__username', 'update__title')  # Search by user or update title
+    list_filter = ('booked_at', 'update')  # Filter by booking date and update
