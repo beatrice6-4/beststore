@@ -1,0 +1,17 @@
+{% extends 'gov.html' %}
+{% block content %}
+<h1>Updates</h1>
+{% for update in updates %}
+    <div class="update">
+        <h2>{{ update.title }}</h2>
+        <p>{{ update.description }}</p>
+        <p><small>Posted on: {{ update.created_at }}</small></p>
+        <form method="POST" action="{% url 'book_update' update.id %}">
+            {% csrf_token %}
+            <input type="text" name="group_name" placeholder="Enter group name" required>
+            <button type="submit">Book</button>
+        </form>
+    </div>
+    <hr>
+{% endfor %}
+{% endblock %}

@@ -45,3 +45,5 @@ from .models import Document
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_by', 'uploaded_at')
     search_fields = ('title',)
+
+

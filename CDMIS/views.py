@@ -721,3 +721,5 @@ def docs(request):
     else:
         form = None
     return render(request, 'CDMIS/docs.html', {'documents': documents, 'form': form})
+
+

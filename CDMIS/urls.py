@@ -34,6 +34,8 @@ urlpatterns = [
     path('updates/', views.updates, name='updates'),
     path('docs/', views.docs, name='docs'),
 
+    
+
     path('requirements/download_word/', views.download_requirements_word, name='download_requirements_word'),
 
     path('orders/', views.order_list, name='order_list'),
