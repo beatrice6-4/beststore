@@ -1,1 +1,1 @@
-web gunicorn beststore.wsgi
+web: gunicorn beststore.wsgi
