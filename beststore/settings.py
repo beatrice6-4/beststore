@@ -2,14 +2,22 @@ import os
 from pathlib import Path
 import django_heroku
 import dj_database_url
-import cloudinary_storage
+from django.core.exceptions import ImproperlyConfigured
+from django.contrib.messages import constants as messages
 
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Secret key
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = True
+
+# Debug mode
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
+# Allowed hosts
 ALLOWED_HOSTS = ['mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
 
+# Installed apps
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -31,6 +39,7 @@ INSTALLED_APPS = [
     'cloudinary',
 ]
 
+# Jazzmin settings
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
     "site_header": "Mama Maasai Bakers",
@@ -40,22 +49,22 @@ JAZZMIN_SETTINGS = {
     "search_model": ["accounts.Account", "store.Product", "category.Category"],
     "show_sidebar": True,
     "navigation_expanded": True,
-    "hide_apps": [],
-    "hide_models": [],
     "order_with_respect_to": ["accounts", "store", "category", "orders", "CDMIS", "finance"],
     "custom_links": {
-        "accounts": [{
-            "name": "View Site",
-            "url": "https://mamamaasaibakers.com",
-            "icon": "fas fa-globe",
-            "new_window": True
-        }, {
-            "name": "visit CDMIS",
-            "url": "https://mamamaasaibakers.com/cdmis/groups",
-            "icon": "fas fa-users",
-            "new_window": True
-
-        }]
+        "accounts": [
+            {
+                "name": "View Site",
+                "url": "https://mamamaasaibakers.com",
+                "icon": "fas fa-globe",
+                "new_window": True
+            },
+            {
+                "name": "Visit CDMIS",
+                "url": "https://mamamaasaibakers.com/cdmis/groups",
+                "icon": "fas fa-users",
+                "new_window": True
+            }
+        ]
     },
     "icons": {
         "accounts.Account": "fas fa-user",
@@ -78,13 +87,14 @@ JAZZMIN_SETTINGS = {
         "orders.Order": "horizontal_tabs",
         "CDMIS.Group": "collapsible",
         "finance.Payment": "horizontal_tabs",
-        
     },
 }
 
+# Session settings
 SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 
+# Middleware
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -96,10 +106,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Root URL configuration
 ROOT_URLCONF = 'beststore.urls'
 
+# Login redirect URL
 LOGIN_REDIRECT_URL = 'redirect_after_login'
 
+# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -118,17 +131,20 @@ TEMPLATES = [
     },
 ]
 
+# WSGI application
 WSGI_APPLICATION = 'beststore.wsgi.application'
-AUTH_USER_MODEL = 'accounts.Account'
-import dj_database_url
 
+# Custom user model
+AUTH_USER_MODEL = 'accounts.Account'
+
+# Database configuration
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://postgres:password@localhost:5432/postgres',  # Fallback for local development
-        conn_max_age=600,
+        default='postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render',
+        conn_max_age=600
     )
 }
-# postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render
+
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dhklmtpxy',
@@ -137,6 +153,7 @@ CLOUDINARY_STORAGE = {
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -145,6 +162,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -152,6 +170,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
+# Localization settings
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
@@ -163,19 +182,20 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",  # Main static directory
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"  # Directory for collected static files
-
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-from django.contrib.messages import constants as messages
+# Message tags
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
 }
 
+# Default auto field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Activate Django-Heroku settings
 django_heroku.settings(locals())
