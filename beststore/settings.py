@@ -120,18 +120,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'beststore.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
+import dj_database_url
 
 DATABASES = {
-    'default':{
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'bramwel,12',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
-
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dhklmtpxy',
