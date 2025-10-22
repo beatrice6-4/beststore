@@ -123,7 +123,10 @@ AUTH_USER_MODEL = 'accounts.Account'
 import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default='postgres://postgres:password@localhost:5432/postgres',  # Fallback for local development
+        conn_max_age=600,
+    )
 }
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
