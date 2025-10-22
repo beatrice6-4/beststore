@@ -7,7 +7,7 @@ import cloudinary_storage
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
 
 INSTALLED_APPS = [
