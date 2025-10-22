@@ -146,9 +146,9 @@ DATABASES = {
 
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dhklmtpxy',
-    'API_KEY': '345437392578237',
-    'API_SECRET': 'Vz5iaCXqJlNOO3oCQ-41J-tsVbA',
+    'CLOUD_NAME': os.environ.get('dmgwc5b2t'),
+    'API_KEY': os.environ.get('191412321311827'),
+    'API_SECRET': os.environ.get('CKl1zIOVvWfU_ObPtlVIlKyUCNE'),
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 

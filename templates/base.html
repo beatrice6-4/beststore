@@ -47,20 +47,6 @@
             font-weight: 700;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
         }
-        .install-btn {
-            display: none;
-            background-color: #004080;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .install-btn:hover {
-            background-color: #003060;
-        }
         .alert {
             margin: 10px 15px;
             padding: 10px 15px;
@@ -154,37 +140,6 @@
                             <p>Orders</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cart' %}" class="nav-link">
-                            <i class="nav-icon fas fa-shopping-basket"></i>
-                            <p>Carts</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'user_management' %}" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>User Management</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'contact_messages' %}" class="nav-link">
-                            <i class="nav-icon fas fa-envelope"></i>
-                            <p>Contact Messages</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'about' %}" class="nav-link">
-                            <i class="nav-icon far fa-address-card"></i>
-                            <p>About Us</p>
-                        </a>
-                    </li>
-                    <!-- Install App Button -->
-                    <li class="nav-item">
-                        <button id="installApp" class="install-btn nav-link">
-                            <i class="nav-icon fas fa-download"></i>
-                            <p>Install App</p>
-                        </button>
-                    </li>
                 </ul>
             </nav>
         </div>
@@ -197,7 +152,7 @@
         <div class="messages">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
+                    <div class="alert alert-{{ message.tags }} fade show" role="alert">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -233,41 +188,14 @@
 <!-- ./wrapper -->
 
 <script>
-    let deferredPrompt;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault(); // Prevent the default install prompt
-        deferredPrompt = e; // Save the event for later use
-
-        // Show the install button
-        const installButton = document.getElementById("installApp");
-        if (installButton) {
-            installButton.style.display = "block";
-
-            // Handle the install button click
-            installButton.addEventListener("click", () => {
-                deferredPrompt.prompt(); // Show the install prompt
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === "accepted") {
-                        console.log("User accepted the install prompt");
-                    } else {
-                        console.log("User dismissed the install prompt");
-                    }
-                    deferredPrompt = null; // Reset the deferred prompt
-                });
-            });
-        }
-    });
-
-    // Hide the install button if the app is already installed
-    window.addEventListener("appinstalled", () => {
-        console.log("PWA was installed");
-        const installButton = document.getElementById("installApp");
-        if (installButton) {
-            installButton.style.display = "none";
-        }
-    });
+    // Automatically hide messages after 4 seconds
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.classList.add('fade'); // Add fade-out effect
+            setTimeout(() => alert.remove(), 500); // Remove the element after fade-out
+        });
+    }, 4000); // 4 seconds
 
     // Register the service worker
     if ("serviceWorker" in navigator) {
