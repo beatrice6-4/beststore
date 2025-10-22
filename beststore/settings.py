@@ -128,6 +128,7 @@ DATABASES = {
         conn_max_age=600,
     )
 }
+# postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dhklmtpxy',
