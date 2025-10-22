@@ -1,0 +1,13 @@
+{% extends 'gov.html' %}
+
+{% block content %}
+<h1>Edit Balance for {{ account.user.username }}</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+<a href="{% url 'cdmis:financial_accounts' %}" class="btn btn-secondary">Back to Accounts</a>
+{% endblock %}

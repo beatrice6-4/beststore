@@ -7,8 +7,8 @@ import cloudinary_storage
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = True
-ALLOWED_HOSTS = ['mamamaasaibakers.com']
+DEBUG = False
+ALLOWED_HOSTS = ['mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -166,6 +166,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",  # Main static directory
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"  # Directory for collected static files
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files configuration
 MEDIA_URL = '/media/'

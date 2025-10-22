@@ -1,4 +1,7 @@
 {% extends 'gov.html' %}
+{% block title %}Withdraw Funds{% endblock %}
+{% block breadcrumb %}Withdraw Funds{% endblock %}
+{% load static %}
 {% block content %}
 <h1>Withdraw Funds</h1>
 
@@ -6,7 +9,7 @@
     <p><strong>Current Balance:</strong> {{ account.balance }}</p>
 </div>
 
-<form method="POST" action="">
+<form method="POST" action="{% url 'cdmis:withdraw_funds' %}">
     {% csrf_token %}
     <div>
         <label for="amount">Withdrawal Amount:</label>

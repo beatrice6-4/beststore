@@ -1,14 +1,18 @@
 from django.contrib import admin
-from .models import Group, Payment, Activity, Training, Service, Update, Booking, Requirement, Document
 from django.http import HttpResponse
 import csv
+from CDMIS.models import (
+    Group, Payment, Activity, Training, Service, Update, Booking, Requirement, Document, FinancialAccount, Withdrawal
+)
 
+# Register Group, Activity, Training, and Service models
 admin.site.register(Group)
 admin.site.register(Activity)
 admin.site.register(Training)
 admin.site.register(Service)
 
 
+# Payment Admin
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('group', 'amount', 'payment_date', 'notes')
@@ -28,21 +32,25 @@ class PaymentAdmin(admin.ModelAdmin):
                 payment.notes
             ])
         return response
+
     download_payments_csv.short_description = "Download selected payments as CSV"
 
 
+# Requirement Admin
 @admin.register(Requirement)
 class RequirementAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title',)
 
 
+# Document Admin
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_by', 'uploaded_at')
     search_fields = ('title',)
 
 
+# Update Admin
 @admin.register(Update)
 class UpdateAdmin(admin.ModelAdmin):
     list_display = ('title', 'date', 'created_by')
@@ -63,9 +71,11 @@ class UpdateAdmin(admin.ModelAdmin):
                 update.created_by.username if update.created_by else '',
             ])
         return response
+
     download_updates_csv.short_description = "Download selected updates as CSV"
 
 
+# Booking Admin
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = ('user', 'update', 'booked_at')  # Display user, update, and booking date
@@ -73,13 +83,13 @@ class BookingAdmin(admin.ModelAdmin):
     list_filter = ('booked_at', 'update')  # Filter by booking date and update
 
 
-from django.contrib import admin
-from .models import FinancialAccount, Withdrawal
-
+# FinancialAccount Admin
 @admin.register(FinancialAccount)
 class FinancialAccountAdmin(admin.ModelAdmin):
     list_display = ('user', 'balance', 'phone_number')
 
+
+# Withdrawal Admin
 @admin.register(Withdrawal)
 class WithdrawalAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'phone_number', 'status', 'requested_at', 'processed_at')

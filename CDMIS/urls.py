@@ -36,9 +36,12 @@ urlpatterns = [
 
    
     path('withdraw/', views.withdraw_funds, name='withdraw_funds'),
+    path('financial-account/<int:pk>/edit/', views.edit_balance, name='edit_balance'),
+    path('financial-accounts/', views.financial_accounts, name='financial_accounts'),
+    path('withdrawals/<int:pk>/', views.WithdrawalDetailView.as_view(), name='withdrawal_detail'),
 
+    path('withdrawals/', views.WithdrawalListView.as_view(), name='withdrawal_list'),
 
-    
 
     path('requirements/download_word/', views.download_requirements_word, name='download_requirements_word'),
 

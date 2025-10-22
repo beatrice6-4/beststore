@@ -1,0 +1,26 @@
+{% extends 'gov.html' %}
+
+{% block content %}
+<h1>Financial Accounts</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Balance</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for account in accounts %}
+        <tr>
+            <td>{{ account.user.username }}</td>
+            <td>{{ account.balance }}</td>
+            <td>
+                <a href="{% url 'cdmis:edit_balance' account.pk %}" class="btn btn-primary">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

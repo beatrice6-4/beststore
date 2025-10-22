@@ -741,15 +741,15 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import FinancialAccount, Withdrawal
-from django.utils.timezone import now
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import FinancialAccount, Withdrawal
-from django.utils.timezone import now
 
 @login_required
 def withdraw_funds(request):
+    # Ensure the FinancialAccount exists for the user
+    account, created = FinancialAccount.objects.get_or_create(
+        user=request.user,
+        defaults={'balance': 6000.00}  # Default balance is 6,000 if the account is created
+    )
+
     if request.method == 'POST':
         amount = request.POST.get('amount')
         phone_number = request.POST.get('phone_number')
@@ -758,10 +758,7 @@ def withdraw_funds(request):
             amount = float(amount)
         except ValueError:
             messages.error(request, "Invalid amount entered.")
-            return redirect('withdraw_funds')
-
-        # Get the user's financial account
-        account = FinancialAccount.objects.get(user=request.user)
+            return redirect('cdmis:withdraw_funds')
 
         # Check if the user has sufficient balance
         if amount > account.balance:
@@ -778,8 +775,111 @@ def withdraw_funds(request):
             Withdrawal.objects.create(user=request.user, amount=amount, phone_number=phone_number, status='Pending')
             messages.success(request, f"Withdrawal request for {amount} has been submitted.")
 
-        return redirect('withdraw_funds')
+        return redirect('cdmis:withdraw_funds')
 
-    # Get the user's financial account
-    account = FinancialAccount.objects.get(user=request.user)
     return render(request, 'CDMIS/withdraw_funds.html', {'account': account})
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import FinancialAccount, Withdrawal
+from decimal import Decimal
+
+@login_required
+def withdraw_funds(request):
+    # Ensure the FinancialAccount exists for the user
+    account, created = FinancialAccount.objects.get_or_create(
+        user=request.user,
+        defaults={'balance': Decimal('6000.00')}  # Default balance is 6,000
+    )
+
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        phone_number = request.POST.get('phone_number')
+
+        try:
+            # Convert the amount to Decimal
+            amount = Decimal(amount)
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid amount entered.")
+            return redirect('cdmis:withdraw_funds')
+
+        # Check if the user has sufficient balance
+        if amount > account.balance:
+            messages.error(request, "Insufficient balance.")
+        elif amount <= 0:
+            messages.error(request, "Withdrawal amount must be greater than zero.")
+        elif not phone_number:
+            messages.error(request, "Phone number is required.")
+        else:
+            # Deduct the amount and create a withdrawal request
+            account.balance -= amount
+            account.save()
+
+            Withdrawal.objects.create(user=request.user, amount=amount, phone_number=phone_number, status='Pending')
+            messages.success(request, f"Withdrawal request for {amount} has been submitted.")
+
+            # Redirect to the withdrawal list page
+            return redirect('cdmis:withdrawal_list')
+
+    return render(request, 'CDMIS/withdraw_funds.html', {'account': account})
+
+
+
+from django.views.generic import ListView
+from .models import Withdrawal
+
+class WithdrawalListView(ListView):
+    model = Withdrawal
+    template_name = 'CDMIS/withdrawal_list.html'
+    context_object_name = 'withdrawals'
+
+    def get_queryset(self):
+        # Show only withdrawals for the logged-in user
+        return Withdrawal.objects.filter(user=self.request.user).order_by('-requested_at')
+
+
+
+
+
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import FinancialAccount
+from django.contrib import messages
+from django import forms
+
+# Form for editing the balance
+class EditBalanceForm(forms.ModelForm):
+    class Meta:
+        model = FinancialAccount
+        fields = ['balance']
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def edit_balance(request, pk):
+    account = get_object_or_404(FinancialAccount, pk=pk)
+    if request.method == 'POST':
+        form = EditBalanceForm(request.POST, instance=account)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Balance for {account.user.username} has been updated.")
+            return redirect('cdmis:financial_accounts')  # Redirect to a list of financial accounts
+    else:
+        form = EditBalanceForm(instance=account)
+    return render(request, 'CDMIS/edit_balance.html', {'form': form, 'account': account})
+
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def financial_accounts(request):
+    accounts = FinancialAccount.objects.all()
+    return render(request, 'CDMIS/financial_accounts.html', {'accounts': accounts})
+
+
+from django.views.generic import DetailView
+from .models import Withdrawal
+
+class WithdrawalDetailView(DetailView):
+    model = Withdrawal
+    template_name = 'CDMIS/withdrawal_detail.html'
+    context_object_name = 'withdrawal'

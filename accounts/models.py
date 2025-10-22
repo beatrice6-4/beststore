@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+from CDMIS.models import FinancialAccount
+
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, first_name, last_name, username, email, password=None):
@@ -33,8 +35,8 @@ class MyAccountManager(BaseUserManager):
         user.is_admin = True
         user.is_active = True
         user.is_staff = True
-        user.is_superadmin = True
-        user.role = Account.Role.ADMINISTRATOR  # Set superuser as administrator
+        user.is_superuser = True
+        user.role = 'admin'  # Set superuser as administrator
         user.save(using=self._db)
         return user
 
@@ -166,3 +168,14 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.amount} - {self.description}"
+    
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_financial_account(sender, instance, created, **kwargs):
+    if created:
+        FinancialAccount.objects.create(user=instance)

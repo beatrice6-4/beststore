@@ -1,0 +1,33 @@
+{% extends 'gov.html' %}
+{% block title %}Withdrawal Details{% endblock %}
+{% block breadcrumb %}Withdrawal Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Withdrawal Details</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Details for Withdrawal #{{ withdrawal.id }}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Amount:</strong> {{ withdrawal.amount }}</p>
+            <p><strong>Phone Number:</strong> {{ withdrawal.phone_number }}</p>
+            <p><strong>Status:</strong> 
+                {% if withdrawal.status == "Approved" %}
+                <span class="badge bg-success">{{ withdrawal.status }}</span>
+                {% elif withdrawal.status == "Rejected" %}
+                <span class="badge bg-danger">{{ withdrawal.status }}</span>
+                {% else %}
+                <span class="badge bg-secondary">{{ withdrawal.status }}</span>
+                {% endif %}
+            </p>
+            <p><strong>Requested At:</strong> {{ withdrawal.requested_at|date:"M d, Y H:i" }}</p>
+            <p><strong>Processed At:</strong> {{ withdrawal.processed_at|default:"N/A" }}</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'cdmis:withdrawal_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

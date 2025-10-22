@@ -1,6 +1,12 @@
 from django.db import models
 
+from django.apps import apps
+
 # Create your models here.
+
+
+
+
 
 class Group(models.Model):
     name = models.CharField(max_length=100)
@@ -48,7 +54,7 @@ class Service(models.Model):
         return f"{self.name} ({self.group.name})"
     
 from django.db import models
-from django.conf import settings
+from django.conf import Settings, settings
 
 class Order(models.Model):
     user = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='cdmis_orders')
@@ -80,26 +86,36 @@ class Member(models.Model):
         return f"{self.first_name} {self.middle_name} ({self.id_no})"
 
 
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+def get_default_user():
+    User = get_user_model()
+    return User.objects.first().id  # Replace with logic to select a valid user
+
+class Document(models.Model):
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to='cdmis/docs/')
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=get_default_user  # Use a callable function
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
 from django.db import models
 
 class Requirement(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
 
-
-from django.db import models
-from django.contrib.auth import get_user_model
-
-class Document(models.Model):
-    title = models.CharField(max_length=255)
-    file = models.FileField(upload_to='cdmis/docs/')
-    uploaded_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return self.title
-
-
 
 
 from django.conf import settings
@@ -129,17 +145,23 @@ from django.conf import settings
 
 class FinancialAccount(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='financial_account')
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=6000.00)  # Default balance is 6,000
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Phone number for withdrawals
 
     def __str__(self):
         return f"{self.user.username}'s Account"
 
 class Withdrawal(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Disbursed', 'Disbursed'),
+        ('Rejected', 'Rejected'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='withdrawals')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    phone_number = models.CharField(max_length=15)  # Phone number for this withdrawal
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending')
+    phone_number = models.CharField(max_length=15)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     requested_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
 
