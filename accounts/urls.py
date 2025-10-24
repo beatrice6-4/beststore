@@ -33,6 +33,7 @@ urlpatterns = [
     path('payments/', views.payment_list, name='payment_list'),
     path('carts/', views.cart_list, name='cart_list'),
     path('cart-items/', views.cart_items, name='cart_items'),
+    path('track-order/', views.track_order, name='track_order'),
 
     # Account/profile
     path('account/', views.account, name='account'),
