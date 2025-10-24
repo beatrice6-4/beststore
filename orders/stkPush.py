@@ -26,22 +26,24 @@ def initiate_stk_push(request, order_number):
         except Order.DoesNotExist:
             return JsonResponse({'error': 'Order not found.'})
 
-        # Get phone number from form
+        # Get the business account number and account reference
         if request.method == "POST":
-            phone = request.POST.get("phone")
-            if not phone:
-                return JsonResponse({'error': 'Phone number is required.'})
+            business_account_number = request.POST.get("522522")  # PayBill number
+            account_reference = request.POST.get("account_reference")  # Reference for the payment
+            if not business_account_number:
+                return JsonResponse({'error': 'Business account number is required.'})
+            if not account_reference:
+                return JsonResponse({'error': 'Account reference is required.'})
         else:
             return JsonResponse({'error': 'Invalid request method.'})
 
         # Prepare STK Push parameters for sandbox payments
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = '174379'  # <-- Use your actual Till Number here
+        business_short_code = "1319705871"  # Use the provided business account number
         process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
         callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        account_reference = 'MAMAMAASAI BAKERS'
         transaction_desc = f'Payment of order {order_number} - MAMAMAASAI BAKERS'
 
         stk_push_headers = {
@@ -53,14 +55,14 @@ def initiate_stk_push(request, order_number):
             'BusinessShortCode': business_short_code,
             'Password': password,
             'Timestamp': timestamp,
-            'TransactionType': 'CustomerBuyGoodsOnline',  # <-- For Till Number
+            'TransactionType': 'CustomerPayBillOnline',  # PayBill transaction
             'Amount': amount,
-            'PartyA': phone,
-            'PartyB': 6391014,                # <-- Till Number
-            'PhoneNumber': phone, # 2547XXXXXXXX
+            'PartyA': request.user.phone_number,  # The user's phone number
+            'PartyB': business_short_code,  # The business account number (PayBill)
+            'PhoneNumber': request.user.phone_number,  # The user's phone number
             'CallBackURL': callback_url,
-            'AccountReference': account_reference,
-            'TransactionDesc': transaction_desc 
+            'AccountReference': account_reference,  # Reference for the payment
+            'TransactionDesc': transaction_desc
         }
 
         try:
@@ -94,7 +96,7 @@ def mpesa_callback(request):
                 mpesa_receipt = None
                 phone_number = None
                 amount = None
-                order_number = None
+                account_reference = None
 
                 for item in callback_metadata:
                     if item['Name'] == 'MpesaReceiptNumber':
@@ -104,12 +106,12 @@ def mpesa_callback(request):
                     elif item['Name'] == 'Amount':
                         amount = float(item['Value'])
                     elif item['Name'] == 'AccountReference':
-                        order_number = str(item['Value'])
-                if not all([mpesa_receipt, phone_number, amount, order_number]):
+                        account_reference = str(item['Value'])
+                if not all([mpesa_receipt, phone_number, amount, account_reference]):
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Incomplete callback data"}, status=400)
 
                 try:
-                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
+                    order = Order.objects.get(order_number=account_reference, is_ordered=False)
                 except Order.DoesNotExist:
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
 
