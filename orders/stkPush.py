@@ -26,20 +26,10 @@ def initiate_stk_push(request, order_number):
         except Order.DoesNotExist:
             return JsonResponse({'error': 'Order not found.'})
 
-        # Get the business account number and account reference
-        if request.method == "POST":
-            business_account_number = request.POST.get("522522")  # PayBill number
-            account_reference = request.POST.get("account_reference")  # Reference for the payment
-            if not business_account_number:
-                return JsonResponse({'error': 'Business account number is required.'})
-            if not account_reference:
-                return JsonResponse({'error': 'Account reference is required.'})
-        else:
-            return JsonResponse({'error': 'Invalid request method.'})
-
         # Prepare STK Push parameters for sandbox payments
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = "1319705871"  # Use the provided business account number
+        business_short_code = "522522"  # PayBill number
+        account_reference = "1319705871"  # Account number
         process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
         callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -58,10 +48,10 @@ def initiate_stk_push(request, order_number):
             'TransactionType': 'CustomerPayBillOnline',  # PayBill transaction
             'Amount': amount,
             'PartyA': request.user.phone_number,  # The user's phone number
-            'PartyB': business_short_code,  # The business account number (PayBill)
+            'PartyB': business_short_code,  # The PayBill number
             'PhoneNumber': request.user.phone_number,  # The user's phone number
             'CallBackURL': callback_url,
-            'AccountReference': account_reference,  # Reference for the payment
+            'AccountReference': account_reference,  # Account number
             'TransactionDesc': transaction_desc
         }
 
