@@ -1,13 +1,10 @@
 {% extends 'base.html' %}
-{% block page_title %}My Orders - BestStore{% endblock %}
-
-{% load static %}
+{% block title %}My Orders - BestStore{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="mb-4">
   <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'myOrders' %}">Orders</a></li>
     <li class="breadcrumb-item active" aria-current="page">My Orders</li>
   </ol>
 </nav>
@@ -20,8 +17,26 @@
         background: #f8f9fa;
         font-family: 'Segoe UI', Arial, sans-serif;
     }
-    .section-content {
-        padding: 40px 0;
+    .sidebar {
+        background: #004080;
+        color: #fff;
+        min-height: 100vh;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .sidebar a {
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+        display: block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        transition: background 0.3s ease;
+    }
+    .sidebar a:hover, .sidebar a.active {
+        background: #198754;
+        color: #fff;
     }
     .card {
         border-radius: 16px;
@@ -39,9 +54,6 @@
         border-bottom: 1px solid #eaf6fb;
         display: flex;
         align-items: center;
-    }
-    .card-header i {
-        margin-right: 10px;
     }
     .card-body {
         padding: 28px;
@@ -61,11 +73,6 @@
         padding: 14px 12px;
         vertical-align: middle;
         border-bottom: 1px solid #e9ecef;
-    }
-    .table th {
-        background: #eaf6fb;
-        color: #004080;
-        font-weight: 700;
     }
     .table-striped tbody tr:nth-of-type(odd) {
         background-color: #f4f8fb;
@@ -100,11 +107,31 @@
     }
 </style>
 
-<section class="section-content padding-y bg">
-    {% include 'includes/alerts.html' %}
-    <div class="container">
-        <div class="row">
-            <main class="col-md-9 mx-auto">
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="sidebar">
+                <h4 class="text-white mb-4">Menu</h4>
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{% url 'myOrders' %}" class="{% if request.resolver_match.url_name == 'myOrders' %}active{% endif %}">
+                    <i class="fas fa-shopping-cart"></i> My Orders
+                </a>
+                <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <section class="section-content padding-y bg">
+                {% include 'includes/alerts.html' %}
                 <article class="card">
                     <header class="card-header">
                         <i class="fa fa-history"></i>
@@ -150,8 +177,8 @@
                         </div>
                     </div>
                 </article>
-            </main>
+            </section>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}
