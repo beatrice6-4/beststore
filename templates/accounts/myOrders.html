@@ -107,27 +107,6 @@
     }
 </style>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3">
-            <div class="sidebar">
-                <h4 class="text-white mb-4">Menu</h4>
-                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="{% url 'myOrders' %}" class="{% if request.resolver_match.url_name == 'myOrders' %}active{% endif %}">
-                    <i class="fas fa-shopping-cart"></i> My Orders
-                </a>
-                <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <i class="fas fa-user"></i> Profile
-                </a>
-                <a href="{% url 'logout' %}">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
-        </div>
-
         <!-- Main Content -->
         <div class="col-md-9">
             <section class="section-content padding-y bg">
