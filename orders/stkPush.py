@@ -28,9 +28,9 @@ def initiate_stk_push(request, order_number):
 
         # Prepare STK Push parameters for sandbox payments
         passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = "522522"  # PayBill number
-        account_reference = "1319705871"  # Account number
-        process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+        business_short_code = "174379"  # PayBill number
+        account_reference = "600996"  # Account number
+        process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl'
         callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
