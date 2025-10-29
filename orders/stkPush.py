@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 import json
 import base64
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .generateAcesstoken import get_access_token
 from .models import Order, Payment
@@ -10,7 +10,10 @@ from accounts.models import Account
 
 @csrf_exempt
 def initiate_stk_push(request, order_number):
-    # Get access token for sandbox environment
+    """
+    Initiates an STK Push request to Safaricom's M-Pesa API for payment.
+    """
+    # Step 1: Get access token
     access_token_response = get_access_token(request)
     if isinstance(access_token_response, JsonResponse):
         access_token = access_token_response.content.decode('utf-8')
@@ -19,63 +22,84 @@ def initiate_stk_push(request, order_number):
         if not access_token:
             return JsonResponse({'error': 'Access token not found.'})
 
-        # Fetch the exact amount from the order
-        try:
-            order = Order.objects.get(order_number=order_number, user=request.user)
-            amount = int(order.order_total)
-        except Order.DoesNotExist:
-            return JsonResponse({'error': 'Order not found.'})
+    # Step 2: Fetch order details
+    try:
+        order = Order.objects.get(order_number=order_number, user=request.user)
+        amount = int(order.order_total)  # Ensure the amount is an integer
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found.'})
 
-        # Prepare STK Push parameters for sandbox payments
-        passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = "174379"  # PayBill number
-        account_reference = "600996"  # Account number
-        process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        transaction_desc = f'Payment of order {order_number} - MAMAMAASAI BAKERS'
+    # Step 3: Prepare STK Push parameters
+    passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"  # Sandbox passkey
+    business_short_code = '174379'  # Sandbox PayBill number
+    process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+    callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'  # Replace with your actual callback URL
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
+    transaction_desc = f'Payment for Order {order_number}'
+    account_reference = f'Order-{order_number}'
 
-        stk_push_headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + access_token
-        }
+    # Format the phone number to ensure it is in the correct format (2547XXXXXXXX)
+    phone_number = request.user.phone_number
+    if phone_number.startswith("0"):
+        phone_number = "254" + phone_number[1:]
 
-        stk_push_payload = {
-            'BusinessShortCode': business_short_code,
-            'Password': password,
-            'Timestamp': timestamp,
-            'TransactionType': 'CustomerPayBillOnline',  # PayBill transaction
-            'Amount': amount,
-            'PartyA': request.user.phone_number,  # The user's phone number
-            'PartyB': business_short_code,  # The PayBill number
-            'PhoneNumber': request.user.phone_number,  # The user's phone number
-            'CallBackURL': callback_url,
-            'AccountReference': account_reference,  # Account number
-            'TransactionDesc': transaction_desc
-        }
+    stk_push_headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + access_token
+    }
 
-        try:
-            response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
-            response.raise_for_status()
-            response_data = response.json()
+    stk_push_payload = {
+        'BusinessShortCode': business_short_code,
+        'Password': password,
+        'Timestamp': timestamp,
+        'TransactionType': 'CustomerPayBillOnline',
+        'Amount': amount,
+        'PartyA': phone_number,  # The user's phone number
+        'PartyB': business_short_code,  # The PayBill number
+        'PhoneNumber': phone_number,  # The user's phone number
+        'CallBackURL': callback_url,
+        'AccountReference': account_reference,
+        'TransactionDesc': transaction_desc
+    }
+
+    # Step 4: Send STK Push request
+    try:
+        print("STK Push Payload:", stk_push_payload)  # Log the payload
+        print("STK Push Headers:", stk_push_headers)  # Log the headers
+        response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
+        response.raise_for_status()
+        response_data = response.json()
+        print("STK Push Response:", response_data)  # Log the response
+
+        # Check the response for success
+        response_code = response_data.get('ResponseCode')
+        if response_code == "0":
             checkout_request_id = response_data.get('CheckoutRequestID')
-            response_code = response_data.get('ResponseCode')
-
-            if response_code == "0":
-                return JsonResponse({'CheckoutRequestID': checkout_request_id, 'ResponseCode': response_code, 'amount': amount})
-            else:
-                return JsonResponse({'error': 'STK push failed.', 'details': response_data})
-        except requests.exceptions.RequestException as e:
-            return JsonResponse({'error': str(e)})
-    else:
-        return JsonResponse({'error': 'Failed to retrieve access token.'})
+            return JsonResponse({
+                'message': 'STK Push initiated successfully.',
+                'CheckoutRequestID': checkout_request_id,
+                'ResponseCode': response_code,
+                'amount': amount
+            })
+        else:
+            return JsonResponse({
+                'error': 'STK Push failed.',
+                'details': response_data
+            })
+    except requests.exceptions.RequestException as e:
+        print("STK Push Error:", str(e))  # Log the error for debugging
+        return JsonResponse({'error': 'Failed to initiate STK Push. Please try again.'})
 
 @csrf_exempt
 def mpesa_callback(request):
+    """
+    Handles the callback from Safaricom's M-Pesa API after an STK Push request.
+    """
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
+            print("M-Pesa Callback Data:", data)  # Log the callback data for debugging
             body = data.get('Body', {})
             stk_callback = body.get('stkCallback', {})
             result_code = stk_callback.get('ResultCode')
@@ -83,6 +107,7 @@ def mpesa_callback(request):
             callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
 
             if result_code == 0:
+                # Extract metadata
                 mpesa_receipt = None
                 phone_number = None
                 amount = None
@@ -97,9 +122,11 @@ def mpesa_callback(request):
                         amount = float(item['Value'])
                     elif item['Name'] == 'AccountReference':
                         account_reference = str(item['Value'])
+
                 if not all([mpesa_receipt, phone_number, amount, account_reference]):
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Incomplete callback data"}, status=400)
 
+                # Update order and payment details
                 try:
                     order = Order.objects.get(order_number=account_reference, is_ordered=False)
                 except Order.DoesNotExist:
@@ -119,12 +146,12 @@ def mpesa_callback(request):
                 order.status = "Completed"
                 order.save()
 
-                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+                return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment processed successfully."})
 
-            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not successful."})
 
         except Exception as e:
-            print("Mpesa Callback Error:", str(e))
-            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
+            print("M-Pesa Callback Error:", str(e))  # Log the error for debugging
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed to process callback."}, status=400)
     else:
-        return HttpResponse("Mpesa callback endpoint.", status=200)
+        return HttpResponse("M-Pesa callback endpoint.", status=200)

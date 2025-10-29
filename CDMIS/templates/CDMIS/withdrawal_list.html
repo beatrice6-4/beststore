@@ -37,7 +37,7 @@
                             {% endif %}
                         </td>
                         <td>{{ withdrawal.requested_at|date:"M d, Y H:i" }}</td>
-                        <td>{{ withdrawal.processed_at|default:"N/A" }}</td>
+                        <td>{{ withdrawal.processed_at|default:"Not Yet Processed, Be Patient" }}</td>
                         <td>
                             <a href="{% url 'cdmis:withdrawal_detail' withdrawal.pk %}" class="btn btn-info btn-sm">
                                 View Details

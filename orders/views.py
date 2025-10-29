@@ -1,90 +1,33 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from carts.models import CartItem
-from .forms import OrderForm
-from .models import Order, Payment, OrderProduct
-import json
-import datetime
-from store.models import Product
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
-
-
 from django.template.loader import render_to_string
+from .models import Order, Payment, OrderProduct
+from carts.models import CartItem
+from store.models import Product
+from accounts.models import Account
+from .forms import OrderForm
+from .generateAcesstoken import get_access_token
+from .stkPush import initiate_stk_push
+from .query import query_stk_status
+from datetime import datetime
+import json
 
-@login_required(login_url='login')
-def payments(request):
-    body = json.loads(request.body)
-    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-
-    # Store transaction details inside Payment model
-    payment = Payment(
-        user = request.user,
-        payment_id = body['transID'],
-        payment_method = body['payment_method'],
-        amount_paid = order.order_total,
-        status = body['status'],
-    )
-    payment.save()
-
-    order.payment = payment
-    order.is_ordered = True
-    order.save()
-
-    # Move the cart items to Order Product table
-    cart_items = CartItem.objects.filter(user=request.user)
-
-    for item in cart_items:
-        orderproduct = OrderProduct()
-        orderproduct.order_id = order.id
-        orderproduct.payment = payment
-        orderproduct.user_id = request.user.id
-        orderproduct.product_id = item.product_id
-        orderproduct.quantity = item.quantity
-        orderproduct.product_price = item.product.price
-        orderproduct.ordered = True
-        orderproduct.save()
-
-        cart_item = CartItem.objects.get(id=item.id)
-        product_variation = cart_item.variations.all()
-        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-        orderproduct.variations.set(product_variation)
-        orderproduct.save()
-
-        # Reduce the quantity of the sold products
-        product = Product.objects.get(id=item.product_id)
-        product.stock -= item.quantity
-        product.save()
-
-    # Clear cart
-    CartItem.objects.filter(user=request.user).delete()
-
-    # Send order recieved email to customer
-    mail_subject = 'Thank you for your order!'
-    message = render_to_string('orders/order_recieved_email.html', {
-        'user': request.user,
-        'order': order,
-    })
-    to_email = request.user.email
-    send_email = EmailMessage(mail_subject, message, to=[to_email])
-    send_email.send()
-
-    # Send order number and transaction id back to sendData method via JsonResponse
-    data = {
-        'order_number': order.order_number,
-        'transID': payment.payment_id,
-    }
-    return JsonResponse(data)
-
+# ------------------------------
+# Place Order View
+# ------------------------------
 @login_required(login_url='login')
 def placeOrder(request, total=0, quantity=0):
     current_user = request.user
 
+    # Check if the cart is empty
     cart_items = CartItem.objects.filter(user=current_user)
-    cart_count = cart_items.count()
-    if cart_count <= 0:
+    if not cart_items.exists():
         return redirect('store')
 
+    # Calculate total, tax, and grand total
     grand_total = 0
     tax = 0
     for cart_item in cart_items:
@@ -96,7 +39,7 @@ def placeOrder(request, total=0, quantity=0):
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
-            # Store all the billing information inside Order table
+            # Save billing information to the Order model
             data = Order()
             data.user = current_user
             data.first_name = form.cleaned_data['first_name']
@@ -121,11 +64,8 @@ def placeOrder(request, total=0, quantity=0):
             data.order_number = order_number
             data.save()
 
-            try:
-                order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
-            except Order.DoesNotExist:
-                return redirect('store')
-
+            # Redirect to payment page
+            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
             context = {
                 'order': order,
                 'cart_items': cart_items,
@@ -135,292 +75,77 @@ def placeOrder(request, total=0, quantity=0):
             }
             return render(request, 'orders/payments.html', context)
         else:
-            context = {
-                'form': form,
-                'cart_items': cart_items,
-                'total': total,
-                'tax': tax,
-                'grand_total': grand_total,
-            }
-            return render(request, 'orders/checkout.html', context)
+            return render(request, 'orders/checkout.html', {'form': form, 'cart_items': cart_items})
     else:
         return redirect('checkout')
+
+# ------------------------------
+# Payments View
+# ------------------------------
 @login_required(login_url='login')
-def mpesa_payment(request, order_number):
-    current_user = request.user
-    order = Order.objects.get(user=current_user, order_number=order_number, is_ordered=False)
-    cart_items = CartItem.objects.filter(user=current_user)
+def payments(request):
+    body = json.loads(request.body)
+    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
 
-    total = 0
-    quantity = 0
-    for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
-    tax = (2 * total) / 100
-    grand_total = total + tax
-
-    context = {
-        'order': order,
-        'cart_items': cart_items,
-        'total': total,
-        'tax': tax,
-        'grand_total': grand_total,
-    }
-    return render(request, 'orders/mpesa_payment.html', context)
-
-
-@login_required(login_url='login')
-def payment_success(request, order_number):
-    """
-    Call this view after a successful payment.
-    It records payment details and marks the order as paid.
-    """
-    # Example: get payment details from request or payment gateway callback
-    payment_id = request.GET.get('payment_id')  # or from POST/callback
-    payment_method = request.GET.get('payment_method', 'Mpesa')
-    amount_paid = request.GET.get('amount_paid')  # or from order/order_total
-    status = request.GET.get('status', 'Paid to Account')
-
-    try:
-        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
-    except Order.DoesNotExist:
-        return HttpResponse("Order not found.", status=404)
-
-    # Create Payment record
-    payment = Payment.objects.create(
+    # Save payment details
+    payment = Payment(
         user=request.user,
-        payment_id=payment_id,
-        payment_method=payment_method,
-        amount_paid=amount_paid or order.order_total,
-        status=status
+        payment_id=body['transID'],
+        payment_method=body['payment_method'],
+        amount_paid=order.order_total,
+        status=body['status'],
     )
+    payment.save()
 
-    # Link payment to order and mark as ordered
+    # Update order status
     order.payment = payment
     order.is_ordered = True
-    order.status = "Completed"
     order.save()
 
-    # Optionally, update OrderProduct records
-    order_products = OrderProduct.objects.filter(order=order)
-    for op in order_products:
-        op.payment = payment
-        op.ordered = True
-        op.save()
+    # Move cart items to OrderProduct
+    cart_items = CartItem.objects.filter(user=request.user)
+    for item in cart_items:
+        order_product = OrderProduct()
+        order_product.order = order
+        order_product.payment = payment
+        order_product.user = request.user
+        order_product.product = item.product
+        order_product.quantity = item.quantity
+        order_product.product_price = item.product.price
+        order_product.ordered = True
+        order_product.save()
 
-    # Show a success page or redirect
-    return render(request, 'orders/payment_success.html', {'order': order, 'payment': payment})
+        # Assign product variations
+        order_product.variations.set(item.variations.all())
+        order_product.save()
 
+        # Reduce product stock
+        product = Product.objects.get(id=item.product.id)
+        product.stock -= item.quantity
+        product.save()
 
+    # Clear cart
+    cart_items.delete()
 
-
-import requests
-from datetime import datetime
-import json
-import base64
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .generateAcesstoken import get_access_token
-from .models import Order, Payment
-from accounts.models import Account
-
-@csrf_exempt
-def initiate_stk_push(request, order_number):
-    # Get access token for sandbox environment
-    access_token_response = get_access_token(request)
-    if isinstance(access_token_response, JsonResponse):
-        access_token = access_token_response.content.decode('utf-8')
-        access_token_json = json.loads(access_token)
-        access_token = access_token_json.get('access_token')
-        if not access_token:
-            return JsonResponse({'error': 'Access token not found.'})
-
-        # Fetch the exact amount from the order
-        try:
-            order = Order.objects.get(order_number=order_number, user=request.user)
-            amount = int(order.order_total)
-        except Order.DoesNotExist:
-            return JsonResponse({'error': 'Order not found.'})
-
-        # Get the business account number and account reference
-        if request.method == "POST":
-            business_account_number = request.POST.get("522522")  # PayBill number
-            account_reference = request.POST.get("account_reference")  # Reference for the payment
-            if not business_account_number:
-                return JsonResponse({'error': 'Business account number is required.'})
-            if not account_reference:
-                return JsonResponse({'error': 'Account reference is required.'})
-        else:
-            return JsonResponse({'error': 'Invalid request method.'})
-
-        # Prepare STK Push parameters for sandbox payments
-        passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        business_short_code = "1319705871"  # Use the provided business account number
-        process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        transaction_desc = f'Payment of order {order_number} - MAMAMAASAI BAKERS'
-
-        stk_push_headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + access_token
-        }
-
-        stk_push_payload = {
-            'BusinessShortCode': business_short_code,
-            'Password': password,
-            'Timestamp': timestamp,
-            'TransactionType': 'CustomerPayBillOnline',  # PayBill transaction
-            'Amount': amount,
-            'PartyA': request.user.phone_number,  # The user's phone number
-            'PartyB': business_short_code,  # The business account number (PayBill)
-            'PhoneNumber': request.user.phone_number,  # The user's phone number
-            'CallBackURL': callback_url,
-            'AccountReference': account_reference,  # Reference for the payment
-            'TransactionDesc': transaction_desc
-        }
-
-        try:
-            response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
-            response.raise_for_status()
-            response_data = response.json()
-            checkout_request_id = response_data.get('CheckoutRequestID')
-            response_code = response_data.get('ResponseCode')
-
-            if response_code == "0":
-                return JsonResponse({'CheckoutRequestID': checkout_request_id, 'ResponseCode': response_code, 'amount': amount})
-            else:
-                return JsonResponse({'error': 'STK push failed.', 'details': response_data})
-        except requests.exceptions.RequestException as e:
-            return JsonResponse({'error': str(e)})
-    else:
-        return JsonResponse({'error': 'Failed to retrieve access token.'})
-
-@csrf_exempt
-def mpesa_callback(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            body = data.get('Body', {})
-            stk_callback = body.get('stkCallback', {})
-            result_code = stk_callback.get('ResultCode')
-            result_desc = stk_callback.get('ResultDesc')
-            callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
-
-            if result_code == 0:
-                mpesa_receipt = None
-                phone_number = None
-                amount = None
-                account_reference = None
-
-                for item in callback_metadata:
-                    if item['Name'] == 'MpesaReceiptNumber':
-                        mpesa_receipt = item['Value']
-                    elif item['Name'] == 'PhoneNumber':
-                        phone_number = str(item['Value'])
-                    elif item['Name'] == 'Amount':
-                        amount = float(item['Value'])
-                    elif item['Name'] == 'AccountReference':
-                        account_reference = str(item['Value'])
-                if not all([mpesa_receipt, phone_number, amount, account_reference]):
-                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Incomplete callback data"}, status=400)
-
-                try:
-                    order = Order.objects.get(order_number=account_reference, is_ordered=False)
-                except Order.DoesNotExist:
-                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
-
-                user = Account.objects.get(id=order.user.id)
-                payment = Payment.objects.create(
-                    user=user,
-                    payment_id=mpesa_receipt,
-                    payment_method="Mpesa",
-                    amount_paid=amount,
-                    status="Completed"
-                )
-
-                order.payment = payment
-                order.is_ordered = True
-                order.status = "Completed"
-                order.save()
-
-                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
-
-            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
-
-        except Exception as e:
-            print("Mpesa Callback Error:", str(e))
-            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
-    else:
-        return HttpResponse("Mpesa callback endpoint.", status=200)
-    
-from .query import query_stk_status
-
-def check_stk_status(request, order_number):
-    response = query_stk_status(order_number)
-    return JsonResponse(response)
-
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Order, Payment, OrderProduct
-from django.contrib.auth.decorators import login_required
-
-@login_required(login_url='login')
-def order_complete(request):
-    """
-    Displays the order completion summary after successful payment.
-    Expects 'order_number' and 'payment_id' as GET parameters.
-    """
-    order_number = request.GET.get('order_number')
-    payment_id = request.GET.get('payment_id')
-
-    try:
-        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=False)
-        payment = Payment.objects.get(payment_id=payment_id, user=request.user)
-        ordered_products = OrderProduct.objects.filter(order=order)
-
-        subtotal = sum([op.product_price * op.quantity for op in ordered_products])
-
-        context = {
-            'order': order,
-            'ordered_products': ordered_products,
-            'order_number': order.order_number,
-            'transID': payment.payment_id,
-            'payment': payment,
-            'subtotal': subtotal,
-        }
-        return render(request, 'orders/order_complete.html', context)
-    except (Order.DoesNotExist, Payment.DoesNotExist):
-        return redirect('home')
-    
-
-
-from django.shortcuts import render
-
-from .generateAcesstoken import get_access_token
-from .stkPush import initiate_stk_push
-from .query import query_stk_status
-
-
-
-def payment(request, order_number):
-    order = Order.objects.get(order_number=order_number, user=request.user)
-    amount = int(order.order_total)
-    context = {
+    # Send order confirmation email
+    mail_subject = 'Thank you for your order!'
+    message = render_to_string('orders/order_received_email.html', {
+        'user': request.user,
         'order': order,
-        'amount': amount,
+    })
+    to_email = request.user.email
+    EmailMessage(mail_subject, message, to=[to_email]).send()
+
+    # Return response
+    data = {
+        'order_number': order.order_number,
+        'transID': payment.payment_id,
     }
-    return render(request, 'orders/payments.html', context)
+    return JsonResponse(data)
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
-import json
-
-from .models import Order, Payment, OrderProduct
-from carts.models import CartItem
-
+# ------------------------------
+# Mpesa Callback View
+# ------------------------------
 @csrf_exempt
 def mpesa_callback(request):
     if request.method == "POST":
@@ -448,130 +173,8 @@ def mpesa_callback(request):
                     elif item['Name'] == 'AccountReference':
                         order_number = str(item['Value'])
 
-                # Create Payment object
-                user = Account.objects.filter(phone=phone_number).first()
-                payment = Payment.objects.create(
-                    user=user,
-                    payment_id=mpesa_receipt,
-                    payment_method="Mpesa",
-                    amount_paid=amount,
-                    status="Completed"
-                )
-
-                # Create or update Order object
-                order, created = Order.objects.get_or_create(
-                    order_number=order_number,
-                    defaults={
-                        'user': user,
-                        'phone': phone_number,
-                        'order_total': amount,
-                        'is_ordered': True,
-                        'status': 'Completed',
-                        'payment': payment,
-                    }
-                )
-                if not created:
-                    order.payment = payment
-                    order.is_ordered = True
-                    order.status = "Completed"
-                    order.save()
-
-                return JsonResponse({"ResultCode": 0, "ResultDesc": "Order created and payment recorded"})
-            else:
-                return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not successful"})
-        except Exception as e:
-            return JsonResponse({"ResultCode": 1, "ResultDesc": str(e)}, status=400)
-    else:
-        return HttpResponse("Mpesa callback endpoint.", status=200)
-
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import Order, Payment
-from accounts.models import Account
-
-@login_required(login_url='login')
-def payments(request, order_number):
-    """
-    Handles payment for an order and records the transaction.
-    """
-    order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
-    if request.method == "POST":
-        phone = request.POST.get("phone")
-        amount = order.order_total
-
-        # Here you would call your STK Push function and handle response.
-        # For demonstration, let's assume payment is successful and record it.
-
-        payment = Payment.objects.create(
-            user=request.user,
-            payment_id="MPESA123456",  # This should be the actual payment ID from Mpesa
-            payment_method="Mpesa",
-            amount_paid=amount,
-            status="Completed"
-        )
-        order.payment = payment
-        order.is_ordered = True
-        order.status = "Completed"
-        order.save()
-
-        return redirect('order_complete', order_number=order.order_number)
-
-    context = {
-        'order': order,
-    }
-    return render(request, 'orders/payments.html', context)
-
-@login_required(login_url='login')
-def transactions(request):
-    """
-    Lists all payments made by the logged-in user.
-    """
-    payments = Payment.objects.filter(user=request.user).order_by('-created_at')
-    context = {
-        'payments': payments,
-    }
-    return render(request, 'orders/transactions.html', context)
-
-@csrf_exempt
-def mpesa_callback(request):
-    """
-    Receives Mpesa callback and records the transaction.
-    """
-    if request.method == "POST":
-        try:
-            import json
-            data = json.loads(request.body.decode('utf-8'))
-            body = data.get('Body', {})
-            stk_callback = body.get('stkCallback', {})
-            result_code = stk_callback.get('ResultCode')
-            result_desc = stk_callback.get('ResultDesc')
-            callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
-
-            if result_code == 0:
-                mpesa_receipt = None
-                phone_number = None
-                amount = None
-                order_number = None
-
-                for item in callback_metadata:
-                    if item['Name'] == 'MpesaReceiptNumber':
-                        mpesa_receipt = item['Value']
-                    elif item['Name'] == 'PhoneNumber':
-                        phone_number = str(item['Value'])
-                    elif item['Name'] == 'Amount':
-                        amount = float(item['Value'])
-                    elif item['Name'] == 'AccountReference':
-                        order_number = str(item['Value'])
-
-                try:
-                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
-                except Order.DoesNotExist:
-                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
-
+                # Update order and payment
+                order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
                 payment = Payment.objects.create(
                     user=order.user,
                     payment_id=mpesa_receipt,
@@ -579,18 +182,57 @@ def mpesa_callback(request):
                     amount_paid=amount,
                     status="Completed"
                 )
-
                 order.payment = payment
                 order.is_ordered = True
                 order.status = "Completed"
                 order.save()
 
                 return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
-
-            return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment not successful"})
-
+            else:
+                return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not successful"})
         except Exception as e:
-            print("Mpesa Callback Error:", str(e))
-            return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed"}, status=400)
+            return JsonResponse({"ResultCode": 1, "ResultDesc": str(e)}, status=400)
     else:
         return HttpResponse("Mpesa callback endpoint.", status=200)
+
+# ------------------------------
+# Order Complete View
+# ------------------------------
+@login_required(login_url='login')
+def order_complete(request):
+    order_number = request.GET.get('order_number')
+    payment_id = request.GET.get('payment_id')
+
+    try:
+        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
+        payment = Payment.objects.get(payment_id=payment_id, user=request.user)
+        ordered_products = OrderProduct.objects.filter(order=order)
+
+        subtotal = sum([item.product_price * item.quantity for item in ordered_products])
+
+        context = {
+            'order': order,
+            'ordered_products': ordered_products,
+            'order_number': order.order_number,
+            'transID': payment.payment_id,
+            'payment': payment,
+            'subtotal': subtotal,
+        }
+        return render(request, 'orders/order_complete.html', context)
+    except (Order.DoesNotExist, Payment.DoesNotExist):
+        return redirect('home')
+    
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='login')
+def transactions(request):
+    # Example: Fetch all transactions for the logged-in user
+    user_transactions = Payment.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'transactions': user_transactions,
+    }
+    return render(request, 'orders/transactions.html', context)
