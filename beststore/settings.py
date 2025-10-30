@@ -15,7 +15,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # Allowed hosts
-ALLOWED_HOSTS = ['mamamasaibabakers.com']
+ALLOWED_HOSTS = ['mamamasaibabakers.com', 'www.mamamaasaibakers.com']
 # Installed apps
 INSTALLED_APPS = [
     'jazzmin',
