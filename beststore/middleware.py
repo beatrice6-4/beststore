@@ -6,8 +6,9 @@ class WwwRedirectMiddleware:
 
     def __call__(self, request):
         host = request.get_host()
-        if host.startswith('www.mamamaasaibakers.com'):
-            # Redirect to non-www domain, preserving path and query
+        # Strictly redirect any www.mamamaasaibakers.com to mamamaasaibakers.com
+        if host.lower().startswith('www.mamamaasaibakers.com'):
             new_url = 'https://mamamaasaibakers.com' + request.get_full_path()
-            return redirect(new_url)
+            # Permanent redirect (HTTP 301)
+            return redirect(new_url, permanent=True)
         return self.get_response(request)
