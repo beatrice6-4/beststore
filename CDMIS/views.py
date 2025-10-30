@@ -740,6 +740,9 @@ def docs(request):
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+from decimal import Decimal
 from .models import FinancialAccount, Withdrawal
 
 @login_required
@@ -747,35 +750,63 @@ def withdraw_funds(request):
     # Ensure the FinancialAccount exists for the user
     account, created = FinancialAccount.objects.get_or_create(
         user=request.user,
-        defaults={'balance': 6000.00}  # Default balance is 6,000 if the account is created
+        defaults={'balance': Decimal('6000.00')}
     )
 
     if request.method == 'POST':
         amount = request.POST.get('amount')
+        withdrawal_method = request.POST.get('withdrawal_method')
         phone_number = request.POST.get('phone_number')
+        bank_name = request.POST.get('bank_name')
+        bank_branch = request.POST.get('bank_branch')
+        account_number = request.POST.get('account_number')
+        notes = request.POST.get('notes')
 
         try:
-            amount = float(amount)
-        except ValueError:
+            amount = Decimal(amount)
+        except (ValueError, TypeError):
             messages.error(request, "Invalid amount entered.")
             return redirect('cdmis:withdraw_funds')
 
-        # Check if the user has sufficient balance
+        # Validation
         if amount > account.balance:
             messages.error(request, "Insufficient balance.")
         elif amount <= 0:
             messages.error(request, "Withdrawal amount must be greater than zero.")
-        elif not phone_number:
-            messages.error(request, "Phone number is required.")
+        elif not withdrawal_method:
+            messages.error(request, "Please select a withdrawal method.")
+        elif withdrawal_method in ['mpesa', 'cash_pickup'] and not phone_number:
+            messages.error(request, "Phone number is required for this method.")
+        elif withdrawal_method == 'bank_transfer' and (not bank_name or not bank_branch or not account_number):
+            messages.error(request, "Bank name, branch, and account number are required for bank transfer.")
         else:
             # Deduct the amount and create a withdrawal request
             account.balance -= amount
             account.save()
 
-            Withdrawal.objects.create(user=request.user, amount=amount, phone_number=phone_number, status='Pending')
-            messages.success(request, f"Withdrawal request for {amount} has been submitted.")
+            withdrawal = Withdrawal.objects.create(
+                user=request.user,
+                amount=amount,
+                withdrawal_method=withdrawal_method,
+                phone_number=phone_number if withdrawal_method in ['mpesa', 'cash_pickup'] else None,
+                bank_name=bank_name if withdrawal_method == 'bank_transfer' else None,
+                bank_branch=bank_branch if withdrawal_method == 'bank_transfer' else None,
+                account_number=account_number if withdrawal_method == 'bank_transfer' else None,
+                notes=notes,
+                status='Pending'
+            )
 
-        return redirect('cdmis:withdraw_funds')
+            # Send pending notification email
+            send_mail(
+                subject='Withdrawal Request Pending',
+                message=f'Dear {request.user.first_name},\n\nYour withdrawal request of Ksh {withdrawal.amount} is pending and will be processed soon.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[request.user.email],
+                fail_silently=True,
+            )
+
+            messages.success(request, f"Withdrawal request for {amount} has been submitted and is pending.")
+            return redirect('cdmis:withdrawal_list')
 
     return render(request, 'CDMIS/withdraw_funds.html', {'account': account})
 
