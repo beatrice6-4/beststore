@@ -15,7 +15,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # Allowed hosts
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['mamamasaibabakers.com']
 # Installed apps
 INSTALLED_APPS = [
     'jazzmin',
@@ -95,6 +95,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 # Middleware
 MIDDLEWARE = [
+    'beststore.middleware.WwwRedirectMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
