@@ -89,9 +89,11 @@ class FinancialAccountAdmin(admin.ModelAdmin):
     list_display = ('user', 'balance', 'phone_number')
 
 
-# Withdrawal Admin
+# admin.py
 @admin.register(Withdrawal)
 class WithdrawalAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'phone_number', 'status', 'requested_at', 'processed_at')
-    list_filter = ('status', 'requested_at')
-    search_fields = ('user__username', 'phone_number')
+    list_display = (
+        'user', 'amount', 'withdrawal_method', 'phone_number',
+        'bank_name', 'bank_branch', 'account_number', 'status', 'requested_at'
+    )
+    search_fields = ('user__username', 'phone_number', 'bank_name', 'account_number')

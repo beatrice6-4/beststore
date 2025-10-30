@@ -164,6 +164,11 @@ class Withdrawal(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     requested_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
+    withdrawal_method = models.CharField(max_length=50)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    bank_name = models.CharField(max_length=100, blank=True, null=True)
+    bank_branch = models.CharField(max_length=100, blank=True, null=True)
+    account_number = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.amount} ({self.status})"
