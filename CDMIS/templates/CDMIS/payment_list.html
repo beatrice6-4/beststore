@@ -3,162 +3,106 @@
 {% block breadcrumb %}Payments{% endblock %}
 {% load dict_extras %}
 {% block content %}
-<nav aria-label="breadcrumb" style="margin-top:24px;">
-  <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
+
+<nav aria-label="breadcrumb" class="mt-3">
+  <ol class="breadcrumb bg-light px-3 py-2 rounded shadow-sm">
     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
     <li class="breadcrumb-item active" aria-current="page">Payments</li>
   </ol>
 </nav>
 
-<style>
-    .payments-table-container {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-        padding: 32px 24px;
-        margin-top: 40px;
-        margin-bottom: 40px;
-    }
-    .payments-table-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #4e54c8;
-        text-align: center;
-        margin-bottom: 30px;
-        letter-spacing: 1px;
-    }
-    .table-payments {
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f8f9fa;
-        font-size: 0.97em;
-    }
-    .table-payments thead {
-        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-        color: #fff;
-        font-size: 1.1em;
-    }
-    .table-payments th, .table-payments td {
-        vertical-align: middle !important;
-        padding: 14px 12px;
-        border: 1px solid #e0e0e0;
-    }
-    .table-payments tbody tr:nth-child(odd) {
-        background: #f4f8fb;
-    }
-    .table-payments tbody tr:nth-child(even) {
-        background: #eafbe7;
-    }
-    .table-payments tbody tr:hover {
-        background: #d1e7fd;
-    }
-    .date-separator {
-        background: #f1f3fa;
-        color: hsl(140, 93%, 46%);
-        font-weight: 700;
-        text-align: left;
-        padding-left: 10px;
-        border-top: 2px solid #0b17ea;
-    }
-    .date-total-row {
-        background: #eafbe7;
-        color: #2d7a2d;
-        font-weight: 600;
-    }
-    .download-btn {
-        float: right;
-        margin-right: 10px;
-        margin-top: -4px;
-        font-size: 0.95em;
-        padding: 2px 12px;
-        border-radius: 6px;
-    }
-    .text-center {
-        text-align: center;
-    }
-    @media (max-width: 600px) {
-        .payments-table-container {
-            padding: 16px 4px;
-        }
-        .payments-table-title {
-            font-size: 1.3rem;
-        }
-        .table-payments th, .table-payments td {
-            padding: 8px 4px;
-            font-size: 0.95em;
-        }
-        .download-btn {
-            margin-right: 0;
-            margin-top: 4px;
-            width: 100%;
-        }
-    }
-</style>
-<div class="container payments-table-container">
-    <div class="payments-table-title">Payments Recorded</div>
-    <div class="table-responsive">
-        <table class="table table-payments table-bordered table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Group</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Recorded By</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            {% regroup all_payments by payment_date as date_groups %}
-            {% for date_group in date_groups %}
-                <tbody id="print-group-{{ date_group.grouper|date:'Ymd' }}">
-                    <tr class="date-separator">
-                        <td colspan="5">
-                            {{ date_group.grouper|date:"M d, Y" }}
-                        </td>
-                        <td class="text-end">
-                            <button type="button"
-                                    class="btn btn-sm btn-success download-btn"
-                                    onclick="printGroup('print-group-{{ date_group.grouper|date:'Ymd' }}')">
-                                <i class="fa fa-print"></i> Print
-                            </button>
-                        </td>
-                    </tr>
-                    {% for payment in date_group.list %}
-                        <tr>
-                            <td>{{ forloop.parentloop.counter }}</td>
-                            <td>{{ payment.group.name }}</td>
-                            <td>Ksh. {{ payment.amount }}</td>
-                            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
-                            <td>{{ payment.added_by.first_name }}</td>
-                            <td>{{ payment.notes }}</td>
-                        </tr>
-                    {% endfor %}
-                    <tr class="date-total-row">
-                        <td colspan="2"></td>
-                        <td colspan="4">
-                            Total for {{ date_group.grouper|date:"M d, Y" }}: 
-                            Ksh. {{ date_totals|dict_get:date_group.grouper }}
-                        </td>
-                    </tr>
-                </tbody>
-            {% empty %}
-                <tbody>
-                    <tr>
-                        <td colspan="6" class="text-center">No payments have been made.</td>
-                    </tr>
-                </tbody>
-            {% endfor %}
-        </table>
+<div class="container my-4">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Payments Recorded</h4>
+      <i class="fa fa-money-bill-wave fa-lg"></i>
     </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th scope="col">No.</th>
+              <th scope="col">Group</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Date</th>
+              <th scope="col">Recorded By</th>
+              <th scope="col">Notes</th>
+            </tr>
+          </thead>
+          {% regroup all_payments by payment_date as date_groups %}
+          {% for date_group in date_groups %}
+            <tbody id="print-group-{{ date_group.grouper|date:'Ymd' }}">
+              <tr class="table-light">
+                <td colspan="5" class="fw-bold text-success">
+                  {{ date_group.grouper|date:"M d, Y" }}
+                </td>
+                <td class="text-end">
+                  <button type="button"
+                          class="btn btn-outline-success btn-sm"
+                          onclick="printGroup('print-group-{{ date_group.grouper|date:'Ymd' }}')">
+                    <i class="fa fa-print"></i> Print
+                  </button>
+                </td>
+              </tr>
+              {% for payment in date_group.list %}
+                <tr>
+                  <td>{{ forloop.parentloop.counter }}</td>
+                  <td>{{ payment.group.name }}</td>
+                  <td class="fw-bold text-primary">Ksh. {{ payment.amount }}</td>
+                  <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                  <td>{{ payment.added_by.first_name }}</td>
+                  <td>{{ payment.notes }}</td>
+                </tr>
+              {% endfor %}
+              <tr class="table-success">
+                <td colspan="2"></td>
+                <td colspan="4" class="fw-bold">
+                  Total for {{ date_group.grouper|date:"M d, Y" }}:
+                  <span class="text-success">Ksh. {{ date_totals|dict_get:date_group.grouper }}</span>
+                </td>
+              </tr>
+            </tbody>
+          {% empty %}
+            <tbody>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  <i class="fa fa-info-circle"></i> No payments have been made.
+                </td>
+              </tr>
+            </tbody>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  .card-header h4 {
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  @media (max-width: 600px) {
+    .card-header h4 {
+      font-size: 1.2rem;
+    }
+    .table th, .table td {
+      font-size: 0.95em;
+      padding: 8px 4px;
+    }
+  }
+</style>
+
 <script>
 function printGroup(groupId) {
     var printContents = document.getElementById(groupId).outerHTML;
     var win = window.open('', '', 'height=900,width=1200');
     win.document.write('<html><head><title>Payments</title>');
     win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
-    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;width:100%;border-collapse:collapse;} th,td{padding:8px 10px;border:1px solid #ccc;} .date-separator{background:#f1f3fa;color:#2d7a2d;font-weight:700;} .date-total-row{background:#eafbe7;color:#2d7a2d;font-weight:600;} .gov-logo{text-align:center;margin-bottom:12px;} .gov-logo img{height:70px;} .gov-title{text-align:center;font-size:1.5em;font-weight:700;margin-bottom:18px;}</style>');
+    win.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">');
+    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;width:100%;border-collapse:collapse;} th,td{padding:8px 10px;border:1px solid #ccc;} .table-light{background:#f1f3fa;color:#2d7a2d;font-weight:700;} .table-success{background:#eafbe7;color:#2d7a2d;font-weight:600;} .gov-logo{text-align:center;margin-bottom:12px;} .gov-logo img{height:70px;} .gov-title{text-align:center;font-size:1.5em;font-weight:700;margin-bottom:18px;}</style>');
     win.document.write('</head><body>');
     win.document.write('<div class="gov-logo"><img src="/static/images/gov.png" alt="GOV Logo"></div>');
     win.document.write('<div class="gov-title">Payments</div>');
