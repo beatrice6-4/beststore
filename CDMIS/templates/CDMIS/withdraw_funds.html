@@ -41,7 +41,7 @@ h1 {
     <!-- Current Balance Section -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <p class="h5"><strong>Current Balance:</strong> <span class="text-success">${{ account.balance }}</span></p>
+            <p class="h5"><strong>Current Balance:</strong> <span class="text-success">Ksh {{ account.balance }}</span></p>
         </div>
     </div>
 
@@ -60,6 +60,19 @@ h1 {
                 <div class="form-group">
                     <label for="phone_number" class="font-weight-bold">Phone Number:</label>
                     <input type="text" name="phone_number" id="phone_number" class="form-control" value="{{ account.phone_number }}" placeholder="Enter phone number" required>
+                </div>
+                <div class="form-group">
+                    <label for="notes" class="font-weight-bold">Notes (Optional):</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Enter any notes..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="withdrawal_method" class="font-weight-bold">Withdrawal Method:</label>
+                    <select name="withdrawal_method" id="withdrawal_method" class="form-control" required>
+                        <option value="" disabled selected>Select method</option>
+                        <option value="mpesa">M-Pesa</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="cash_pickup">M-Pesa Cash Pickup</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-success btn-block">Withdraw</button>
             </form>
