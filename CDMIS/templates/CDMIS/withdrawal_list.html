@@ -1,57 +1,180 @@
-{% extends 'gov.html' %}
-{% block title %}My Withdrawals{% endblock %}
-{% block breadcrumb %}My Withdrawals{% endblock %}
+{% load static %}
+{% extends "gov.html" %}
+{% block title %}Withdrawals — CDMIS{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="text-center mb-4">My Withdrawals</h1>
+<style>
+    /* Simple responsive table and layout tweaks */
+    .actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .table-responsive { overflow-x:auto; }
+    .muted { color:#6c757d; }
+    .search-bar { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+    .filters { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+    @media (max-width:640px) {
+        .filters { flex-direction:column; align-items:flex-start; }
+    }
+    .pill { background:#f1f3f5; border-radius:999px; padding:.25rem .6rem; font-size:.9rem; }
+</style>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Withdrawal History</h5>
+<section aria-labelledby="withdrawals-heading">
+    <header style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;">
+        <div>
+            <h1 id="withdrawals-heading" style="margin:0 0 .25rem 0;">Withdrawals</h1>
+            <p class="muted" style="margin:0">List of withdrawal requests and statuses</p>
         </div>
-        <div class="card-body p-0">
-            <table class="table table-hover table-striped mb-0">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Amount</th>
-                        <th>Phone Number</th>
-                        <th>Status</th>
-                        <th>Requested At</th>
-                        <th>Processed At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for withdrawal in withdrawals %}
-                    <tr>
-                        <td class="font-weight-bold text-success">{{ withdrawal.amount }}</td>
-                        <td>{{ withdrawal.phone_number }}</td>
-                        <td>
-                            {% if withdrawal.status == "Approved" %}
-                            <span class="badge bg-success">{{ withdrawal.status }}</span>
-                            {% elif withdrawal.status == "Rejected" %}
-                            <span class="badge bg-danger">{{ withdrawal.status }}</span>
-                            {% else %}
-                            <span class="badge bg-secondary">{{ withdrawal.status }}</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ withdrawal.requested_at|date:"M d, Y H:i" }}</td>
-                        <td>{{ withdrawal.processed_at|default:"Not Yet Processed, Be Patient" }}</td>
-                        <td>
-                            <a href="{% url 'cdmis:withdrawal_detail' withdrawal.pk %}" class="btn btn-info btn-sm">
-                                View Details
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">No withdrawals found.</td>
-                    </tr>
+
+        <div class="actions">
+            <form method="get" class="search-bar" style="margin:0;">
+                <label for="q" class="sr-only">Search</label>
+                <input id="q" name="q" value="{{ request.GET.q }}" placeholder="Search by user, ref, amount..." class="form-control" style="min-width:200px;padding:.4rem .6rem;border:1px solid #ccd;">
+                <select name="status" class="form-control" aria-label="Filter by status" style="padding:.4rem .6rem;">
+                    <option value="">All statuses</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="declined" {% if request.GET.status == 'declined' %}selected{% endif %}>Declined</option>
+                </select>
+                <button type="submit" class="btn btn-primary" style="padding:.4rem .6rem;">Search</button>
+                {% if request.GET.q or request.GET.status %}
+                <a href="{% url 'withdrawal_list' %}" class="btn btn-light" style="padding:.4rem .6rem;border:1px solid #ddd;">Reset</a>
+                {% endif %}
+            </form>
+
+            <div style="display:flex;gap:.5rem;">
+                <a href="{% url 'withdrawal_export' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary" title="Export CSV">Export CSV</a>
+                <a href="#" class="btn btn-success">New Withdrawal</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="pill" style="margin-bottom:.75rem;">
+        Total: <strong>{{ page_obj.paginator.count }}</strong>
+        {% if page_obj.has_other_pages %}
+            &nbsp;•&nbsp; Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        {% endif %}
+    </div>
+
+    <div class="table-responsive" role="region" aria-label="Withdrawals table">
+        <table class="table" style="width:100%;border-collapse:collapse;">
+            <thead style="background:#f8f9fa;">
+                <tr>
+                    <th scope="col" style="text-align:left;padding:.6rem;">Ref</th>
+                    <th scope="col" style="text-align:left;padding:.6rem;">User</th>
+                    <th scope="col" style="text-align:right;padding:.6rem;">Amount</th>
+                    <th scope="col" style="text-align:left;padding:.6rem;">Method</th>
+                    <th scope="col" style="text-align:left;padding:.6rem;">Requested</th>
+                    <th scope="col" style="text-align:left;padding:.6rem;">Status</th>
+                    <th scope="col" style="text-align:center;padding:.6rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if withdrawals %}
+                    {% for w in withdrawals %}
+                        <tr style="border-top:1px solid #eee;">
+                            <td style="padding:.6rem;">
+                                <a href="{% url 'withdrawal_detail' w.pk %}">{{ w.reference|default:"—" }}</a>
+                            </td>
+                            <td style="padding:.6rem;">
+                                <div>{{ w.user.get_full_name|default:w.user.username }}</div>
+                                <div class="muted" style="font-size:.85rem;">{{ w.user.email }}</div>
+                            </td>
+                            <td style="padding:.6rem;text-align:right;">
+                                {{ w.amount|floatformat:2 }} {{ w.currency|default:"USD" }}
+                            </td>
+                            <td style="padding:.6rem;">{{ w.method|default:"—" }}</td>
+                            <td style="padding:.6rem;">{{ w.created_at|date:"Y-m-d H:i" }}</td>
+                            <td style="padding:.6rem;">
+                                {% if w.status == 'approved' %}
+                                    <span style="color:#155724;background:#d4edda;padding:.25rem .5rem;border-radius:.25rem;">Approved</span>
+                                {% elif w.status == 'declined' %}
+                                    <span style="color:#721c24;background:#f8d7da;padding:.25rem .5rem;border-radius:.25rem;">Declined</span>
+                                {% else %}
+                                    <span style="color:#856404;background:#fff3cd;padding:.25rem .5rem;border-radius:.25rem;">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding:.6rem;text-align:center;">
+                                <div style="display:flex;gap:.35rem;justify-content:center;">
+                                    <a class="btn btn-sm btn-outline-info" href="{% url 'withdrawal_detail' %}">View</a>
+                                    {% if w.status == 'pending' %}
+                                        <a class="btn btn-sm btn-outline-success" href="{% url 'withdrawal_approve' w.pk %}" onclick="return confirm('Approve this withdrawal?');">Approve</a>
+                                        <button class="btn btn-sm btn-outline-danger" data-delete-url="{% url 'withdrawal_delete' %}" onclick="openDeleteConfirm(this)">Delete</button>
+                                    {% else %}
+                                        <a class="btn btn-sm btn-outline-secondary" href="#">History</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="padding:1rem;text-align:center;color:#6c757d;">
+                            No withdrawals found. Try adjusting search filters or create a new withdrawal.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Pagination" style="margin-top:1rem;display:flex;justify-content:center;">
+            <ul class="pagination" style="display:flex;gap:.25rem;list-style:none;padding:0;margin:0;">
+                {% if page_obj.has_previous %}
+                    <li><a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|safe_without:'page' }}">Prev</a></li>
+                {% else %}
+                    <li><span class="btn btn-light disabled">Prev</span></li>
+                {% endif %}
+                <li style="display:flex;align-items:center;padding:0 .5rem;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+                {% if page_obj.has_next %}
+                    <li><a class="btn btn-light" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|safe_without:'page' }}">Next</a></li>
+                {% else %}
+                    <li><span class="btn btn-light disabled">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</section>
+
+<!-- Delete confirmation modal (simple, no external libs) -->
+<div id="delete-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:1rem 1.25rem;border-radius:6px;max-width:420px;width:95%;">
+        <h2 style="margin:0 0 .5rem 0;font-size:1.125rem;">Confirm delete</h2>
+        <p class="muted" style="margin:0 0 1rem 0;">Are you sure you want to delete this withdrawal? This action cannot be undone.</p>
+        <div style="display:flex;gap:.5rem;justify-content:flex-end;">
+            <button id="cancel-delete" class="btn btn-light">Cancel</button>
+            <form id="confirm-delete-form" method="post" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
         </div>
     </div>
 </div>
-{% endblock %}
+
+<script>
+    // Minimal JS for delete modal and accessible behavior
+    function openDeleteConfirm(button) {
+        var url = button.getAttribute('data-delete-url');
+        var modal = document.getElementById('delete-modal');
+        var form = document.getElementById('confirm-delete-form');
+        form.action = url;
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        document.getElementById('cancel-delete').focus();
+    }
+    document.getElementById('cancel-delete').addEventListener('click', function (e) {
+        e.preventDefault();
+        var modal = document.getElementById('delete-modal');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    });
+    // Close modal on ESC
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            var modal = document.getElementById('delete-modal');
+            if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }
+    });
+</script>
+{% endblock %}</div>
