@@ -158,15 +158,28 @@ class Withdrawal(models.Model):
         ('Rejected', 'Rejected'),
     ]
 
+    BANK_CHOICES = [
+        ('KCB', 'KCB Bank'),
+        ('Equity', 'Equity Bank'),
+        ('Cooperative', 'Cooperative Bank'),
+        ('Absa', 'Absa Bank'),
+        ('Stanbic', 'Stanbic Bank'),
+        ('NCBA', 'NCBA Bank'),
+        ('Family', 'Family Bank'),
+        ('I&M', 'I&M Bank'),
+        ('DTB', 'Diamond Trust Bank'),
+        ('Standard Chartered', 'Standard Chartered Bank'),
+        # ...add more as needed...
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='withdrawals')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    phone_number = models.CharField(max_length=15)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     requested_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
     withdrawal_method = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    bank_name = models.CharField(max_length=100, blank=True, null=True)
+    bank_name = models.CharField(max_length=100, choices=BANK_CHOICES, blank=True, null=True)
     bank_branch = models.CharField(max_length=100, blank=True, null=True)
     account_number = models.CharField(max_length=50, blank=True, null=True)
 
