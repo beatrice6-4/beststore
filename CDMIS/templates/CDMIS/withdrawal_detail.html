@@ -33,10 +33,6 @@
                         <dd class="col-sm-7">{{ withdrawal.processed_at|date:"M d, Y H:i" }}</dd>
                         {% endif %}
 
-                        <div class="col-lg-7">Paid To Account Number: {{ withdrawal.account_number }}</div>
-                        <div class="col-lg-7">Paid To Phone Number: {{ withdrawal.phone_number }}</div>
-                        
-
                         <dt class="col-sm-5">Withdrawal Method</dt>
                         <dd class="col-sm-7 text-capitalize">{{ withdrawal.withdrawal_method|cut:"_" }}</dd>
 
