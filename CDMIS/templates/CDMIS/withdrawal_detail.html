@@ -1,33 +1,81 @@
 {% extends 'gov.html' %}
 {% block title %}Withdrawal Details{% endblock %}
 {% block breadcrumb %}Withdrawal Details{% endblock %}
-
 {% block content %}
-<div class="container mt-4">
-    <h1 class="text-center mb-4">Withdrawal Details</h1>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Details for Withdrawal #{{ withdrawal.id }}</h5>
-        </div>
-        <div class="card-body">
-            <p><strong>Amount:</strong> {{ withdrawal.amount }}</p>
-            <p><strong>Phone Number:</strong> {{ withdrawal.phone_number }}</p>
-            <p><strong>Status:</strong> 
-                {% if withdrawal.status == "Approved" %}
-                <span class="badge bg-success">{{ withdrawal.status }}</span>
-                {% elif withdrawal.status == "Rejected" %}
-                <span class="badge bg-danger">{{ withdrawal.status }}</span>
-                {% else %}
-                <span class="badge bg-secondary">{{ withdrawal.status }}</span>
-                {% endif %}
-            </p>
-            <p><strong>Requested At:</strong> {{ withdrawal.requested_at|date:"M d, Y H:i" }}</p>
-            <p><strong>Processed At:</strong> {{ withdrawal.processed_at|default:"Not Yet Processed, Be Patient" }}</p>
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'cdmis:withdrawal_list' %}" class="btn btn-secondary">Back to List</a>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Withdrawal Details</h4>
+                    <span class="badge 
+                        {% if withdrawal.status == 'Pending' %}bg-warning text-dark
+                        {% elif withdrawal.status == 'Disbursed' %}bg-success
+                        {% elif withdrawal.status == 'Rejected' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ withdrawal.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">User</dt>
+                        <dd class="col-sm-7">{{ withdrawal.user.get_full_name|default:withdrawal.user.username }}</dd>
+
+                        <dt class="col-sm-5">Amount</dt>
+                        <dd class="col-sm-7 text-success fw-bold">Ksh {{ withdrawal.amount }}</dd>
+
+                        <dt class="col-sm-5">Requested At</dt>
+                        <dd class="col-sm-7">{{ withdrawal.requested_at|date:"M d, Y H:i" }}</dd>
+
+                        {% if withdrawal.processed_at %}
+                        <dt class="col-sm-5">Processed At</dt>
+                        <dd class="col-sm-7">{{ withdrawal.processed_at|date:"M d, Y H:i" }}</dd>
+                        {% endif %}
+
+                        <dt class="col-sm-5">Withdrawal Method</dt>
+                        <dd class="col-sm-7 text-capitalize">{{ withdrawal.withdrawal_method|replace:"_":" " }}</dd>
+
+                        {% if withdrawal.withdrawal_method == "mpesa" or withdrawal.withdrawal_method == "cash_pickup" %}
+                        <dt class="col-sm-5">Phone Number</dt>
+                        <dd class="col-sm-7">{{ withdrawal.phone_number }}</dd>
+                        {% endif %}
+
+                        {% if withdrawal.withdrawal_method == "bank_transfer" %}
+                        <dt class="col-sm-5">Bank Name</dt>
+                        <dd class="col-sm-7">{{ withdrawal.get_bank_name_display }}</dd>
+                        <dt class="col-sm-5">Bank Branch</dt>
+                        <dd class="col-sm-7">{{ withdrawal.bank_branch }}</dd>
+                        <dt class="col-sm-5">Account Number</dt>
+                        <dd class="col-sm-7">{{ withdrawal.account_number }}</dd>
+                        {% endif %}
+
+                        {% if withdrawal.notes %}
+                        <dt class="col-sm-5">Notes</dt>
+                        <dd class="col-sm-7">{{ withdrawal.notes }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+                <div class="card-footer bg-light text-end">
+                    <a href="{% url 'cdmis:withdrawal_list' %}" class="btn btn-outline-primary">
+                        <i class="fa fa-arrow-left"></i> Back to Withdrawals
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.card-header h4 {
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+dt {
+    font-weight: 600;
+}
+dd {
+    margin-bottom: .5rem;
+}
+</style>
 {% endblock %}
