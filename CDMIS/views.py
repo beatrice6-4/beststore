@@ -745,6 +745,21 @@ from django.conf import settings
 from decimal import Decimal
 from .models import FinancialAccount, Withdrawal
 
+BANK_CHOICES = [
+    ('', 'Select Bank'),
+    ('KCB', 'KCB Bank'),
+    ('Equity', 'Equity Bank'),
+    ('Cooperative', 'Cooperative Bank'),
+    ('Absa', 'Absa Bank'),
+    ('Stanbic', 'Stanbic Bank'),
+    ('NCBA', 'NCBA Bank'),
+    ('Family', 'Family Bank'),
+    ('I&M', 'I&M Bank'),
+    ('DTB', 'Diamond Trust Bank'),
+    ('Standard Chartered', 'Standard Chartered Bank'),
+    # ...add more as needed...
+]
+
 @login_required
 def withdraw_funds(request):
     # Ensure the FinancialAccount exists for the user
@@ -808,7 +823,10 @@ def withdraw_funds(request):
             messages.success(request, f"Withdrawal request for {amount} has been submitted and is pending.")
             return redirect('cdmis:withdrawal_list')
 
-    return render(request, 'CDMIS/withdraw_funds.html', {'account': account})
+    return render(request, 'CDMIS/withdraw_funds.html', {
+        'account': account,
+        'bank_choices': BANK_CHOICES
+    })
 
 
 

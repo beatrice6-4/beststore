@@ -73,9 +73,13 @@ h1 {
                 </div>
                 <!-- Bank Transfer Fields -->
                 <div id="bank_fields" style="display:none;">
-                    <div class="form-group">
+                    <div class="form-group" id="bank_name_group">
                         <label for="bank_name" class="font-weight-bold">Bank Name:</label>
-                        <input type="text" name="bank_name" id="bank_name" class="form-control" placeholder="Enter bank name">
+                        <select name="bank_name" id="bank_name" class="form-control">
+                            {% for value, label in bank_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="bank_branch" class="font-weight-bold">Bank Branch:</label>
