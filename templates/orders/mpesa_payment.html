@@ -18,7 +18,7 @@
 
                         {% if payment_response %}
                             {% if payment_response.error %}
-                                <div class="alert alert-danger text-center">
+                                <div class="alert alert-danger text-center auto-hide-message">
                                     {{ payment_response.error }}
                                     {% if payment_response.details %}
                                         <br>{{ payment_response.details }}
@@ -26,12 +26,12 @@
                                 </div>
                             {% endif %}
                             {% if payment_response.message %}
-                                <div class="alert alert-success text-center">
+                                <div class="alert alert-success text-center auto-hide-message">
                                     {{ payment_response.message }}
                                 </div>
                             {% endif %}
                             {% if payment_response.paybill_instructions %}
-                                <div class="alert alert-info text-center mt-2">
+                                <div class="alert alert-info text-center mt-2 auto-hide-message">
                                     {{ payment_response.paybill_instructions }}<br>
                                     <strong>Paybill:</strong> {{ payment_response.paybill }}<br>
                                     <strong>Account Number:</strong> {{ payment_response.account_reference }}<br>
@@ -70,4 +70,12 @@
         </div>
     </div>
 </section>
+<script>
+    // Hide messages after 2 minutes (120,000 milliseconds)
+    setTimeout(function() {
+        document.querySelectorAll('.auto-hide-message').forEach(function(el) {
+            el.style.display = 'none';
+        });
+    }, 120000);
+</script>
 {% endblock %}
