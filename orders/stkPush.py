@@ -14,12 +14,12 @@ def initiate_stk_push(request, order_number):
     if not access_token:
         return JsonResponse({'error': 'Access token not found.'})
 
-    # Ensure user has a phone number
-    if not hasattr(request.user, 'phone_number') or not request.user.phone_number:
-        return JsonResponse({'error': 'User phone number not found. Please update your profile and try again.'})
+# Get phone number from POST data or fallback to user's phone number
+    phone_number = request.POST.get('phone_number') or getattr(request.user, 'phone_number', None)
+    if not phone_number:
+        return JsonResponse({'error': 'Phone number not provided. Please enter your phone number.'})
 
     # Format phone number
-    phone_number = request.user.phone_number
     if phone_number.startswith("+"):
         phone_number = phone_number[1:]
     if phone_number.startswith("0"):
