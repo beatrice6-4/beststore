@@ -14,13 +14,10 @@ def initiate_stk_push(request, order_number):
     Initiates an STK Push request to Safaricom's M-Pesa API for payment.
     """
     # Step 1: Get access token
-    access_token_response = get_access_token(request)
-    if isinstance(access_token_response, JsonResponse):
-        access_token = access_token_response.content.decode('utf-8')
-        access_token_json = json.loads(access_token)
-        access_token = access_token_json.get('access_token')
-        if not access_token:
-            return JsonResponse({'error': 'Access token not found.'})
+    access_token = get_access_token()
+    if not access_token:
+        return JsonResponse({'error': 'Access token not found.'})
+
 
     # Step 2: Fetch order details
     try:
