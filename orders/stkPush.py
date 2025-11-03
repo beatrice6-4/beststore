@@ -16,7 +16,7 @@ def initiate_stk_push(request, order_number):
 
     # Ensure user has a phone number
     if not hasattr(request.user, 'phone_number') or not request.user.phone_number:
-        return JsonResponse({'error': 'User phone number not found. Please update your profile.'})
+        return JsonResponse({'error': 'User phone number not found. Please update your profile and try again.'})
 
     # Format phone number
     phone_number = request.user.phone_number
@@ -62,6 +62,12 @@ def initiate_stk_push(request, order_number):
         'TransactionDesc': transaction_desc
     }
 
+    paybill_instructions = (
+        f"If you do not receive the STK Push on your phone, "
+        f"you can pay directly via M-Pesa Paybill {business_short_code} "
+        f"and use Account Number {account_reference}."
+    )
+
     try:
         print("STK Push Payload:", stk_push_payload)
         print("STK Push Headers:", stk_push_headers)
@@ -74,22 +80,39 @@ def initiate_stk_push(request, order_number):
         if response_code == "0":
             checkout_request_id = response_data.get('CheckoutRequestID')
             return JsonResponse({
-                'message': 'STK Push initiated successfully.',
+                'message': 'STK Push initiated successfully. Please complete payment on your phone by entering your M-Pesa PIN.',
                 'CheckoutRequestID': checkout_request_id,
                 'ResponseCode': response_code,
-                'amount': amount
+                'amount': amount,
+                'paybill': business_short_code,
+                'account_reference': account_reference,
+                'paybill_instructions': paybill_instructions
             })
         else:
             error_message = response_data.get('errorMessage') or response_data.get('errorDesc') or response_data
             return JsonResponse({
                 'error': 'STK Push failed.',
-                'details': error_message
+                'details': error_message,
+                'paybill': business_short_code,
+                'account_reference': account_reference,
+                'paybill_instructions': paybill_instructions
             })
     except requests.exceptions.RequestException as e:
         print("STK Push Error:", str(e))
         if hasattr(e, 'response') and e.response is not None:
-            return JsonResponse({'error': 'Failed to initiate STK Push.', 'details': e.response.text})
-        return JsonResponse({'error': 'Failed to initiate STK Push. Please try again.'})
+            return JsonResponse({
+                'error': 'Failed to initiate STK Push.',
+                'details': e.response.text,
+                'paybill': business_short_code,
+                'account_reference': account_reference,
+                'paybill_instructions': paybill_instructions
+            })
+        return JsonResponse({
+            'error': 'Failed to initiate STK Push. Please try again.',
+            'paybill': business_short_code,
+            'account_reference': account_reference,
+            'paybill_instructions': paybill_instructions
+        })
 
 @csrf_exempt
 def mpesa_callback(request):
