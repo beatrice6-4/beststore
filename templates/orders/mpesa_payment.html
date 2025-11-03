@@ -8,11 +8,19 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-success text-white text-center">
+                        {% if payment_response.error %}
+  <div class="alert alert-danger text-center">
+    {{ payment_response.error }}
+    {% if payment_response.details %}
+      <br>{{ payment_response.details }}
+    {% endif %}
+  </div>
+{% endif %}
                         <h4>Mpesa Payment</h4>
                     </div>
                     <div class="card-body">
                         <p class="text-center">
-                            <img src="{% static 'images/mpesa-logo.jpg' %}" alt="Mpesa" style="height:50px;">
+                            <img src="{% static 'images/mpesa-loogo.jpg' %}" alt="Mpesa" style="height:50px;">
                         </p>
                         <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
 
