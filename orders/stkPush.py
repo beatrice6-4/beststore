@@ -105,16 +105,24 @@ def mpesa_payment(request, order_number):
         'payment_response': payment_response,
     }
     return render(request, 'orders/mpesa_payment.html', context)
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Order, Payment
+from accounts.models import Account
 
 @csrf_exempt
 def mpesa_callback(request):
     """
     Handles the callback from Safaricom's M-Pesa API after an STK Push request.
+    This should be set as your live callback URL, e.g.:
+    https://mamamaasaibakers.com/orders/mpesa/callback/
     """
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            print("M-Pesa Callback Data:", data)  # Log the callback data for debugging
+            print("M-Pesa Callback Data:", data)  # For debugging
+
             body = data.get('Body', {})
             stk_callback = body.get('stkCallback', {})
             result_code = stk_callback.get('ResultCode')
@@ -141,7 +149,7 @@ def mpesa_callback(request):
                 if not all([mpesa_receipt, phone_number, amount, account_reference]):
                     return JsonResponse({"ResultCode": 1, "ResultDesc": "Incomplete callback data"}, status=400)
 
-                # Update order and payment details
+                # Find and update the order
                 try:
                     order = Order.objects.get(order_number=account_reference, is_ordered=False)
                 except Order.DoesNotExist:
@@ -163,10 +171,11 @@ def mpesa_callback(request):
 
                 return JsonResponse({"ResultCode": 0, "ResultDesc": "Payment processed successfully."})
 
-            return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not successful."})
+            # If payment failed
+            return JsonResponse({"ResultCode": 1, "ResultDesc": result_desc or "Payment not successful."})
 
         except Exception as e:
-            print("M-Pesa Callback Error:", str(e))  # Log the error for debugging
+            print("M-Pesa Callback Error:", str(e))  # For debugging
             return JsonResponse({"ResultCode": 1, "ResultDesc": "Failed to process callback."}, status=400)
     else:
         return HttpResponse("M-Pesa callback endpoint.", status=200)
