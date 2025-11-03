@@ -9,7 +9,7 @@ urlpatterns = [
     path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
     path('query/', views.query_stk_status, name='query_stk_status'),
     path('payments/<str:order_number>/', views.payments, name='payments'),
-    path('stkpush/<str:order_number>/', views.initiate_stk_push, name='initiate_stk_push'),
+    path('stkpush/<str:order_number>/', views.mpesa_payment, name='initiate_stk_push'),
     path('payments/<str:order_number>/', views.payments, name='payments'),
     path('transactions/', views.transactions, name='transactions'),
 ]
