@@ -16,7 +16,6 @@
                         </p>
                         <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
 
-                        {# Display STK Push response and paybill instructions if present #}
                         {% if payment_response %}
                             {% if payment_response.message %}
                                 <div class="alert alert-success text-center">
@@ -25,8 +24,7 @@
                             {% endif %}
                             {% if payment_response.paybill_instructions %}
                                 <div class="alert alert-info text-center mt-2">
-                                    {{ payment_response.paybill_instructions }}
-                                    <br>
+                                    {{ payment_response.paybill_instructions }}<br>
                                     <strong>Paybill:</strong> {{ payment_response.paybill }}<br>
                                     <strong>Account Number:</strong> {{ payment_response.account_reference }}<br>
                                     <strong>Amount:</strong> Ksh {{ payment_response.amount }}
@@ -35,11 +33,14 @@
                             {% if payment_response.error %}
                                 <div class="alert alert-danger text-center">
                                     {{ payment_response.error }}
+                                    {% if payment_response.details %}
+                                        <br>{{ payment_response.details }}
+                                    {% endif %}
                                 </div>
                             {% endif %}
                         {% endif %}
 
-                        <form method="POST" action="{% url 'stkpush' order.order_number %}">
+                        <form method="POST" action="">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="phone">Mpesa Phone Number</label>
