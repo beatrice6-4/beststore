@@ -105,6 +105,7 @@ def mpesa_payment(request, order_number):
         'payment_response': payment_response,
     }
     return render(request, 'orders/mpesa_payment.html', context)
+
 @csrf_exempt
 def mpesa_callback(request):
     """
