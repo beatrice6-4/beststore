@@ -10,36 +10,38 @@ from accounts.models import Account
 
 @csrf_exempt
 def initiate_stk_push(request, order_number):
-    """
-    Initiates an STK Push request to Safaricom's M-Pesa API for payment.
-    """
-    # Step 1: Get access token
     access_token = get_access_token()
     if not access_token:
         return JsonResponse({'error': 'Access token not found.'})
 
+    # Ensure user has a phone number
+    if not hasattr(request.user, 'phone_number') or not request.user.phone_number:
+        return JsonResponse({'error': 'User phone number not found. Please update your profile.'})
 
-    # Step 2: Fetch order details
+    # Format phone number
+    phone_number = request.user.phone_number
+    if phone_number.startswith("+"):
+        phone_number = phone_number[1:]
+    if phone_number.startswith("0"):
+        phone_number = "254" + phone_number[1:]
+    if not phone_number.startswith("254") or len(phone_number) != 12:
+        return JsonResponse({'error': 'Invalid phone number format. Use 2547XXXXXXXX.'})
+
+    # Fetch order details
     try:
         order = Order.objects.get(order_number=order_number, user=request.user)
-        amount = int(order.order_total)  # Ensure the amount is an integer
+        amount = int(order.order_total)
     except Order.DoesNotExist:
         return JsonResponse({'error': 'Order not found.'})
 
-    # Step 3: Prepare STK Push parameters
-    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # Replace with your actual passkey
+    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"
     business_short_code = '3581517'
     process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-    callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'  # Replace with your actual callback URL
+    callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
     transaction_desc = f'Payment for Order {order_number}'
     account_reference = f'Order-{order_number}'
-
-    # Format the phone number to ensure it is in the correct format (2547XXXXXXXX)
-    phone_number = request.user.phone_number
-    if phone_number.startswith("0"):
-        phone_number = "254" + phone_number[1:]
 
     stk_push_headers = {
         'Content-Type': 'application/json',
@@ -52,24 +54,22 @@ def initiate_stk_push(request, order_number):
         'Timestamp': timestamp,
         'TransactionType': 'CustomerPayBillOnline',
         'Amount': amount,
-        'PartyA': phone_number,  # The user's phone number
-        'PartyB': business_short_code,  # The PayBill number
-        'PhoneNumber': phone_number,  # The user's phone number
+        'PartyA': phone_number,
+        'PartyB': business_short_code,
+        'PhoneNumber': phone_number,
         'CallBackURL': callback_url,
         'AccountReference': account_reference,
         'TransactionDesc': transaction_desc
     }
 
-    # Step 4: Send STK Push request
     try:
-        print("STK Push Payload:", stk_push_payload)  # Log the payload
-        print("STK Push Headers:", stk_push_headers)  # Log the headers
+        print("STK Push Payload:", stk_push_payload)
+        print("STK Push Headers:", stk_push_headers)
         response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
         response.raise_for_status()
         response_data = response.json()
-        print("STK Push Response:", response_data)  # Log the response
+        print("STK Push Response:", response_data)
 
-        # Check the response for success
         response_code = response_data.get('ResponseCode')
         if response_code == "0":
             checkout_request_id = response_data.get('CheckoutRequestID')
@@ -80,12 +80,15 @@ def initiate_stk_push(request, order_number):
                 'amount': amount
             })
         else:
+            error_message = response_data.get('errorMessage') or response_data.get('errorDesc') or response_data
             return JsonResponse({
                 'error': 'STK Push failed.',
-                'details': response_data
+                'details': error_message
             })
     except requests.exceptions.RequestException as e:
-        print("STK Push Error:", str(e))  # Log the error for debugging
+        print("STK Push Error:", str(e))
+        if hasattr(e, 'response') and e.response is not None:
+            return JsonResponse({'error': 'Failed to initiate STK Push.', 'details': e.response.text})
         return JsonResponse({'error': 'Failed to initiate STK Push. Please try again.'})
 
 @csrf_exempt
