@@ -1,3 +1,5 @@
+from django.shortcuts import redirect
+
 class WwwRedirectMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -8,4 +10,3 @@ class WwwRedirectMiddleware:
             new_url = 'https://mamamaasaibakers.com' + request.get_full_path()
             return redirect(new_url, permanent=True)
         return self.get_response(request)
-from django.shortcuts import redirect
