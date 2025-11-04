@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 import base64
 from django.http import JsonResponse
-from . import get_access_token
+from .generateAcesstoken import get_access_token
 from .generateAcesstoken import get_access_token
 
 
