@@ -14,6 +14,6 @@ urlpatterns = [
     path('payments/<str:order_number>/', views.payments, name='payments'),
     path('transactions/', views.transactions, name='transactions'),
 
-    path('mpesa/<str:order_number>/', views.mpesa_payment, name='mpesa_payment'),
+
     path('sandbox/<str:order_number>/', views.sandbox_payment, name='sandbox_payment'),
 ]
