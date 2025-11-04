@@ -82,17 +82,16 @@ def placeOrder(request, total=0, quantity=0):
 
 
 
-
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from .models import Order
 from .generateAcesstoken import get_access_token
 import base64
 import requests
 from datetime import datetime
 
-@login_required(login_url='login')
-def mpesa_payment(request, order_number):
+@csrf_exempt
+def sandbox_payment(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
     payment_response = None
 
@@ -101,9 +100,9 @@ def mpesa_payment(request, order_number):
         if not access_token:
             payment_response = {'error': 'Access token not found.'}
         else:
-            phone_number = request.POST.get('phone_number') or getattr(request.user, 'phone_number', None)
+            phone_number = request.POST.get('phone_number')
             if not phone_number:
-                payment_response = {'error': 'Phone number not provided. Please enter your phone number.'}
+                payment_response = {'error': 'Phone number not provided.'}
             else:
                 # Format phone number
                 if phone_number.startswith("+"):
@@ -113,15 +112,15 @@ def mpesa_payment(request, order_number):
                 if not phone_number.startswith("254") or len(phone_number) != 12:
                     payment_response = {'error': 'Invalid phone number format. Use 2547XXXXXXXX.'}
                 else:
-                    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"
-                    business_short_code = '3581517'
-                    process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-                    callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
+                    business_short_code = '174379'  # Sandbox paybill
+                    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+                    process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                    callback_url = 'https://yourdomain.com/orders/mpesa/callback/'  # Use your test callback URL
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-                    transaction_desc = f'Payment for Order {order_number}'
+                    transaction_desc = f'Sandbox Payment for Order {order_number}'
                     account_reference = f'Order-{order_number}'
-                    amount = int(order.order_total)
+                    amount = 1  # Sandbox only allows 1 Ksh
 
                     stk_push_headers = {
                         'Content-Type': 'application/json',
@@ -156,7 +155,7 @@ def mpesa_payment(request, order_number):
                         if response_code == "0":
                             checkout_request_id = response_data.get('CheckoutRequestID')
                             payment_response = {
-                                'message': 'STK Push initiated successfully. Please complete payment on your phone by entering your M-Pesa PIN.',
+                                'message': 'Sandbox STK Push initiated successfully. Check your test phone for the prompt.',
                                 'CheckoutRequestID': checkout_request_id,
                                 'ResponseCode': response_code,
                                 'amount': amount,
@@ -187,7 +186,7 @@ def mpesa_payment(request, order_number):
         'grand_total': order.order_total,
         'payment_response': payment_response,
     }
-    return render(request, 'orders/mpesa_payment.html', context)
+    return render(request, 'orders/payments.html', context)
 
 
 
