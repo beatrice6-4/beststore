@@ -77,6 +77,27 @@ def placeOrder(request, total=0, quantity=0):
             return render(request, 'orders/checkout.html', {'form': form, 'cart_items': cart_items})
     else:
         return redirect('checkout')
+    
+
+
+
+
+
+# Example in views.py
+from django.shortcuts import redirect
+
+def placeOrder(request):
+    if request.method == "POST":
+        # ...process order...
+        # Assume you create an order object and get its order_number
+        order = Order.objects.create(...)  # your order creation logic
+        return redirect('mpesa_payment', order_number=order.order_number)
+    # ...existing GET logic...
+
+
+
+
+
 
 # ------------------------------
 # Payments View
