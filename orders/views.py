@@ -83,18 +83,6 @@ def placeOrder(request, total=0, quantity=0):
 
 
 
-# Example in views.py
-from django.shortcuts import redirect
-
-def placeOrder(request):
-    if request.method == "POST":
-        # ...process order...
-        # Assume you create an order object and get its order_number
-        order = Order.objects.create(...)  # your order creation logic
-        return redirect('mpesa_payment', order_number=order.order_number)
-    # ...existing GET logic...
-
-
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Order
