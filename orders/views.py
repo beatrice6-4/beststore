@@ -80,7 +80,6 @@ from .generateAcesstoken import get_access_token
 import base64
 import requests
 from datetime import datetime
-
 @login_required(login_url='login')
 def mpesa_payment(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
@@ -103,9 +102,9 @@ def mpesa_payment(request, order_number):
                 if not phone_number.startswith("254") or len(phone_number) != 12:
                     payment_response = {'error': 'Invalid phone number format. Use 2547XXXXXXXX.'}
                 else:
-                    passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-                    business_short_code = '174379'
-                    process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey
+                    business_short_code = '3581517'  # LIVE shortcode
+                    process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'  # LIVE endpoint
                     callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
@@ -178,7 +177,6 @@ def mpesa_payment(request, order_number):
         'payment_response': payment_response,
     }
     return render(request, 'orders/mpesa_payment.html', context)
-
 
 
 
