@@ -185,6 +185,11 @@ def mpesa_payment(request, order_number):
     }
     return render(request, 'orders/mpesa_payment.html', context)
 
+    response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
+    print(response.text)  # <-- Place this right after the request
+    response.raise_for_status()
+    response_data = response.json()
+    # ...rest of your logic...
 
 
 
