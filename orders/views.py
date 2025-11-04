@@ -200,12 +200,13 @@ def check_account_balance(request):
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
 @csrf_exempt
 def mpesa_balance_result(request):
     if request.method == "POST":
-        # Parse and process the notification data here
-        data = request.body.decode('utf-8')
-        # Save or log the result as needed
+        # Handle and log the result notification here
         return JsonResponse({"status": "received"})
     return JsonResponse({"error": "Invalid request"}, status=400)
 
