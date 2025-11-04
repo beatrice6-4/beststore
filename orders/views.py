@@ -103,8 +103,8 @@ def mpesa_payment(request, order_number):
                 if not phone_number.startswith("254") or len(phone_number) != 12:
                     payment_response = {'error': 'Invalid phone number format. Use 2547XXXXXXXX.'}
                 else:
-                    business_short_code ='3581517'  
-                    passkey = '46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933'
+                    business_short_code =''  
+                    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
                     process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                     callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'  # Use your test callback URL
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
