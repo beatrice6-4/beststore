@@ -72,14 +72,16 @@ def placeOrder(request, total=0, quantity=0):
 
 
 
-
+import random
+import string
+import base64
+import requests
+from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Order
 from .generateAcesstoken import get_access_token
-import base64
-import requests
-from datetime import datetime
+
 @login_required(login_url='login')
 def mpesa_payment(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
@@ -104,12 +106,17 @@ def mpesa_payment(request, order_number):
                 else:
                     passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey
                     business_short_code = '3581517'  # LIVE shortcode
-                    process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'  # LIVE endpoint
+                    process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                     callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Payment for Order {order_number}'
-                    account_reference = f'{phone_number} {order_number}'
+
+                    # Generate AccountReference: 4 random capital letters + 4 random digits
+                    random_letters = ''.join(random.choices(string.ascii_uppercase, k=4))
+                    random_digits = ''.join(random.choices(string.digits, k=4))
+                    account_reference = f'{random_letters}{random_digits}'
+
                     amount = int(order.order_total)
 
                     stk_push_headers = {
