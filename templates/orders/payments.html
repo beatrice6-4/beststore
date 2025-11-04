@@ -78,7 +78,87 @@
                     </div>
                     <div class="card-body">
                         <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
-                        <form id="stkpush-form" method="POST" action="{% url 'initiate_stk_push' order.order_number %}">
+                        <form id="stkpush-form" method="POST" action="{% url 'initiate_stk_pus{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white text-center">
+                        <h4>Mpesa Payment</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-center">
+                            <img src="{% static 'images/mpesa-loogo.jpg' %}" alt="Mpesa" style="height:50px;">
+                        </p>
+                        <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
+
+                        {% if payment_response %}
+                            {% if payment_response.error %}
+                                <div class="alert alert-danger text-center auto-hide-message">
+                                    {{ payment_response.error }}
+                                    {% if payment_response.details %}
+                                        <br>{{ payment_response.details }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            {% if payment_response.message %}
+                                <div class="alert alert-success text-center auto-hide-message">
+                                    {{ payment_response.message }}
+                                </div>
+                            {% endif %}
+                            {% if payment_response.paybill_instructions %}
+                                <div class="alert alert-info text-center mt-2 auto-hide-message">
+                                    {{ payment_response.paybill_instructions }}<br>
+                                    <strong>Paybill:</strong> {{ payment_response.paybill }}<br>
+                                    <strong>Account Number:</strong> {{ payment_response.account_reference }}<br>
+                                    <strong>Amount:</strong> Ksh {{ payment_response.amount }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="phone">Mpesa Phone Number</label>
+                                <input type="text" class="form-control" id="phone" name="phone_number"
+                                       placeholder="e.g. 2547XXXXXXXX"
+                                       pattern="2547[0-9]{8}" maxlength="12" required>
+                                <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount to Pay</label>
+                                <input type="text" class="form-control" value="Ksh. {{ grand_total }}" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fa fa-mobile"></i> Pay Now
+                            </button>
+                        </form>
+                        <hr>
+                        <p class="text-center text-muted" style="font-size:0.95rem;">
+                            You will receive an Mpesa prompt on your phone to complete the payment.
+                        </p>
+                        <div class="text-center">
+                            <a href="{% url 'checkout' %}" class="btn btn-link">Back to Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    // Hide messages after 2 minutes (120,000 milliseconds)
+    setTimeout(function() {
+        document.querySelectorAll('.auto-hide-message').forEach(function(el) {
+            el.style.display = 'none';
+        });
+    }, 120000);
+</script>
+{% endblock %}h' order.order_number %}">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="amount">Amount (KES)</label>
