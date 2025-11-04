@@ -115,12 +115,12 @@ def sandbox_payment(request, order_number):
                     business_short_code = '174379'  # Sandbox paybill
                     passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
                     process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-                    callback_url = 'https://yourdomain.com/orders/mpesa/callback/'  # Use your test callback URL
+                    callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'  # Use your test callback URL
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Sandbox Payment for Order {order_number}'
                     account_reference = f'Order-{order_number}'
-                    amount = 1  # Sandbox only allows 1 Ksh
+                    amount = 4  # Sandbox only allows 4 Ksh
 
                     stk_push_headers = {
                         'Content-Type': 'application/json',
