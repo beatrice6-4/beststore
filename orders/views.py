@@ -188,6 +188,17 @@ def mpesa_payment(request, order_number):
 
 
 
+
+from django.http import JsonResponse
+from .account_balance import query_account_balance
+
+def check_account_balance(request):
+    result = query_account_balance()
+    return JsonResponse(result)
+
+
+
+
 # ------------------------------
 # Payments View
 # ------------------------------
