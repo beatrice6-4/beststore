@@ -109,7 +109,7 @@ def mpesa_payment(request, order_number):
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Payment for Order {order_number}'
-                    account_reference = f'STORE{order_number}'
+                    account_reference = f'{phone_number} {order_number}'
                     amount = int(order.order_total)
 
                     stk_push_headers = {
