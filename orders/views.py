@@ -63,8 +63,8 @@ def placeOrder(request, total=0, quantity=0):
             data.order_number = order_number
             data.save()
 
-            # Redirect to sandbox payment page
-            return redirect('sandbox_payment', order_number=order_number)
+            # Redirect to mpesa payment page
+            return redirect('mpesa_payment', order_number=order_number)
         else:
             return render(request, 'orders/payments.html', {'form': form, 'cart_items': cart_items})
     else:
@@ -82,7 +82,7 @@ import requests
 from datetime import datetime
 
 @csrf_exempt
-def sandbox_payment(request, order_number):
+def mpesa_payment(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
     payment_response = None
 
