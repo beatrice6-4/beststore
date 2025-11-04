@@ -120,7 +120,7 @@ def sandbox_payment(request, order_number):
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Sandbox Payment for Order {order_number}'
                     account_reference = f'Order-{order_number}'
-                    amount = 4  # Sandbox only allows 4 Ksh
+                    amount = int(order.order_total)
 
                     stk_push_headers = {
                         'Content-Type': 'application/json',
