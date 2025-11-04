@@ -18,4 +18,5 @@ urlpatterns = [
     path('mpesa/<str:order_number>/', views.mpesa_payment, name='mpesa_payment'),
 
     path('check-account-balance/', views.check_account_balance, name='check_account_balance'),
+    path('mpesa/balance/result/', views.mpesa_balance_result, name='mpesa_balance_result'),
 ]

@@ -196,6 +196,18 @@ def check_account_balance(request):
     result = query_account_balance()
     return JsonResponse(result)
 
+# filepath: c:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\orders\views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+@csrf_exempt
+def mpesa_balance_result(request):
+    if request.method == "POST":
+        # Parse and process the notification data here
+        data = request.body.decode('utf-8')
+        # Save or log the result as needed
+        return JsonResponse({"status": "received"})
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 
