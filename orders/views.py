@@ -213,6 +213,10 @@ def mpesa_balance_result(request):
 from .transaction_status import check_transaction_status
 
 result = check_transaction_status('TRANSACTION_ID_HERE')
+def transaction_status_view(request):
+    transaction_id = request.GET.get('transaction_id')  # Or get from POST, or hardcode for testing
+    result = check_transaction_status(transaction_id)
+    return JsonResponse(result)
 
 
 
