@@ -63,21 +63,12 @@ def placeOrder(request, total=0, quantity=0):
             data.order_number = order_number
             data.save()
 
-            # Redirect to payment page
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
-            context = {
-                'order': order,
-                'cart_items': cart_items,
-                'total': total,
-                'tax': tax,
-                'grand_total': grand_total,
-            }
-            return render(request, 'orders/payments.html', context)
+            # Redirect to sandbox payment page
+            return redirect('sandbox_payment', order_number=order_number)
         else:
             return render(request, 'orders/payments.html', {'form': form, 'cart_items': cart_items})
     else:
         return redirect('checkout')
-    
 
 
 
