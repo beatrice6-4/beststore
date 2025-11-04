@@ -210,6 +210,10 @@ def mpesa_balance_result(request):
         return JsonResponse({"status": "received"})
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+from .transaction_status import check_transaction_status
+
+result = check_transaction_status('TRANSACTION_ID_HERE')
+
 
 
 # ------------------------------
