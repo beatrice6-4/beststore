@@ -1,5 +1,4 @@
 import requests
-from django.http import JsonResponse
 
 def get_access_token():
     consumer_key = "kfy4wKPlLpC4AGlZRphJl1VgpzAVc1fNVs4w2l3vNVb1GuqM"  
@@ -12,7 +11,7 @@ def get_access_token():
         response.raise_for_status() 
         result = response.json()
         access_token = result['access_token']
-        return JsonResponse({'access_token': access_token})
+        return access_token
     except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': str(e)})
-    return JsonResponse({'error': 'Unknown error occurred.'})
+        print("Access token error:", str(e))
+        return None
