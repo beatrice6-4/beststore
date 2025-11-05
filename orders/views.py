@@ -79,7 +79,6 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Order
 from .generateAcesstoken import get_access_token
-
 @login_required(login_url='login')
 def mpesa_payment(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
@@ -95,12 +94,13 @@ def mpesa_payment(request, order_number):
                 payment_response = {'error': 'Phone number not provided. Please enter your phone number.'}
             else:
                 # Format phone number
+                original_phone = phone_number
                 if phone_number.startswith("+"):
                     phone_number = phone_number[1:]
                 if phone_number.startswith("0"):
                     phone_number = "254" + phone_number[1:]
                 if not phone_number.startswith("254") or len(phone_number) != 12:
-                    payment_response = {'error': 'Invalid phone number format. Use 2547XXXXXXXX.'}
+                    payment_response = {'error': f'Invalid phone number format ({original_phone}). Use 2547XXXXXXXX.'}
                 else:
                     passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey
                     business_short_code = '3581517'  # LIVE shortcode
@@ -110,9 +110,9 @@ def mpesa_payment(request, order_number):
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Payment for Order {order_number}'
 
-                    # Generate AccountReference: 4 random capital letters + 4 random digits
-                    random_letters = ''.join(random.choices(string.ascii_uppercase, k=4))
-                    random_digits = ''.join(random.choices(string.digits, k=4))
+                    # Generate AccountReference: 3 random capital letters + 3 random digits
+                    random_letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+                    random_digits = ''.join(random.choices(string.digits, k=3))
                     account_reference = f'{random_letters}{random_digits}'
 
                     amount = int(order.order_total)
@@ -145,6 +145,9 @@ def mpesa_payment(request, order_number):
                     try:
                         response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
                         print("STK Push API Response:", response.text)  # For debugging
+                        # Optionally, log to a file for persistent debugging:
+                        with open('stkpush_debug.log', 'a') as log_file:
+                            log_file.write(f"{datetime.now()} - Payload: {stk_push_payload}\nResponse: {response.text}\n\n")
                         response.raise_for_status()
                         response_data = response.json()
                         response_code = response_data.get('ResponseCode')
@@ -164,6 +167,7 @@ def mpesa_payment(request, order_number):
                             payment_response = {
                                 'error': 'STK Push failed.',
                                 'details': error_message,
+                                'api_response': response.text,  # Show full API response for debugging
                                 'paybill': business_short_code,
                                 'account_reference': account_reference,
                                 'paybill_instructions': paybill_instructions
