@@ -69,7 +69,7 @@ def placeOrder(request, total=0, quantity=0):
             return render(request, 'orders/payments.html', {'form': form, 'cart_items': cart_items})
     else:
         return redirect('checkout')
-   import random
+import random
 import string
 import base64
 import requests
