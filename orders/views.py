@@ -69,6 +69,9 @@ def placeOrder(request, total=0, quantity=0):
             return render(request, 'orders/payments.html', {'form': form, 'cart_items': cart_items})
     else:
         return redirect('checkout')
+
+
+
 import random
 import string
 import base64
@@ -101,8 +104,8 @@ def mpesa_payment(request, order_number):
                 if not phone_number.startswith("254") or len(phone_number) != 12:
                     payment_response = {'error': 'Invalid phone number format. Use 2547XXXXXXXX.'}
                 else:
-                    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # Replace with your actual till passkey
-                    business_short_code = '6391014'  # TILL number as shortcode
+                    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey for 3581517
+                    business_short_code = '3581517'  # LIVE Paybill shortcode
                     process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                     callback_url = 'https://mamamaasaibakers-917922e1976b.herokuapp.com/orders/mpesa/callback/'
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -125,7 +128,7 @@ def mpesa_payment(request, order_number):
                         'BusinessShortCode': business_short_code,
                         'Password': password,
                         'Timestamp': timestamp,
-                        'TransactionType': 'CustomerBuyGoodsOnline',  # Use this for TILLs
+                        'TransactionType': 'CustomerPayBillOnline',  # Use this for Paybill
                         'Amount': amount,
                         'PartyA': phone_number,
                         'PartyB': business_short_code,
@@ -137,7 +140,7 @@ def mpesa_payment(request, order_number):
 
                     paybill_instructions = (
                         f"If you do not receive the STK Push on your phone, "
-                        f"you can pay directly via M-Pesa Till {business_short_code} "
+                        f"you can pay directly via M-Pesa Paybill {business_short_code} "
                         f"and use Account Number {account_reference}."
                     )
 
@@ -182,7 +185,6 @@ def mpesa_payment(request, order_number):
         'payment_response': payment_response,
     }
     return render(request, 'orders/mpesa_payment.html', context)
-
 
 def transaction_status_view(request):
     transaction_id = request.GET.get('transaction_id')  # Or get from POST, or hardcode for testing
