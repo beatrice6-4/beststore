@@ -12,7 +12,7 @@ def query_stk_status(request):
 
     # LIVE endpoint and credentials
     query_url = 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query'
-    business_short_code = '3581517'  # LIVE shortcode
+    business_short_code = '6391014'  # LIVE shortcode
     passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
