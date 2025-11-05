@@ -128,10 +128,10 @@ def mpesa_payment(request, order_number):
                         'BusinessShortCode': business_short_code,
                         'Password': password,
                         'Timestamp': timestamp,
-                        'TransactionType': 'CustomerPayBillOnline',  # Use this for Paybill
+                        'TransactionType': 'CustomerBuyGoodsOnline',  # Use this for Buy Goods
                         'Amount': amount,
                         'PartyA': phone_number,
-                        'PartyB': business_short_code,
+                        'PartyB': 6391014, # this is the till number
                         'PhoneNumber': phone_number,
                         'CallBackURL': callback_url,
                         'AccountReference': account_reference,
@@ -157,7 +157,7 @@ def mpesa_payment(request, order_number):
                                 'CheckoutRequestID': checkout_request_id,
                                 'ResponseCode': response_code,
                                 'amount': amount,
-                                'paybill': business_short_code,
+            
                                 'account_reference': account_reference,
                                 'paybill_instructions': paybill_instructions
                             }
