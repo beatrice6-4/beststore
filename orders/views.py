@@ -107,7 +107,7 @@ def mpesa_payment(request, order_number):
                     passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey
                     business_short_code = '3581517'  # LIVE shortcode
                     process_request_url = ' https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'  # LIVE endpoint
-                    callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
+                    callback_url = 'https://mamamaasaibakers-917922e1976b.herokuapp.com/orders/mpesa/callback/'
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Payment for Order {order_number}'
