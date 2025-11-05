@@ -1,20 +1,115 @@
 {% extends 'base.html' %}
+{% block page_title %}Mpesa{% endblock %}
+{% block breadcrumb %}Payment{% endblock %}
 {% load static %}
 
 {% block content %}
+<style>
+    body {
+        background: #f7f7f7;
+    }
+    .mpesa-card {
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        border: none;
+        margin-top: 40px;
+        background: #fff;
+    }
+    .mpesa-card-header {
+        background: linear-gradient(90deg, #43b02a 60%, #009900 100%);
+        border-radius: 16px 16px 0 0;
+        padding: 24px 0 12px 0;
+    }
+    .mpesa-card-header h4 {
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 0;
+    }
+    .mpesa-logo {
+        height: 60px;
+        margin-bottom: 10px;
+    }
+    .mpesa-form-group label {
+        font-weight: 600;
+        color: #009900;
+    }
+    .mpesa-form-group input {
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        padding: 10px 12px;
+        font-size: 1.05rem;
+    }
+    .mpesa-form-group input:focus {
+        border-color: #43b02a;
+        box-shadow: 0 0 0 2px #e6f9ea;
+    }
+    .btn-success {
+        background: linear-gradient(90deg, #43b02a 60%, #009900 100%);
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 12px 0;
+        transition: background 0.2s;
+    }
+    .btn-success:hover {
+        background: linear-gradient(90deg, #009900 60%, #43b02a 100%);
+    }
+    .alert {
+        border-radius: 8px;
+        font-size: 1.05rem;
+        margin-bottom: 18px;
+    }
+    .alert-info {
+        background: #e6f9ea;
+        color: #009900;
+        border: 1px solid #b2e5c4;
+    }
+    .alert-success {
+        background: #e6f9ea;
+        color: #43b02a;
+        border: 1px solid #b2e5c4;
+    }
+    .alert-danger {
+        background: #ffeaea;
+        color: #d32f2f;
+        border: 1px solid #f5c6cb;
+    }
+    .mpesa-order-no {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #009900;
+        margin-bottom: 18px;
+    }
+    .mpesa-instructions {
+        font-size: 0.98rem;
+        color: #555;
+        margin-top: 10px;
+    }
+    .mpesa-back-link {
+        color: #009900;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .mpesa-back-link:hover {
+        color: #43b02a;
+        text-decoration: underline;
+    }
+</style>
 <section class="section-content padding-y bg">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white text-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="card mpesa-card">
+                    <div class="card-header mpesa-card-header text-white text-center">
+                        <img src="{% static 'images/mpesa-logo.jpg' %}" alt="Mpesa" class="mpesa-logo">
                         <h4>Mpesa Payment</h4>
                     </div>
                     <div class="card-body">
-                        <p class="text-center">
-                            <img src="{% static 'images/mpesa-logo.jpg' %}" alt="Mpesa" style="height:50px;">
-                        </p>
-                        <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
+                        <div class="mpesa-order-no text-center">
+                            Order No: {{ order.order_number }}
+                        </div>
 
                         {% if payment_response %}
                             {% if payment_response.error %}
@@ -42,14 +137,14 @@
 
                         <form method="POST" action="">
                             {% csrf_token %}
-                            <div class="form-group">
+                            <div class="form-group mpesa-form-group">
                                 <label for="phone">Mpesa Phone Number</label>
                                 <input type="text" class="form-control" id="phone" name="phone_number"
                                        placeholder="e.g. 2547XXXXXXXX"
                                        pattern="2547[0-9]{8}" maxlength="12" required>
                                 <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mpesa-form-group">
                                 <label>Amount to Pay</label>
                                 <input type="text" class="form-control" value="Ksh. {{ grand_total }}" readonly>
                             </div>
@@ -58,11 +153,11 @@
                             </button>
                         </form>
                         <hr>
-                        <p class="text-center text-muted" style="font-size:0.95rem;">
+                        <p class="text-center mpesa-instructions">
                             You will receive an Mpesa prompt on your phone to complete the payment.
                         </p>
                         <div class="text-center">
-                            <a href="{% url 'checkout' %}" class="btn btn-link">Back to Checkout</a>
+                            <a href="{% url 'checkout' %}" class="mpesa-back-link">Back to Checkout</a>
                         </div>
                     </div>
                 </div>

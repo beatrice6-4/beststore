@@ -69,9 +69,7 @@ def placeOrder(request, total=0, quantity=0):
             return render(request, 'orders/payments.html', {'form': form, 'cart_items': cart_items})
     else:
         return redirect('checkout')
-
-
-
+    
 import random
 import string
 import base64
@@ -106,7 +104,7 @@ def mpesa_payment(request, order_number):
                 else:
                     passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey
                     business_short_code = '3581517'  # LIVE shortcode
-                    process_request_url = ' https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'  # LIVE endpoint
+                    process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                     callback_url = 'https://mamamaasaibakers-917922e1976b.herokuapp.com/orders/mpesa/callback/'
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
@@ -146,6 +144,7 @@ def mpesa_payment(request, order_number):
 
                     try:
                         response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
+                        print("STK Push API Response:", response.text)  # For debugging
                         response.raise_for_status()
                         response_data = response.json()
                         response_code = response_data.get('ResponseCode')
@@ -184,13 +183,6 @@ def mpesa_payment(request, order_number):
         'payment_response': payment_response,
     }
     return render(request, 'orders/mpesa_payment.html', context)
-
-    response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
-    print(response.text)  # <-- Place this right after the request
-    response.raise_for_status()
-    response_data = response.json()
-    # ...rest of your logic...
-
 
 
 
