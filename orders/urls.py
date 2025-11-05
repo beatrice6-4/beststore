@@ -20,4 +20,5 @@ urlpatterns = [
     path('check-account-balance/', views.check_account_balance, name='check_account_balance'),
     path('mpesa/balance/result/', views.mpesa_balance_result, name='mpesa_balance_result'),
     path('check-transaction-status/', views.transaction_status_view, name='check_transaction_status'),
+    path('mpesa/transaction/result/', views.mpesa_transaction_result, name='mpesa_transaction_result'),
 ]
