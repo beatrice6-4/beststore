@@ -144,10 +144,12 @@
                                        pattern="2547[0-9]{8}" maxlength="12" required>
                                 <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
                             </div>
-                            <div class="form-group mpesa-form-group">
-                                <label>Amount to Pay</label>
-                                <input type="text" class="form-control" value="Ksh. {{ grand_total }}" readonly>
-                            </div>
+                           <div class="form-group mpesa-form-group">
+    <label for="amount">Amount to Pay</label>
+    <input type="number" class="form-control" id="amount" name="amount"
+           value="{{ grand_total }}" min="1" required>
+    <small class="form-text text-muted">Enter the amount you wish to pay.</small>
+</div>
                             <button type="submit" class="btn btn-success btn-block">
                                 <i class="fa fa-mobile"></i> Pay Now
                             </button>
