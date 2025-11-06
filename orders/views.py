@@ -117,7 +117,18 @@ def mpesa_payment(request, order_number):
                     random_digits = ''.join(random.choices(string.digits, k=4))
                     account_reference = f'{random_letters}{random_digits}'
 
-                    amount = int(order.order_total)
+                    # Get editable amount from form
+                    amount = request.POST.get('amount')
+                    try:
+                        amount = int(amount)
+                    except (TypeError, ValueError):
+                        payment_response = {'error': 'Invalid amount entered.'}
+                        context = {
+                            'order': order,
+                            'grand_total': order.order_total,
+                            'payment_response': payment_response,
+                        }
+                        return render(request, 'orders/mpesa_payment.html', context)
 
                     stk_push_headers = {
                         'Content-Type': 'application/json',
@@ -138,12 +149,6 @@ def mpesa_payment(request, order_number):
                         'TransactionDesc': transaction_desc
                     }
 
-                    paybill_instructions = (
-                        f"If you do not receive the STK Push on your phone, "
-                        f"you can pay directly via M-Pesa Paybill {business_short_code} "
-                        f"and use Account Number {account_reference}."
-                    )
-
                     try:
                         response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
                         print("STK Push API Response:", response.text)  # For debugging
@@ -157,9 +162,7 @@ def mpesa_payment(request, order_number):
                                 'CheckoutRequestID': checkout_request_id,
                                 'ResponseCode': response_code,
                                 'amount': amount,
-            
-                                'account_reference': account_reference,
-                                'paybill_instructions': paybill_instructions
+                                'account_reference': account_reference
                             }
                         else:
                             error_message = response_data.get('errorMessage') or response_data.get('errorDesc') or response_data
@@ -167,16 +170,14 @@ def mpesa_payment(request, order_number):
                                 'error': 'STK Push failed.',
                                 'details': error_message,
                                 'paybill': business_short_code,
-                                'account_reference': account_reference,
-                                'paybill_instructions': paybill_instructions
+                                'account_reference': account_reference
                             }
                     except requests.exceptions.RequestException as e:
                         payment_response = {
                             'error': 'Failed to initiate STK Push.',
                             'details': str(e),
                             'paybill': business_short_code,
-                            'account_reference': account_reference,
-                            'paybill_instructions': paybill_instructions
+                            'account_reference': account_reference
                         }
 
     context = {
