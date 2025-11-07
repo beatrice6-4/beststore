@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.conf import settings
 from django.db import models
 from accounts.models import Account
 from orders.generateAcesstoken import get_access_token
@@ -142,3 +143,23 @@ class OrderProduct(models.Model):
 
     def __str__(self):
         return f'{self.product.product_name} (Order {self.order.order_number})'
+    
+
+
+
+class Transaction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    mpesa_receipt = models.CharField(max_length=100, unique=True)
+    phone_number = models.CharField(max_length=15)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ])
+    paid_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.mpesa_receipt} - {self.status}"

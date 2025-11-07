@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>All Online Till Transactions</h2>
+<table>
+    <tr>
+        <th>Receipt</th><th>User</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th>
+    </tr>
+    {% for tx in transactions %}
+    <tr>
+        <td>{{ tx.mpesa_receipt }}</td>
+        <td>{{ tx.user }}</td>
+        <td>{{ tx.product }}</td>
+        <td>{{ tx.amount }}</td>
+        <td>{{ tx.status }}</td>
+        <td>{{ tx.paid_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

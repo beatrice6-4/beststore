@@ -67,3 +67,13 @@ class OrderAdmin(admin.ModelAdmin):
 
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderProduct)
+
+
+from django.contrib import admin
+from .models import Transaction
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('mpesa_receipt', 'user', 'product', 'amount', 'status', 'paid_at')
+    search_fields = ('mpesa_receipt', 'phone_number', 'user__username')
+    list_filter = ('status', 'paid_at')

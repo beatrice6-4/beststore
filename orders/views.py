@@ -386,3 +386,13 @@ def mpesa_callback(request):
             return JsonResponse({"ResultCode": 1, "ResultDesc": f"Callback error: {str(e)}"}, status=400)
     else:
         return HttpResponse("Mpesa callback endpoint.", status=200)
+    
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from .models import Transaction
+
+@staff_member_required
+def transaction_portal(request):
+    transactions = Transaction.objects.all().order_by('-paid_at')
+    return render(request, 'orders/transaction_portal.html', {'transactions': transactions})
