@@ -396,3 +396,8 @@ from .models import Transaction
 def transaction_portal(request):
     transactions = Transaction.objects.all().order_by('-paid_at')
     return render(request, 'orders/transaction_portal.html', {'transactions': transactions})
+
+
+def paidOrders(request):
+    paid_orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
+    return render(request, 'orders/paidOrders.html', {'paid_orders': paid_orders})

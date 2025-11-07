@@ -12,6 +12,7 @@ urlpatterns = [
     path('stkpush/', views.initiate_stk_push, name='initiate_stk_push'),
     path('query/', views.query_stk_status, name='query_stk_status'),
     path('payments/<str:order_number>/', views.payments, name='payments'),
+    path('paidOrders/', views.paidOrders, name='paidOrders'),
 
 
     path('mpesa/<str:order_number>/', views.mpesa_payment, name='mpesa_payment'),
