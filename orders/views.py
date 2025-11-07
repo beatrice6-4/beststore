@@ -398,10 +398,109 @@ def transaction_portal(request):
     return render(request, 'orders/transaction_portal.html', {'transactions': transactions})
 
 
-def paidOrders(request):
-    paid_orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
-    return render(request, 'orders/paidOrders.html', {'paid_orders': paid_orders})
+# ...existing code...
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+import csv
+from datetime import datetime
+from django.http import HttpResponse
 
+@staff_member_required
+def paidOrders(request):
+    """
+    Staff-only view to list paid orders with search, filtering, pagination and CSV export.
+    Query params:
+      - q: search term (order number, customer name/email, mpesa receipt)
+      - from: start date YYYY-MM-DD
+      - to: end date YYYY-MM-DD
+      - order_by: field to order by (default '-created_at')
+      - page: page number
+      - per_page: items per page (default 25)
+      - export=csv : return CSV of current filtered set
+    """
+    qs = Order.objects.filter(is_ordered=True).select_related('user', 'payment').order_by('-created_at')
+
+    # Search
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(
+            Q(order_number__icontains=q) |
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q) |
+            Q(payment__payment_id__icontains=q) |
+            Q(user__email__icontains=q) |
+            Q(user__first_name__icontains=q) |
+            Q(user__last_name__icontains=q)
+        )
+
+    # Date filtering
+    date_from = request.GET.get('from')
+    date_to = request.GET.get('to')
+    date_format = '%Y-%m-%d'
+    if date_from:
+        try:
+            dt = datetime.strptime(date_from, date_format)
+            qs = qs.filter(created_at__date__gte=dt.date())
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            dt = datetime.strptime(date_to, date_format)
+            qs = qs.filter(created_at__date__lte=dt.date())
+        except ValueError:
+            pass
+
+    # Ordering
+    order_by = request.GET.get('order_by', '-created_at')
+    try:
+        qs = qs.order_by(order_by)
+    except Exception:
+        qs = qs.order_by('-created_at')
+
+    # CSV export
+    if request.GET.get('export') == 'csv':
+        filename = f"paid_orders_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        resp = HttpResponse(content_type='text/csv')
+        resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+        writer = csv.writer(resp)
+        writer.writerow(['Order Number', 'Customer', 'Email', 'Phone', 'Total', 'Payment ID', 'Status', 'Created At'])
+        for o in qs:
+            customer = (o.user.get_full_name() if getattr(o, 'user', None) else f"{o.first_name or ''} {o.last_name or ''}".strip())
+            writer.writerow([
+                o.order_number,
+                customer,
+                o.email or (o.user.email if getattr(o, 'user', None) else ''),
+                o.phone or '',
+                float(o.order_total or 0),
+                (o.payment.payment_id if getattr(o, 'payment', None) else ''),
+                getattr(o, 'status', '') or '',
+                o.created_at.isoformat() if getattr(o, 'created_at', None) else ''
+            ])
+        return resp
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    per_page = int(request.GET.get('per_page', 25))
+    paginator = Paginator(qs, per_page)
+    try:
+        paid_orders = paginator.page(page)
+    except PageNotAnInteger:
+        paid_orders = paginator.page(1)
+    except EmptyPage:
+        paid_orders = paginator.page(paginator.num_pages)
+
+    context = {
+        'paid_orders': paid_orders,
+        'q': q,
+        'date_from': date_from,
+        'date_to': date_to,
+        'order_by': order_by,
+        'paginator': paginator,
+    }
+    return render(request, 'orders/paidOrders.html', context)
+# ...existing code...
 
 
 # ...existing code...
