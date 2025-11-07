@@ -88,6 +88,7 @@ SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 
 MIDDLEWARE = [
+    'beststore.middleware.RemoveWWWRedirectMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
