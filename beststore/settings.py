@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import django_heroku
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.messages import constants as messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,9 +29,6 @@ INSTALLED_APPS = [
     'finance',
     'storages',
     'CDMIS',
-]
-
-INSTALLED_APPS += [
     'cloudinary',
     'cloudinary_storage',
 ]
@@ -101,7 +97,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 ROOT_URLCONF = 'beststore.urls'
 
 LOGIN_REDIRECT_URL = 'redirect_after_login'
@@ -128,15 +124,22 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
+# Database (Heroku Postgres via dj_database_url)
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL')
+    )
+}
+
+# Cloudinary for media files
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'df44dwnwg',
-    'API_KEY': '626193889524544',
-    'API_SECRET': 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -163,8 +166,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
 MESSAGE_TAGS = {
@@ -174,7 +177,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.DEBUG: 'debug',
     messages.NOTICE: 'info',
-
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
