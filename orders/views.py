@@ -401,3 +401,48 @@ def transaction_portal(request):
 def paidOrders(request):
     paid_orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
     return render(request, 'orders/paidOrders.html', {'paid_orders': paid_orders})
+
+
+
+# ...existing code...
+from django.http import JsonResponse
+from django.utils import timezone
+from .models import Order
+
+def paid_orders_api(request):
+    """
+    GET /api/orders?status=paid
+    Returns a JSON array of paid orders. Public GET (adjust auth as needed).
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    status = request.GET.get('status', '').lower()
+    # only return paid when status=paid requested
+    if status != 'paid':
+        return JsonResponse({'error': 'Specify ?status=paid to get paid orders'}, status=400)
+
+    qs = Order.objects.filter(is_ordered=True).order_by('-id')  # adjust filter if you use order.status or payment.status
+    results = []
+    for o in qs:
+        paid_at = None
+        if hasattr(o, 'created_at') and o.created_at:
+            paid_at = o.created_at.isoformat()
+        elif hasattr(o, 'updated_at') and o.updated_at:
+            paid_at = o.updated_at.isoformat()
+        results.append({
+            'id': o.order_number,
+            'customer': {
+                'name': (o.user.get_full_name() if getattr(o, 'user', None) and hasattr(o.user, 'get_full_name') else (
+                         (o.first_name or '') + ' ' + (o.last_name or '')
+                ).strip()) if (getattr(o, 'user', None) or getattr(o, 'first_name', None)) else '',
+                'email': getattr(o, 'email', '') or (getattr(o.user, 'email', '') if getattr(o, 'user', None) else '')
+            },
+            'total': float(o.order_total or 0),
+            'currency': 'KES',
+            'paidAt': paid_at,
+            'viewUrl': f'/orders/{o.order_number}/',
+            'receiptUrl': (o.payment.payment_id if getattr(o, 'payment', None) else None),
+        })
+    return JsonResponse(results, safe=False)
+# ...existing code...
