@@ -5,18 +5,14 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.messages import constants as messages
 
-# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Secret key
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
 
-# Debug mode
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Allowed hosts
 ALLOWED_HOSTS = ['mamamaasaibakers.com']
-# Installed apps
+
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -38,7 +34,6 @@ INSTALLED_APPS = [
     'cloudinary',
 ]
 
-# Jazzmin settings
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
     "site_header": "Mama Maasai Bakers",
@@ -89,13 +84,10 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-# Session settings
 SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Middleware
 MIDDLEWARE = [
-    
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -106,13 +98,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Root URL configuration
 ROOT_URLCONF = 'beststore.urls'
 
-# Login redirect URL
 LOGIN_REDIRECT_URL = 'redirect_after_login'
 
-# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -131,13 +120,10 @@ TEMPLATES = [
     },
 ]
 
-# WSGI application
 WSGI_APPLICATION = 'beststore.wsgi.application'
 
-# Custom user model
 AUTH_USER_MODEL = 'accounts.Account'
 
-# Database configuration
 DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render',
@@ -145,7 +131,6 @@ DATABASES = {
     )
 }
 
-# Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('dmgwc5b2t'),
     'API_KEY': os.environ.get('191412321311827'),
@@ -153,7 +138,6 @@ CLOUDINARY_STORAGE = {
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -162,7 +146,6 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -170,32 +153,27 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-# Localization settings
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
-# Static files configuration
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # Main static directory
+    BASE_DIR / "static",
 ]
-STATIC_ROOT = BASE_DIR / "staticfiles"  # Directory for collected static files
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-# Message tags
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
 }
 
-# Default auto field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Activate Django-Heroku settings
+# Activate Django-Heroku settings (for Heroku deployment)
 django_heroku.settings(locals())
