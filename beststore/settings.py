@@ -98,7 +98,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 ROOT_URLCONF = 'beststore.urls'
 
 LOGIN_REDIRECT_URL = 'redirect_after_login'
@@ -132,12 +132,6 @@ DATABASES = {
     )
 }
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('dmgwc5b2t'),
-    'API_KEY': os.environ.get('191412321311827'),
-    'API_SECRET': os.environ.get('CKl1zIOVvWfU_ObPtlVIlKyUCNE'),
-}
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -164,7 +158,6 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
@@ -172,6 +165,11 @@ MEDIA_ROOT = BASE_DIR / 'mediafiles'
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
+    messages.INFO: 'info',
+    messages.WARNING: 'warning',
+    messages.DEBUG: 'debug',
+    messages.NOTICE: 'info',
+    
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
