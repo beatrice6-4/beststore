@@ -30,8 +30,11 @@ INSTALLED_APPS = [
     'finance',
     'storages',
     'CDMIS',
-    'cloudinary_storage',
+]
+
+INSTALLED_APPS += [
     'cloudinary',
+    'cloudinary_storage',
 ]
 
 JAZZMIN_SETTINGS = {
@@ -125,12 +128,14 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render',
-        conn_max_age=600
-    )
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'df44dwnwg',
+    'API_KEY': '626193889524544',
+    'API_SECRET': 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU',
 }
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+MEDIA_URL = '/media/'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -169,7 +174,7 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.DEBUG: 'debug',
     messages.NOTICE: 'info',
-    
+
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
