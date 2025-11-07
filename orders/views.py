@@ -329,10 +329,6 @@ from django.shortcuts import render
 from .stkPush import initiate_stk_push
 from .query import query_stk_status
 
-
-# ------------------------------
-# Mpesa Callback View
-# ------------------------------
 @csrf_exempt
 def mpesa_callback(request):
     if request.method == "POST":
@@ -341,85 +337,52 @@ def mpesa_callback(request):
             body = data.get('Body', {})
             stk_callback = body.get('stkCallback', {})
             result_code = stk_callback.get('ResultCode')
+            result_desc = stk_callback.get('ResultDesc', '')
             callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
 
-            if result_code == 0:
-                # Extract payment details
-                mpesa_receipt = None
-                phone_number = None
-                amount = None
-                order_number = None
+            # Initialize variables
+            mpesa_receipt = None
+            phone_number = None
+            amount = None
+            order_number = None
 
-                for item in callback_metadata:
-                    if item['Name'] == 'MpesaReceiptNumber':
-                        mpesa_receipt = item['Value']
-                    elif item['Name'] == 'PhoneNumber':
-                        phone_number = str(item['Value'])
-                    elif item['Name'] == 'Amount':
-                        amount = float(item['Value'])
-                    elif item['Name'] == 'AccountReference':
-                        order_number = str(item['Value'])
+            # Extract payment details from callback metadata
+            for item in callback_metadata:
+                if item['Name'] == 'MpesaReceiptNumber':
+                    mpesa_receipt = item['Value']
+                elif item['Name'] == 'PhoneNumber':
+                    phone_number = str(item['Value'])
+                elif item['Name'] == 'Amount':
+                    amount = float(item['Value'])
+                elif item['Name'] == 'AccountReference':
+                    order_number = str(item['Value'])
 
-                # Update order and payment
-                order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
-                payment = Payment.objects.create(
-                    user=order.user,
-                    payment_id=mpesa_receipt,
-                    payment_method="Mpesa",
-                    amount_paid=amount,
-                    status="Completed"
-                )
-                order.payment = payment
-                order.is_ordered = True
-                order.status = "Completed"
-                order.save()
-
-                return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+            if result_code == 0 and mpesa_receipt and order_number and phone_number:
+                # Save payment and update order
+                try:
+                    order = Order.objects.get(order_number=order_number, phone=phone_number, is_ordered=False)
+                    payment = Payment.objects.create(
+                        user=order.user,
+                        payment_id=mpesa_receipt,  # Save the Mpesa transaction code here
+                        payment_method="Mpesa",
+                        amount_paid=amount,
+                        status="Completed"
+                    )
+                    order.payment = payment
+                    order.is_ordered = True
+                    order.status = "Completed"
+                    order.save()
+                    return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted and transaction code saved"})
+                except Order.DoesNotExist:
+                    return JsonResponse({"ResultCode": 1, "ResultDesc": "Order not found"}, status=404)
+                except Exception as e:
+                    return JsonResponse({"ResultCode": 1, "ResultDesc": f"Error saving payment: {str(e)}"}, status=500)
             else:
-                return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not successful"})
+                return JsonResponse({
+                    "ResultCode": 1,
+                    "ResultDesc": f"Payment not successful or missing data: {result_desc}"
+                })
         except Exception as e:
-            return JsonResponse({"ResultCode": 1, "ResultDesc": str(e)}, status=400)
+            return JsonResponse({"ResultCode": 1, "ResultDesc": f"Callback error: {str(e)}"}, status=400)
     else:
         return HttpResponse("Mpesa callback endpoint.", status=200)
-
-# ------------------------------
-# Order Complete View
-# ------------------------------
-@login_required(login_url='login')
-def order_complete(request):
-    order_number = request.GET.get('order_number')
-    payment_id = request.GET.get('payment_id')
-
-    try:
-        order = Order.objects.get(order_number=order_number, user=request.user, is_ordered=True)
-        payment = Payment.objects.get(payment_id=payment_id, user=request.user)
-        ordered_products = OrderProduct.objects.filter(order=order)
-
-        subtotal = sum([item.product_price * item.quantity for item in ordered_products])
-
-        context = {
-            'order': order,
-            'ordered_products': ordered_products,
-            'order_number': order.order_number,
-            'transID': payment.payment_id,
-            'payment': payment,
-            'subtotal': subtotal,
-        }
-        return render(request, 'orders/order_complete.html', context)
-    except (Order.DoesNotExist, Payment.DoesNotExist):
-        return redirect('home')
-    
-
-
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-
-@login_required(login_url='login')
-def transactions(request):
-    # Example: Fetch all transactions for the logged-in user
-    user_transactions = Payment.objects.filter(user=request.user).order_by('-created_at')
-    context = {
-        'transactions': user_transactions,
-    }
-    return render(request, 'orders/transactions.html', context)
