@@ -105,17 +105,20 @@
             <td><strong>{{ o.order_number }}</strong></td>
             <td>
               {% if o.user %}
-                {{ o.user.get_full_name|default:o.user.username }}
+                {% if o.user.get_full_name %}
+                  {{ o.user.get_full_name }}
+                {% else %}
+                  {{ o.user.username }}
+                {% endif %}
               {% else %}
                 {{ o.first_name }} {{ o.last_name }}
               {% endif %}
             </td>
-            <td>{{ o.email|default: (o.user.email if o.user) }}</td>
-            <td>{{ o.phone }}</td>
-            <td>Ksh. {{ o.order_total|floatformat:2 }}</td>
             <td>
-              {% if o.payment and o.payment.payment_id %}
-                <code>{{ o.payment.payment_id }}</code>
+              {% if o.email %}
+                {{ o.email }}
+              {% elif o.user and o.user.email %}
+                {{ o.user.email }}
               {% else %}
                 -
               {% endif %}
