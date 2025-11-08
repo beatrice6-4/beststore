@@ -111,6 +111,7 @@ def mpesa_payment(request, order_number):
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                     transaction_desc = f'Payment for Order {order_number}'
+                    acccount_reference = f'{phone_number} {order_number}'
 
                     # Generate AccountReference: 4 random capital letters + 4 random digits
                     random_letters = ''.join(random.choices(string.ascii_uppercase, k=4))

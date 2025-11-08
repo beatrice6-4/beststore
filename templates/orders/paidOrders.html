@@ -123,10 +123,29 @@
                 -
               {% endif %}
             </td>
+            <td>
+              {% if o.phone %}
+                {{ o.phone }}
+              {% elif o.user and o.user.phone_number %}
+                {{ o.user.phone_number }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>Ksh. {{ order_total }}</td>
+            <td>#</td>
+            <td>
+              {% if o.status == 'Paid' %}
+                <span class="badge badge-success">Paid</span>
+              {% elif o.status == 'Pending' %}
+                <span class="badge badge-pending">Pending</span>
+              {% else %}
+                <span class="badge badge-failed">{{ o.status }}</span>
+              {% endif %}
           
             <td>{{ o.created_at|date:"Y-m-d H:i" }}</td>
             <td style="text-align:right">
-              <a href="#" class="btn btn-ghost" style="padding:6px 10px">View</a>
+              <a href="{% url 'order_detail' %}" class="btn btn-ghost" style="padding:6px 10px">View</a>
             </td>
           </tr>
           {% endfor %}
