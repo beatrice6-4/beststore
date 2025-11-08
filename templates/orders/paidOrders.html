@@ -123,17 +123,7 @@
                 -
               {% endif %}
             </td>
-            <td>
-        
-                {% if st == "completed" or o.is_ordered %}
-                  <span class="badge badge-success">Completed</span>
-                {% elif st == "pending" %}
-                  <span class="badge badge-pending">Pending</span>
-                {% else %}
-                  <span class="badge badge-failed">{{ o.status|default:"Unknown" }}</span>
-                {% endif %}
-              {% endwith %}
-            </td>
+          
             <td>{{ o.created_at|date:"Y-m-d H:i" }}</td>
             <td style="text-align:right">
               <a href="#" class="btn btn-ghost" style="padding:6px 10px">View</a>
