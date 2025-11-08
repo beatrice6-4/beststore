@@ -124,7 +124,7 @@
               {% endif %}
             </td>
             <td>
-              {% with st=(o.status|default:"")|lower %}
+              {% with st=(o.status|default:"") %}
                 {% if st == "completed" or o.is_ordered %}
                   <span class="badge badge-success">Completed</span>
                 {% elif st == "pending" %}
