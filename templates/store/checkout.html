@@ -1,4 +1,4 @@
-// ...existing code...
+
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
@@ -206,7 +206,14 @@ textarea { min-height:110px; resize:vertical; }
                 <div class="title">{{ item.product.product_name }}</div>
                 <div class="sub">{{ item.quantity }} × Ksh. {{ item.product.price }}</div>
               </div>
-              <div style="font-weight:700;min-width:72px;text-align:right">Ksh. {{ item.get_total_price|default:item.product.price }}</div>
+              <div style="font-weight:700;min-width:72px;text-align:right">
+                Ksh.
+                {% if item.get_total_price %}
+                  {{ item.get_total_price }}
+                {% else %}
+                  {{ item.product.price }}
+                {% endif %}
+              </div>
             </div>
           {% endfor %}
         {% else %}
@@ -214,9 +221,280 @@ textarea { min-height:110px; resize:vertical; }
         {% endif %}
 
         <div class="totals" aria-hidden="false">
-          <div class="row"><span>Subtotal</span><span>Ksh. {{ total|default:0 }}</span></div>
-          <div class="row"><span>Tax</span><span>Ksh. {{ tax|default:0 }}</span></div>
-          <div class="row grand"><span>Grand total</span><span>Ksh. {{ grand_total|default:order_total|default:0 }}</span></div>
+          <div class="row"><span>Subtotal</span><span>Ksh. {{ total|default:"0" }}</span></div>
+          <div class="row"><span>Tax</span><span>Ksh. {{ tax|default:"0" }}</span></div>
+          <div class="row grand">
+            <span>Grand total</span>
+            <span>
+              Ksh.
+              {% if grand_total %}
+                {{ grand_total }}
+              {% elif order_total %}
+                {{ order_total }}
+              {% elif total %}
+                {{ total }}
+              {% else %}
+                0
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <p class="note"><strong>Payment:</strong> After placing the order you will be prompted to pay with available methods (M-Pesa STK Push or Till).</p>
+          {% comment %} If you already created an order object and have order_number, show pay button. Adjust as needed. {% endcomment %}
+          {% if order and order.order_number %}
+            <a href="{% url 'mpesa_payment' order_number=order.order_number %}" class="btn btn-primary" style="width:100%;margin-top:8px">Pay with M-Pesa</a>
+          {% else %}
+            <a href="{% url 'checkout' %}" class="btn btn-primary" style="width:100%;margin-top:8px">Proceed to payment</a>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+```// filepath: c:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\templates\store\checkout.html
+<!-- ...existing code... -->
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+/* Mobile-first responsive checkout styles (Android-friendly) */
+:root{
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --primary: #0a64c7;
+  --accent: #06a77d;
+  --muted: #6b7280;
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(16,24,40,.06);
+  --gap: 14px;
+  --container: 1100px;
+  --max-width: 1024px;
+}
+
+body { background: var(--bg); -webkit-font-smoothing:antialiased; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: #111; margin:0; padding:0; }
+
+.container { max-width: var(--max-width); margin: 18px auto; padding: 0 16px; }
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+.header h1 { margin:0; font-size:20px; color:#111; }
+.header p { margin:0; color:var(--muted); font-size:13px; }
+
+/* Layout */
+.checkout-grid {
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap);
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:16px;
+  overflow:hidden;
+}
+
+/* Form */
+.form-grid {
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+}
+.field { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+label { font-size:13px; color:#333; }
+input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+  padding:12px 14px;
+  font-size:14px;
+  border-radius:10px;
+  border:1px solid #e6edf3;
+  background:#fff;
+  transition:box-shadow .12s, border-color .12s;
+}
+input:focus, textarea:focus, select:focus { outline:none; box-shadow:0 6px 18px rgba(10,100,199,.08); border-color:var(--primary); }
+textarea { min-height:110px; resize:vertical; }
+
+/* Order summary */
+.summary { display:flex; flex-direction:column; gap:10px; }
+.item {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid #f1f5f9;
+}
+.item-thumb { width:64px; height:64px; flex-shrink:0; border-radius:8px; overflow:hidden; background:#fff; border:1px solid #f0f3f6; }
+.item-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.item .meta { flex:1; min-width:0; }
+.item .title { font-weight:600; font-size:14px; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.item .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+
+/* totals */
+.totals { margin-top:6px; border-top:1px solid #f1f5f9; padding-top:10px; }
+.totals .row { display:flex; justify-content:space-between; padding:8px 0; font-size:15px; color:#333; }
+.totals .grand { font-weight:800; font-size:18px; color:#0b1220; }
+
+/* Buttons */
+.actions { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 16px; border-radius:10px; border:0; cursor:pointer; font-weight:700; text-decoration:none;
+}
+.btn-primary { background:var(--primary); color:#fff; box-shadow:0 8px 20px rgba(10,100,199,.12); }
+.btn-alt { background:transparent; color:var(--primary); border:1px solid rgba(10,100,199,.12); }
+
+/* small text helpers */
+.note { font-size:13px; color:var(--muted); margin-top:8px; }
+
+/* Responsive adjustments for larger screens */
+@media(min-width:900px){
+  .checkout-grid { grid-template-columns: 1fr 360px; align-items:start; gap:22px; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .field.full { grid-column: 1 / -1; }
+}
+
+/* Very small screens tweak */
+@media(max-width:420px){
+  .item-thumb { width:56px; height:56px; }
+  .btn { padding:10px 12px; font-size:14px; }
+}
+</style>
+
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Checkout</h1>
+      <p>Review your order and provide delivery details.</p>
+    </div>
+    <div>
+      <a href="{% url 'store' %}" class="btn btn-alt" style="padding:8px 12px;border-radius:8px;text-decoration:none;">Continue shopping</a>
+    </div>
+  </div>
+
+  <div class="checkout-grid">
+    <!-- Checkout Form -->
+    <section class="card">
+      <h2 style="margin:0 0 8px 0;font-size:16px">Shipping & Contact</h2>
+      <form method="POST" action="">
+        {% csrf_token %}
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="field">
+            <label for="first_name">First name</label>
+            <input id="first_name" name="first_name" type="text" value="{{ request.user.first_name|default:'' }}" required>
+          </div>
+
+          <div class="field">
+            <label for="last_name">Last name</label>
+            <input id="last_name" name="last_name" type="text" value="{{ request.user.last_name|default:'' }}" required>
+          </div>
+
+          <div class="field full">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" value="{{ request.user.email|default:'' }}" required>
+          </div>
+
+          <div class="field full">
+            <label for="address">Address</label>
+            <textarea id="address" name="address" placeholder="Street address, building, landmark..." required>{{ form.address.value|default:'' }}</textarea>
+          </div>
+
+          <div class="field">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" value="{{ form.city.value|default:'' }}">
+          </div>
+
+          <div class="field">
+            <label for="state">County / State</label>
+            <input id="state" name="state" type="text" value="{{ form.state.value|default:'' }}">
+          </div>
+
+          <div class="field">
+            <label for="country">Country</label>
+            <select id="country" name="country" required>
+              <option value="Kenya" {% if form.country.value == "Kenya" or not form.country.value %}selected{% endif %}>Kenya</option>
+              <option value="Other" {% if form.country.value == "Other" %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input id="phone" name="phone" type="tel" value="{{ request.user.phone_number|default:'' }}" placeholder="2547XXXXXXXX" required>
+            <div class="note">We'll use this number for payment prompts (M-Pesa) and delivery updates.</div>
+          </div>
+
+          <div class="field full">
+            <label for="note">Order note (optional)</label>
+            <textarea id="note" name="order_note" placeholder="Delivery instructions, preferred time..."></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Place order</button>
+          <a href="{% url 'cart' %}" class="btn btn-alt" style="display:inline-flex;align-items:center;justify-content:center;">View cart</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Order Summary -->
+    <aside class="card">
+      <h2 style="margin:0 0 8px 0;font-size:16px">Order summary</h2>
+
+      <div class="summary">
+        {% if cart_items %}
+          {% for item in cart_items %}
+            <div class="item" role="group" aria-label="{{ item.product.product_name }}">
+              <div class="item-thumb" aria-hidden="true">
+                {% if item.product.image %}
+                  <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}">
+                {% else %}
+                  <img src="{% static 'images/no-image.png' %}" alt="No image">
+                {% endif %}
+              </div>
+              <div class="meta">
+                <div class="title">{{ item.product.product_name }}</div>
+                <div class="sub">{{ item.quantity }} × Ksh. {{ item.product.price }}</div>
+              </div>
+              <div style="font-weight:700;min-width:72px;text-align:right">
+                Ksh.
+                {% if item.get_total_price %}
+                  {{ item.get_total_price }}
+                {% else %}
+                  {{ item.product.price }}
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="note">Your cart is empty.</p>
+        {% endif %}
+
+        <div class="totals" aria-hidden="false">
+          <div class="row"><span>Subtotal</span><span>Ksh. {{ total|default:"0" }}</span></div>
+          <div class="row"><span>Tax</span><span>Ksh. {{ tax|default:"0" }}</span></div>
+          <div class="row grand">
+            <span>Grand total</span>
+            <span>
+              Ksh.
+              {% if grand_total %}
+                {{ grand_total }}
+              {% elif order_total %}
+                {{ order_total }}
+              {% elif total %}
+                {{ total }}
+              {% else %}
+                0
+              {% endif %}
+            </span>
+          </div>
         </div>
 
         <div style="margin-top:10px">

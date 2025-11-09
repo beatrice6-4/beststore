@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}User Dashboard | Mama Maasai Bakers{% endblock %}</title>
+
     <link rel="stylesheet" href="{% static 'vendor/fontawesome-free/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/adminlte/css/adminlte.min.css' %}">
     <link rel="stylesheet" href="{% static 'jazzmin/css/main.css' %}">
@@ -13,10 +14,14 @@
     <link rel="shortcut icon" href="{% static 'images/faavicom.jpg' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/faavicom.jpg' %}" sizes="32x32" type="image/png">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
     <style>
+        /* Base look */
         body {
             background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
             font-family: 'Source Sans Pro', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .brand-link {
             background: linear-gradient(90deg, #004080 0%, #151615 100%);
@@ -25,63 +30,91 @@
             letter-spacing: 1px;
             border-bottom: 2px solid #198754;
         }
-        .brand-link .brand-text {
-            font-size: 1.2rem;
-        }
+        .brand-link .brand-text { font-size: 1.1rem; }
+
         .sidebar {
             background: linear-gradient(135deg, #131314 0%, #141414 100%);
             min-height: 100vh;
             color: #fff;
             padding: 10px 15px;
-            border-radius: 0 15px 15px 0;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-
+            border-radius: 0 12px 12px 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.08);
         }
         .sidebar .nav-link {
-            color: hsla(120, 2%, 90%, 0.951) !important;
+            color: rgba(255,255,255,0.92) !important;
             font-weight: 500;
             border-radius: 8px;
             padding: 10px 15px;
             margin-bottom: 6px;
-            transition: background 0.2s, color 0.2s;
-            box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+            transition: background 0.15s, color 0.15s;
+            box-shadow: 0 1px 4px rgba(44,62,80,0.04);
         }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             background: #e50202 !important;
-            color: lch(52.92% 69.88 284.2) !important;
+            color: #fff !important;
             font-weight: 700;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
 
-        }
-        .alert {
-            margin: 10px 15px;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            box-shadow: 0 1px 4px rgba(44,62,80,0.06);
-        }
-        .alert-error {
-            background-color: #e5dadb;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+        .alert { margin: 10px 15px; padding: 10px 15px; border-radius: 6px; font-size: 0.95rem; }
+        .alert-success { background-color: #d4edda; color:#155724; border:1px solid #c3e6cb; }
+        .alert-error { background-color:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+        .alert-info { background-color:#d1ecf1; color:#0c5460; border:1px solid #bee5eb; }
 
+        /* Page loader */
+        #page-loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.92);
+            z-index: 99999;
+            transition: opacity .35s ease, visibility .35s ease;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
         }
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+        #page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
+        .loader {
+            --size:48px;
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            border-top: 4px solid #0a64c7;
+            border-right: 4px solid transparent;
+            box-sizing: border-box;
+            position: relative;
+            animation: rotation 1s linear infinite;
+        }
+        .loader:after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border-left: 4px solid #FF3D00;
+            border-bottom: 4px solid transparent;
+            animation: rotation .6s linear infinite reverse;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* small helpers */
+        .content-wrapper { min-height: 60vh; }
     </style>
+
     {% block extra_head %}{% endblock %}
 </head>
 <body class="hold-transition sidebar-mini accent-primary theme-default">
 <div class="wrapper">
+
+    <!-- Page loader (visible until page fully loaded) -->
+    <div id="page-loader" role="status" aria-label="Loading">
+      <div class="loader" aria-hidden="true"></div>
+    </div>
 
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -93,9 +126,10 @@
                 <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
             </li>
         </ul>
+
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">
-                <a class="nav-link btn" data-toggle="dropdown" href="#" title="{{ user.email }}">
+                <a class="nav-link btn" data-toggle="dropdown" href="#" title="{{ user.email|default:'' }}">
                     <i class="far fa-user"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-left">
@@ -117,7 +151,7 @@
     <!-- Sidebar -->
     <aside class="main-sidebar elevation-4 sidebar-dark-primary">
         <a href="#" class="brand-link">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3" style="opacity: .8">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3" style="opacity: .9">
             <span class="brand-text font-weight-light">Mama Maasai Bakers</span>
         </a>
         <div class="sidebar">
@@ -126,47 +160,17 @@
                     <i class="fas fa-user-circle fa-2x text-white"></i>
                 </div>
                 <div class="info">
-                    <a href="{% url 'profile' %}" class="d-block">{{ user.username }}</a>
+                    <a href="{% url 'profile' %}" class="d-block">{{ user.username|default:"Guest" }}</a>
                 </div>
             </div>
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard' %}" class="nav-link">
-                            <i class="nav-icon fas fa-th-large"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'store' %}" class="nav-link">
-                            <i class="nav-icon fas fa-store"></i>
-                            <p>Store</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cart' %}" class="nav-link">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Cart</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'about' %}" class="nav-link">
-                            <i class="nav-icon fas fa-info-circle"></i>
-                            <p>About Us</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-    <i class="nav-icon fas fa-database"></i>
-    <p>Track Orders</p>
-</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'myOrders' %}" class="nav-link">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Orders</p>
-                        </a>
-                    </li>
+                    <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link"><i class="nav-icon fas fa-th-large"></i><p>Dashboard</p></a></li>
+                    <li class="nav-item"><a href="{% url 'store' %}" class="nav-link"><i class="nav-icon fas fa-store"></i><p>Store</p></a></li>
+                    <li class="nav-item"><a href="{% url 'cart' %}" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i><p>Cart</p></a></li>
+                    <li class="nav-item"><a href="{% url 'about' %}" class="nav-link"><i class="nav-icon fas fa-info-circle"></i><p>About Us</p></a></li>
+                    <li class="nav-item"><a href="#" class="nav-link"><i class="nav-icon fas fa-database"></i><p>Track Orders</p></a></li>
+                    <li class="nav-item"><a href="{% url 'myOrders' %}" class="nav-link"><i class="nav-icon fas fa-list-alt"></i><p>Orders</p></a></li>
                 </ul>
             </nav>
         </div>
@@ -200,11 +204,13 @@
                 </div>
             </div>
         </div>
+
         <div class="content">
             <div class="container-fluid">
                 {% block content %}{% endblock %}
             </div>
         </div>
+
         <footer class="main-footer text-center">
             <strong>&copy; 2025 Mama Maasai Bakers.</strong> All rights reserved.
         </footer>
@@ -215,60 +221,345 @@
 <!-- ./wrapper -->
 
 <script>
-    // Automatically hide messages after 4 seconds
+    // Hide flash messages automatically after 4 seconds
     setTimeout(() => {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(alert => {
-            alert.classList.add('fade'); // Add fade-out effect
-            setTimeout(() => alert.remove(), 500); // Remove the element after fade-out
+            alert.classList.add('fade');
+            setTimeout(() => alert.remove(), 600);
         });
-    }, 180000); // 3 minutes = 180,000 milliseconds
+    }, 4000);
 
-    // Register the service worker
+    // Service worker registration (if available)
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-            .register("{% static 'service-worker.js' %}")
-            .then((registration) => {
-                console.log("Service Worker registered with scope:", registration.scope);
-            })
-            .catch((error) => {
-                console.error("Service Worker registration failed:", error);
-            });
+        navigator.serviceWorker.register("{% static 'service-worker.js' %}")
+            .then(registration => console.log("Service Worker registered:", registration.scope))
+            .catch(err => console.warn("Service Worker registration failed:", err));
     }
 </script>
-<span class="Loader">
-    .loader {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: inline-block;
-  border-top: 4px solid #FFF;
-  border-right: 4px solid transparent;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-}
-.loader::after {
-  content: '';  
-  box-sizing: border-box;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border-left: 4px solid #FF3D00;
-  border-bottom: 4px solid transparent;
-  animation: rotation 0.5s linear infinite reverse;
-}
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-} 
-</span>
+
+<script>
+  // Page loader behavior
+  (function () {
+    const loader = document.getElementById('page-loader');
+
+    function hideLoader() {
+      if (!loader) return;
+      loader.classList.add('hidden');
+      setTimeout(() => { if (loader && loader.parentNode) loader.parentNode.removeChild(loader); }, 500);
+    }
+
+    // Hide on full window load
+    window.addEventListener('load', hideLoader);
+
+    // Fallback: hide after 8s if load event didn't fire
+    setTimeout(hideLoader, 8000);
+
+    // Show loader on navigation actions (forms / same-origin links)
+    document.addEventListener('click', function (e) {
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:')) return;
+      if (a.target && a.target !== '_self') return;
+      // same-origin check
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.origin !== window.location.origin) return;
+      } catch (err) { return; }
+      if (loader) loader.classList.remove('hidden');
+    }, true);
+
+    document.addEventListener('submit', function (e) {
+      if (loader) loader.classList.remove('hidden');
+    }, true);
+  })();
+</script>
+
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'vendor/adminlte/js/adminlte.min.js' %}"></script>
+<script src="{% static 'jazzmin/js/main.js' %}"></script>
+</body>
+</html>
+```// filepath: c:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\templates\base.html
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}User Dashboard | Mama Maasai Bakers{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'vendor/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/adminlte/css/adminlte.min.css' %}">
+    <link rel="stylesheet" href="{% static 'jazzmin/css/main.css' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#004080">
+    <link rel="shortcut icon" href="{% static 'images/faavicom.jpg' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/faavicom.jpg' %}" sizes="32x32" type="image/png">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <style>
+        /* Base look */
+        body {
+            background: linear-gradient(135deg, #eaf6fb 0%, #f5f7fa 100%);
+            font-family: 'Source Sans Pro', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .brand-link {
+            background: linear-gradient(90deg, #004080 0%, #151615 100%);
+            color: #fff !important;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #198754;
+        }
+        .brand-link .brand-text { font-size: 1.1rem; }
+
+        .sidebar {
+            background: linear-gradient(135deg, #131314 0%, #141414 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 0 12px 12px 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.92) !important;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 6px;
+            transition: background 0.15s, color 0.15s;
+            box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #e50202 !important;
+            color: #fff !important;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+
+        .alert { margin: 10px 15px; padding: 10px 15px; border-radius: 6px; font-size: 0.95rem; }
+        .alert-success { background-color: #d4edda; color:#155724; border:1px solid #c3e6cb; }
+        .alert-error { background-color:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+        .alert-info { background-color:#d1ecf1; color:#0c5460; border:1px solid #bee5eb; }
+
+        /* Page loader */
+        #page-loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.92);
+            z-index: 99999;
+            transition: opacity .35s ease, visibility .35s ease;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader {
+            --size:48px;
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            border-top: 4px solid #3306e4;
+            border-right: 4px solid transparent;
+            box-sizing: border-box;
+            position: relative;
+            animation: rotation 1s linear infinite;
+        }
+        .loader:after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border-left: 4px solid #FF3D00;
+            border-bottom: 4px solid transparent;
+            animation: rotation .6s linear infinite reverse;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* small helpers */
+        .content-wrapper { min-height: 60vh; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="hold-transition sidebar-mini accent-primary theme-default">
+<div class="wrapper">
+
+    <!-- Page loader (visible until page fully loaded) -->
+    <div id="page-loader" role="status" aria-label="Loading">
+      <div class="loader" aria-hidden="true"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link btn" data-toggle="dropdown" href="#" title="{{ user.email|default:'' }}">
+                    <i class="far fa-user"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-left">
+                    <span class="dropdown-header">Account</span>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'profile' %}" class="dropdown-item">
+                        <i class="fas fa-user mr-2"></i> Profile
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Log out
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+    <!-- /.navbar -->
+
+    <!-- Sidebar -->
+    <aside class="main-sidebar elevation-4 sidebar-dark-primary">
+        <a href="#" class="brand-link">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3" style="opacity: .9">
+            <span class="brand-text font-weight-light">Mama Maasai Bakers</span>
+        </a>
+        <div class="sidebar">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <i class="fas fa-user-circle fa-2x text-white"></i>
+                </div>
+                <div class="info">
+                    <a href="{% url 'profile' %}" class="d-block">{{ user.username|default:"Guest" }}</a>
+                </div>
+            </div>
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link"><i class="nav-icon fas fa-th-large"></i><p>Dashboard</p></a></li>
+                    <li class="nav-item"><a href="{% url 'store' %}" class="nav-link"><i class="nav-icon fas fa-store"></i><p>Store</p></a></li>
+                    <li class="nav-item"><a href="{% url 'cart' %}" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i><p>Cart</p></a></li>
+                    <li class="nav-item"><a href="{% url 'about' %}" class="nav-link"><i class="nav-icon fas fa-info-circle"></i><p>About Us</p></a></li>
+                    <li class="nav-item"><a href="#" class="nav-link"><i class="nav-icon fas fa-database"></i><p>Track Orders</p></a></li>
+                    <li class="nav-item"><a href="{% url 'myOrders' %}" class="nav-link"><i class="nav-icon fas fa-list-alt"></i><p>Orders</p></a></li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+    <!-- /.sidebar -->
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Messages Section -->
+        <div class="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} fade show" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <!-- End Messages Section -->
+
+        <div class="content border-bottom mb-2">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 col-md-auto d-flex flex-grow-1 align-items-center">
+                        <h1 class="h4 m-0 pr-3 mr-3 border-right">{% block page_title %}Dashboard{% endblock %}</h1>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item">{% block breadcrumb %}Dashboard{% endblock %}</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+        <footer class="main-footer text-center">
+            <strong>&copy; 2025 Mama Maasai Bakers | CD MIS.</strong> All rights reserved.
+        </footer>
+    </div>
+    <!-- /.content-wrapper -->
+
+</div>
+<!-- ./wrapper -->
+
+<script>
+    // Hide flash messages automatically after 4 seconds
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.classList.add('fade');
+            setTimeout(() => alert.remove(), 600);
+        });
+    }, 4000);
+
+    // Service worker registration (if available)
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("{% static 'service-worker.js' %}")
+            .then(registration => console.log("Service Worker registered:", registration.scope))
+            .catch(err => console.warn("Service Worker registration failed:", err));
+    }
+</script>
+
+<script>
+  // Page loader behavior
+  (function () {
+    const loader = document.getElementById('page-loader');
+
+    function hideLoader() {
+      if (!loader) return;
+      loader.classList.add('hidden');
+      setTimeout(() => { if (loader && loader.parentNode) loader.parentNode.removeChild(loader); }, 500);
+    }
+
+    // Hide on full window load
+    window.addEventListener('load', hideLoader);
+
+    // Fallback: hide after 8s if load event didn't fire
+    setTimeout(hideLoader, 8000);
+
+    // Show loader on navigation actions (forms / same-origin links)
+    document.addEventListener('click', function (e) {
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:')) return;
+      if (a.target && a.target !== '_self') return;
+      // same-origin check
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.origin !== window.location.origin) return;
+      } catch (err) { return; }
+      if (loader) loader.classList.remove('hidden');
+    }, true);
+
+    document.addEventListener('submit', function (e) {
+      if (loader) loader.classList.remove('hidden');
+    }, true);
+  })();
+</script>
 
 <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
