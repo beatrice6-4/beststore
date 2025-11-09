@@ -246,7 +246,7 @@ textarea { min-height:110px; resize:vertical; }
           {% if order and order.order_number %}
             <a href="{% url 'mpesa_payment' order_number=order.order_number %}" class="btn btn-primary" style="width:100%;margin-top:8px">Pay with M-Pesa</a>
           {% else %}
-            <a href="{% url 'checkout' %}" class="btn btn-primary" style="width:100%;margin-top:8px">Proceed to payment</a>
+            <a href="{% url 'placeOrder' %}" class="btn btn-primary" style="width:100%;margin-top:8px">Proceed to payment</a>
           {% endif %}
         </div>
       </div>
