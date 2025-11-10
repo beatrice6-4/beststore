@@ -70,7 +70,7 @@
 
         <div class="form-group">
           <label for="amount">Amount (Ksh)</label>
-          <input id="amount" name="amount" class="form-control" type="number" min="1" step="1" required value="{{ grand_total|default:total|default:0 }}">
+          <input id="amount" name="amount" class="form-control" type="number" min="1" step="1" required value="{{ grand_total|floatformat:0 }}">
         </div>
 
         <button id="pay-btn" class="btn-pay" type="submit" aria-live="polite">
