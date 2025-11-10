@@ -100,6 +100,24 @@
         max-width: 100%;
     }
 }
+
+/* loader overlay */
+#checkout-loader {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.85);
+  z-index: 99999;
+}
+#checkout-loader.show { display:flex; }
+.checkout-spinner {
+  width:56px; height:56px; border-radius:50%;
+  border:6px solid rgba(25,135,84,0.2); border-top-color:#198754;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
 <section class="section-content padding-y bg">
@@ -221,5 +239,97 @@
 </div>
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
+
+<!-- loader element -->
+<div id="checkout-loader" aria-hidden="true">
+  <div class="checkout-spinner" role="status" aria-label="Placing order"></div>
+</div>
+
+<script>
+(function(){
+  // find the placeOrder form (do not change structure)
+  const form = document.querySelector('form[action*="placeOrder"]');
+  if (!form) return;
+
+  const submitBtn = form.querySelector('button[type="submit"]') || form.querySelector('input[type="submit"]');
+  const loader = document.getElementById('checkout-loader');
+
+  function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? match.pop() : '';
+  }
+
+  form.addEventListener('submit', async function (e) {
+    // attempt AJAX submit to receive JSON { order_number: "..." } and redirect to placeOrder/<order_number>/
+    e.preventDefault();
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('disabled');
+    }
+    if (loader) loader.classList.add('show');
+
+    const data = new FormData(form);
+
+    try {
+      const resp = await fetch(form.action, {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        redirect: 'follow'
+      });
+
+      // if server responded with redirect, follow it
+      if (resp.redirected) {
+        window.location.href = resp.url;
+        return;
+      }
+
+      // try parse JSON
+      const json = await resp.json().catch(()=>null);
+      if (json && json.order_number) {
+        // build redirect URL to placeOrder/<order_number>/
+        let base = form.action || '{% url "placeOrder" %}';
+        if (!base.endsWith('/')) base += '/';
+        window.location.href = base + encodeURIComponent(json.order_number) + '/';
+        return;
+      }
+
+      // if not JSON, try to treat response as HTML and navigate to it
+      const text = await resp.text();
+      // try find a redirect URL inside HTML (meta refresh)
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const meta = doc.querySelector('meta[http-equiv="refresh"]');
+      if (meta) {
+        const content = meta.getAttribute('content') || '';
+        const parts = content.split(';');
+        if (parts.length > 1) {
+          const urlPart = parts[1].replace(/url=/i, '').trim();
+          window.location.href = urlPart;
+          return;
+        }
+      }
+
+      // fallback: replace current document with returned HTML
+      document.open();
+      document.write(text);
+      document.close();
+
+    } catch (err) {
+      console.error('placeOrder failed', err);
+      alert('Could not place order right now. Please try again.');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('disabled');
+      }
+      if (loader) loader.classList.remove('show');
+    }
+  });
+})();
+</script>
 
 {% endblock %}
