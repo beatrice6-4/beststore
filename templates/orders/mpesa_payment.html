@@ -1,178 +1,217 @@
 {% extends 'base.html' %}
-{% block page_title %}Mpesa{% endblock %}
+{% block page_title %}M-Pesa Payment{% endblock %}
 {% block breadcrumb %}Payment{% endblock %}
 {% load static %}
 
 {% block content %}
 <style>
-    body {
-        background: #f7f7f7;
-    }
-    .mpesa-card {
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-        border: none;
-        margin-top: 40px;
-        background: #fff;
-    }
-    .mpesa-card-header {
-        background: linear-gradient(90deg, #43b02a 60%, #009900 100%);
-        border-radius: 16px 16px 0 0;
-        padding: 24px 0 12px 0;
-    }
-    .mpesa-card-header h4 {
-        font-weight: 700;
-        letter-spacing: 1px;
-        margin-bottom: 0;
-    }
-    .mpesa-logo {
-        height: 60px;
-        margin-bottom: 10px;
-    }
-    .mpesa-form-group label {
-        font-weight: 600;
-        color: #009900;
-    }
-    .mpesa-form-group input {
-        border-radius: 8px;
-        border: 1px solid #e0e0e0;
-        padding: 10px 12px;
-        font-size: 1.05rem;
-    }
-    .mpesa-form-group input:focus {
-        border-color: #43b02a;
-        box-shadow: 0 0 0 2px #e6f9ea;
-    }
-    .btn-success {
-        background: linear-gradient(90deg, #43b02a 60%, #009900 100%);
-        border: none;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        padding: 12px 0;
-        transition: background 0.2s;
-    }
-    .btn-success:hover {
-        background: linear-gradient(90deg, #009900 60%, #43b02a 100%);
-    }
-    .alert {
-        border-radius: 8px;
-        font-size: 1.05rem;
-        margin-bottom: 18px;
-    }
-    .alert-info {
-        background: #e6f9ea;
-        color: #009900;
-        border: 1px solid #b2e5c4;
-    }
-    .alert-success {
-        background: #e6f9ea;
-        color: #43b02a;
-        border: 1px solid #b2e5c4;
-    }
-    .alert-danger {
-        background: #ffeaea;
-        color: #d32f2f;
-        border: 1px solid #f5c6cb;
-    }
-    .mpesa-order-no {
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: #009900;
-        margin-bottom: 18px;
-    }
-    .mpesa-instructions {
-        font-size: 0.98rem;
-        color: #555;
-        margin-top: 10px;
-    }
-    .mpesa-back-link {
-        color: #009900;
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    .mpesa-back-link:hover {
-        color: #43b02a;
-        text-decoration: underline;
-    }
+  .mpesa-wrap { padding: 28px 12px; }
+  .mpesa-card { max-width:720px; margin:18px auto; border-radius:14px; box-shadow:0 8px 30px rgba(6,20,40,.08); overflow:hidden; background:#fff; }
+  .mpesa-header { background:linear-gradient(90deg,#24b24a,#0a8f2a); color:#fff; padding:20px; text-align:center; }
+  .mpesa-header img{ height:52px; display:block; margin:0 auto 8px; }
+  .mpesa-body{ padding:18px; }
+  .mpesa-order-no { font-weight:700; color:#0a6a2a; margin-bottom:10px; text-align:center; }
+  .form-group { margin-bottom:12px; }
+  label { font-weight:600; color:#153d17; display:block; margin-bottom:6px; font-size:0.95rem; }
+  .form-control { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6eef0; font-size:1rem; box-sizing:border-box; }
+  .form-control:focus { outline:none; box-shadow:0 6px 18px rgba(10,100,199,.06); border-color:#0a8f2a; }
+  .btn-pay { display:flex; gap:10px; align-items:center; justify-content:center; width:100%; padding:12px 14px; border-radius:10px; background:#0a8f2a; color:#fff; border:0; font-weight:700; cursor:pointer; }
+  .btn-pay[disabled]{ opacity:.7; cursor:not-allowed; }
+  .mpesa-note { color:#444; font-size:0.95rem; margin-top:10px; text-align:center; }
+  .alerts { margin-top:12px; }
+  .alert { padding:10px 12px; border-radius:8px; margin-bottom:8px; }
+  .alert-success { background:#e6f9ea; color:#0a8f2a; border:1px solid #cfeed0; }
+  .alert-error { background:#fff0f0; color:#9b1f1f; border:1px solid #f4c6c6; }
+  .loader-inline { width:18px; height:18px; border:3px solid rgba(255,255,255,0.25); border-top-color:#fff; border-radius:50%; animation:spin .9s linear infinite; display:inline-block; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  @media(max-width:420px){
+    .mpesa-body{ padding:14px; }
+    .mpesa-header{ padding:16px; }
+  }
 </style>
-<section class="section-content padding-y bg">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-6">
-                <div class="card mpesa-card">
-                    <div class="card-header mpesa-card-header text-white text-center">
-                        <img src="{% static 'images/mpesa-logo.jpg' %}" alt="Mpesa" class="mpesa-logo">
-                        <h4>Mpesa Payment</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mpesa-order-no text-center">
-                            Order No: {{ order.order_number }}
-                        </div>
 
-                        {% if payment_response %}
-                            {% if payment_response.error %}
-                                <div class="alert alert-danger text-center auto-hide-message">
-                                    {{ payment_response.error }}
-                                    {% if payment_response.details %}
-                                        <br>{{ payment_response.details }}
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                            {% if payment_response.message %}
-                                <div class="alert alert-success text-center auto-hide-message">
-                                    {{ payment_response.message }}
-                                </div>
-                            {% endif %}
-                            {% if payment_response.paybill_instructions %}
-                                <div class="alert alert-info text-center mt-2 auto-hide-message">
-                                    {{ payment_response.paybill_instructions }}<br>
-                                    <strong>Paybill:</strong> {{ payment_response.paybill }}<br>
-                                    <strong>Account Number:</strong> {{ payment_response.account_reference }}<br>
-                                    <strong>Amount:</strong> Ksh {{ payment_response.amount }}
-                                </div>
-                            {% endif %}
-                        {% endif %}
-
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <div class="form-group mpesa-form-group">
-                                <label for="phone">Mpesa Phone Number</label>
-                                <input type="text" class="form-control" id="phone" name="phone_number"
-                                       placeholder="e.g. 2547XXXXXXXX"
-                                       pattern="2547[0-9]{8}" maxlength="12" required>
-                                <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
-                            </div>
-                           <div class="form-group mpesa-form-group">
-    <label for="amount">Amount to Pay</label>
-    <input type="number" class="form-control" id="amount" name="amount"
-           value="{{ grand_total }}" min="1" required>
-    <small class="form-text text-muted">Enter the amount you wish to pay.</small>
-</div>
-                            <button type="submit" class="btn btn-success btn-block">
-                                <i class="fa fa-mobile"></i> Pay Now
-                            </button>
-                        </form>
-                        <hr>
-                        <p class="text-center mpesa-instructions">
-                            You will receive an Mpesa prompt on your phone to complete the payment.
-                        </p>
-                        <div class="text-center">
-                            <a href="{% url 'checkout' %}" class="mpesa-back-link">Back to Checkout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="mpesa-wrap" aria-labelledby="mpesa-title">
+  <div class="mpesa-card" role="region" aria-label="Mpesa payment card">
+    <div class="mpesa-header">
+      <img src="{% static 'images/mpesa-logo.jpg' %}" alt="M-Pesa">
+      <h3 id="mpesa-title" style="margin:0;font-size:1.15rem">Pay with M-Pesa</h3>
+      <p style="margin:6px 0 0;font-size:0.95rem;opacity:.95">Secure payment via Safaricom M-Pesa</p>
     </div>
+
+    <div class="mpesa-body">
+      <div class="mpesa-order-no">Order No: <span id="order-no">{{ order.order_number }}</span></div>
+
+      <div class="alerts" id="alerts" aria-live="polite"></div>
+
+      {% if payment_response %}
+        {% if payment_response.error %}
+          <div class="alert alert-error">{{ payment_response.error }}{% if payment_response.details %} — {{ payment_response.details }}{% endif %}</div>
+        {% endif %}
+        {% if payment_response.message %}
+          <div class="alert alert-success">{{ payment_response.message }}</div>
+        {% endif %}
+        {% if payment_response.paybill_instructions %}
+          <div class="alert alert-success">
+            {{ payment_response.paybill_instructions }}<br>
+            <strong>Paybill:</strong> {{ payment_response.paybill }} &nbsp; <strong>Account:</strong> {{ payment_response.account_reference }}<br>
+            <strong>Amount:</strong> Ksh {{ payment_response.amount }}
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <form id="mpesa-form" method="POST" action="">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="phone">Mpesa Phone number</label>
+          <input id="phone" name="phone_number" class="form-control" inputmode="numeric" pattern="2547[0-9]{8}" maxlength="12" placeholder="2547XXXXXXXX" required value="{{ request.user.phone_number|default:'' }}">
+          <small class="mpesa-note">Enter number in format 2547XXXXXXXX. We will send STK push to this number.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount (Ksh)</label>
+          <input id="amount" name="amount" class="form-control" type="number" min="1" step="1" required value="{{ grand_total|default:total|default:0 }}">
+        </div>
+
+        <button id="pay-btn" class="btn-pay" type="submit" aria-live="polite">
+          <span id="pay-text"><i class="fa fa-mobile-alt" aria-hidden="true"></i> Pay Now</span>
+        </button>
+      </form>
+
+      <p class="mpesa-note">You will receive a prompt on your phone to confirm the payment. Do not close this page until payment completes.</p>
+
+      <div style="text-align:center;margin-top:12px">
+        <a href="{% url 'checkout' %}" style="color:#0a8f2a;font-weight:600;text-decoration:none">Back to Checkout</a>
+      </div>
+    </div>
+  </div>
 </section>
+
 <script>
-    // Hide messages after 2 minutes (120,000 milliseconds)
-    setTimeout(function() {
-        document.querySelectorAll('.auto-hide-message').forEach(function(el) {
-            el.style.display = 'none';
-        });
-    }, 120000);
+(function () {
+  const form = document.getElementById('mpesa-form');
+  const payBtn = document.getElementById('pay-btn');
+  const payText = document.getElementById('pay-text');
+  const alerts = document.getElementById('alerts');
+  const orderNo = document.getElementById('order-no') ? document.getElementById('order-no').textContent.trim() : '';
+
+  function showAlert(text, type='success', timeout=120000) {
+    const div = document.createElement('div');
+    div.className = 'alert ' + (type === 'error' ? 'alert-error' : 'alert-success');
+    div.textContent = text;
+    alerts.innerHTML = '';
+    alerts.appendChild(div);
+    if (timeout) setTimeout(() => { if (div.parentNode) div.remove(); }, timeout);
+  }
+
+  function getCookie(name) {
+    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    // simple client validations
+    const phone = form.phone_number.value.trim();
+    const amount = form.amount.value.trim();
+    if (!/^2547\d{8}$/.test(phone)) {
+      showAlert('Phone number must be in format 2547XXXXXXXX', 'error');
+      return;
+    }
+    if (!amount || parseInt(amount,10) <= 0) {
+      showAlert('Please enter a valid amount', 'error');
+      return;
+    }
+
+    // UI feedback
+    payBtn.disabled = true;
+    payText.innerHTML = '<span class="loader-inline" aria-hidden="true"></span> Sending...';
+
+    try {
+      const data = new FormData(form);
+      const resp = await fetch(form.action || window.location.href, {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+      });
+
+      if (resp.redirected) {
+        window.location.href = resp.url;
+        return;
+      }
+
+      // expect JSON { success: true/false, message: "...", order_number: "..." }
+      const json = await resp.json().catch(()=>null);
+      if (json) {
+        if (json.success) {
+          showAlert(json.message || 'Payment request sent. Confirm on your phone.', 'success', 180000);
+          // if server returned an order_number or status URL redirect to placeOrder/<order_number> when provided
+          if (json.order_number) {
+            // redirect to placeOrder page for the order
+            const base = '{% url "placeOrder" %}';
+            const url = base.endsWith('/') ? base + encodeURIComponent(json.order_number) + '/' : base + '/' + encodeURIComponent(json.order_number) + '/';
+            // small delay to let user read message
+            setTimeout(() => { window.location.href = url; }, 1400);
+            return;
+          }
+          // optionally poll payment status if server provides status_url
+          if (json.status_url) {
+            pollStatus(json.status_url);
+            return;
+          }
+        } else {
+          showAlert(json.message || 'Payment request failed', 'error');
+        }
+      } else {
+        // fallback: show HTML response if any
+        const text = await resp.text();
+        showAlert('Server response received. Please follow instructions.', 'success');
+        // optionally replace content — skip to avoid breaking experience
+        console.log('non-json response', text.slice(0,200));
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert('Network error. Try again.', 'error');
+    } finally {
+      payBtn.disabled = false;
+      payText.innerHTML = '<i class="fa fa-mobile-alt" aria-hidden="true"></i> Pay Now';
+    }
+  });
+
+  // optional polling helper
+  async function pollStatus(url, attempts = 12, interval = 3000) {
+    try {
+      for (let i=0;i<attempts;i++) {
+        const resp = await fetch(url, { credentials: 'same-origin', headers: {'X-Requested-With':'XMLHttpRequest'} });
+        if (resp.ok) {
+          const j = await resp.json().catch(()=>null);
+          if (j && j.status) {
+            if (j.status === 'success') {
+              showAlert(j.message || 'Payment received', 'success', 30000);
+              // if returned order_number, redirect to placeOrder/ORDER_NO/
+              if (j.order_number) {
+                const base = '{% url "placeOrder" %}';
+                const url = base.endsWith('/') ? base + encodeURIComponent(j.order_number) + '/' : base + '/' + encodeURIComponent(j.order_number) + '/';
+                setTimeout(()=> window.location.href = url, 900);
+                return;
+              }
+              return;
+            } else if (j.status === 'failed') {
+              showAlert(j.message || 'Payment failed', 'error', 60000);
+              return;
+            } // else pending -> continue polling
+          }
+        }
+        await new Promise(r => setTimeout(r, interval));
+      }
+      showAlert('Payment still pending. Check your phone or contact support.', 'error', 60000);
+    } catch (e) {
+      console.error('poll error', e);
+    }
+  }
+})();
 </script>
 {% endblock %}
