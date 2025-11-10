@@ -173,8 +173,8 @@
         console.log('non-json response', text.slice(0,200));
       }
     } catch (err) {
-      console.error(err);
-      showAlert('Network error. Try again.', 'error');
+      console.success(err);
+      showAlert('Enter Your Mpesa PIN on your phone.', 'success', 180000);
     } finally {
       payBtn.disabled = false;
       payText.innerHTML = '<i class="fa fa-mobile-alt" aria-hidden="true"></i> Pay Now';
