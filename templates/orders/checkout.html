@@ -120,8 +120,8 @@ textarea { min-height:110px; resize:vertical; }
     <!-- Checkout Form -->
     <section class="card">
       <h2 style="margin:0 0 8px 0;font-size:16px">Shipping & Contact</h2>
-      <form id="checkout-form" action="{% url 'placeOrder' %}" method="POST"></form>
-        {% csrf_token %}
+     <form action="{% url 'placeOrder' %}" method="POST">
+      {% csrf_token %}
         <div class="form-grid" style="margin-top:12px;">
           <div class="field">
             <label for="first_name">First name</label>
