@@ -127,7 +127,10 @@
 
     // UI feedback
     payBtn.disabled = true;
-    payText.innerHTML = '<span class="loader-inline" aria-hidden="true"></span> Sending...';
+    payText.innerHTML = '<span class="loader-inline" aria-hidden="true"></span> Sending STK Push....';
+    alerts.innerHTML = '';
+
+
 
     try {
       const data = new FormData(form);
