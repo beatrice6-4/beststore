@@ -1,122 +1,119 @@
+
 {% extends 'gov.html' %}
 {% block page_title %}Registered Groups{% endblock %}
 {% block breadcrumb %}Registered Groups{% endblock %}
 {% load static %}
 {% block content %}
-<style>
-    body {
-        background: #f7f8fa;
-    }
-    .group-list-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-    }
-    .group-list-header h2 {
-        color: #4e54c8;
-        font-weight: 700;
-        margin: 0;
-        font-size: 2rem;
-        letter-spacing: 1px;
-    }
-    .btn-secondary {
-        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-        border: none;
-        color: #fff;
-        font-weight: 600;
-        border-radius: 24px;
-        padding: 8px 28px;
-        transition: background 0.2s;
-        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-    }
-    .btn-secondary:hover {
-        background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
-        color: #fff;
-    }
-    .table {
-        background: #fff;
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-    }
-    .table thead th {
-        background: #f3f3fa;
-        color: #4e54c8;
-        font-weight: 700;
-        border-bottom: 2px solid #e0e0ef;
-        font-size: 1.08em;
-    }
-    .table-striped tbody tr:nth-of-type(odd) {
-        background: #f7f8fa;
-    }
-    .table-bordered th, .table-bordered td {
-        border: 1px solid #e0e0ef !important;
-    }
-    .btn-sm {
-        border-radius: 18px;
-        font-size: 0.98em;
-        padding: 4px 16px;
-        margin-right: 6px;
-    }
-    .btn-primary {
-        background: #4e54c8;
-        border: none;
-    }
-    .btn-primary:hover {
-        background: #8f94fb;
-    }
-    .btn-danger {
-        background: #e74c3c;
-        border: none;
-    }
-    .btn-danger:hover {
-        background: #c0392b;
-    }
-    @media (max-width: 700px) {
-        .group-list-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        .table {
-            font-size: 0.98em;
-        }
-    }
-</style>
-<div class="group-list-header">
-    <h2><i class="fa fa-users me-2"></i>Registered Groups</h2>
-    <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addGroupModal">
-    <i class="fa fa-plus"></i> Add Group
-</button>
+...existing code...
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="h3 mb-0 text-primary"><i class="fa fa-users me-2"></i> Registered Groups</h1>
+      <small class="text-muted">Manage community groups registered in the system</small>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary d-none d-md-inline" id="clear-filter">Clear</button>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+        <i class="fa fa-plus me-1"></i> Add Group
+      </button>
+    </div>
+  </div>
+
+  <div class="row mb-3 g-2 align-items-center">
+    <div class="col-sm-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fa fa-search"></i></span>
+        <input id="group-search" type="search" class="form-control" placeholder="Search groups by name or description">
+      </div>
+    </div>
+    <div class="col-sm-6 text-sm-end">
+      <small class="text-muted me-2">Show</small>
+      <select id="page-size" class="form-select d-inline-block w-auto">
+        <option value="10" {% if request.GET.page_size == "10" %}selected{% endif %}>10</option>
+        <option value="25" {% if request.GET.page_size == "25" %}selected{% endif %}>25</option>
+        <option value="50" {% if request.GET.page_size == "50" %}selected{% endif %}>50</option>
+      </select>
+      <small class="text-muted ms-2">entries</small>
+    </div>
+  </div>
+
+  <div class="table-responsive shadow-sm rounded bg-white">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Registration Date</th>
+          <th scope="col">Description</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="groups-table-body">
+      {% if groups %}
+        {% for group in groups %}
+        <tr>
+          <td class="align-middle">{{ group.name }}</td>
+          <td class="align-middle">{{ group.registration_date|date:"M j, Y" }}</td>
+          <td class="align-middle text-truncate" style="max-width:420px;">{{ group.description }}</td>
+          <td class="align-middle text-end">
+            <a href="{% url 'cdmis:group_members' group.pk %}" class="btn btn-sm btn-info me-1" title="Members">
+              <i class="fa fa-user-friends"></i>
+            </a>
+            <a href="{% url 'cdmis:group_edit' group.pk %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+              <i class="fa fa-edit"></i>
+            </a>
+            <form action="{% url 'cdmis:group_delete' group.pk %}" method="post" class="d-inline" onsubmit="return confirm('Delete group {{ group.name }}?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                <i class="fa fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="4" class="text-center py-4 text-muted">No groups found.</td>
+        </tr>
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+  <nav aria-label="Groups pagination" class="mt-3">
+    <ul class="pagination justify-content-center mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}" aria-label="Previous">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+
+      {% for num in paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}" aria-label="Next">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 </div>
-<table id="dt-role" class="table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Registration Date</th>
-            <th>Description</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for group in groups %}
-        <tr>
-            <td>{{ group.name }}</td>
-            <td>{{ group.registration_date }}</td>
-            <td>{{ group.description }}</td>
-            <td>
-                <a href="{% url 'cdmis:group_edit' group.pk %}" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{% url 'cdmis:group_delete' group.pk %}" class="btn btn-sm btn-danger"
-                   onclick="return confirm('Are you sure you want to delete this group?');">Delete</a>
-                <a href="{% url 'cdmis:group_members' group.pk %}" class="btn btn-sm btn-info">Members</a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+
+<!-- Add Group Modal -->
 <div class="modal fade" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <form method="post" action="{% url 'cdmis:group_create' %}">
         {% csrf_token %}
@@ -125,41 +122,62 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          {{ form.as_p }}
+          {{ form.non_field_errors }}
+          <div class="mb-2">
+            <label class="form-label">Group name</label>
+            {{ form.name }}
+            {% if form.name.help_text %}<div class="form-text">{{ form.name.help_text }}</div>{% endif %}
+            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors|striptags }}</div>{% endif %}
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Registration date</label>
+            {{ form.registration_date }}
+            {% if form.registration_date.help_text %}<div class="form-text">{{ form.registration_date.help_text }}</div>{% endif %}
+            {% if form.registration_date.errors %}<div class="text-danger small">{{ form.registration_date.errors|striptags }}</div>{% endif %}
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Description</label>
+            {{ form.description }}
+            {% if form.description.help_text %}<div class="form-text">{{ form.description.help_text }}</div>{% endif %}
+            {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors|striptags }}</div>{% endif %}
+          </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Group</button>
         </div>
       </form>
     </div>
   </div>
 </div>
-{% if is_paginated %}
-<nav aria-label="Group pagination" class="mt-3">
-  <ul class="pagination">
-    {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">Previous</span></li>
-    {% endif %}
-    {% for num in paginator.page_range %}
-      {% if page_obj.number == num %}
-        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-      {% else %}
-        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-      {% endif %}
-    {% endfor %}
-    {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">Next</span></li>
-    {% endif %}
-  </ul>
-</nav>
-{% endif %}
+
+<script>
+(function(){
+  // simple client-side filtering for the visible table (no server changes)
+  const search = document.getElementById('group-search');
+  const tbody = document.getElementById('groups-table-body');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const clearBtn = document.getElementById('clear-filter');
+  if (search) {
+    search.addEventListener('input', function () {
+      const q = this.value.trim().toLowerCase();
+      rows.forEach(r=>{
+        const text = r.innerText.toLowerCase();
+        r.style.display = q && !text.includes(q) ? 'none' : '';
+      });
+    });
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function(){
+      search.value = '';
+      search.dispatchEvent(new Event('input'));
+    });
+  }
+
+  // add bootstrap classes to form fields if not present
+  document.querySelectorAll('#addGroupModal form input, #addGroupModal form textarea, #addGroupModal form select').forEach(el=>{
+    if (!el.classList.contains('form-control')) el.classList.add('form-control');
+  });
+})();
+</script>
 {% endblock %}
