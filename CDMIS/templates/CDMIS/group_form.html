@@ -1,71 +1,189 @@
+
 {% extends 'gov.html' %}
 {% block page_title %}Add Group{% endblock %}
 {% block breadcrumb %}Add Group{% endblock %}
 {% load static %}
 {% block content %}
 <style>
-    .group-form-container {
-        max-width: 540px;
-        margin: 40px auto;
+    .group-form-wrapper {
+        max-width: 720px;
+        margin: 32px auto;
+        padding: 22px;
+    }
+    .group-card {
         background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(44,62,80,0.10);
-        padding: 36px 32px 28px 32px;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(44,62,80,0.06);
+        overflow: hidden;
     }
-    .group-form-title {
-        color: #4e54c8;
-        font-weight: 700;
-        margin-bottom: 28px;
-        text-align: center;
-        letter-spacing: 1px;
+    .group-card .card-header {
+        padding: 20px 24px;
+        background: linear-gradient(90deg,#4e54c8 0%, #8f94fb 100%);
+        color: #fff;
     }
-    .form-label {
-        color: #4e54c8;
-        font-weight: 600;
+    .group-card .card-body {
+        padding: 24px;
     }
-    .form-control, .form-select {
-        border-radius: 10px;
-        border: 1px solid #e0e0ef;
-        box-shadow: none;
-        transition: border-color 0.2s;
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
     }
-    .form-control:focus, .form-select:focus {
-        border-color: #4e54c8;
-        box-shadow: 0 0 0 0.1rem #4e54c855;
+    @media (max-width:720px) {
+        .form-row { grid-template-columns: 1fr; }
     }
-    .btn-primary {
-        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-        border: none;
-        border-radius: 24px;
-        font-weight: 600;
-        padding: 10px 36px;
-        margin-top: 12px;
-        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        transition: background 0.2s;
+    label.form-label {
+        display:block;
+        font-weight:600;
+        color:#2f2f7a;
+        margin-bottom:8px;
+        font-size:0.95rem;
     }
-    .btn-primary:hover {
-        background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+    input.form-control, textarea.form-control {
+        width:100%;
+        padding:10px 12px;
+        border-radius:10px;
+        border:1px solid #e6e7fb;
+        background:#fcfcff;
+        box-sizing:border-box;
+        transition: box-shadow .12s, border-color .12s;
+        font-size:0.95rem;
     }
+    input.form-control:focus, textarea.form-control:focus {
+        outline:none;
+        border-color:#4e54c8;
+        box-shadow:0 8px 20px rgba(78,84,200,0.06);
+    }
+    .field-help { font-size:0.85rem; color:#6b6fb0; margin-top:6px; }
+    .field-errors { margin-top:8px; color:#b00020; font-size:0.875rem; }
+    .actions {
+        display:flex;
+        gap:12px;
+        justify-content:flex-end;
+        align-items:center;
+        margin-top:18px;
+    }
+    .btn-save {
+        background: linear-gradient(90deg,#4e54c8 0%, #6f78f9 100%);
+        color:#fff;
+        border:0;
+        padding:10px 20px;
+        border-radius:12px;
+        font-weight:700;
+        cursor:pointer;
+    }
+    .btn-cancel {
+        background:transparent;
+        color:#4e54c8;
+        border:1px solid #e9e9ff;
+        padding:10px 18px;
+        border-radius:12px;
+        cursor:pointer;
+    }
+    .hint { font-size:0.85rem; color:#707090; margin-bottom:12px; text-align:center; }
+    .char-count { font-size:0.8rem; color:#8a8fb8; text-align:right; margin-top:6px; }
 </style>
-<div class="group-form-container">
-    <h2 class="group-form-title">Add Group</h2>
-    <form method="post">
+
+<div class="group-form-wrapper">
+  <div class="group-card" role="region" aria-labelledby="group-form-title">
+    <div class="card-header">
+      <h2 id="group-form-title" style="margin:0;font-size:1.2rem">Create new group</h2>
+    </div>
+
+    <div class="card-body">
+      <p class="hint">Provide a clear name and description for the group. Registration date defaults to today if left blank.</p>
+
+      <form id="group-form" method="post" novalidate>
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="{{ form.name.id_for_label }}" class="form-label">Group name <span aria-hidden="true" style="color:#b00020">*</span></label>
             {{ form.name }}
-        </div>
-        <div class="mb-3">
-            <label for="{{ form.registration_date.id_for_label }}" class="form-label">Registration Date</label>
+            {% if form.name.help_text %}
+              <div class="field-help">{{ form.name.help_text }}</div>
+            {% endif %}
+            {% if form.name.errors %}
+              <div class="field-errors" role="alert">{{ form.name.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.registration_date.id_for_label }}" class="form-label">Registration date</label>
             {{ form.registration_date }}
+            {% if form.registration_date.help_text %}
+              <div class="field-help">{{ form.registration_date.help_text }}</div>
+            {% endif %}
+            {% if form.registration_date.errors %}
+              <div class="field-errors" role="alert">{{ form.registration_date.errors|striptags }}</div>
+            {% endif %}
+          </div>
         </div>
-        <div class="mb-3">
-            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-            {{ form.description }}
+
+        <div style="margin-top:14px;">
+          <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+          {{ form.description }}
+          <div class="char-count" id="desc-count">0 / 800</div>
+          {% if form.description.help_text %}
+            <div class="field-help">{{ form.description.help_text }}</div>
+          {% endif %}
+          {% if form.description.errors %}
+            <div class="field-errors" role="alert">{{ form.description.errors|striptags }}</div>
+          {% endif %}
         </div>
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Save Group</button>
+
+        <div class="actions">
+          <a href="{% url 'groups:list' %}" class="btn-cancel" role="button">Cancel</a>
+          <button type="submit" class="btn-save" id="save-btn">Save Group</button>
         </div>
-    </form>
+      </form>
+    </div>
+  </div>
 </div>
+
+<script>
+(function(){
+  const form = document.getElementById('group-form');
+  if (!form) return;
+
+  // Add consistent classes to Django-rendered widgets
+  Array.from(form.querySelectorAll('input, textarea, select')).forEach(el=>{
+    if (!el.classList.contains('form-control')) el.classList.add('form-control');
+  });
+
+  // Ensure registration_date uses date input where supported
+  const regField = form.querySelector('[name$="registration_date"]');
+  if (regField && regField.type !== 'date') {
+    try { regField.type = 'date'; } catch(e) {}
+  }
+
+  // Character counter for description
+  const desc = form.querySelector('[name$="description"]');
+  const counter = document.getElementById('desc-count');
+  const max = 800;
+  if (desc) {
+    desc.setAttribute('maxlength', max);
+    const update = ()=> { counter.textContent = desc.value.length + ' / ' + max; };
+    desc.addEventListener('input', update);
+    update();
+  }
+
+  // Prevent double submit & client-side required checks
+  const saveBtn = document.getElementById('save-btn');
+  form.addEventListener('submit', function(e){
+    // basic client validation: required inputs
+    const requiredMissing = Array.from(form.querySelectorAll('[required]')).some(i => !i.value.trim());
+    if (requiredMissing) {
+      e.preventDefault();
+      alert('Please fill the required fields.');
+      return;
+    }
+    // disable button to avoid double submits
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+    }
+  });
+})();
+</script>
 {% endblock %}
