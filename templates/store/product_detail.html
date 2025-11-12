@@ -826,8 +826,7 @@ function toggleWishlist(productId) {
     const isAdded = btn.classList.contains('added');
     
     const url = isAdded 
-        ? `{% url 'remove_from_wishlist' 0 %}`.replace('0', productId)
-        : `{% url 'add_to_wishlist' 0 %}`.replace('0', productId);
+     
     
     fetch(url, {
         method: 'POST',
