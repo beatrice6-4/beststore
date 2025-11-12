@@ -671,25 +671,6 @@
                     </span>
                     <h1 class="product-title">{{ single_product.product_name }}</h1>
 
-                    <!-- Rating -->
-                    <div class="product-rating">
-                        <div class="stars">
-                            {% for i in "x"|rjust:"5" %}
-                               
-                                    <i class="fas fa-star"></i>
-                                {% elif forloop.counter0 < single_product.averageReview|add:"1" and single_product.averageReview|remainder:"1" >= 0.5 %}
-                                    <i class="fas fa-star-half-alt"></i>
-                                {% else %}
-                                    <i class="far fa-star"></i>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <span class="rating-text">
-                            {{ single_product.averageReview|floatformat:1 }} / 5.0
-                            ({{ single_product.countReview }} reviews)
-                        </span>
-                    </div>
-                </div>
 
                 <!-- Pricing -->
                 <div class="product-pricing">
