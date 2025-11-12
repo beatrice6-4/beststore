@@ -5,729 +5,198 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="CDMIS Management System - Community Development & Management">
-    <meta name="theme-color" content="#198754">
-    <title>{% block title %}Dashboard | CDMIS Management{% endblock %}</title>
-    
-    <!-- Favicon -->
+    <title>{% block title %}User Dashboard | CDMIS MANAGEMENT{% endblock %}</title>
+    <link rel="stylesheet" href="/static/vendor/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="/static/vendor/adminlte/css/adminlte.min.css">
+    <link rel="stylesheet" href="/static/jazzmin/css/main.css">
     <link rel="shortcut icon" href="{% static 'images/gov.png' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/gov.png' %}" sizes="32x32" type="image/png">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
-    <style>
-        :root {
-            --primary: #198754;
-            --primary-dark: #145c32;
-            --primary-light: #e8f5e9;
-            --secondary: #004080;
-            --accent: #FF6B35;
-            --light-bg: #f8f9fa;
-            --border-color: #e9ecef;
-            --text-dark: #1a1a1a;
-            --text-muted: #6c757d;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fa;
-            color: var(--text-dark);
-            min-height: 100vh;
-        }
-
-        /* ============ WRAPPER ============ */
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        /* ============ NAVBAR ============ */
-        .main-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            box-shadow: var(--shadow-md);
-            padding: 0.75rem 1.5rem;
-            color: #fff;
-            position: sticky;
-            top: 0;
-            z-index: 1030;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #fff !important;
-            text-decoration: none;
-        }
-
-        .navbar-brand img {
-            height: 36px;
-            width: auto;
-        }
-
-        .nav-link {
-            color: rgba(255,255,255,0.8) !important;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nav-link:hover {
-            color: #fff !important;
-        }
-
-        .navbar-nav {
-            gap: 12px;
-        }
-
-        /* ============ MAIN CONTAINER ============ */
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* ============ SIDEBAR ============ */
-        .main-sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
-            box-shadow: var(--shadow-lg);
-            overflow-y: auto;
-            position: fixed;
-            height: calc(100vh - 56px);
-            top: 56px;
-            left: 0;
-            z-index: 900;
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar-brand {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .sidebar-brand img {
-            height: 44px;
-            width: auto;
-        }
-
-        .sidebar-brand-text {
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.95rem;
-            line-height: 1.3;
-        }
-
-        .user-panel {
-            padding: 1rem 1.5rem;
-            background: rgba(25,135,84,0.1);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin: 0;
-        }
-
-        .user-panel-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #fff;
-        }
-
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 1.2rem;
-        }
-
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-info .username {
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: block;
-            color: #fff;
-        }
-
-        .user-info .role {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.7);
-        }
-
-        /* ============ SIDEBAR MENU ============ */
-        .sidebar-menu {
-            list-style: none;
-            padding: 1rem 0;
-        }
-
-        .sidebar-menu .nav-item {
-            margin: 0;
-        }
-
-        .sidebar-menu .nav-link {
-            color: rgba(255,255,255,0.7);
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            font-size: 0.95rem;
-        }
-
-        .sidebar-menu .nav-link:hover {
-            color: #fff;
-            background: rgba(25,135,84,0.1);
-            padding-left: 1.75rem;
-        }
-
-        .sidebar-menu .nav-link.active {
-            color: #fff;
-            background: linear-gradient(90deg, var(--primary) 0%, rgba(25,135,84,0.5) 100%);
-            border-left: 3px solid var(--accent);
-            padding-left: calc(1.5rem - 3px);
-        }
-
-        .sidebar-menu .nav-link i {
-            width: 20px;
-            text-align: center;
-        }
-
-        /* ============ CONTENT WRAPPER ============ */
-        .content-wrapper {
-            margin-left: 280px;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        .page-header {
-            background: #fff;
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .page-header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .page-title-section {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .page-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0;
-        }
-
-        .breadcrumb-nav {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .breadcrumb-nav a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .breadcrumb-nav a:hover {
-            text-decoration: underline;
-        }
-
-        /* ============ CONTENT AREA ============ */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        /* ============ ALERTS ============ */
-        .alert {
-            border: none;
-            border-radius: 10px;
-            box-shadow: var(--shadow-sm);
-            animation: slideInDown 0.3s ease;
-        }
-
-        .alert-success {
-            background: linear-gradient(135deg, #d1e7dd 0%, #c3e6cb 100%);
-            color: #0f5132;
-            border-left: 4px solid #198754;
-        }
-
-        .alert-error, .alert-danger {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            color: #842029;
-            border-left: 4px solid #dc3545;
-        }
-
-        .alert-warning {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            color: #664d03;
-            border-left: 4px solid #ffc107;
-        }
-
-        .alert-info {
-            background: linear-gradient(135deg, #cfe2ff 0%, #b6d4fe 100%);
-            color: #084298;
-            border-left: 4px solid #0dcaf0;
-        }
-
-        .btn-close {
-            background: transparent;
-            opacity: 0.7;
-        }
-
-        .btn-close:hover {
-            opacity: 1;
-        }
-
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ============ FOOTER ============ */
-        .main-footer {
-            background: #fff;
-            border-top: 1px solid var(--border-color);
-            padding: 1.5rem;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .main-footer strong {
-            color: var(--primary);
-        }
-
-        /* ============ DROPDOWN MENU ============ */
-        .dropdown-menu {
-            border: none;
-            box-shadow: var(--shadow-lg);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .dropdown-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: #fff;
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-        }
-
-        .dropdown-item {
-            padding: 0.75rem 1rem;
-            color: var(--text-dark);
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
-
-        .dropdown-item:hover {
-            background: var(--light-bg);
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
-
-        .dropdown-divider {
-            background: var(--border-color);
-            margin: 0.25rem 0;
-        }
-
-        /* ============ RESPONSIVE ============ */
-        @media (max-width: 768px) {
-            .main-sidebar {
-                transform: translateX(-100%);
-            }
-
-            .main-sidebar.show {
-                transform: translateX(0);
-            }
-
-            .content-wrapper {
-                margin-left: 0;
-            }
-
-            .content {
-                padding: 1rem;
-            }
-
-            .page-header-content {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .page-title {
-                font-size: 1.4rem;
-            }
-        }
-
-        /* ============ SCROLLBAR ============ */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(25,135,84,0.3);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(25,135,84,0.5);
-        }
-
-        /* ============ UTILITY CLASSES ============ */
-        .separator {
-            height: 1px;
-            background: var(--border-color);
-            margin: 1rem 0;
-        }
-
-        .text-muted {
-            color: var(--text-muted);
-        }
-
-        .text-primary {
-            color: var(--primary);
-        }
-    </style>
-    
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     {% block extra_head %}{% endblock %}
 </head>
+<body class="hold-transition sidebar-mini accent-primary theme-default">
+<div class="wrapper">
 
-<body>
-    <div class="wrapper">
-
-        <!-- ========================= NAVBAR ========================= -->
-        <nav class="main-header navbar navbar-expand-lg navbar-dark">
-            <div class="container-fluid">
-                <a href="{% url 'dashboard' %}" class="navbar-brand">
-                    <img src="{% static 'images/gov.png' %}" alt="Logo">
-                    <span>CDMIS Management</span>
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-tr"></i></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link btn" data-toggle="dropdown" href="#" title="{{ user.email }}">
+                    <i class="far fa-user"></i>
                 </a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-left">
+                    <span class="dropdown-header">Account</span>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-user mr-2"></i> Profile
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Log out
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+    <!-- /.navbar -->
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a href="{% url 'dashboard' %}" class="nav-link">
-                                <i class="fas fa-home"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i> {{ user.username|default:"Account" }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><span class="dropdown-header">{{ user.email }}</span></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-user mr-2"></i> Profile
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'change_password' %}">
-                                    <i class="fas fa-lock mr-2"></i> Change Password
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Log Out
-                                </a></li>
-                            </ul>
-                        </li>
-                    </ul>
+    <!-- Sidebar -->
+    <aside class="main-sidebar elevation-4 sidebar-dark-primary">
+        <a href="{% url 'dashboard' %}" class="brand-link">
+            <img src="{% static 'images/gov.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3" style="opacity: .8">
+            <span class="brand-text font-weight-light">CDMIS MANAGEMENT</span>
+        </a>
+        <div class="sidebar">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <i class="fas fa-user-circle fa-2x text-white"></i>
+                </div>
+                <div class="info">
+                    <a href="{% url 'profile' %}" class="d-block">{{ user.username }}</a>
                 </div>
             </div>
-        </nav>
-        <!-- /.navbar -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-th-large"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:group_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Community groups</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:requirements' %}" class="nav-link">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>Group requirements</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:training_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                            <p>Trainings</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+    <a href="{% url 'cdmis:withdraw_funds' %}" class="nav-link">
+        <i class="nav-icon fas fa-money-bill-wave"></i>
+        <p>Withdraw Funds</p>
+    </a>
+</li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:payment_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                            <p>Payments</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:finance' %}" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line"></i>
+                            <p>Financials</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:reports' %}" class="nav-link">
+                            <i class="nav-icon fas fa-file-alt"></i>
+                            <p>Reports</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:updates' %}" class="nav-link">
+                            <i class="nav-icon fas fa-bullhorn"></i>
+                            <p>Updates</p>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'cdmis:docs' %}" class="nav-link">
+                            <i class="nav-icon fas fa-file"></i>
+                            <p>Docs</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'profile' %}" class="nav-link">
+                            <i class="nav-icon fas fa-user"></i>
+                            <p>Profile</p>
+                    </li>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+    <!-- /.sidebar -->
 
-        <div class="main-container">
-
-            <!-- ========================= SIDEBAR ========================= -->
-            <aside class="main-sidebar">
-                <div class="sidebar-brand">
-                    <img src="{% static 'images/gov.png' %}" alt="Logo">
-                    <span class="sidebar-brand-text">CDMIS</span>
-                </div>
-
-                <div class="user-panel">
-                    <div class="user-panel-item">
-                        <div class="user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="user-info">
-                            <span class="username">{{ user.get_full_name|default:user.username }}</span>
-                            <span class="role">Community Manager</span>
-                        </div>
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <div class="content border-bottom mb-2">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 col-md-auto d-flex flex-grow-1 align-items-center">
+                        <h1 class="h4 m-0 pr-3 mr-3 border-right">{% block page_title %}Dashboard{% endblock %}</h1>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item">{% block breadcrumb %}Dashboard{% endblock %}</li>
+                        </ol>
                     </div>
                 </div>
-
-                <nav class="mt-2">
-                    <ul class="sidebar-menu list-unstyled">
-                        <!-- Dashboard -->
-                        <li class="nav-item">
-                            <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                                <i class="fas fa-th-large"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-
-                        <!-- Community Groups -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:group_list' %}" class="nav-link {% if 'group' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-users"></i>
-                                <span>Community Groups</span>
-                            </a>
-                        </li>
-
-                        <!-- Requirements -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:requirements' %}" class="nav-link {% if 'requirements' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-tasks"></i>
-                                <span>Requirements</span>
-                            </a>
-                        </li>
-
-                        <!-- Training -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:training_list' %}" class="nav-link {% if 'training' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-chalkboard-teacher"></i>
-                                <span>Trainings</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item"><div class="separator"></div></li>
-
-                        <!-- Finance Section -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:withdraw_funds' %}" class="nav-link {% if 'withdraw' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <span>Withdraw Funds</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:payment_list' %}" class="nav-link {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-credit-card"></i>
-                                <span>Payments</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:finance' %}" class="nav-link {% if 'finance' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-chart-line"></i>
-                                <span>Financials</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item"><div class="separator"></div></li>
-
-                        <!-- Reports -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:reports' %}" class="nav-link {% if 'reports' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-file-alt"></i>
-                                <span>Reports</span>
-                            </a>
-                        </li>
-
-                        <!-- Updates -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:updates' %}" class="nav-link {% if 'updates' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-bullhorn"></i>
-                                <span>Updates</span>
-                            </a>
-                        </li>
-
-                        <!-- Documentation -->
-                        <li class="nav-item">
-                            <a href="{% url 'cdmis:docs' %}" class="nav-link {% if 'docs' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-book"></i>
-                                <span>Documentation</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item"><div class="separator"></div></li>
-
-                        <!-- Settings -->
-                        <li class="nav-item">
-                            <a href="{% url 'profile' %}" class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="fas fa-cog"></i>
-                                <span>Settings</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </aside>
-            <!-- /.sidebar -->
-
-            <!-- ========================= CONTENT WRAPPER ========================= -->
-            <div class="content-wrapper">
-
-                <!-- Page Header -->
-                <div class="page-header">
-                    <div class="page-header-content">
-                        <div class="page-title-section">
-                            <h1 class="page-title">
-                                {% block page_title %}Dashboard{% endblock %}
-                            </h1>
-                        </div>
-                        <nav class="breadcrumb-nav">
-                            <a href="{% url 'dashboard' %}">Home</a>
-                            <i class="fas fa-chevron-right"></i>
-                            <span>{% block breadcrumb %}Dashboard{% endblock %}</span>
-                        </nav>
-                    </div>
-                </div>
-
-                <!-- Messages Section -->
-                <div class="content">
-                    {% if messages %}
-                        <div class="mb-3">
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    <!-- Page Content -->
-                    {% block content %}{% endblock %}
-                </div>
-
-                <!-- Footer -->
-                <footer class="main-footer">
-                    <strong>&copy; 2025 CDMIS Management System</strong> | All rights reserved.
-                    <div style="margin-top: 0.5rem; font-size: 0.85rem;">
-                        Empowering Communities Through Effective Development Management
-                    </div>
-                </footer>
-
             </div>
-            <!-- /.content-wrapper -->
-
         </div>
 
+        <!-- Messages Section -->
+        <div class="container mt-3">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="content">
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        <footer class="main-footer text-center">
+            <strong>&copy; 2025 CDMIS MANAGEMENT</strong> All rights reserved.
+        </footer>
     </div>
-    <!-- /.wrapper -->
+    <!-- /.content-wrapper -->
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- jQuery (optional, for compatibility) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</div>
+<!-- ./wrapper -->
 
-    <!-- Custom Scripts -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Auto-dismiss success messages
-            const successAlerts = document.querySelectorAll('.alert-success');
-            successAlerts.forEach(alert => {
-                setTimeout(() => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 3000); // 3 seconds
-            });
+<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="/static/vendor/adminlte/js/adminlte.min.js"></script>
+<script src="/static/jazzmin/js/main.js"></script>
 
-            // Sidebar toggle for mobile
-            const toggler = document.querySelector('.navbar-toggler');
-            const sidebar = document.querySelector('.main-sidebar');
-            
-            if (toggler) {
-                toggler.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                });
-            }
-
-            // Close sidebar when clicking outside
-            document.addEventListener('click', function(e) {
-                if (window.innerWidth < 768) {
-                    if (!sidebar.contains(e.target) && !toggler.contains(e.target)) {
-                        sidebar.classList.remove('show');
-                    }
-                }
-            });
-
-            // Set active menu item based on current URL
-            const currentUrl = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentUrl) {
-                    link.classList.add('active');
-                }
-            });
+<!-- JavaScript to Auto-Dismiss Success Messages -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const alerts = document.querySelectorAll('.alert-success');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add('fade');
+                alert.classList.remove('show');
+            }, 2000); // 2 seconds
         });
-
-        // Smooth scroll behavior
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href !== '#' && document.querySelector(href)) {
-                    e.preventDefault();
-                    document.querySelector(href).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    </script>
-
-    {% block extra_js %}{% endblock %}
+    });
+</script>
 </body>
-
 </html>
