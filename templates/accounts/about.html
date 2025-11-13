@@ -3,74 +3,843 @@
 {% block breadcrumb %}About Us{% endblock %}
 {% load static %}
 
-
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>About Us - BestStore</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-            margin: 0;
-            padding: 0;
+<style>
+    :root {
+        --primary: #198754;
+        --primary-dark: #145c32;
+        --secondary: #004080;
+        --accent: #FF6B35;
+        --light-bg: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-dark: #1a1a1a;
+        --text-muted: #6c757d;
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    /* ============ PAGE WRAPPER ============ */
+    .about-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+        padding: 60px 0;
+    }
+
+    .about-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* ============ HERO SECTION ============ */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: #fff;
+        padding: 60px 40px;
+        border-radius: 16px;
+        margin-bottom: 60px;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .hero-section h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin: 0 0 16px 0;
+        line-height: 1.2;
+    }
+
+    .hero-section p {
+        font-size: 1.2rem;
+        margin: 0;
+        opacity: 0.95;
+        line-height: 1.6;
+    }
+
+    /* ============ CONTENT SECTION ============ */
+    .content-section {
+        background: #fff;
+        border-radius: 14px;
+        padding: 48px 40px;
+        margin-bottom: 40px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 24px 0;
+        padding-bottom: 16px;
+        border-bottom: 3px solid var(--primary);
+        display: inline-block;
+    }
+
+    .section-title i {
+        color: var(--primary);
+        margin-right: 12px;
+    }
+
+    .content-text {
+        font-size: 1rem;
+        color: var(--text-dark);
+        line-height: 1.8;
+        margin-bottom: 16px;
+    }
+
+    .content-text p {
+        margin: 0 0 16px 0;
+    }
+
+    .content-text p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ============ VALUES GRID ============ */
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 24px;
+        margin-top: 32px;
+    }
+
+    .value-card {
+        background: linear-gradient(135deg, rgba(25,135,84,0.05) 0%, rgba(0,64,128,0.05) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .value-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary);
+    }
+
+    .value-icon {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 16px;
+    }
+
+    .value-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+    }
+
+    .value-text {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ============ TEAM SECTION ============ */
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 32px;
+        margin-top: 32px;
+    }
+
+    .team-member {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .team-member:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .team-member-image {
+        width: 100%;
+        height: 240px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        color: #fff;
+    }
+
+    .team-member-info {
+        padding: 24px;
+    }
+
+    .team-member-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 8px 0;
+    }
+
+    .team-member-role {
+        font-size: 1rem;
+        color: var(--primary);
+        font-weight: 600;
+        margin: 0 0 12px 0;
+    }
+
+    .team-member-bio {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .team-member-socials {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    .social-link {
+        width: 36px;
+        height: 36px;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .social-link:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    /* ============ STATS SECTION ============ */
+    .stats-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-top: 32px;
+    }
+
+    .stat-box {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        padding: 32px 24px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-number {
+        font-size: 2.4rem;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+    }
+
+    .stat-label {
+        font-size: 0.95rem;
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    /* ============ FEATURES SECTION ============ */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+        margin-top: 32px;
+    }
+
+    .feature-card {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 28px 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-md);
+    }
+
+    .feature-icon {
+        font-size: 2.8rem;
+        color: var(--accent);
+        margin-bottom: 16px;
+    }
+
+    .feature-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 12px 0;
+    }
+
+    .feature-text {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ============ CTA SECTION ============ */
+    .cta-section {
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+        color: #fff;
+        padding: 48px 40px;
+        border-radius: 16px;
+        text-align: center;
+        margin-top: 60px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .cta-section h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+    }
+
+    .cta-section p {
+        font-size: 1.1rem;
+        margin: 0 0 24px 0;
+        opacity: 0.95;
+    }
+
+    .btn-cta {
+        display: inline-block;
+        padding: 14px 32px;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-cta:hover {
+        background: darken(var(--accent), 10%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(255,107,53,0.4);
+        text-decoration: none;
+        color: #fff;
+    }
+
+    /* ============ TIMELINE ============ */
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+        margin-top: 32px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 100%;
+        background: var(--border-color);
+    }
+
+    .timeline-item {
+        margin-bottom: 32px;
+        width: 50%;
+    }
+
+    .timeline-item:nth-child(odd) {
+        margin-left: 0;
+        text-align: right;
+        padding-right: 40px;
+    }
+
+    .timeline-item:nth-child(even) {
+        margin-left: 50%;
+        text-align: left;
+        padding-left: 40px;
+    }
+
+    .timeline-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .timeline-year {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+
+    .timeline-text {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 16px;
+        background: var(--primary);
+        border: 4px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px var(--primary);
+        top: 0;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 991px) {
+        .hero-section {
+            padding: 40px 24px;
         }
-        .about-container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: #52d859;
+
+        .hero-section h1 {
+            font-size: 2.2rem;
+        }
+
+        .content-section {
             padding: 32px 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        h1 {
-            color: #2d3748;
-            margin-bottom: 16px;
+
+        .section-title {
+            font-size: 1.6rem;
         }
-        p {
-            color: #4a5568;
-            line-height: 1.7;
+
+        .values-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
-        .team-section {
-            margin-top: 32px;
+
+        .timeline::before {
+            left: 15px;
         }
-        .team-member {
-            margin-bottom: 12px;
+
+        .timeline-item {
+            width: 100%;
+            padding-left: 50px !important;
+            text-align: left !important;
+            margin-left: 0 !important;
+            padding-right: 0 !important;
         }
-    </style>
-</head>
-<body>
+
+        .timeline-dot {
+            left: 0;
+            transform: translateX(0);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-section {
+            padding: 32px 16px;
+        }
+
+        .hero-section h1 {
+            font-size: 1.8rem;
+        }
+
+        .hero-section p {
+            font-size: 1rem;
+        }
+
+        .content-section {
+            padding: 24px 16px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+        }
+
+        .values-grid,
+        .team-grid,
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cta-section {
+            padding: 32px 16px;
+        }
+
+        .cta-section h2 {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+
+<div class="about-wrapper">
     <div class="about-container">
-        <h1>About BestStore</h1>
-        <p>
-            Welcome to BestStore! We are dedicated to providing you with the best online shopping experience.
-            Our mission is to offer high-quality products at competitive prices, backed by exceptional customer service.
-            We value integrity, transparency, and customer satisfaction above all else. We also strive to create a seamless and enjoyable shopping journey for all our customers.
-        </p>
-        <p>
-            Founded in 2024, BestStore has quickly grown into a trusted destination for shoppers seeking variety, value, and convenience.
-            We believe in making shopping easy, enjoyable, and secure for everyone.
-            Today, we continue to expand our product range and improve our services to meet the evolving needs of our customers.
-        </p>
-        <div class="team-section">
-            <h2>Our Team</h2>
-            <div class="team-member">
-                <strong>Bramwel Nyongesa</strong> – Developer & CEO
+
+        <!-- ========================= HERO SECTION ========================= -->
+        <div class="hero-section">
+            <h1>
+                <i class="fas fa-star"></i> Welcome to BestStore
+            </h1>
+            <p>Your trusted destination for quality products and exceptional shopping experience</p>
+        </div>
+
+        <!-- ========================= ABOUT SECTION ========================= -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i> About BestStore
+            </h2>
+            <div class="content-text">
+                <p>
+                    Welcome to BestStore! We are dedicated to providing you with the best online shopping experience. 
+                    Our mission is to offer high-quality products at competitive prices, backed by exceptional customer service.
+                </p>
+                <p>
+                    We value integrity, transparency, and customer satisfaction above all else. We strive to create a seamless 
+                    and enjoyable shopping journey for all our customers, ensuring that every interaction with BestStore is positive and rewarding.
+                </p>
+                <p>
+                    Founded in 2024, BestStore has quickly grown into a trusted destination for shoppers seeking variety, value, and convenience. 
+                    We believe in making shopping easy, enjoyable, and secure for everyone. Today, we continue to expand our product range and 
+                    improve our services to meet the evolving needs of our customers.
+                </p>
             </div>
-            <div class="team-member">
-                <strong>Diana Nambuchi</strong> – Director & Owner of the Company
-            </div>
-            <div class="team-member">
-                <strong>Assumpta Sikolia</strong> – Operations Manager
+
+            <!-- Core Values -->
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="value-title">Customer First</h3>
+                    <p class="value-text">Your satisfaction is our top priority. We listen to your feedback and continuously improve.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="value-title">Trust & Security</h3>
+                    <p class="value-text">We protect your data and ensure secure transactions for every purchase.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="value-title">Quality Products</h3>
+                    <p class="value-text">We carefully curate our collection to bring you the best quality items.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="value-title">Innovation</h3>
+                    <p class="value-text">We constantly innovate to improve our platform and services for you.</p>
+                </div>
             </div>
         </div>
-        <p style="margin-top:32px;">
-            Thank you for choosing BestStore. We look forward to serving you!
-        </p>
+
+        <!-- ========================= STATS SECTION ========================= -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i> Our Growth
+            </h2>
+            <div class="stats-section">
+                <div class="stat-box">
+                    <div class="stat-number">10K+</div>
+                    <p class="stat-label">Active Customers</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">5K+</div>
+                    <p class="stat-label">Products Listed</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">50K+</div>
+                    <p class="stat-label">Orders Completed</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">98%</div>
+                    <p class="stat-label">Customer Satisfaction</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================= FEATURES SECTION ========================= -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-check-circle"></i> Why Choose Us
+            </h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="feature-title">Fast Delivery</h3>
+                    <p class="feature-text">Quick and reliable shipping to your doorstep with real-time tracking.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h3 class="feature-title">Secure Payments</h3>
+                    <p class="feature-text">Multiple payment options with advanced security and encryption.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-undo"></i>
+                    </div>
+                    <h3 class="feature-title">Easy Returns</h3>
+                    <p class="feature-text">Hassle-free returns and exchanges within 30 days of purchase.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="feature-title">24/7 Support</h3>
+                    <p class="feature-text">Dedicated customer support team ready to help anytime.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <h3 class="feature-title">Best Prices</h3>
+                    <p class="feature-text">Competitive pricing with regular deals and discounts.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3 class="feature-title">Data Privacy</h3>
+                    <p class="feature-text">Your personal information is always protected and secure.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================= TIMELINE SECTION ========================= -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-history"></i> Our Journey
+            </h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2024 - Founded</div>
+                        <div class="timeline-text">BestStore was launched with a vision to revolutionize online shopping in Kenya.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2024 - Expansion</div>
+                        <div class="timeline-text">We expanded our product catalog and added thousands of items from trusted sellers.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2024 - 10K Users</div>
+                        <div class="timeline-text">Reached 10,000 active users and established ourselves as a trusted marketplace.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2024 - Present</div>
+                        <div class="timeline-text">Continuing to grow and serve our customers with excellence and innovation.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================= TEAM SECTION ========================= -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i> Meet Our Team
+            </h2>
+            <div class="team-grid">
+                <!-- Team Member 1 -->
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3 class="team-member-name">Bramwel Nyongesa</h3>
+                        <p class="team-member-role">Developer & CEO</p>
+                        <p class="team-member-bio">
+                            Tech visionary leading BestStore's development and innovation strategy. Passionate about creating seamless digital experiences.
+                        </p>
+                        <div class="team-member-socials">
+                            <a href="https://twitter.com" class="social-link" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="mailto:developer@beststore.com" class="social-link" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3 class="team-member-name">Diana Nambuchi</h3>
+                        <p class="team-member-role">Director & Company Owner</p>
+                        <p class="team-member-bio">
+                            Founder with a deep commitment to customer satisfaction and business excellence. Drives BestStore's strategic direction.
+                        </p>
+                        <div class="team-member-socials">
+                            <a href="https://twitter.com" class="social-link" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="mailto:dnambuchi@gmail.com" class="social-link" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3 class="team-member-name">Assumpta Sikolia</h3>
+                        <p class="team-member-role">Operations Manager</p>
+                        <p class="team-member-bio">
+                            Operations expert ensuring smooth day-to-day functioning. Focuses on efficiency and customer service excellence.
+                        </p>
+                        <div class="team-member-socials">
+                            <a href="https://twitter.com" class="social-link" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="mailto:operations@beststore.com" class="social-link" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================= CTA SECTION ========================= -->
+        <div class="cta-section">
+            <h2>Ready to Shop?</h2>
+            <p>Explore our amazing collection of products at unbeatable prices.</p>
+            <a href="{% url 'store' %}" class="btn-cta">
+                <i class="fas fa-shopping-bag me-2"></i> Start Shopping Now
+            </a>
+        </div>
+
+        <!-- ========================= CONTACT SECTION ========================= -->
+        <div class="content-section" style="text-align: center; margin-top: 40px;">
+            <h2 class="section-title">
+                <i class="fas fa-envelope"></i> Get In Touch
+            </h2>
+            <p class="content-text" style="max-width: 600px; margin: 20px auto;">
+                Have questions? We'd love to hear from you. Reach out to our team anytime.
+            </p>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
+                <div>
+                    <p style="margin: 0 0 8px 0; font-weight: 700;">Email</p>
+                    <a href="mailto:dnambuchi@gmail.com" style="color: var(--primary); text-decoration: none;">
+                        dnambuchi@gmail.com
+                    </a><br>
+                    <a href="mailto:bramwemwelwanyonyi2021@gmail.com" style="color: var(--primary); text-decoration: none;">
+                        bramwemwelwanyonyi2021@gmail.com
+                    </a>
+                </div>
+                <div>
+                    <p style="margin: 0 0 8px 0; font-weight: 700;">Support</p>
+                    <a href="{% url 'contact' %}" style="color: var(--primary); text-decoration: none;">
+                        <i class="fas fa-phone me-2"></i>Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
-</body>
-</html>
+</div>
+
+<script>
+    // Smooth scroll animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const elements = document.querySelectorAll('.hero-section, .content-section, .cta-section');
+        
+        elements.forEach((el, i) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                el.style.transition = 'all 0.6s ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, i * 100);
+        });
+
+        // Counter animation for stats
+        const numbers = document.querySelectorAll('.stat-number');
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        numbers.forEach(num => observer.observe(num));
+    });
+
+    function animateCounter(element) {
+        const finalValue = element.textContent;
+        const numericValue = parseInt(finalValue);
+        let currentValue = 0;
+        const increment = Math.ceil(numericValue / 30);
+
+        const counter = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= numericValue) {
+                element.textContent = finalValue;
+                clearInterval(counter);
+            } else {
+                element.textContent = currentValue + '+';
+            }
+        }, 50);
+    }
+</script>
+
 {% endblock %}
