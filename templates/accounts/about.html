@@ -147,11 +147,12 @@
     }
 
     .team-member {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+        background: #fff;
         border-radius: 12px;
         overflow: hidden;
         transition: all 0.3s ease;
         box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
     }
 
     .team-member:hover {
@@ -161,13 +162,25 @@
 
     .team-member-image {
         width: 100%;
-        height: 240px;
+        height: 280px;
         background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 3.5rem;
         color: #fff;
+        overflow: hidden;
+    }
+
+    .team-member-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .team-member-image i {
+        font-size: 4rem;
     }
 
     .team-member-info {
@@ -212,11 +225,14 @@
         justify-content: center;
         transition: all 0.2s;
         text-decoration: none;
+        font-size: 0.9rem;
     }
 
     .social-link:hover {
         background: var(--primary-dark);
         transform: translateY(-2px);
+        text-decoration: none;
+        color: #fff;
     }
 
     /* ============ STATS SECTION ============ */
@@ -328,7 +344,7 @@
     }
 
     .btn-cta:hover {
-        background: darken(var(--accent), 10%);
+        background: #e55a2b;
         transform: translateY(-2px);
         box-shadow: 0 4px 16px rgba(255,107,53,0.4);
         text-decoration: none;
@@ -402,6 +418,42 @@
         top: 0;
     }
 
+    /* ============ CONTACT BOX ============ */
+    .contact-box {
+        background: linear-gradient(135deg, rgba(25,135,84,0.05) 0%, rgba(0,64,128,0.05) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 32px;
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .contact-item {
+        text-align: center;
+    }
+
+    .contact-item p {
+        margin: 0 0 8px 0;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .contact-item a {
+        color: var(--primary);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .contact-item a:hover {
+        text-decoration: underline;
+    }
+
     /* ============ RESPONSIVE ============ */
     @media (max-width: 991px) {
         .hero-section {
@@ -463,8 +515,14 @@
             font-size: 1.4rem;
         }
 
-        .values-grid,
-        .team-grid,
+        .values-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .team-grid {
+            grid-template-columns: 1fr;
+        }
+
         .features-grid {
             grid-template-columns: 1fr;
         }
@@ -475,6 +533,11 @@
 
         .cta-section h2 {
             font-size: 1.6rem;
+        }
+
+        .contact-info {
+            flex-direction: column;
+            gap: 24px;
         }
     }
 </style>
@@ -677,23 +740,26 @@
                 <!-- Team Member 1 -->
                 <div class="team-member">
                     <div class="team-member-image">
-                        <img src="{% static 'images/bram.jpeg' %}" alt="Dr.Bramwel Nyongesa">
+                        {% if bram_image %}
+                            <img src="{% static 'images/bram.jpeg' %}" alt="Bramwel Nyongesa">
+                        {% else %}
+                            <i class="fas fa-user-tie"></i>
+                        {% endif %}
                     </div>
                     <div class="team-member-info">
                         <h3 class="team-member-name">Bramwel Nyongesa</h3>
-
                         <p class="team-member-role">Developer & CEO</p>
                         <p class="team-member-bio">
                             Tech visionary leading BestStore's development and innovation strategy. Passionate about creating seamless digital experiences.
                         </p>
                         <div class="team-member-socials">
-                            <a href="https://twitter.com" class="social-link" title="Twitter">
+                            <a href="https://twitter.com" class="social-link" title="Twitter" target="_blank">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                            <a href="https://linkedin.com" class="social-link" title="LinkedIn" target="_blank">
                                 <i class="fab fa-linkedin-in"></i>
                             </a>
-                            <a href="mailto:developer@beststore.com" class="social-link" title="Email">
+                            <a href="mailto:bramwemwelwanyonyi2021@gmail.com" class="social-link" title="Email">
                                 <i class="fas fa-envelope"></i>
                             </a>
                         </div>
@@ -703,7 +769,7 @@
                 <!-- Team Member 2 -->
                 <div class="team-member">
                     <div class="team-member-image">
-                        <i class="fas fa-user-circle"></i>.
+                        <i class="fas fa-user-circle"></i>
                     </div>
                     <div class="team-member-info">
                         <h3 class="team-member-name">Diana Nambuchi</h3>
@@ -712,10 +778,10 @@
                             Founder with a deep commitment to customer satisfaction and business excellence. Drives BestStore's strategic direction.
                         </p>
                         <div class="team-member-socials">
-                            <a href="https://twitter.com" class="social-link" title="Twitter">
+                            <a href="https://twitter.com" class="social-link" title="Twitter" target="_blank">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                            <a href="https://linkedin.com" class="social-link" title="LinkedIn" target="_blank">
                                 <i class="fab fa-linkedin-in"></i>
                             </a>
                             <a href="mailto:dnambuchi@gmail.com" class="social-link" title="Email">
@@ -737,10 +803,10 @@
                             Operations expert ensuring smooth day-to-day functioning. Focuses on efficiency and customer service excellence.
                         </p>
                         <div class="team-member-socials">
-                            <a href="https://twitter.com" class="social-link" title="Twitter">
+                            <a href="https://twitter.com" class="social-link" title="Twitter" target="_blank">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                            <a href="https://linkedin.com" class="social-link" title="LinkedIn" target="_blank">
                                 <i class="fab fa-linkedin-in"></i>
                             </a>
                             <a href="mailto:operations@beststore.com" class="social-link" title="Email">
@@ -757,33 +823,29 @@
             <h2>Ready to Shop?</h2>
             <p>Explore our amazing collection of products at unbeatable prices.</p>
             <a href="{% url 'store' %}" class="btn-cta">
-                <i class="fas fa-shopping-bag me-2"></i> Start Shopping Now
+                <i class="fas fa-shopping-bag"></i> Start Shopping Now
             </a>
         </div>
 
         <!-- ========================= CONTACT SECTION ========================= -->
-        <div class="content-section" style="text-align: center; margin-top: 40px;">
+        <div class="content-section">
             <h2 class="section-title">
                 <i class="fas fa-envelope"></i> Get In Touch
             </h2>
-            <p class="content-text" style="max-width: 600px; margin: 20px auto;">
+            <p class="content-text" style="max-width: 600px; margin: 20px auto; text-align: center;">
                 Have questions? We'd love to hear from you. Reach out to our team anytime.
             </p>
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
-                <div>
-                    <p style="margin: 0 0 8px 0; font-weight: 700;">Email</p>
-                    <a href="mailto:dnambuchi@gmail.com" style="color: var(--primary); text-decoration: none;">
-                        dnambuchi@gmail.com
-                    </a><br>
-                    <a href="mailto:bramwemwelwanyonyi2021@gmail.com" style="color: var(--primary); text-decoration: none;">
-                        bramwemwelwanyonyi2021@gmail.com
-                    </a>
-                </div>
-                <div>
-                    <p style="margin: 0 0 8px 0; font-weight: 700;">Support</p>
-                    <a href="{% url 'contact' %}" style="color: var(--primary); text-decoration: none;">
-                        <i class="fas fa-phone me-2"></i>Contact Us
-                    </a>
+            <div class="contact-box">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <p><i class="fas fa-envelope me-2"></i>Email Support</p>
+                        <a href="mailto:dnambuchi@gmail.com">dnambuchi@gmail.com</a>
+                        <a href="mailto:bramwemwelwanyonyi2021@gmail.com">bramwemwelwanyonyi2021@gmail.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <p><i class="fas fa-phone me-2"></i>Support</p>
+                        <a href="{% url 'contact' %}">Contact Us</a>
+                    </div>
                 </div>
             </div>
         </div>
