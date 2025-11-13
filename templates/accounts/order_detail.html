@@ -602,62 +602,7 @@
         <!-- ========================= MAIN CONTENT ========================= -->
         <div class="order-content">
 
-            <!-- ========================= ORDER ITEMS ========================= -->
-            <div class="order-items-section">
-                <div class="section-header">
-                    <i class="fas fa-shopping-bag"></i>
-                    Order Items ({{ order_detail|length }})
-                </div>
-
-                <div class="order-items-list">
-                    {% if order_detail %}
-                        {% for item in order_detail %}
-                            <div class="order-item">
-                                <div class="order-item-image">
-                                    {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}">
-                                    {% else %}
-                                        <i class="fas fa-image" style="color: #ccc; font-size: 2rem;"></i>
-                                    {% endif %}
-                                </div>
-
-                                <div class="order-item-details">
-                                    <div class="item-name">
-                                        <a href="{{ item.product.get_url }}" target="_blank">
-                                            {{ item.product.product_name }}
-                                        </a>
-                                    </div>
-
-                                    {% if item.variations.all %}
-                                        <div class="item-variation">
-                                            {% for variation in item.variations.all %}
-                                                <span class="item-variation-tag">
-                                                    <strong>{{ variation.variation_category|capfirst }}:</strong> 
-                                                    {{ variation.variation_value|capfirst }}
-                                                </span>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="item-price">
-                                    <span class="item-qty">
-                                        <strong>Qty:</strong> {{ item.quantity }}
-                                    </span>
-                                    <span class="item-total">
-                                        Ksh {{ item.product_price|floatformat:0 }}
-                                    </span>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="empty-items">
-                            <i class="fas fa-inbox"></i>
-                            <p>No items in this order</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+        
 
             <!-- ========================= SIDEBAR ========================= -->
             <div>
