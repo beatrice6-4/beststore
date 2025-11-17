@@ -746,3 +746,9 @@ def redirect_after_login(request):
     if request.user.role == 'finance':
         return redirect('finance_dashboard')
     return redirect('dashboard')
+
+
+
+@login_required
+def accademicWrittings(request):
+    return render(request, 'accounts/accademicWrittings.html')

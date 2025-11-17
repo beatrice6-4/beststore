@@ -68,4 +68,7 @@ urlpatterns = [
     path('activities/', views.activity_list, name='activity_list'),
     path('services/', views.service_list, name='service_list'),
     path('trainings/', views.training_list, name='training_list'),
+
+
+    path('accademicWrittings/', views.accademicWrittings, name='accademicWrittings'),
 ]

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Academic Writings{% endblock %}
+
+{% block content %}
+<style>
+    /* Minimal, responsive, accessible styling */
+    .aw-container { max-width: 980px; margin: 1.5rem auto; padding: 0 1rem; }
+    .aw-header { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .aw-search { display:flex; gap:.5rem; align-items:center; }
+    .aw-list { margin-top:1.25rem; display:grid; gap:1rem; }
+    .aw-article { border:1px solid #e6e6e6; padding:1rem; border-radius:6px; background:#fff; }
+    .aw-meta { color:#555; font-size:.9rem; margin-bottom:.5rem; }
+    .aw-actions { margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap; }
+    .btn { padding:.45rem .7rem; border-radius:4px; border:1px solid #bbb; background:#f7f7f7; cursor:pointer; }
+    .btn-primary { background:#0b5fff; color:#fff; border-color:#084ecf; }
+    .tag { background:#eef; padding:.2rem .5rem; border-radius:3px; font-size:.85rem; margin-right:.35rem; }
+    .sr-only { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+    nav.pagination { margin-top:1rem; display:flex; justify-content:center; gap:.5rem; flex-wrap:wrap; }
+    @media (max-width:520px){ .aw-header { flex-direction:column; align-items:stretch } .aw-search { width:100% } }
+</style>
+
+<div class="aw-container" role="main">
+    <header class="aw-header" aria-labelledby="aw-heading">
+        <h1 id="aw-heading">Academic Writings</h1>
+        <form class="aw-search" method="get" action="" role="search" aria-label="Search academic writings">
+            <label for="q" class="sr-only">Search</label>
+            <input id="q" name="q" type="search" placeholder="Search title, author, abstract…" value="{{ request.GET.q|default:'' }}" aria-label="Search writings" />
+            <select name="sort" aria-label="Sort">
+                <option value="">Sort</option>
+                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                <option value="relevance" {% if request.GET.sort == 'relevance' %}selected{% endif %}>Relevance</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+    </header>
+
+    {% if writings %}
+    <section class="aw-list" aria-live="polite">
+        {% for writing in writings %}
+        <article class="aw-article" itemscope itemtype="http://schema.org/ScholarlyArticle" aria-labelledby="title-{{ writing.id }}">
+            <header>
+                <h2 id="title-{{ writing.id }}" itemprop="headline">
+                    <a href="#">{{ writing.title }}</a>
+                </h2>
+                <div class="aw-meta">
+                    <span itemprop="author">{{ writing.authors_display }}</span>
+                    {% if writing.publication_year %} • <time itemprop="datePublished" datetime="{{ writing.publication_year }}">{{ writing.publication_year }}</time>{% endif %}
+                    {% if writing.journal %} • {{ writing.journal }}{% endif %}
+                </div>
+            </header>
+
+            {% if writing.abstract %}
+            <p itemprop="abstract">{{ writing.abstract|truncatechars:320 }}</p>
+            {% endif %}
+
+            <div>
+                {% if writing.tags.exists %}
+                    {% for tag in writing.tags.all %}
+                        <span class="tag">{{ tag.name }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="aw-actions" role="group" aria-label="Actions for {{ writing.title }}">
+                {% if writing.pdf_url %}
+                    <a class="btn" href="#" target="_blank" rel="noopener noreferrer">Download PDF</a>
+                {% endif %}
+                <a class="btn" href="#">View details</a>
+                <button class="btn" type="button" data-cite-button data-id="{{ writing.id }}" aria-controls="cite-modal-{{ writing.id }}">Cite</button>
+            </div>
+        </article>
+
+        <!-- Citation modal -->
+        <div id="cite-modal-{{ writing.id }}" class="cite-modal" role="dialog" aria-hidden="true" aria-labelledby="cite-title-{{ writing.id }}" style="display:none;">
+            <div style="background:#fff;border:1px solid #ddd;padding:1rem;border-radius:6px;max-width:720px;margin:1rem auto;">
+                <h3 id="cite-title-{{ writing.id }}">Cite: {{ writing.title }}</h3>
+                <p class="aw-meta">{{ writing.authors_display }} — {{ writing.publication_year }}</p>
+
+                <label for="cite-text-{{ writing.id }}" class="sr-only">Citation formats</label>
+                <textarea id="cite-text-{{ writing.id }}" rows="4" style="width:100%;font-family:monospace;">
+APA: {{ writing.citation_apa }}
+MLA: {{ writing.citation_mla }}
+Chicago: {{ writing.citation_chicago }}
+BibTeX:
+{{ writing.citation_bibtex }}
+                </textarea>
+
+                <div style="margin-top:.5rem;display:flex;gap:.5rem;justify-content:flex-end;">
+                    <button class="btn" data-copy-id="{{ writing.id }}">Copy</button>
+                    <a class="btn" href="#">Export .bib</a>
+                    <button class="btn" data-close-id="{{ writing.id }}">Close</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+
+    {% if page_obj.has_other_pages %}
+    <nav class="pagination" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+            <a class="btn" href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+        {% else %}
+            <span class="btn" aria-disabled="true" style="opacity:.6;">&laquo; Prev</span>
+        {% endif %}
+
+        <span class="btn" aria-current="page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a class="btn" href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
+        {% else %}
+            <span class="btn" aria-disabled="true" style="opacity:.6;">Next &raquo;</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+        <p>No writings found. Try a different search or <a href="#">add a new writing</a>.</p>
+    {% endif %}
+</div>
+
+<script>
+    // Lightweight client-side behavior for cite modal and copy
+    (function(){
+        function showModal(id){
+            var modal = document.getElementById('cite-modal-'+id);
+            if(modal){ modal.style.display='block'; modal.setAttribute('aria-hidden','false'); modal.querySelector('textarea').focus(); }
+        }
+        function closeModal(id){
+            var modal = document.getElementById('cite-modal-'+id);
+            if(modal){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); }
+        }
+        document.addEventListener('click', function(e){
+            var citeBtn = e.target.closest('[data-cite-button]');
+            if(citeBtn){ showModal(citeBtn.getAttribute('data-id')); return; }
+            var closeBtn = e.target.closest('[data-close-id]');
+            if(closeBtn){ closeModal(closeBtn.getAttribute('data-close-id')); return; }
+            var copyBtn = e.target.closest('[data-copy-id]');
+            if(copyBtn){
+                var id = copyBtn.getAttribute('data-copy-id');
+                var ta = document.getElementById('cite-text-'+id);
+                if(ta){ ta.select(); try{ document.execCommand('copy'); copyBtn.textContent='Copied'; setTimeout(function(){ copyBtn.textContent='Copy'; },2000); }catch(e){ /* fall through */ } }
+            }
+        });
+        // close modal on Escape
+        document.addEventListener('keydown', function(e){
+            if(e.key === 'Escape'){
+                document.querySelectorAll('.cite-modal[aria-hidden="false"]').forEach(function(m){
+                    m.style.display='none'; m.setAttribute('aria-hidden','true');
+                });
+            }
+        });
+    })();
+</script>
+{% endblock %}
