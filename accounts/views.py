@@ -927,7 +927,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.decorators.http import require_http_methods
-from .models import Profile  # Assuming you have a Profile model
+
 
 def is_admin(user):
     """Check if user is admin"""
