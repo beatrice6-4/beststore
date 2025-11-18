@@ -553,7 +553,7 @@
             <button class="btn-action btn-edit" onclick="toggleEditForm()">
                 <i class="fas fa-edit"></i> Edit User
             </button>
-            <a href="{% url 'accounts:userManagement' %}" class="btn-action btn-back">
+            <a href="{% url 'userManagement' %}" class="btn-action btn-back">
                 <i class="fas fa-arrow-left"></i> Back to Users
             </a>
             <button class="btn-action btn-delete" onclick="confirmDelete()">
@@ -590,7 +590,7 @@
                                 <i class="fas fa-edit"></i> Edit User Details
                             </div>
                             <div class="section-content">
-                                <form method="POST" action="{% url 'accounts:user_update' user.id %}">
+                                <form method="POST" action="#">
                                     {% csrf_token %}
 
                                     <div class="form-group">
