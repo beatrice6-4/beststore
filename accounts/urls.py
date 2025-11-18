@@ -71,4 +71,5 @@ urlpatterns = [
 
 
     path('accademicWrittings/', views.accademicWrittings, name='accademicWrittings'),
+    path('userManagement/', views.userManagement, name='userManagement'),
 ]

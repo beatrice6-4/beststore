@@ -919,3 +919,228 @@ def accademicWrittings(request):
     return render(request, 'accounts/accademicWrittings.html', context)
 
 
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.views.decorators.http import require_http_methods
+from .models import Profile  # Assuming you have a Profile model
+
+def is_admin(user):
+    """Check if user is admin"""
+    return user.is_superuser or (hasattr(user, 'profile') and user.profile.role == 'admin')
+
+@login_required
+@user_passes_test(is_admin)
+def userManagement(request):
+    """
+    Display and manage users with search, filter, and pagination.
+    Only accessible to admin users.
+    """
+    # Get search and filter parameters
+    search_query = request.GET.get('q', '').strip()
+    role_filter = request.GET.get('role', '').strip()
+    page_num = request.GET.get('page', 1)
+    
+    # Base queryset
+    users = User.objects.all().select_related('profile').order_by('-date_joined')
+    
+    # Search by name or email
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+    
+    # Filter by role
+    if role_filter:
+        users = users.filter(profile__role=role_filter)
+    
+    # Pagination
+    paginator = Paginator(users, 10)  # 10 users per page
+    page_obj = paginator.get_page(page_num)
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'role_filter': role_filter,
+        'roles': ['customer', 'staff', 'admin'],
+    }
+    
+    return render(request, 'accounts/userManagement.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def user_create(request):
+    """
+    Create a new user via modal form.
+    """
+    try:
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        full_name = request.POST.get('full_name', '').strip()
+        password = request.POST.get('password', '').strip()
+        role = request.POST.get('role', 'customer')
+        
+        # Validation
+        if not username or not email:
+            messages.error(request, 'Username and email are required.')
+            return redirect('accounts:userManagement')
+        
+        # Check if user already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f'Username "{username}" already exists.')
+            return redirect('accounts:userManagement')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, f'Email "{email}" already exists.')
+            return redirect('accounts:userManagement')
+        
+        if not password or len(password) < 6:
+            messages.error(request, 'Password must be at least 6 characters long.')
+            return redirect('accounts:userManagement')
+        
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+        
+        # Set full name
+        if full_name:
+            parts = full_name.split(' ', 1)
+            user.first_name = parts[0]
+            user.last_name = parts[1] if len(parts) > 1 else ''
+            user.save()
+        
+        # Set admin/staff permissions
+        if role == 'admin':
+            user.is_superuser = True
+            user.is_staff = True
+        elif role == 'staff':
+            user.is_staff = True
+        user.save()
+        
+        # Create or update profile
+        profile, created = Profile.objects.get_or_create(user=user)
+        profile.role = role
+        profile.save()
+        
+        messages.success(request, f'User "{username}" created successfully.')
+        return redirect('accounts:userManagement')
+        
+    except Exception as e:
+        messages.error(request, f'Error creating user: {str(e)}')
+        return redirect('accounts:userManagement')
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def user_update(request, user_id):
+    """
+    Update an existing user via modal form.
+    """
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        full_name = request.POST.get('full_name', '').strip()
+        password = request.POST.get('password', '').strip()
+        role = request.POST.get('role', 'customer')
+        
+        # Validation
+        if not username or not email:
+            messages.error(request, 'Username and email are required.')
+            return redirect('accounts:userManagement')
+        
+        # Check if username already exists (excluding current user)
+        if User.objects.filter(username=username).exclude(id=user_id).exists():
+            messages.error(request, f'Username "{username}" already exists.')
+            return redirect('accounts:userManagement')
+        
+        # Check if email already exists (excluding current user)
+        if User.objects.filter(email=email).exclude(id=user_id).exists():
+            messages.error(request, f'Email "{email}" already exists.')
+            return redirect('accounts:userManagement')
+        
+        # Update user
+        user.username = username
+        user.email = email
+        
+        # Update full name
+        if full_name:
+            parts = full_name.split(' ', 1)
+            user.first_name = parts[0]
+            user.last_name = parts[1] if len(parts) > 1 else ''
+        else:
+            user.first_name = ''
+            user.last_name = ''
+        
+        # Update password if provided
+        if password:
+            if len(password) < 6:
+                messages.error(request, 'Password must be at least 6 characters long.')
+                return redirect('accounts:userManagement')
+            user.set_password(password)
+        
+        # Update admin/staff permissions
+        if role == 'admin':
+            user.is_superuser = True
+            user.is_staff = True
+        elif role == 'staff':
+            user.is_superuser = False
+            user.is_staff = True
+        else:  # customer
+            user.is_superuser = False
+            user.is_staff = False
+        
+        user.save()
+        
+        # Update profile
+        profile, created = Profile.objects.get_or_create(user=user)
+        profile.role = role
+        profile.save()
+        
+        messages.success(request, f'User "{username}" updated successfully.')
+        return redirect('accounts:userManagement')
+        
+    except Exception as e:
+        messages.error(request, f'Error updating user: {str(e)}')
+        return redirect('accounts:userManagement')
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def user_delete(request, user_id):
+    """
+    Delete a user.
+    """
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        # Prevent self-deletion
+        if user.id == request.user.id:
+            messages.error(request, 'You cannot delete your own account.')
+            return redirect('accounts:userManagement')
+        
+        username = user.username
+        user.delete()
+        
+        messages.success(request, f'User "{username}" deleted successfully.')
+        return redirect('accounts:userManagement')
+        
+    except Exception as e:
+        messages.error(request, f'Error deleting user: {str(e)}')
+        return redirect('accounts:userManagement')
+
