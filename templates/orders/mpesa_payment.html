@@ -1,220 +1,836 @@
 {% extends 'base.html' %}
-{% block page_title %}M-Pesa Payment{% endblock %}
+{% block page_title %}M-Pesa Payment - BestStore{% endblock %}
 {% block breadcrumb %}Payment{% endblock %}
 {% load static %}
 
 {% block content %}
 <style>
-  .mpesa-wrap { padding: 28px 12px; }
-  .mpesa-card { max-width:720px; margin:18px auto; border-radius:14px; box-shadow:0 8px 30px rgba(6,20,40,.08); overflow:hidden; background:#fff; }
-  .mpesa-header { background:linear-gradient(90deg,#24b24a,#0a8f2a); color:#fff; padding:20px; text-align:center; }
-  .mpesa-header img{ height:52px; display:block; margin:0 auto 8px; }
-  .mpesa-body{ padding:18px; }
-  .mpesa-order-no { font-weight:700; color:#0a6a2a; margin-bottom:10px; text-align:center; }
-  .form-group { margin-bottom:12px; }
-  label { font-weight:600; color:#153d17; display:block; margin-bottom:6px; font-size:0.95rem; }
-  .form-control { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6eef0; font-size:1rem; box-sizing:border-box; }
-  .form-control:focus { outline:none; box-shadow:0 6px 18px rgba(10,100,199,.06); border-color:#0a8f2a; }
-  .btn-pay { display:flex; gap:10px; align-items:center; justify-content:center; width:100%; padding:12px 14px; border-radius:10px; background:#0a8f2a; color:#fff; border:0; font-weight:700; cursor:pointer; }
-  .btn-pay[disabled]{ opacity:.7; cursor:not-allowed; }
-  .mpesa-note { color:#444; font-size:0.95rem; margin-top:10px; text-align:center; }
-  .alerts { margin-top:12px; }
-  .alert { padding:10px 12px; border-radius:8px; margin-bottom:8px; }
-  .alert-success { background:#e6f9ea; color:#0a8f2a; border:1px solid #cfeed0; }
-  .alert-error { background:#fff0f0; color:#9b1f1f; border:1px solid #f4c6c6; }
-  .loader-inline { width:18px; height:18px; border:3px solid rgba(255,255,255,0.25); border-top-color:#fff; border-radius:50%; animation:spin .9s linear infinite; display:inline-block; vertical-align:middle; }
-  @keyframes spin { to { transform:rotate(360deg); } }
+    :root {
+        --primary: #198754;
+        --primary-dark: #145c32;
+        --secondary: #004080;
+        --accent: #FF6B35;
+        --mpesa-green: #24b24a;
+        --mpesa-dark: #0a8f2a;
+        --light-bg: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-dark: #1a1a1a;
+        --text-muted: #6c757d;
+        --success-bg: #e6f9ea;
+        --success-color: #0f5132;
+        --error-bg: #fff0f0;
+        --error-color: #9b1f1f;
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    }
 
-  @media(max-width:420px){
-    .mpesa-body{ padding:14px; }
-    .mpesa-header{ padding:16px; }
-  }
+    /* ============ PAGE WRAPPER ============ */
+    .mpesa-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+        min-height: calc(100vh - 200px);
+        padding: 40px 0;
+    }
+
+    .mpesa-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* ============ PAYMENT CARD ============ */
+    .payment-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 32px;
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: #fff;
+        padding: 40px 32px;
+        text-align: center;
+    }
+
+    .payment-header-logo {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    .payment-header-logo img {
+        max-height: 100%;
+        max-width: 100%;
+    }
+
+    .payment-header-logo i {
+        font-size: 3rem;
+    }
+
+    .payment-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+    }
+
+    .payment-header p {
+        font-size: 0.95rem;
+        margin: 0;
+        opacity: 0.95;
+    }
+
+    /* ============ PAYMENT BODY ============ */
+    .payment-body {
+        padding: 40px 32px;
+    }
+
+    /* ============ ORDER INFO ============ */
+    .order-info {
+        background: linear-gradient(135deg, rgba(36,178,74,0.1) 0%, rgba(10,143,42,0.05) 100%);
+        border-left: 4px solid var(--mpesa-green);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 32px;
+    }
+
+    .order-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+
+    .order-info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .order-info-label {
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .order-info-value {
+        color: var(--text-muted);
+    }
+
+    .order-info-value.highlight {
+        color: var(--mpesa-dark);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* ============ ALERTS ============ */
+    .alerts-container {
+        margin-bottom: 24px;
+    }
+
+    .alert {
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .alert-success {
+        background: var(--success-bg);
+        color: var(--success-color);
+        border-left: 4px solid #10b981;
+    }
+
+    .alert-error {
+        background: var(--error-bg);
+        color: var(--error-color);
+        border-left: 4px solid #ef4444;
+    }
+
+    .alert-info {
+        background: #e7f3ff;
+        color: #0c5aa0;
+        border-left: 4px solid #0dcaf0;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 1.3rem;
+        padding: 0;
+        line-height: 1;
+    }
+
+    /* ============ FORM ============ */
+    .payment-form {
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-label small {
+        font-weight: 400;
+        color: var(--text-muted);
+        display: block;
+        margin-top: 4px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        background: #fff;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--mpesa-green);
+        box-shadow: 0 0 0 3px rgba(36,178,74,0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .input-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .input-prefix {
+        padding: 14px 14px;
+        background: var(--light-bg);
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px 0 0 10px;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        user-select: none;
+    }
+
+    .form-control.with-prefix {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .form-help {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+    }
+
+    /* ============ BUTTONS ============ */
+    .btn-pay {
+        width: 100%;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-pay:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(36,178,74,0.3);
+    }
+
+    .btn-pay:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .loader-spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid rgba(255,255,255,0.25);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-secondary {
+        width: 100%;
+        padding: 14px 24px;
+        background: var(--light-bg);
+        color: var(--text-dark);
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .btn-secondary:hover {
+        background: var(--border-color);
+        text-decoration: none;
+        color: var(--text-dark);
+    }
+
+    /* ============ PAYMENT STEPS ============ */
+    .payment-steps {
+        background: linear-gradient(135deg, rgba(36,178,74,0.05) 0%, rgba(10,143,42,0.02) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .steps-title {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 16px 0;
+        font-size: 0.95rem;
+    }
+
+    .steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .steps-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+    }
+
+    .steps-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .steps-number {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        background: var(--mpesa-green);
+        color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .steps-text {
+        flex: 1;
+        color: var(--text-muted);
+        padding-top: 2px;
+    }
+
+    /* ============ SECURITY INFO ============ */
+    .security-info {
+        background: linear-gradient(135deg, rgba(13,202,240,0.1) 0%, rgba(13,202,240,0.05) 100%);
+        border-left: 4px solid #0dcaf0;
+        padding: 16px;
+        border-radius: 10px;
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .security-info i {
+        color: #0dcaf0;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .security-text {
+        font-size: 0.9rem;
+        color: #0c5aa0;
+    }
+
+    /* ============ FOOTER LINKS ============ */
+    .payment-footer {
+        text-align: center;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .payment-footer a {
+        color: var(--mpesa-green);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .payment-footer a:hover {
+        text-decoration: underline;
+        color: var(--mpesa-dark);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+        .mpesa-container {
+            padding: 0 16px;
+        }
+
+        .payment-header {
+            padding: 32px 20px;
+        }
+
+        .payment-body {
+            padding: 24px 20px;
+        }
+
+        .payment-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .order-info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .input-group {
+            flex-direction: column;
+        }
+
+        .input-prefix,
+        .form-control.with-prefix {
+            border-radius: 10px;
+        }
+
+        .form-control.with-prefix {
+            border-radius: 10px;
+        }
+    }
 </style>
 
-<section class="mpesa-wrap" aria-labelledby="mpesa-title">
-  <div class="mpesa-card" role="region" aria-label="Mpesa payment card">
-    <div class="mpesa-header">
-      <img src="{% static 'images/mpesa-logo.jpg' %}" alt="M-Pesa">
-      <h3 id="mpesa-title" style="margin:0;font-size:1.15rem">Pay with M-Pesa</h3>
-      <p style="margin:6px 0 0;font-size:0.95rem;opacity:.95">Secure payment via Safaricom M-Pesa</p>
-    </div>
+<div class="mpesa-wrapper">
+    <div class="mpesa-container">
 
-    <div class="mpesa-body">
-      <div class="mpesa-order-no">Order No: <span id="order-no">{{ order.order_number }}</span></div>
+        <!-- ========================= PAYMENT CARD ========================= -->
+        <div class="payment-card">
 
-      <div class="alerts" id="alerts" aria-live="polite"></div>
+            <!-- HEADER -->
+            <div class="payment-header">
+                <div class="payment-header-logo">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h1>M-Pesa Payment</h1>
+                <p>Secure payment via Safaricom M-Pesa</p>
+            </div>
 
-      {% if payment_response %}
-        {% if payment_response.error %}
-          <div class="alert alert-error">{{ payment_response.error }}{% if payment_response.details %} — {{ payment_response.details }}{% endif %}</div>
-        {% endif %}
-        {% if payment_response.message %}
-          <div class="alert alert-success">{{ payment_response.message }}</div>
-        {% endif %}
-        {% if payment_response.paybill_instructions %}
-          <div class="alert alert-success">
-            {{ payment_response.paybill_instructions }}<br>
-            <strong>Paybill:</strong> {{ payment_response.paybill }} &nbsp; <strong>Account:</strong> {{ payment_response.account_reference }}<br>
-            <strong>Amount:</strong> Ksh {{ payment_response.amount }}
-          </div>
-        {% endif %}
-      {% endif %}
+            <!-- BODY -->
+            <div class="payment-body">
 
-      <form id="mpesa-form" method="POST" action="">
-        {% csrf_token %}
-        <div class="form-group">
-          <label for="phone">Mpesa Phone number</label>
-          <input id="phone" name="phone_number" class="form-control" inputmode="numeric" pattern="2547[0-9]{8}" maxlength="12" placeholder="2547XXXXXXXX" required value="{{ request.user.phone_number|default:'' }}">
-          <small class="mpesa-note">Enter number in format 2547XXXXXXXX. We will send STK push to this number.</small>
+                <!-- ========================= ALERTS ========================= -->
+                <div class="alerts-container" id="alerts" aria-live="polite" aria-atomic="true">
+                    {% if payment_response %}
+                        {% if payment_response.error %}
+                            <div class="alert alert-error" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <div class="alert-content">
+                                    <strong>Payment Error</strong>
+                                    <p style="margin: 4px 0 0 0;">{{ payment_response.error }}{% if payment_response.details %} — {{ payment_response.details }}{% endif %}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if payment_response.message %}
+                            <div class="alert alert-success" role="alert">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="alert-content">
+                                    {{ payment_response.message }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if payment_response.paybill_instructions %}
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="alert-content">
+                                    <strong>Paybill Instructions</strong>
+                                    <p style="margin: 8px 0 0 0;">{{ payment_response.paybill_instructions }}</p>
+                                    <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+                                        <div><strong>Paybill:</strong> {{ payment_response.paybill }}</div>
+                                        <div><strong>Account:</strong> {{ payment_response.account_reference }}</div>
+                                        <div colspan="2"><strong>Amount:</strong> Ksh {{ payment_response.amount }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- ========================= ORDER INFORMATION ========================= -->
+                <div class="order-info">
+                    <div class="order-info-row">
+                        <span class="order-info-label">Order Number</span>
+                        <span class="order-info-value" id="order-no">{{ order.order_number|default:"N/A" }}</span>
+                    </div>
+                    <div class="order-info-row">
+                        <span class="order-info-label">Order Date</span>
+                        <span class="order-info-value">{{ order.order_date|date:"M d, Y \a\t H:i"|default:"N/A" }}</span>
+                    </div>
+                    <div class="order-info-row">
+                        <span class="order-info-label">Total Amount</span>
+                        <span class="order-info-value highlight">Ksh {{ grand_total|floatformat:2|default:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- ========================= PAYMENT FORM ========================= -->
+                <form id="mpesa-form" method="POST" action="" class="payment-form">
+                    {% csrf_token %}
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone" class="form-label">
+                            <i class="fas fa-phone me-2"></i>M-Pesa Phone Number
+                            <small>Enter the phone number registered with M-Pesa</small>
+                        </label>
+                        <div class="input-group">
+                            <div class="input-prefix">+</div>
+                            <input 
+                                id="phone" 
+                                name="phone_number" 
+                                class="form-control with-prefix" 
+                                inputmode="numeric" 
+                                pattern="2547[0-9]{8}" 
+                                maxlength="12" 
+                                placeholder="2547XXXXXXXX" 
+                                required 
+                                value="{{ request.user.phone_number|default:'' }}"
+                                aria-label="M-Pesa phone number">
+                        </div>
+                        <div class="form-help">
+                            <i class="fas fa-info-circle me-1"></i>Format: 2547XXXXXXXX (12 digits)
+                        </div>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label for="amount" class="form-label">
+                            <i class="fas fa-money-bill-wave me-2"></i>Amount (Ksh)
+                            <small>The amount to be paid</small>
+                        </label>
+                        <input 
+                            id="amount" 
+                            name="amount" 
+                            class="form-control" 
+                            type="number" 
+                            min="1" 
+                            step="1" 
+                            required 
+                            value="{{ grand_total|floatformat:0|default:0 }}"
+                            aria-label="Payment amount in Kenyan Shillings">
+                        <div class="form-help">
+                            <i class="fas fa-lock me-1"></i>Minimum amount: Ksh 1
+                        </div>
+                    </div>
+
+                    <!-- Payment Steps -->
+                    <div class="payment-steps">
+                        <p class="steps-title">
+                            <i class="fas fa-list-ol me-2"></i>Payment Steps
+                        </p>
+                        <ul class="steps-list">
+                            <li class="steps-item">
+                                <span class="steps-number">1</span>
+                                <span class="steps-text">Enter your M-Pesa registered phone number</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">2</span>
+                                <span class="steps-text">Click "Pay Now" to request payment</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">3</span>
+                                <span class="steps-text">You'll receive an STK push on your phone</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">4</span>
+                                <span class="steps-text">Enter your M-Pesa PIN to complete payment</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Pay Button -->
+                    <button id="pay-btn" class="btn-pay" type="submit" aria-busy="false">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span id="pay-text">Pay Now</span>
+                    </button>
+
+                    <!-- Back Button -->
+                    <a href="{% url 'checkout' %}" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Checkout
+                    </a>
+                </form>
+
+                <!-- Security Info -->
+                <div class="security-info">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="security-text">
+                        <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your M-Pesa PIN.
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="payment-footer">
+                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
+                        Need help? <a href="#contact">Contact Support</a> or visit <a href="#faq">FAQ</a>
+                    </p>
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="form-group">
-          <label for="amount">Amount (Ksh)</label>
-          <input id="amount" name="amount" class="form-control" type="number" min="1" step="1" required value="{{ grand_total|floatformat:0 }}">
-        </div>
-
-        <button id="pay-btn" class="btn-pay" type="submit" aria-live="polite">
-          <span id="pay-text"><i class="fa fa-mobile-alt" aria-hidden="true"></i> Pay Now</span>
-        </button>
-      </form>
-
-      <p class="mpesa-note">You will receive a prompt on your phone to confirm the payment. Do not close this page until payment completes.</p>
-
-      <div style="text-align:center;margin-top:12px">
-        <a href="{% url 'checkout' %}" style="color:#0a8f2a;font-weight:600;text-decoration:none">Back to Checkout</a>
-      </div>
     </div>
-  </div>
-</section>
+</div>
 
 <script>
 (function () {
-  const form = document.getElementById('mpesa-form');
-  const payBtn = document.getElementById('pay-btn');
-  const payText = document.getElementById('pay-text');
-  const alerts = document.getElementById('alerts');
-  const orderNo = document.getElementById('order-no') ? document.getElementById('order-no').textContent.trim() : '';
+    const form = document.getElementById('mpesa-form');
+    const payBtn = document.getElementById('pay-btn');
+    const payText = document.getElementById('pay-text');
+    const alerts = document.getElementById('alerts');
+    const phoneInput = document.getElementById('phone');
+    const amountInput = document.getElementById('amount');
 
-  function showAlert(text, type='success', timeout=120000) {
-    const div = document.createElement('div');
-    div.className = 'alert ' + (type === 'error' ? 'alert-error' : 'alert-success');
-    div.textContent = text;
-    alerts.innerHTML = '';
-    alerts.appendChild(div);
-    if (timeout) setTimeout(() => { if (div.parentNode) div.remove(); }, timeout);
-  }
-
-  function getCookie(name) {
-    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-    return m ? m.pop() : '';
-  }
-
-  if (!form) return;
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    // simple client validations
-    const phone = form.phone_number.value.trim();
-    const amount = form.amount.value.trim();
-    if (!/^2547\d{8}$/.test(phone)) {
-      showAlert('Phone number must be in format 2547XXXXXXXX', 'error');
-      return;
-    }
-    if (!amount || parseInt(amount,10) <= 0) {
-      showAlert('Please enter a valid amount', 'error');
-      return;
-    }
-
-    // UI feedback
-    payBtn.disabled = true;
-    payText.innerHTML = '<span class="loader-inline" aria-hidden="true"></span> Sending STK Push....';
-    alerts.innerHTML = '';
-
-
-
-    try {
-      const data = new FormData(form);
-      const resp = await fetch(form.action || window.location.href, {
-        method: 'POST',
-        body: data,
-        credentials: 'same-origin',
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
-      });
-
-      if (resp.redirected) {
-        window.location.href = resp.url;
-        return;
-      }
-
-      // expect JSON { success: true/false, message: "...", order_number: "..." }
-      const json = await resp.json().catch(()=>null);
-      if (json) {
-        if (json.success) {
-          showAlert(json.message || 'Payment request sent. Confirm on your phone.', 'success', 180000);
-          // if server returned an order_number or status URL redirect to placeOrder/<order_number> when provided
-          if (json.order_number) {
-            // redirect to placeOrder page for the order
-            const base = '{% url "placeOrder" %}';
-            const url = base.endsWith('/') ? base + encodeURIComponent(json.order_number) + '/' : base + '/' + encodeURIComponent(json.order_number) + '/';
-            // small delay to let user read message
-            setTimeout(() => { window.location.href = url; }, 1400);
-            return;
-          }
-          // optionally poll payment status if server provides status_url
-          if (json.status_url) {
-            pollStatus(json.status_url);
-            return;
-          }
-        } else {
-          showAlert(json.message || 'Payment request failed', 'error');
+    // Show alert
+    function showAlert(text, type = 'success', timeout = 120000) {
+        const div = document.createElement('div');
+        div.className = `alert alert-${type}`;
+        div.setAttribute('role', 'alert');
+        
+        const icon = type === 'error' ? 'fa-exclamation-circle' : 
+                     type === 'warning' ? 'fa-exclamation-triangle' : 
+                     type === 'info' ? 'fa-info-circle' : 'fa-check-circle';
+        
+        div.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <div class="alert-content">${text}</div>
+            <button class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        alerts.insertBefore(div, alerts.firstChild);
+        
+        if (timeout) {
+            setTimeout(() => {
+                if (div.parentNode) div.remove();
+            }, timeout);
         }
-      } else {
-        // fallback: show HTML response if any
-        const text = await resp.text();
-        showAlert('Server response received. Please follow instructions.', 'success');
-        // optionally replace content — skip to avoid breaking experience
-        console.log('non-json response', text.slice(0,200));
-      }
-    } catch (err) {
-      console.success(err);
-      showAlert('Enter Your Mpesa PIN on your phone.', 'success', 180000);
-    } finally {
-      payBtn.disabled = false;
-      payText.innerHTML = '<i class="fa fa-mobile-alt" aria-hidden="true"></i> Pay Now';
     }
-  });
 
-  // optional polling helper
-  async function pollStatus(url, attempts = 12, interval = 3000) {
-    try {
-      for (let i=0;i<attempts;i++) {
-        const resp = await fetch(url, { credentials: 'same-origin', headers: {'X-Requested-With':'XMLHttpRequest'} });
-        if (resp.ok) {
-          const j = await resp.json().catch(()=>null);
-          if (j && j.status) {
-            if (j.status === 'success') {
-              showAlert(j.message || 'Payment received', 'success', 30000);
-              // if returned order_number, redirect to placeOrder/ORDER_NO/
-              if (j.order_number) {
-                const base = '{% url "placeOrder" %}';
-                const url = base.endsWith('/') ? base + encodeURIComponent(j.order_number) + '/' : base + '/' + encodeURIComponent(j.order_number) + '/';
-                setTimeout(()=> window.location.href = url, 900);
+    // Get CSRF token
+    function getCookie(name) {
+        const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? match.pop() : '';
+    }
+
+    // Validate phone number
+    function validatePhone(phone) {
+        return /^2547\d{8}$/.test(phone);
+    }
+
+    // Validate amount
+    function validateAmount(amount) {
+        return !isNaN(amount) && parseInt(amount, 10) > 0;
+    }
+
+    if (!form) return;
+
+    // Form submit
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const phone = phoneInput.value.trim();
+        const amount = amountInput.value.trim();
+
+        // Validate inputs
+        if (!validatePhone(phone)) {
+            showAlert('Phone number must be in format 2547XXXXXXXX (12 digits)', 'error');
+            phoneInput.focus();
+            return;
+        }
+
+        if (!validateAmount(amount)) {
+            showAlert('Please enter a valid amount greater than 0', 'error');
+            amountInput.focus();
+            return;
+        }
+
+        // Disable button and show loader
+        payBtn.disabled = true;
+        payBtn.setAttribute('aria-busy', 'true');
+        payText.innerHTML = '<span class="loader-spinner" aria-hidden="true"></span> Sending STK Push...';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            });
+
+            // Handle redirect
+            if (response.redirected) {
+                window.location.href = response.url;
                 return;
-              }
-              return;
-            } else if (j.status === 'failed') {
-              showAlert(j.message || 'Payment failed', 'error', 60000);
-              return;
-            } // else pending -> continue polling
-          }
+            }
+
+            // Parse JSON response
+            const json = await response.json().catch(() => null);
+
+            if (json) {
+                if (json.success) {
+                    showAlert(
+                        json.message || 'Payment request sent successfully. Confirm on your phone.',
+                        'success',
+                        180000
+                    );
+
+                    // Redirect to order page if provided
+                    if (json.order_number) {
+                        setTimeout(() => {
+                            const baseUrl = '{% url "placeOrder" %}';
+                            const orderUrl = baseUrl.endsWith('/') 
+                                ? baseUrl + encodeURIComponent(json.order_number) + '/'
+                                : baseUrl + '/' + encodeURIComponent(json.order_number) + '/';
+                            window.location.href = orderUrl;
+                        }, 1500);
+                        return;
+                    }
+
+                    // Poll status if URL provided
+                    if (json.status_url) {
+                        pollStatus(json.status_url);
+                        return;
+                    }
+                } else {
+                    showAlert(json.message || 'Payment request failed. Please try again.', 'error');
+                }
+            } else {
+                showAlert('Enter your M-Pesa PIN on your phone to complete the payment.', 'info', 180000);
+            }
+        } catch (err) {
+            console.error('Payment error:', err);
+            showAlert('Enter your M-Pesa PIN on your phone to complete the payment.', 'info', 180000);
+        } finally {
+            payBtn.disabled = false;
+            payBtn.setAttribute('aria-busy', 'false');
+            payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Pay Now</span>';
         }
-        await new Promise(r => setTimeout(r, interval));
-      }
-      showAlert('Payment still pending. Check your phone or contact support.', 'error', 60000);
-    } catch (e) {
-      console.error('poll error', e);
+    });
+
+    // Poll payment status
+    async function pollStatus(statusUrl, maxAttempts = 12, interval = 3000) {
+        try {
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                await new Promise(r => setTimeout(r, interval));
+
+                const response = await fetch(statusUrl, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+
+                if (response.ok) {
+                    const data = await response.json().catch(() => null);
+
+                    if (data && data.status) {
+                        if (data.status === 'success') {
+                            showAlert(data.message || 'Payment received successfully!', 'success', 30000);
+
+                            if (data.order_number) {
+                                setTimeout(() => {
+                                    const baseUrl = '{% url "placeOrder" %}';
+                                    const orderUrl = baseUrl.endsWith('/')
+                                        ? baseUrl + encodeURIComponent(data.order_number) + '/'
+                                        : baseUrl + '/' + encodeURIComponent(data.order_number) + '/';
+                                    window.location.href = orderUrl;
+                                }, 1000);
+                            }
+                            return;
+                        } else if (data.status === 'failed') {
+                            showAlert(data.message || 'Payment failed. Please try again.', 'error', 60000);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            showAlert('Payment processing is taking longer than expected. Please check your phone or contact support.', 'warning', 60000);
+        } catch (err) {
+            console.error('Status polling error:', err);
+        }
     }
-  }
+
+    // Real-time phone validation
+    phoneInput.addEventListener('blur', function () {
+        if (this.value && !validatePhone(this.value.trim())) {
+            showAlert('Invalid phone number format. Use 2547XXXXXXXX', 'warning', 5000);
+        }
+    });
+
+    // Auto-focus on page load
+    window.addEventListener('load', () => {
+        if (!phoneInput.value) {
+            phoneInput.focus();
+        }
+    });
 })();
 </script>
+
 {% endblock %}
