@@ -140,15 +140,360 @@ def activate(request, uidb64, token):
 
 from store.models import Product  # Import the Product model
 
+# ...existing code...
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count, Q
+from django.utils import timezone
+from datetime import timedelta
+
 @login_required
 def dashboard(request):
-    # Fetch all products
-    products = Product.objects.all()
-
+    """
+    Display user dashboard with orders, spending, and featured products.
+    Shows personalized statistics and quick access to frequently used features.
+    """
+    from store.models import Product, Order, OrderItem
+    
+    user = request.user
+    
+    # ========================= ORDERS STATISTICS =========================
+    # Get all orders for current user
+    all_orders = Order.objects.filter(user=user).select_related('user')
+    
+    # Calculate total orders
+    total_orders = all_orders.count()
+    
+    # Calculate completed orders
+    completed_orders = all_orders.filter(
+        status__in=['completed', 'delivered', 'confirmed']
+    ).count()
+    
+    # Calculate pending orders
+    pending_orders = all_orders.filter(
+        status__in=['pending', 'processing', 'shipped']
+    ).count()
+    
+    # Calculate total spending
+    total_spent = all_orders.filter(
+        status__in=['completed', 'delivered', 'confirmed']
+    ).aggregate(total=Sum('order_total'))['total'] or 0
+    
+    # ========================= FEATURED PRODUCTS =========================
+    # Get featured/new products
+    try:
+        products = Product.objects.filter(
+            is_available=True,
+            is_featured=True
+        ).select_related('category').order_by('-created_date')[:12]
+        
+        # If not enough featured products, get recent products
+        if products.count() < 6:
+            products = Product.objects.filter(
+                is_available=True
+            ).select_related('category').order_by('-created_date')[:12]
+    except Exception as e:
+        print(f"Error fetching products: {str(e)}")
+        products = []
+    
+    # ========================= RECENT ACTIVITIES =========================
+    # Get recent orders (last 5)
+    recent_orders = all_orders.select_related('user').order_by('-order_date')[:5]
+    
+    # ========================= USER PROFILE INFO =========================
+    user_profile = None
+    try:
+        from accounts.models import Profile
+        user_profile = Profile.objects.get(user=user)
+    except:
+        user_profile = None
+    
+    # ========================= CONTEXT DATA =========================
     context = {
-        'products': products,  # Pass all products to the template
+        'total_orders': total_orders,
+        'completed_orders': completed_orders,
+        'pending_orders': pending_orders,
+        'total_spent': float(total_spent),
+        'products': products,
+        'recent_orders': recent_orders,
+        'user_profile': user_profile,
+        'page_title': 'Dashboard',
+        'breadcrumb': 'Dashboard',
     }
+    
     return render(request, 'accounts/dashboard.html', context)
+
+
+@login_required
+def dashboard(request):
+    """
+    API endpoint for dashboard statistics (optional, for AJAX updates).
+    Returns JSON data for real-time stats updates.
+    """
+    from django.http import JsonResponse
+    from store.models import Order
+    
+    try:
+        user = request.user
+        all_orders = Order.objects.filter(user=user)
+        
+        total_orders = all_orders.count()
+        completed_orders = all_orders.filter(
+            status__in=['completed', 'delivered', 'confirmed']
+        ).count()
+        pending_orders = all_orders.filter(
+            status__in=['pending', 'processing', 'shipped']
+        ).count()
+        total_spent = all_orders.filter(
+            status__in=['completed', 'delivered', 'confirmed']
+        ).aggregate(total=Sum('order_total'))['total'] or 0
+        
+        return JsonResponse({
+            'success': True,
+            'total_orders': total_orders,
+            'completed_orders': completed_orders,
+            'pending_orders': pending_orders,
+            'total_spent': float(total_spent),
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+
+@login_required
+def user_profile(request):
+    """
+    Display and manage user profile information.
+    """
+    from accounts.models import Profile
+    
+    user = request.user
+    
+    try:
+        profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=user)
+    
+    if request.method == 'POST':
+        # Handle profile update
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        address = request.POST.get('address', '').strip()
+        city = request.POST.get('city', '').strip()
+        country = request.POST.get('country', '').strip()
+        
+        # Update user info
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+        
+        # Update profile
+        profile.phone = phone
+        profile.address = address
+        profile.city = city
+        profile.country = country
+        profile.save()
+        
+        from django.contrib import messages
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+    
+    context = {
+        'user': user,
+        'profile': profile,
+        'page_title': 'User Profile',
+        'breadcrumb': 'Profile',
+    }
+    
+    return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+def myOrders(request):
+    """
+    Display user's order history with filtering and pagination.
+    """
+    from store.models import Order
+    from django.core.paginator import Paginator
+    
+    user = request.user
+    
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'all')
+    page_num = request.GET.get('page', 1)
+    
+    # Base queryset
+    orders = Order.objects.filter(user=user).select_related('user').order_by('-order_date')
+    
+    # Filter by status
+    if status_filter != 'all':
+        orders = orders.filter(status=status_filter)
+    
+    # Pagination
+    paginator = Paginator(orders, 10)  # 10 orders per page
+    page_obj = paginator.get_page(page_num)
+    
+    context = {
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+        'total_orders': orders.count(),
+        'page_title': 'My Orders',
+        'breadcrumb': 'Orders',
+    }
+    
+    return render(request, 'accounts/myOrders.html', context)
+
+
+@login_required
+def order_detail(request, order_id):
+    """
+    Display detailed information about a specific order.
+    """
+    from store.models import Order
+    
+    user = request.user
+    
+    try:
+        order = Order.objects.get(order_number=order_id, user=user)
+        order_items = order.orderitem_set.all().select_related('product')
+    except Order.DoesNotExist:
+        from django.shortcuts import get_object_or_404
+        order = get_object_or_404(Order, pk=order_id, user=user)
+        order_items = order.orderitem_set.all().select_related('product')
+    
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'page_title': f'Order #{order.order_number}',
+        'breadcrumb': 'Order Details',
+    }
+    
+    return render(request, 'accounts/order_detail.html', context)
+
+
+@login_required
+def change_password(request):
+    """
+    Handle user password change requests.
+    """
+    if request.method == 'POST':
+        from django.contrib.auth import authenticate, update_session_auth_hash
+        from django.contrib import messages
+        
+        current_password = request.POST.get('current_password', '')
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        
+        user = request.user
+        
+        # Verify current password
+        if not user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('change_password')
+        
+        # Validate new password
+        if len(new_password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            return redirect('change_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+            return redirect('change_password')
+        
+        if new_password == current_password:
+            messages.error(request, 'New password must be different from current password.')
+            return redirect('change_password')
+        
+        # Update password
+        user.set_password(new_password)
+        user.save()
+        
+        # Update session to prevent logout
+        update_session_auth_hash(request, user)
+        
+        messages.success(request, 'Password changed successfully!')
+        return redirect('dashboard')
+    
+    context = {
+        'page_title': 'Change Password',
+        'breadcrumb': 'Change Password',
+    }
+    
+    return render(request, 'accounts/change_password.html', context)
+
+
+@login_required
+def wishlist(request):
+    """
+    Display user's wishlist items.
+    """
+    from store.models import Product
+    from accounts.models import Wishlist
+    
+    try:
+        wishlist_items = Wishlist.objects.filter(
+            user=request.user
+        ).select_related('product').order_by('-added_date')
+    except:
+        wishlist_items = []
+    
+    context = {
+        'wishlist_items': wishlist_items,
+        'total_items': len(wishlist_items),
+        'page_title': 'My Wishlist',
+        'breadcrumb': 'Wishlist',
+    }
+    
+    return render(request, 'accounts/wishlist.html', context)
+
+
+@login_required
+def add_to_wishlist(request, product_id):
+    """
+    Add or remove product from user's wishlist.
+    """
+    from store.models import Product
+    from accounts.models import Wishlist
+    from django.http import JsonResponse
+    from django.shortcuts import get_object_or_404
+    
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Check if already in wishlist
+        wishlist_item = Wishlist.objects.filter(
+            user=request.user,
+            product=product
+        ).first()
+        
+        if wishlist_item:
+            # Remove from wishlist
+            wishlist_item.delete()
+            return JsonResponse({
+                'success': True,
+                'action': 'removed',
+                'message': 'Removed from wishlist'
+            })
+        else:
+            # Add to wishlist
+            Wishlist.objects.create(
+                user=request.user,
+                product=product
+            )
+            return JsonResponse({
+                'success': True,
+                'action': 'added',
+                'message': 'Added to wishlist'
+            })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
 
 
 def forgotPassword(request):
