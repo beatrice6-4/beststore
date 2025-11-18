@@ -749,6 +749,173 @@ def redirect_after_login(request):
 
 
 
+# ...existing code...
+
 @login_required
 def accademicWrittings(request):
-    return render(request, 'accounts/accademicWrittings.html')
+    """
+    Display academic writings/articles page for authenticated users.
+    Allows users to browse, search, and filter academic articles.
+    """
+    from django.db.models import Q
+    from django.core.paginator import Paginator
+    
+    # Get search query and filter parameters
+    search_query = request.GET.get('q', '').strip()
+    sort_by = request.GET.get('sort', 'recent')
+    category = request.GET.get('category', 'all')
+    page_num = request.GET.get('page', 1)
+    
+    # Example articles data - can be replaced with database model queries
+    # This is mock data for demonstration
+    articles = [
+        {
+            'id': 1,
+            'title': 'Building Sustainable Business Models for the African Market',
+            'author': 'Bramwel Nyongesa',
+            'author_initials': 'BN',
+            'date': '2024-11-15',
+            'category': 'Business',
+            'description': 'Learn key strategies for creating sustainable business models that resonate with African markets. Discover how to balance profitability with social impact.',
+            'views': 2400,
+            'likes': 156,
+            'read_time': 8,
+        },
+        {
+            'id': 2,
+            'title': 'AI & Machine Learning: Transforming Retail Operations',
+            'author': 'Diana Nambuchi',
+            'author_initials': 'DN',
+            'date': '2024-11-12',
+            'category': 'Technology',
+            'description': 'Explore how artificial intelligence and machine learning are revolutionizing retail operations. From inventory management to personalized customer experiences.',
+            'views': 3800,
+            'likes': 298,
+            'read_time': 12,
+        },
+        {
+            'id': 3,
+            'title': 'Digital Payment Solutions: The Future of Commerce',
+            'author': 'Assumpta Sikolia',
+            'author_initials': 'AS',
+            'date': '2024-11-10',
+            'category': 'Innovation',
+            'description': 'Understanding the role of digital payments in shaping the future of e-commerce. Security, innovation, and customer adoption strategies.',
+            'views': 1900,
+            'likes': 127,
+            'read_time': 10,
+        },
+        {
+            'id': 4,
+            'title': 'Consumer Behavior Trends in Online Shopping 2024',
+            'author': 'Bramwel Nyongesa',
+            'author_initials': 'BN',
+            'date': '2024-11-08',
+            'category': 'Market Research',
+            'description': 'Comprehensive analysis of consumer behavior patterns in 2024. What drives purchases, payment preferences, and customer loyalty in online retail.',
+            'views': 5200,
+            'likes': 412,
+            'read_time': 15,
+        },
+        {
+            'id': 5,
+            'title': 'Cybersecurity Best Practices for E-Commerce Platforms',
+            'author': 'Diana Nambuchi',
+            'author_initials': 'DN',
+            'date': '2024-11-05',
+            'category': 'Security',
+            'description': 'Essential security measures every e-commerce platform must implement. From data encryption to fraud prevention strategies.',
+            'views': 3100,
+            'likes': 234,
+            'read_time': 11,
+        },
+        {
+            'id': 6,
+            'title': 'Creating Exceptional Customer Experiences in Digital Retail',
+            'author': 'Assumpta Sikolia',
+            'author_initials': 'AS',
+            'date': '2024-11-01',
+            'category': 'Customer Experience',
+            'description': 'Strategies for delivering exceptional customer experiences online. From personalization to responsive support systems.',
+            'views': 2700,
+            'likes': 189,
+            'read_time': 9,
+        },
+        {
+            'id': 7,
+            'title': 'The Future of E-Commerce in Africa',
+            'author': 'Bramwel Nyongesa',
+            'author_initials': 'BN',
+            'date': '2024-10-28',
+            'category': 'Business',
+            'description': 'Explore how digital transformation is reshaping the retail landscape across Africa, and what entrepreneurs need to know to stay competitive.',
+            'views': 4100,
+            'likes': 356,
+            'read_time': 13,
+        },
+        {
+            'id': 8,
+            'title': 'Logistics & Supply Chain Optimization',
+            'author': 'Diana Nambuchi',
+            'author_initials': 'DN',
+            'date': '2024-10-25',
+            'category': 'Technology',
+            'description': 'Modern approaches to supply chain management using technology and data analytics to improve efficiency and reduce costs.',
+            'views': 2900,
+            'likes': 201,
+            'read_time': 14,
+        },
+    ]
+    
+    # Filter by search query
+    if search_query:
+        articles = [
+            a for a in articles
+            if search_query.lower() in a['title'].lower()
+            or search_query.lower() in a['description'].lower()
+            or search_query.lower() in a['author'].lower()
+        ]
+    
+    # Filter by category
+    if category != 'all':
+        articles = [a for a in articles if a['category'].lower() == category.lower()]
+    
+    # Sort articles
+    if sort_by == 'popular':
+        articles = sorted(articles, key=lambda x: x['views'], reverse=True)
+    elif sort_by == 'trending':
+        articles = sorted(articles, key=lambda x: x['likes'], reverse=True)
+    elif sort_by == 'oldest':
+        articles = sorted(articles, key=lambda x: x['date'])
+    else:  # recent (default)
+        articles = sorted(articles, key=lambda x: x['date'], reverse=True)
+    
+    # Pagination
+    paginator = Paginator(articles, 6)  # 6 articles per page
+    page_obj = paginator.get_page(page_num)
+    
+    # Get unique categories for filter dropdown
+    categories = sorted(list(set([a['category'] for a in articles])))
+    
+    # Statistics
+    stats = {
+        'total_articles': len(articles),
+        'total_authors': 3,
+        'monthly_readers': '50K+',
+        'total_categories': 8,
+    }
+    
+    context = {
+        'page_obj': page_obj,
+        'articles': page_obj.object_list,
+        'categories': categories,
+        'search_query': search_query,
+        'sort_by': sort_by,
+        'selected_category': category,
+        'stats': stats,
+        'total_articles': len(articles),
+    }
+    
+    return render(request, 'accounts/accademicWrittings.html', context)
+
+
