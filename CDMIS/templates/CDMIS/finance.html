@@ -2,218 +2,776 @@
 {% block page_title %}Financial Summary{% endblock %}
 {% block breadcrumb %}Financial Summary{% endblock %}
 {% load static %}
+
 {% block content %}
 <style>
+    :root {
+        --primary-color: #1f3a5f;
+        --secondary-color: #2980b9;
+        --accent-color: #e74c3c;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --info-color: #3498db;
+        --light-bg: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-dark: #2c3e50;
+        --text-muted: #95a5a6;
+    }
+
+    /* ============ MAIN CONTAINER ============ */
+    .finance-wrapper {
+        background: linear-gradient(135deg, rgba(31, 58, 95, 0.05) 0%, rgba(41, 128, 185, 0.05) 100%);
+        padding: 40px 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    .finance-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* ============ MAIN CARD ============ */
     .finance-card {
         background: #fff;
         border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-        padding: 32px 24px;
-        margin: 40px auto;
-        max-width: 900px;
+        box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+        padding: 40px 32px;
+        margin-bottom: 32px;
+        border: 1px solid rgba(231, 76, 60, 0.1);
     }
+
     .finance-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 28px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 2px solid var(--border-color);
+        flex-wrap: wrap;
+        gap: 20px;
     }
+
     .finance-header h2 {
-        color: #004080;
-        font-weight: 700;
+        color: var(--primary-color);
+        font-weight: 800;
         margin: 0;
         font-size: 2rem;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    .download-btn {
-        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+
+    .finance-header h2 i {
+        color: var(--success-color);
+        font-size: 2.2rem;
+    }
+
+    .gov-logo {
+        display: block;
+        margin: 0 auto 24px auto;
+        height: 80px;
+        object-fit: contain;
+        animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ============ BUTTONS ============ */
+    .btn-action {
         border: none;
-        color: #fff;
+        border-radius: 8px;
+        padding: 12px 24px;
         font-weight: 600;
-        border-radius: 24px;
-        padding: 8px 28px;
-        transition: background 0.2s;
-        box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-        font-size: 1.08em;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
     }
-    .download-btn:hover {
-        background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+
+    .btn-print {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--info-color) 100%);
         color: #fff;
     }
+
+    .btn-print:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(41, 128, 185, 0.3);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-download {
+        background: linear-gradient(135deg, var(--success-color) 0%, #52c41a 100%);
+        color: #fff;
+    }
+
+    .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, var(--warning-color) 0%, #faad14 100%);
+        color: #fff;
+    }
+
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(243, 156, 18, 0.3);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* ============ FILTER SECTION ============ */
+    .filter-card {
+        background: linear-gradient(135deg, rgba(41, 128, 185, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
+        border: 1px solid rgba(41, 128, 185, 0.2);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+    }
+
+    .filter-card h5 {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+    }
+
+    .filter-card h5 i {
+        color: var(--secondary-color);
+        font-size: 1.3rem;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .filter-checkbox:hover {
+        background: var(--light-bg);
+        border-color: var(--secondary-color);
+    }
+
+    .filter-checkbox input[type="checkbox"] {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--secondary-color);
+    }
+
+    .filter-checkbox label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        flex: 1;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    /* ============ STATS SECTION ============ */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--secondary-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(44, 62, 80, 0.12);
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-top: 12px;
+        opacity: 0.2;
+    }
+
+    /* ============ TABLE SECTION ============ */
     .finance-table {
         background: #fff;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+        box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
         margin-bottom: 24px;
-        border: 1px solid #e0e0ef;
+        border: 1px solid var(--border-color);
     }
-    .finance-table th, .finance-table td {
-        border: 1px solid #e0e0ef !important;
+
+    .finance-table table {
+        margin: 0;
     }
+
+    .finance-table th,
+    .finance-table td {
+        border: 1px solid var(--border-color) !important;
+        padding: 14px 16px;
+        vertical-align: middle;
+    }
+
     .finance-table thead th {
-        background: #f3f3fa;
-        color: #4e54c8;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: #fff;
         font-weight: 700;
-        font-size: 1.08em;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
+
     .finance-table tbody tr.date-row {
-        background: #eafbe7;
-        color: #2d7a2d;
+        background: linear-gradient(90deg, rgba(39, 174, 96, 0.1) 0%, rgba(39, 174, 96, 0.05) 100%);
+        color: var(--success-color);
+        font-weight: 700;
+    }
+
+    .finance-table tbody tr.date-row td {
+        border-bottom: 2px solid var(--success-color);
+    }
+
+    .finance-table tbody tr.payment-row {
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+
+    .finance-table tbody tr.payment-row:hover {
+        background: var(--light-bg);
+    }
+
+    .finance-table tbody tr.payment-row:nth-of-type(even) {
+        background: rgba(31, 58, 95, 0.02);
+    }
+
+    .finance-table tbody tr.payment-row:nth-of-type(even):hover {
+        background: var(--light-bg);
+    }
+
+    .date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(39, 174, 96, 0.2);
+        color: var(--success-color);
+        border-radius: 6px;
         font-weight: 600;
     }
-    .finance-table tbody tr.payment-row {
-        background: #f7f8fa;
+
+    .amount-cell {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1.05rem;
     }
-    .finance-table tbody tr.payment-row:nth-of-type(even) {
-        background: #f3f3fa;
+
+    .group-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(41, 128, 185, 0.1);
+        color: var(--secondary-color);
+        border-radius: 6px;
+        font-weight: 600;
     }
+
+    /* ============ GRAND TOTAL ============ */
+    .grand-total-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
     .grand-total-card {
-        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         color: #fff;
         border-radius: 12px;
-        padding: 18px 24px;
-        font-size: 1.3em;
+        padding: 28px 24px;
+        font-size: 1.3rem;
         font-weight: 700;
         text-align: center;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
-        margin-bottom: 24px;
+        box-shadow: 0 8px 24px rgba(44, 62, 80, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.6s ease;
     }
-    .gov-logo {
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .grand-total-card i {
+        font-size: 1.8rem;
+        margin-right: 10px;
+    }
+
+    .grand-total-value {
         display: block;
-        margin: 0 auto 18px auto;
-        height: 80px;
+        font-size: 2rem;
+        margin-top: 12px;
     }
-    @media (max-width: 700px) {
+
+    /* ============ EMPTY STATE ============ */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
         .finance-card {
-            padding: 16px 4px;
+            padding: 24px 16px;
         }
+
+        .finance-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
         .finance-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
         }
-        .download-btn {
-            padding: 8px 12px;
-            font-size: 1em;
+
+        .filter-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
         }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+        }
+
+        .grand-total-section {
+            grid-template-columns: 1fr;
+        }
+
+        .finance-table th,
+        .finance-table td {
+            padding: 10px 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-action {
+            padding: 10px 16px;
+            font-size: 0.85rem;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-actions .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .finance-card {
+            padding: 16px 12px;
+        }
+
+        .finance-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .gov-logo {
+            height: 60px;
+        }
+
+        .filter-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
+
+        .finance-table th,
+        .finance-table td {
+            padding: 8px 6px;
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+        }
+
         .grand-total-card {
-            font-size: 1em;
-            padding: 12px 8px;
+            padding: 20px 16px;
+            font-size: 1.1rem;
+        }
+    }
+
+    /* ============ PRINT STYLES ============ */
+    @media print {
+        body {
+            background: #fff;
+        }
+
+        .finance-wrapper {
+            background: #fff;
+            padding: 0;
+        }
+
+        .finance-card {
+            box-shadow: none;
+            border: none;
+            page-break-inside: avoid;
+        }
+
+        .filter-card {
+            display: none;
+        }
+
+        .finance-table {
+            box-shadow: none;
+            border: 1px solid #000;
+        }
+
+        .finance-table th {
+            background: #f0f0f0 !important;
+            color: #000 !important;
+        }
+
+        .btn-action {
+            display: none;
         }
     }
 </style>
 
-<div class="finance-card">
-    <img src="{% static 'images/gov.png' %}" alt="Logo" class="gov-logo">
-    <div class="finance-header">
-        <h2><i class="fa fa-coins me-2 text-success"></i> Financial Summary</h2>
-        <button class="download-btn" onclick="printSelectedFinance()">
-            <i class="fa fa-print"></i> Print Selected Dates
-        </button>
-    </div>
+<div class="finance-wrapper">
+    <div class="finance-container">
 
-    <!-- Date selection form for CSV download and print -->
-    <form method="post" id="datesForm" class="mb-4">
-        {% csrf_token %}
-        <div class="card p-3 mb-3">
-            <h5><i class="fa fa-calendar-alt text-primary"></i> Download Finance Summary by Date</h5>
-            <div class="row">
-                {% for item in finance_list %}
-                    <div class="col-md-3 col-6 mb-2">
-                        <label>
-                            <input type="checkbox" name="dates" value="{{ item.date }}">
-                            {{ item.date }}
-                        </label>
-                    </div>
-                {% endfor %}
+        <!-- ========================= HEADER ========================= -->
+        <div class="finance-card">
+            <img src="{% static 'images/gov.png' %}" alt="Logo" class="gov-logo">
+            <div class="finance-header">
+                <h2>
+                    <i class="fas fa-coins"></i> Financial Summary
+                </h2>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn-action btn-print" onclick="printSelectedFinance()" title="Print selected dates">
+                        <i class="fas fa-print"></i> Print Selected
+                    </button>
+                    <button class="btn-action btn-download" onclick="downloadCSV()" title="Download as CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-success mt-2">
-                <i class="fa fa-download"></i> Download Selected Dates Summary
-            </button>
         </div>
-    </form>
 
-    <table class="table finance-table table-bordered">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Group</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in finance_list %}
-                <tr class="date-row">
-                    <td colspan="3">
-                        <i class="fa fa-calendar-alt text-success"></i>
-                        <strong>{{ item.date }}</strong>
-                        <span class="float-end" style="color:#2d7a2d;">
-                            <i class="fa fa-sack-dollar"></i> Total: {{ item.date_total }}
-                        </span>
-                    </td>
-                </tr>
-                {% for payment in item.payments %}
-                <tr class="payment-row">
-                    <td></td>
-                    <td><i class="fa fa-users text-primary"></i> {{ payment.group }}</td>
-                    <td>Ksh. {{ payment.amount }}</td>
-                </tr>
-                {% endfor %}
-            {% empty %}
-                <tr><td colspan="3" class="text-center">No payments found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- ========================= FILTER SECTION ========================= -->
+        <form method="post" id="datesForm" class="filter-card">
+            {% csrf_token %}
+            <h5>
+                <i class="fas fa-filter"></i> Filter by Date
+            </h5>
 
-    <div class="grand-total-card">
-        <i class="fa fa-calculator me-2"></i>
-        Grand Total: Ksh. {{ grand_total }}
+            {% if finance_list %}
+                <div class="filter-grid">
+                    {% for item in finance_list %}
+                        <div class="filter-checkbox">
+                            <input type="checkbox" name="dates" value="{{ item.date }}" id="date-{{ forloop.counter }}">
+                            <label for="date-{{ forloop.counter }}">{{ item.date }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No dates available.</p>
+            {% endif %}
+
+            <div class="filter-actions">
+                <button type="button" class="btn-action btn-download" onclick="selectAllDates()">
+                    <i class="fas fa-check-square"></i> Select All
+                </button>
+                <button type="button" class="btn-action" style="background: #95a5a6; color: #fff;" onclick="clearAllDates()">
+                    <i class="fas fa-times"></i> Clear All
+                </button>
+            </div>
+        </form>
+
+        <!-- ========================= STATISTICS ========================= -->
+        {% if grand_total %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Payments</div>
+                    <h3 class="stat-value">{{ finance_list|length }}</h3>
+                    <i class="fas fa-receipt stat-icon"></i>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success-color);">
+                    <div class="stat-label">Grand Total Amount</div>
+                    <h3 class="stat-value">Ksh {{ grand_total }}</h3>
+                    <i class="fas fa-money-bill-wave stat-icon"></i>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--info-color);">
+                    <div class="stat-label">Date Range</div>
+                    <h3 class="stat-value">
+                        {% if finance_list %}
+                            {{ finance_list.0.date }} — {{ finance_list|last|get_item:"date" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                    <i class="fas fa-calendar stat-icon"></i>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- ========================= MAIN TABLE ========================= -->
+        <div class="finance-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th width="20%">
+                            <i class="fas fa-calendar-alt"></i> Date
+                        </th>
+                        <th width="50%">
+                            <i class="fas fa-users"></i> Group
+                        </th>
+                        <th width="30%">
+                            <i class="fas fa-money-bill-wave"></i> Amount
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if finance_list %}
+                        {% for item in finance_list %}
+                            <tr class="date-row">
+                                <td colspan="3">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                        <span class="date-badge">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            {{ item.date }}
+                                        </span>
+                                        <span style="color: var(--success-color); font-weight: 700;">
+                                            <i class="fas fa-sack-dollar"></i> Daily Total: <strong>Ksh {{ item.date_total }}</strong>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% for payment in item.payments %}
+                                <tr class="payment-row">
+                                    <td></td>
+                                    <td>
+                                        <span class="group-badge">
+                                            <i class="fas fa-users"></i> {{ payment.group }}
+                                        </span>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <i class="fas fa-money-bill-wave"></i> Ksh {{ payment.amount }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <h3>No Payments Found</h3>
+                                    <p>There are no financial records available at the moment.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ========================= GRAND TOTAL ========================= -->
+        {% if grand_total %}
+            <div class="grand-total-section">
+                <div class="grand-total-card">
+                    <i class="fas fa-calculator"></i>
+                    <div>Grand Total</div>
+                    <span class="grand-total-value">Ksh {{ grand_total }}</span>
+                </div>
+            </div>
+        {% endif %}
+
     </div>
 </div>
 
+<!-- ========================= SCRIPTS ========================= -->
 <script>
-function printSelectedFinance() {
-    var checked = document.querySelectorAll('input[name="dates"]:checked');
-    var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
-
-    if (selectedDates.length === 0) {
-        alert("Please select at least one date to print.");
-        return;
+    // Select all dates
+    function selectAllDates() {
+        document.querySelectorAll('input[name="dates"]').forEach(function(checkbox) {
+            checkbox.checked = true;
+        });
     }
 
-    var printable = '<div style="text-align:center; margin-bottom:20px;">' +
-        '<img src="{% static "images/gov.png" %}" alt="Logo" style="height:80px;">' +
-        '<h2 style="margin-top:10px;">Financial Summary</h2></div>' +
-        '<table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse; margin-bottom:20px;">' +
-        '<thead style="background:#eafbe7; color:#2d7a2d;"><tr><th>Date</th><th>Group</th><th>Amount</th></tr></thead><tbody>';
+    // Clear all dates
+    function clearAllDates() {
+        document.querySelectorAll('input[name="dates"]').forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
+    }
 
-    var grandTotal = 0;
+    // Print selected dates
+    function printSelectedFinance() {
+        var checked = document.querySelectorAll('input[name="dates"]:checked');
+        var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
 
-    {% for item in finance_list %}
-        if (selectedDates.includes("{{ item.date }}")) {
-            var dateTotal = {{ item.date_total }};
-            grandTotal += dateTotal;
-            printable += '<tr style="background:#eafbe7;"><td colspan="3"><strong>{{ item.date }}</strong> — <span style="color:#2d7a2d;">Total: {{ item.date_total }}</span></td></tr>';
-            {% for payment in item.payments %}
-                printable += '<tr><td></td><td>{{ payment.group }}</td><td>{{ payment.amount }}</td></tr>';
-            {% endfor %}
+        if (selectedDates.length === 0) {
+            alert('Please select at least one date to print.');
+            return;
         }
-    {% endfor %}
 
-    printable += '</tbody></table>';
-    printable += '<table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">' +
-        '<thead style="background:#eafbe7; color:#2d7a2d;"><tr><th>Grand Total</th></tr></thead>' +
-        '<tbody><tr><td>' + grandTotal + '</td></tr></tbody></table>';
+        var printable = '<div style="text-align:center; margin-bottom:30px;">' +
+            '<img src="{% static "images/gov.png" %}" alt="Logo" style="height:80px; margin-bottom:15px;">' +
+            '<h2 style="color:#1f3a5f; margin:0;">Financial Summary Report</h2>' +
+            '<p style="color:#95a5a6; margin:10px 0 0 0;">Generated on ' + new Date().toLocaleDateString() + '</p>' +
+            '</div>' +
+            '<table border="1" cellpadding="10" cellspacing="0" width="100%" style="border-collapse:collapse; font-family:Arial,sans-serif;">' +
+            '<thead style="background:#1f3a5f; color:#fff;"><tr><th>Date</th><th>Group</th><th>Amount</th></tr></thead><tbody>';
 
-    var win = window.open('', '', 'height=900,width=1200');
-    win.document.write('<html><head><title>Financial Summary</title>');
-    win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
-    win.document.write('<style>body{font-family:Segoe UI,Arial,sans-serif;} table{margin-bottom:24px;} th,td{padding:8px 10px;}</style>');
-    win.document.write('</head><body>');
-    win.document.write(printable);
-    win.document.write('</body></html>');
-    win.document.close();
-    win.focus();
-    win.print();
-}
+        var grandTotal = 0;
+
+        {% for item in finance_list %}
+            if (selectedDates.includes("{{ item.date }}")) {
+                var dateTotal = parseFloat("{{ item.date_total }}".replace(/,/g, ''));
+                grandTotal += dateTotal;
+                printable += '<tr style="background:#eafbe7; font-weight:bold;"><td colspan="3">{{ item.date }} — Daily Total: Ksh {{ item.date_total }}</td></tr>';
+                {% for payment in item.payments %}
+                    printable += '<tr><td></td><td>{{ payment.group }}</td><td>Ksh {{ payment.amount }}</td></tr>';
+                {% endfor %}
+            }
+        {% endfor %}
+
+        printable += '</tbody></table>';
+        printable += '<div style="margin-top:30px; text-align:center; padding:20px; background:#f8f9fa; border-radius:8px; font-size:18px; font-weight:bold; color:#1f3a5f;">' +
+            'Grand Total: Ksh ' + grandTotal.toFixed(2) + '</div>';
+
+        var win = window.open('', '', 'height=1000,width=1200');
+        win.document.write('<html><head><title>Financial Summary Report</title>');
+        win.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">');
+        win.document.write('<style>body{font-family:Arial,sans-serif; margin:20px;} table{margin-bottom:20px;} th,td{padding:10px; text-align:left;} th{background:#1f3a5f; color:#fff;}</style>');
+        win.document.write('</head><body>');
+        win.document.write(printable);
+        win.document.write('<script>window.onload = function() { window.print(); }</script>');
+        win.document.write('</body></html>');
+        win.document.close();
+    }
+
+    // Download CSV
+    function downloadCSV() {
+        var checked = document.querySelectorAll('input[name="dates"]:checked');
+        if (checked.length === 0) {
+            alert('Please select at least one date to download.');
+            return;
+        }
+
+        var csv = 'Date,Group,Amount\n';
+        var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
+
+        {% for item in finance_list %}
+            if (selectedDates.includes("{{ item.date }}")) {
+                {% for payment in item.payments %}
+                    csv += '"{{ item.date }}","{{ payment.group }}","{{ payment.amount }}"\n';
+                {% endfor %}
+            }
+        {% endfor %}
+
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'finance-summary-' + new Date().getTime() + '.csv';
+        link.click();
+    }
+
+    // Auto-select checkbox functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        var dateCheckboxes = document.querySelectorAll('input[name="dates"]');
+        dateCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                // Optional: Add visual feedback
+                this.parentElement.style.borderColor = this.checked ? '#2980b9' : '#e9ecef';
+            });
+        });
+    });
 </script>
+
 {% endblock %}
