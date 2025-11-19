@@ -136,6 +136,18 @@
         display: flex;
         gap: 12px;
         align-items: flex-start;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .alert i {
@@ -250,6 +262,12 @@
     .form-help {
         font-size: 0.85rem;
         color: var(--text-muted);
+        margin-top: 6px;
+    }
+
+    .form-error {
+        font-size: 0.85rem;
+        color: #dc3545;
         margin-top: 6px;
     }
 
@@ -480,6 +498,9 @@
                                     <strong>Payment Error</strong>
                                     <p style="margin: 4px 0 0 0;">{{ payment_response.error }}{% if payment_response.details %} — {{ payment_response.details }}{% endif %}</p>
                                 </div>
+                                <button class="alert-close" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         {% endif %}
 
@@ -489,44 +510,52 @@
                                 <div class="alert-content">
                                     {{ payment_response.message }}
                                 </div>
+                                <button class="alert-close" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         {% endif %}
 
-                        {% if payment_response.paybill_instructions %}
+                        {% if payment_response.success %}
                             <div class="alert alert-info" role="alert">
                                 <i class="fas fa-info-circle"></i>
                                 <div class="alert-content">
-                                    <strong>Paybill Instructions</strong>
-                                    <p style="margin: 8px 0 0 0;">{{ payment_response.paybill_instructions }}</p>
+                                    <strong>Payment Details</strong>
                                     <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
-                                        <div><strong>Paybill:</strong> {{ payment_response.paybill }}</div>
-                                        <div><strong>Account:</strong> {{ payment_response.account_reference }}</div>
-                                        <div colspan="2"><strong>Amount:</strong> Ksh {{ payment_response.amount }}</div>
+                                        <div><strong>Till Number:</strong> BRAMH</div>
+                                        <div><strong>Amount:</strong> Ksh {{ payment_response.amount }}</div>
+                                        <div><strong>Reference:</strong> {{ payment_response.account_reference }}</div>
+                                        <div><strong>Order:</strong> {{ payment_response.order_number }}</div>
                                     </div>
                                 </div>
+                                <button class="alert-close" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         {% endif %}
                     {% endif %}
                 </div>
 
                 <!-- ========================= ORDER INFORMATION ========================= -->
-                <div class="order-info">
-                    <div class="order-info-row">
-                        <span class="order-info-label">Order Number</span>
-                        <span class="order-info-value" id="order-no">{{ order.order_number|default:"N/A" }}</span>
+                {% if order %}
+                    <div class="order-info">
+                        <div class="order-info-row">
+                            <span class="order-info-label">Order Number</span>
+                            <span class="order-info-value" id="order-no">{{ order.order_number }}</span>
+                        </div>
+                        <div class="order-info-row">
+                            <span class="order-info-label">Order Date</span>
+                            <span class="order-info-value">{{ order.order_date|date:"M d, Y \a\t H:i"|default:"Today" }}</span>
+                        </div>
+                        <div class="order-info-row">
+                            <span class="order-info-label">Total Amount</span>
+                            <span class="order-info-value highlight">Ksh {{ grand_total|floatformat:2 }}</span>
+                        </div>
                     </div>
-                    <div class="order-info-row">
-                        <span class="order-info-label">Order Date</span>
-                        <span class="order-info-value">{{ order.order_date|date:"M d, Y \a\t H:i"|default:"N/A" }}</span>
-                    </div>
-                    <div class="order-info-row">
-                        <span class="order-info-label">Total Amount</span>
-                        <span class="order-info-value highlight">Ksh {{ grand_total|floatformat:2|default:0 }}</span>
-                    </div>
-                </div>
+                {% endif %}
 
                 <!-- ========================= PAYMENT FORM ========================= -->
-                <form id="mpesa-form" method="POST" action="" class="payment-form">
+                <form id="mpesa-form" method="POST" class="payment-form">
                     {% csrf_token %}
 
                     <!-- Phone Number -->
@@ -542,16 +571,16 @@
                                 name="phone_number" 
                                 class="form-control with-prefix" 
                                 inputmode="numeric" 
-                                pattern="2547[0-9]{8}" 
-                                maxlength="12" 
+                                pattern="[0-9+]{10,15}" 
+                                maxlength="15" 
                                 placeholder="2547XXXXXXXX" 
                                 required 
-                                value="{{ request.user.phone_number|default:'' }}"
                                 aria-label="M-Pesa phone number">
                         </div>
                         <div class="form-help">
-                            <i class="fas fa-info-circle me-1"></i>Format: 2547XXXXXXXX (12 digits)
+                            <i class="fas fa-info-circle me-1"></i>Format: 2547XXXXXXXX (12 digits) or 07XXXXXXXX
                         </div>
+                        <div class="form-error" id="phone-error" style="display: none;"></div>
                     </div>
 
                     <!-- Amount -->
@@ -568,11 +597,12 @@
                             min="1" 
                             step="1" 
                             required 
-                            value="{{ grand_total|floatformat:0|default:0 }}"
+                            value="{{ grand_total|floatformat:0 }}"
                             aria-label="Payment amount in Kenyan Shillings">
                         <div class="form-help">
                             <i class="fas fa-lock me-1"></i>Minimum amount: Ksh 1
                         </div>
+                        <div class="form-error" id="amount-error" style="display: none;"></div>
                     </div>
 
                     <!-- Payment Steps -->
@@ -616,14 +646,14 @@
                 <div class="security-info">
                     <i class="fas fa-shield-alt"></i>
                     <div class="security-text">
-                        <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your M-Pesa PIN.
+                        <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your M-Pesa PIN. Till Reference: <strong>BRAMH</strong>
                     </div>
                 </div>
 
                 <!-- Footer -->
                 <div class="payment-footer">
                     <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
-                        Need help? <a href="#contact">Contact Support</a> or visit <a href="#faq">FAQ</a>
+                        Need help? <a href="mailto:support@beststore.com">Contact Support</a>
                     </p>
                 </div>
 
@@ -678,12 +708,38 @@
 
     // Validate phone number
     function validatePhone(phone) {
-        return /^2547\d{8}$/.test(phone);
+        // Accept formats: 2547XXXXXXXX, 07XXXXXXXX, +2547XXXXXXXX
+        phone = phone.replace(/\s/g, '');
+        
+        if (phone.startsWith('+')) {
+            phone = phone.substring(1);
+        }
+        
+        if (phone.startsWith('0')) {
+            phone = '254' + phone.substring(1);
+        }
+        
+        return /^2547\d{8}$/.test(phone) && phone.length === 12;
     }
 
     // Validate amount
     function validateAmount(amount) {
         return !isNaN(amount) && parseInt(amount, 10) > 0;
+    }
+
+    // Clear form errors
+    function clearErrors() {
+        document.getElementById('phone-error').style.display = 'none';
+        document.getElementById('amount-error').style.display = 'none';
+    }
+
+    // Show form error
+    function showError(fieldId, message) {
+        const errorElement = document.getElementById(fieldId + '-error');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
     }
 
     if (!form) return;
@@ -692,18 +748,32 @@
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
+        clearErrors();
+
         const phone = phoneInput.value.trim();
         const amount = amountInput.value.trim();
 
         // Validate inputs
-        if (!validatePhone(phone)) {
-            showAlert('Phone number must be in format 2547XXXXXXXX (12 digits)', 'error');
+        if (!phone) {
+            showError('phone', 'Phone number is required');
             phoneInput.focus();
             return;
         }
 
+        if (!validatePhone(phone)) {
+            showError('phone', 'Phone number must be in format 2547XXXXXXXX or 07XXXXXXXX');
+            phoneInput.focus();
+            return;
+        }
+
+        if (!amount) {
+            showError('amount', 'Amount is required');
+            amountInput.focus();
+            return;
+        }
+
         if (!validateAmount(amount)) {
-            showAlert('Please enter a valid amount greater than 0', 'error');
+            showError('amount', 'Please enter a valid amount greater than 0');
             amountInput.focus();
             return;
         }
@@ -737,7 +807,7 @@
             if (json) {
                 if (json.success) {
                     showAlert(
-                        json.message || 'Payment request sent successfully. Confirm on your phone.',
+                        json.message || 'Payment request sent successfully. Confirm on your phone within 3 minutes.',
                         'success',
                         180000
                     );
@@ -745,12 +815,8 @@
                     // Redirect to order page if provided
                     if (json.order_number) {
                         setTimeout(() => {
-                            const baseUrl = '{% url "placeOrder" %}';
-                            const orderUrl = baseUrl.endsWith('/') 
-                                ? baseUrl + encodeURIComponent(json.order_number) + '/'
-                                : baseUrl + '/' + encodeURIComponent(json.order_number) + '/';
-                            window.location.href = orderUrl;
-                        }, 1500);
+                            window.location.href = `/orders/${json.order_number}/`;
+                        }, 2000);
                         return;
                     }
 
@@ -763,11 +829,11 @@
                     showAlert(json.message || 'Payment request failed. Please try again.', 'error');
                 }
             } else {
-                showAlert('Enter your M-Pesa PIN on your phone to complete the payment.', 'info', 180000);
+                showAlert('Enter your M-Pesa PIN on your phone to complete the payment within 3 minutes.', 'info', 180000);
             }
         } catch (err) {
             console.error('Payment error:', err);
-            showAlert('Enter your M-Pesa PIN on your phone to complete the payment.', 'info', 180000);
+            showAlert('Enter your M-Pesa PIN on your phone to complete the payment within 3 minutes.', 'info', 180000);
         } finally {
             payBtn.disabled = false;
             payBtn.setAttribute('aria-busy', 'false');
@@ -795,11 +861,7 @@
 
                             if (data.order_number) {
                                 setTimeout(() => {
-                                    const baseUrl = '{% url "placeOrder" %}';
-                                    const orderUrl = baseUrl.endsWith('/')
-                                        ? baseUrl + encodeURIComponent(data.order_number) + '/'
-                                        : baseUrl + '/' + encodeURIComponent(data.order_number) + '/';
-                                    window.location.href = orderUrl;
+                                    window.location.href = `/orders/${data.order_number}/`;
                                 }, 1000);
                             }
                             return;
@@ -819,8 +881,9 @@
 
     // Real-time phone validation
     phoneInput.addEventListener('blur', function () {
+        clearErrors();
         if (this.value && !validatePhone(this.value.trim())) {
-            showAlert('Invalid phone number format. Use 2547XXXXXXXX', 'warning', 5000);
+            showError('phone', 'Invalid phone number format. Use 2547XXXXXXXX or 07XXXXXXXX');
         }
     });
 
