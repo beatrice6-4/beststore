@@ -187,476 +187,53 @@ class FinanceDateForm(forms.Form):
         required=True,
         label="Select Dates"
     )
-from django.views import View
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.db.models import Sum, Q
-from datetime import datetime, timedelta
-from .models import Payment, Group
-import json
 
-
-class FinanceView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Finance view for displaying financial summary and payment records.
-    Only accessible to staff members and group leaders.
-    Displays payments grouped by date with daily totals and grand total.
-    """
+class FinanceView(UserPassesTestMixin, View):
     template_name = 'CDMIS/finance.html'
-    login_url = 'login'
 
     def test_func(self):
-        """
-        Test if user is staff or group leader.
-        Returns True if user has permission to view finances.
-        """
-        return self.request.user.is_staff or self.request.user.groups.filter(name='Group Leaders').exists()
+        return self.request.user.is_staff or self.request.user.is_superuser
 
     def handle_no_permission(self):
-        """
-        Handle when user doesn't have permission.
-        """
-        from django.shortcuts import redirect
-        from django.contrib import messages
-        messages.error(self.request, 'You do not have permission to access this page.')
-        return redirect('dashboard')
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("ERROR 404, ONLY ADMINS ARE ALLOWED TO VIEW THIS PAGE.")
 
-    def get_finance_data(self, start_date=None, end_date=None, selected_dates=None):
-        """
-        Get financial data from the database.
-        
-        Args:
-            start_date: Optional start date for filtering
-            end_date: Optional end date for filtering
-            selected_dates: List of specific dates to filter by
-        
-        Returns:
-            List of dicts with date, payments, and date_total
-        """
-        # Base queryset
-        payments = Payment.objects.select_related('group', 'user').order_by('-date', 'group__name')
+    def get(self, request, *args, **kwargs):
+        from collections import defaultdict
+        from .models import Group, Payment
 
-        # Filter by user if not staff
-        if not self.request.user.is_staff:
-            payments = payments.filter(
-                Q(group__leaders=self.request.user) | 
-                Q(user=self.request.user)
-            )
+        payments = Payment.objects.select_related('group').order_by('payment_date')
+        finance_data = defaultdict(list)
+        date_choices = set()
+        for payment in payments:
+            finance_data[payment.payment_date].append({
+                'group': payment.group.name,
+                'amount': payment.amount
+            })
+            date_choices.add(payment.payment_date)
 
-        # Date filtering
-        if start_date:
-            try:
-                start = datetime.strptime(start_date, '%Y-%m-%d').date()
-                payments = payments.filter(date__gte=start)
-            except ValueError:
-                pass
-
-        if end_date:
-            try:
-                end = datetime.strptime(end_date, '%Y-%m-%d').date()
-                payments = payments.filter(date__lte=end)
-            except ValueError:
-                pass
-
-        # Specific dates filtering
-        if selected_dates:
-            date_list = []
-            for date_str in selected_dates:
-                try:
-                    date_list.append(datetime.strptime(date_str, '%Y-%m-%d').date())
-                except ValueError:
-                    pass
-            if date_list:
-                payments = payments.filter(date__in=date_list)
-
-        # Group by date
         finance_list = []
-        current_date = None
-        current_payments = []
-        date_total = 0
-
-        for payment in payments:
-            if current_date != payment.date:
-                # Save previous date group
-                if current_date is not None:
-                    finance_list.append({
-                        'date': current_date.strftime('%Y-%m-%d'),
-                        'date_display': current_date.strftime('%A, %B %d, %Y'),
-                        'payments': current_payments,
-                        'date_total': f"{date_total:,.2f}",
-                        'date_total_raw': date_total,
-                    })
-                
-                # Start new date group
-                current_date = payment.date
-                current_payments = []
-                date_total = 0
-
-            # Add payment to current group
-            current_payments.append({
-                'id': payment.id,
-                'group': payment.group.name if payment.group else 'Individual',
-                'group_id': payment.group.id if payment.group else None,
-                'amount': f"{float(payment.amount):,.2f}",
-                'amount_raw': float(payment.amount),
-                'description': payment.description or 'Payment',
-                'payment_method': payment.payment_method or 'Cash',
-                'reference': payment.reference or 'N/A',
-                'user': payment.user.get_full_name() or payment.user.username,
-            })
-            date_total += float(payment.amount)
-
-        # Add last date group
-        if current_date is not None:
+        for date, items in finance_data.items():
+            date_total = sum(item['amount'] for item in items)
             finance_list.append({
-                'date': current_date.strftime('%Y-%m-%d'),
-                'date_display': current_date.strftime('%A, %B %d, %Y'),
-                'payments': current_payments,
-                'date_total': f"{date_total:,.2f}",
-                'date_total_raw': date_total,
+                'date': date,
+                'payments': items,
+                'date_total': date_total
             })
+        finance_list.sort(key=lambda x: x['date'])
 
-        return finance_list
+        grand_total = payments.aggregate(total=Sum('amount'))['total'] or 0
 
-    def calculate_totals(self, finance_list):
-        """
-        Calculate grand totals from finance list.
-        
-        Args:
-            finance_list: List of finance data by date
-        
-        Returns:
-            Dict with total_payments, grand_total, date_range
-        """
-        total_payments = 0
-        grand_total = 0.0
-        first_date = None
-        last_date = None
+        # Prepare date choices for the form
+        date_choices = sorted(list(date_choices))
+        form = FinanceDateForm()
+        form.fields['dates'].choices = [(str(d), d.strftime("%b %d, %Y")) for d in date_choices]
 
-        for date_group in finance_list:
-            for payment in date_group['payments']:
-                total_payments += 1
-                grand_total += payment['amount_raw']
-            
-            if first_date is None:
-                first_date = date_group['date']
-            last_date = date_group['date']
-
-        return {
-            'total_payments': total_payments,
-            'grand_total': f"{grand_total:,.2f}",
-            'grand_total_raw': grand_total,
-            'first_date': first_date,
-            'last_date': last_date,
-            'date_range': f"{first_date} to {last_date}" if first_date and last_date else "N/A",
-        }
-
-    def get_date_options(self):
-        """
-        Get all unique dates available for filtering.
-        
-        Returns:
-            List of dates with payment counts
-        """
-        payments = Payment.objects.values('date').annotate(
-            count=Sum('id'),
-            total=Sum('amount')
-        ).order_by('-date')
-
-        # Filter by user if not staff
-        if not self.request.user.is_staff:
-            payment_ids = Payment.objects.filter(
-                Q(group__leaders=self.request.user) | 
-                Q(user=self.request.user)
-            ).values_list('id', flat=True)
-            payments = payments.filter(id__in=payment_ids)
-
-        date_options = []
-        for payment in payments:
-            date_options.append({
-                'date': payment['date'].strftime('%Y-%m-%d'),
-                'display': payment['date'].strftime('%a, %b %d, %Y'),
-                'count': payment['count'],
-                'total': f"{float(payment['total']):,.2f}",
-            })
-
-        return date_options
-
-    def get(self, request, *args, **kwargs):
-        """
-        Handle GET requests.
-        Display financial summary with all data.
-        """
-        # Get query parameters
-        start_date = request.GET.get('start_date')
-        end_date = request.GET.get('end_date')
-        selected_dates = request.GET.getlist('dates')
-
-        # Get finance data
-        finance_list = self.get_finance_data(start_date, end_date, selected_dates)
-        
-        # Calculate totals
-        totals = self.calculate_totals(finance_list)
-
-        # Get date options for filter
-        date_options = self.get_date_options()
-
-        context = {
+        return render(request, self.template_name, {
             'finance_list': finance_list,
-            'date_options': date_options,
-            'grand_total': totals['grand_total'],
-            'total_payments': totals['total_payments'],
-            'date_range': totals['date_range'],
-            'page_title': 'Financial Summary',
-            'breadcrumb': 'Finance',
-        }
-
-        return render(request, self.template_name, context)
-
-    def post(self, request, *args, **kwargs):
-        """
-        Handle POST requests for filtered data.
-        Returns JSON response with filtered finance data.
-        """
-        try:
-            data = json.loads(request.body)
-            selected_dates = data.get('dates', [])
-            start_date = data.get('start_date')
-            end_date = data.get('end_date')
-
-            # Get finance data
-            finance_list = self.get_finance_data(start_date, end_date, selected_dates)
-            
-            # Calculate totals
-            totals = self.calculate_totals(finance_list)
-
-            return JsonResponse({
-                'success': True,
-                'finance_list': finance_list,
-                'totals': totals,
-                'message': f'Loaded {totals["total_payments"]} payments'
-            })
-
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'error': 'Invalid JSON data'
-            }, status=400)
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            }, status=500)
-
-
-class FinanceExportView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Export finance data as CSV or PDF.
-    Only accessible to staff members.
-    """
-    login_url = 'login'
-
-    def test_func(self):
-        """Only staff can export data."""
-        return self.request.user.is_staff
-
-    def get(self, request, *args, **kwargs):
-        """
-        Export finance data.
-        Query params:
-            - format: 'csv' or 'pdf' (default: csv)
-            - dates: comma-separated list of dates
-        """
-        export_format = request.GET.get('format', 'csv')
-        dates_str = request.GET.get('dates', '')
-        
-        # Parse dates
-        selected_dates = [d.strip() for d in dates_str.split(',') if d.strip()]
-
-        # Get payments
-        payments = Payment.objects.select_related('group', 'user').order_by('-date')
-        
-        if selected_dates:
-            date_list = []
-            for date_str in selected_dates:
-                try:
-                    date_list.append(datetime.strptime(date_str, '%Y-%m-%d').date())
-                except ValueError:
-                    pass
-            if date_list:
-                payments = payments.filter(date__in=date_list)
-
-        if export_format == 'csv':
-            return self._export_csv(payments)
-        elif export_format == 'pdf':
-            return self._export_pdf(payments)
-        else:
-            return JsonResponse({'error': 'Invalid format'}, status=400)
-
-    def _export_csv(self, payments):
-        """Export payments as CSV."""
-        import csv
-        from django.http import HttpResponse
-
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="finance-export-{datetime.now().strftime("%Y%m%d")}.csv"'
-
-        writer = csv.writer(response)
-        writer.writerow(['Date', 'Group', 'Amount', 'Method', 'Reference', 'User'])
-
-        for payment in payments:
-            writer.writerow([
-                payment.date.strftime('%Y-%m-%d'),
-                payment.group.name if payment.group else 'Individual',
-                float(payment.amount),
-                payment.payment_method or 'Cash',
-                payment.reference or '',
-                payment.user.get_full_name() or payment.user.username,
-            ])
-
-        # Add totals row
-        total = sum(float(p.amount) for p in payments)
-        writer.writerow(['', 'TOTAL', total, '', '', ''])
-
-        return response
-
-    def _export_pdf(self, payments):
-        """Export payments as PDF."""
-        try:
-            from reportlab.lib.pagesizes import letter, A4
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch
-            from reportlab.lib import colors
-            from django.http import HttpResponse
-            from datetime import datetime
-
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="finance-export-{datetime.now().strftime("%Y%m%d")}.pdf"'
-
-            # Create PDF
-            doc = SimpleDocTemplate(response, pagesize=A4)
-            elements = []
-            styles = getSampleStyleSheet()
-
-            # Title
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=24,
-                textColor=colors.HexColor('#1f3a5f'),
-                spaceAfter=30,
-                alignment=1
-            )
-            elements.append(Paragraph('Financial Summary Report', title_style))
-            elements.append(Spacer(1, 0.3*inch))
-
-            # Table data
-            data = [['Date', 'Group', 'Amount', 'Method', 'Reference', 'User']]
-            total = 0
-
-            for payment in payments:
-                data.append([
-                    payment.date.strftime('%Y-%m-%d'),
-                    payment.group.name if payment.group else 'Individual',
-                    f"Ksh {float(payment.amount):,.2f}",
-                    payment.payment_method or 'Cash',
-                    payment.reference or '',
-                    payment.user.get_full_name() or payment.user.username,
-                ])
-                total += float(payment.amount)
-
-            # Add total row
-            data.append(['', '', f"Ksh {total:,.2f}", '', '', 'TOTAL'])
-
-            # Create table
-            table = Table(data, colWidths=[1.2*inch, 1.2*inch, 1*inch, 0.8*inch, 1*inch, 1.2*inch])
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f3a5f')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 12),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#eafbe7')),
-                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -2), [colors.white, colors.HexColor('#f8f9fa')]),
-            ]))
-
-            elements.append(table)
-            doc.build(elements)
-            return response
-
-        except ImportError:
-            return JsonResponse({
-                'error': 'PDF export requires reportlab. Install with: pip install reportlab'
-            }, status=500)
-
-
-class FinanceStatsView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    API endpoint for finance statistics.
-    Returns JSON data for dashboard widgets.
-    """
-    login_url = 'login'
-
-    def test_func(self):
-        return self.request.user.is_staff or self.request.user.groups.filter(name='Group Leaders').exists()
-
-    def get(self, request, *args, **kwargs):
-        """
-        Get finance statistics.
-        Query params:
-            - period: 'today', 'week', 'month', 'year' (default: month)
-        """
-        period = request.GET.get('period', 'month')
-        today = datetime.now().date()
-
-        # Determine date range
-        if period == 'today':
-            start_date = today
-        elif period == 'week':
-            start_date = today - timedelta(days=7)
-        elif period == 'year':
-            start_date = today - timedelta(days=365)
-        else:  # month
-            start_date = today - timedelta(days=30)
-
-        # Get payments
-        payments = Payment.objects.filter(date__gte=start_date).select_related('group')
-
-        if not request.user.is_staff:
-            payments = payments.filter(
-                Q(group__leaders=request.user) | 
-                Q(user=request.user)
-            )
-
-        # Calculate stats
-        stats = {
-            'total_amount': float(payments.aggregate(Sum('amount'))['amount__sum'] or 0),
-            'total_payments': payments.count(),
-            'average_payment': float(payments.aggregate(Sum('amount'))['amount__sum'] or 0) / max(payments.count(), 1),
-            'period': period,
-        }
-
-        # By payment method
-        by_method = payments.values('payment_method').annotate(
-            total=Sum('amount'),
-            count=Sum('id')
-        )
-        stats['by_method'] = list(by_method)
-
-        # By group
-        by_group = payments.values('group__name').annotate(
-            total=Sum('amount'),
-            count=Sum('id')
-        ).order_by('-total')
-        stats['by_group'] = list(by_group)
-
-        return JsonResponse(stats)
-
+            'grand_total': grand_total,
+            'form': form,
+        })
 
     def post(self, request, *args, **kwargs):
         # Handle download request
