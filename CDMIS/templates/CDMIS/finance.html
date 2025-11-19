@@ -98,7 +98,6 @@
         align-items: center;
         gap: 8px;
         font-size: 0.95rem;
-        cursor: pointer;
     }
 
     .btn-print {
@@ -588,13 +587,7 @@
                 </div>
                 <div class="stat-card" style="border-left-color: var(--info-color);">
                     <div class="stat-label">Date Range</div>
-                    <h3 class="stat-value">
-                        {% if finance_list %}
-                            <span id="dateRangeStart">{{ finance_list.0.date }}</span> — <span id="dateRangeEnd">{{ finance_list|last }}</span>
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </h3>
+                    
                     <i class="fas fa-calendar stat-icon"></i>
                 </div>
             </div>
@@ -691,21 +684,6 @@
         });
     }
 
-    // Update date range display
-    function updateDateRange() {
-        var checked = document.querySelectorAll('input[name="dates"]:checked');
-        var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
-        
-        if (selectedDates.length > 0) {
-            selectedDates.sort();
-            var startDate = selectedDates[0];
-            var endDate = selectedDates[selectedDates.length - 1];
-            
-            document.getElementById('dateRangeStart').textContent = startDate;
-            document.getElementById('dateRangeEnd').textContent = endDate;
-        }
-    }
-
     // Print selected dates
     function printSelectedFinance() {
         var checked = document.querySelectorAll('input[name="dates"]:checked');
@@ -771,10 +749,10 @@
             }
         {% endfor %}
 
-        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        var blob = new Blob([csv], { type: 'text/csv' });
         var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'finance-summary-' + new Date().toISOString().split('T')[0] + '.csv';
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'finance-summary-' + new Date().getTime() + '.csv';
         link.click();
     }
 
@@ -783,19 +761,10 @@
         var dateCheckboxes = document.querySelectorAll('input[name="dates"]');
         dateCheckboxes.forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
-                // Visual feedback
+                // Optional: Add visual feedback
                 this.parentElement.style.borderColor = this.checked ? '#2980b9' : '#e9ecef';
-                this.parentElement.style.backgroundColor = this.checked ? 'rgba(41, 128, 185, 0.05)' : '#fff';
-                
-                // Update date range
-                updateDateRange();
             });
         });
-    });
-
-    // Initial date range update
-    window.addEventListener('load', function() {
-        updateDateRange();
     });
 </script>
 
