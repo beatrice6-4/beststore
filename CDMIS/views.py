@@ -657,7 +657,6 @@ class FinanceStatsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return JsonResponse(stats)
 
-        
 
     def post(self, request, *args, **kwargs):
         # Handle download request
