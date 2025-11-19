@@ -5,198 +5,629 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="CDMIS Management Dashboard - Community Development Management Information System">
+    <meta name="keywords" content="CDMIS, management, dashboard, groups, training, payments">
+    <meta name="author" content="BestStore">
     <title>{% block title %}User Dashboard | CDMIS MANAGEMENT{% endblock %}</title>
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="/static/vendor/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/static/vendor/adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="/static/jazzmin/css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <!-- Favicon -->
     <link rel="shortcut icon" href="{% static 'images/gov.png' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/gov.png' %}" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'images/gov.png' %}">
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #1f3a5f;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --light-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-dark: #2c3e50;
+            --text-muted: #95a5a6;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        /* ============ NAVBAR ============ */
+        .main-header.navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            padding: 0.5rem 1rem;
+        }
+
+        .main-header.navbar .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease;
+        }
+
+        .main-header.navbar .nav-link:hover {
+            color: #fff !important;
+            transform: translateY(-2px);
+        }
+
+        .main-header.navbar .nav-link i {
+            font-size: 1.2rem;
+        }
+
+        /* ============ SIDEBAR ============ */
+        .main-sidebar {
+            background: linear-gradient(180deg, var(--primary-color) 0%, #1a2f47 100%);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+            border-radius: 8px;
+        }
+
+        .brand-link {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .brand-link:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-image {
+            margin-right: 0.5rem;
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .user-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem !important;
+        }
+
+        .user-panel .info a {
+            font-weight: 600;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .user-panel .info a:hover {
+            color: #3498db;
+        }
+
+        .nav-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 0.5rem;
+        }
+
+        .nav-sidebar .nav-item .nav-link p {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* ============ CONTENT WRAPPER ============ */
+        .content-wrapper {
+            background-color: var(--light-bg);
+        }
+
+        .content.border-bottom {
+            background: #fff;
+            border-bottom: 2px solid var(--border-color) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .content.border-bottom h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .breadcrumb {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* ============ ALERTS ============ */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            border-left: 4px solid;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: var(--success-color);
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-left-color: var(--accent-color);
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-left-color: var(--warning-color);
+            color: #856404;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border-left-color: var(--info-color);
+            color: #0c5460;
+        }
+
+        .btn-close {
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* ============ FOOTER ============ */
+        .main-footer {
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .main-footer strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+
+            .sidebar.sidebar-open {
+                margin-left: 0;
+            }
+
+            .content-wrapper {
+                margin-left: 0 !important;
+            }
+
+            .content-wrapper.sidebar-open {
+                margin-left: 250px;
+            }
+
+            .brand-text {
+                font-size: 0.9rem;
+            }
+
+            .nav-sidebar .nav-item .nav-link p {
+                font-size: 0.85rem;
+            }
+
+            .content.border-bottom h1 {
+                font-size: 1.2rem;
+            }
+
+            .breadcrumb-item {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ============ DROPDOWN MENU ============ */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            min-width: 200px;
+        }
+
+        .dropdown-menu .dropdown-header {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .dropdown-menu .dropdown-item {
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            margin: 0.25rem 0.5rem;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: var(--secondary-color);
+            transform: translateX(4px);
+        }
+
+        .dropdown-menu .dropdown-item i {
+            color: var(--secondary-color);
+            margin-right: 0.5rem;
+        }
+
+        .dropdown-divider {
+            background-color: var(--border-color);
+            margin: 0.5rem 0;
+        }
+
+        /* ============ SCROLLBAR ============ */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+
     {% block extra_head %}{% endblock %}
 </head>
+
 <body class="hold-transition sidebar-mini accent-primary theme-default">
-<div class="wrapper">
+    <div class="wrapper">
 
-    <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-tr"></i></a>
-            </li>
-            <li class="nav-item d-none d-sm-inline-block">
-                <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item dropdown">
-                <a class="nav-link btn" data-toggle="dropdown" href="#" title="{{ user.email }}">
-                    <i class="far fa-user"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-left">
-                    <span class="dropdown-header">Account</span>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-user mr-2"></i> Profile
+        <!-- ========================= NAVBAR ========================= -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button" title="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
                     </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="{% url 'logout' %}" class="dropdown-item">
-                        <i class="fas fa-sign-out-alt mr-2"></i> Log out
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="{% url 'dashboard' %}" class="nav-link" title="Go to Dashboard">
+                        <i class="fas fa-home"></i> Dashboard
                     </a>
-                </div>
-            </li>
-        </ul>
-    </nav>
-    <!-- /.navbar -->
+                </li>
+            </ul>
 
-    <!-- Sidebar -->
-    <aside class="main-sidebar elevation-4 sidebar-dark-primary">
-        <a href="{% url 'dashboard' %}" class="brand-link">
-            <img src="{% static 'images/gov.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3" style="opacity: .8">
-            <span class="brand-text font-weight-light">CDMIS MANAGEMENT</span>
-        </a>
-        <div class="sidebar">
-            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                <div class="image">
-                    <i class="fas fa-user-circle fa-2x text-white"></i>
+            <!-- Right Side Navbar -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#" title="Account Settings">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-header">
+                            <i class="fas fa-user-circle"></i> Account
+                        </span>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'profile' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+
+        <!-- ========================= SIDEBAR ========================= -->
+        <aside class="main-sidebar elevation-4 sidebar-dark-primary">
+            <a href="{% url 'dashboard' %}" class="brand-link">
+                <img src="{% static 'images/gov.png' %}" alt="Logo" class="img-rectangular brand-image elevation-3">
+                <span class="brand-text font-weight-light">CDMIS MANAGEMENT</span>
+            </a>
+
+            <div class="sidebar">
+                <!-- User Panel -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        <i class="fas fa-user-circle fa-2x text-white"></i>
+                    </div>
+                    <div class="info">
+                        <a href="{% url 'profile' %}" class="d-block">
+                            {{ user.username }}
+                        </a>
+                    </div>
                 </div>
-                <div class="info">
-                    <a href="{% url 'profile' %}" class="d-block">{{ user.username }}</a>
-                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                        
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard' %}" class="nav-link">
+                                <i class="nav-icon fas fa-th-large"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <!-- Community Groups -->
+                        <li class="nav-item">
+                            <a href="{% url 'cdmis:group_list' %}" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Community Groups</p>
+                            </a>
+                        </li>
+
+                        <!-- Group Requirements -->
+                        <li class="nav-item">
+                            <a href="{% url 'cdmis:requirements' %}" class="nav-link">
+                                <i class="nav-icon fas fa-list-check"></i>
+                                <p>Group Requirements</p>
+                            </a>
+                        </li>
+
+                        <!-- Trainings -->
+                        <li class="nav-item">
+                            <a href="{% url 'cdmis:training_list' %}" class="nav-link">
+                                <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                                <p>Trainings</p>
+                            </a>
+                        </li>
+
+                        <!-- Payments Section -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-money-bill-wave"></i>
+                                <p>
+                                    Payments
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{% url 'cdmis:payment_list' %}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Payment List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'cdmis:withdraw_funds' %}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Withdraw Funds</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Finance & Reports -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>
+                                    Reports & Finance
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{% url 'cdmis:finance' %}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Financials</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'cdmis:reports' %}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Reports</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Communications -->
+                        <li class="nav-item">
+                            <a href="{% url 'cdmis:updates' %}" class="nav-link">
+                                <i class="nav-icon fas fa-bullhorn"></i>
+                                <p>Updates & News</p>
+                            </a>
+                        </li>
+
+                        <!-- Documentation -->
+                        <li class="nav-item">
+                            <a href="{% url 'cdmis:docs' %}" class="nav-link">
+                                <i class="nav-icon fas fa-file-alt"></i>
+                                <p>Documentation</p>
+                            </a>
+                        </li>
+
+                        <!-- Divider -->
+                        <li class="nav-header">ACCOUNT</li>
+
+                        <!-- Profile -->
+                        <li class="nav-item">
+                            <a href="{% url 'profile' %}" class="nav-link">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>My Profile</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
             </div>
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-th-large"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:group_list' %}" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>Community groups</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:requirements' %}" class="nav-link">
-                            <i class="nav-icon fas fa-list"></i>
-                            <p>Group requirements</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:training_list' %}" class="nav-link">
-                            <i class="nav-icon fas fa-chalkboard-teacher"></i>
-                            <p>Trainings</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-    <a href="{% url 'cdmis:withdraw_funds' %}" class="nav-link">
-        <i class="nav-icon fas fa-money-bill-wave"></i>
-        <p>Withdraw Funds</p>
-    </a>
-</li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:payment_list' %}" class="nav-link">
-                            <i class="nav-icon fas fa-money-bill-wave"></i>
-                            <p>Payments</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:finance' %}" class="nav-link">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>Financials</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:reports' %}" class="nav-link">
-                            <i class="nav-icon fas fa-file-alt"></i>
-                            <p>Reports</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:updates' %}" class="nav-link">
-                            <i class="nav-icon fas fa-bullhorn"></i>
-                            <p>Updates</p>
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a href="{% url 'cdmis:docs' %}" class="nav-link">
-                            <i class="nav-icon fas fa-file"></i>
-                            <p>Docs</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'profile' %}" class="nav-link">
-                            <i class="nav-icon fas fa-user"></i>
-                            <p>Profile</p>
-                    </li>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </aside>
-    <!-- /.sidebar -->
+        </aside>
+        <!-- /.sidebar -->
 
-    <!-- Content Wrapper -->
-    <div class="content-wrapper">
-        <div class="content border-bottom mb-2">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-12 col-md-auto d-flex flex-grow-1 align-items-center">
-                        <h1 class="h4 m-0 pr-3 mr-3 border-right">{% block page_title %}Dashboard{% endblock %}</h1>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item">{% block breadcrumb %}Dashboard{% endblock %}</li>
-                        </ol>
+        <!-- ========================= CONTENT WRAPPER ========================= -->
+        <div class="content-wrapper">
+            
+            <!-- Header Section -->
+            <div class="content border-bottom mb-2">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12 col-md-auto d-flex flex-grow-1 align-items-center">
+                            <h1 class="h4 m-0 pr-3 mr-3 border-right">
+                                {% block page_title %}Dashboard{% endblock %}
+                            </h1>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'dashboard' %}">
+                                        <i class="fas fa-home"></i> Home
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active">
+                                    {% block breadcrumb %}Dashboard{% endblock %}
+                                </li>
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Messages Section -->
-        <div class="container mt-3">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-
-        <div class="content">
-            <div class="container-fluid">
-                {% block content %}{% endblock %}
+            <!-- Messages Section -->
+            <div class="container-fluid mt-3">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
+
+            <!-- Main Content -->
+            <div class="content">
+                <div class="container-fluid">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="main-footer text-center">
+                <strong>&copy; 2025 CDMIS MANAGEMENT</strong> - All rights reserved. | 
+                <small>Powered by BestStore</small>
+            </footer>
         </div>
-        <footer class="main-footer text-center">
-            <strong>&copy; 2025 CDMIS MANAGEMENT</strong> All rights reserved.
-        </footer>
+        <!-- /.content-wrapper -->
+
     </div>
-    <!-- /.content-wrapper -->
+    <!-- ./wrapper -->
 
-</div>
-<!-- ./wrapper -->
+    <!-- Scripts -->
+    <script src="/static/admin/js/vendor/jquery/jquery.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/vendor/adminlte/js/adminlte.min.js"></script>
+    <script src="/static/jazzmin/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
-<script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="/static/vendor/adminlte/js/adminlte.min.js"></script>
-<script src="/static/jazzmin/js/main.js"></script>
+    <!-- Auto-Dismiss Success Messages -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successAlerts = document.querySelectorAll('.alert-success');
+            successAlerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 3000); // 3 seconds
+            });
 
-<!-- JavaScript to Auto-Dismiss Success Messages -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const alerts = document.querySelectorAll('.alert-success');
-        alerts.forEach(alert => {
-            setTimeout(() => {
-                alert.classList.add('fade');
-                alert.classList.remove('show');
-            }, 2000); // 2 seconds
+            // Sidebar toggle for mobile
+            const sidebar = document.querySelector('.main-sidebar');
+            const wrapper = document.querySelector('.wrapper');
+            const pushmenuBtn = document.querySelector('[data-widget="pushmenu"]');
+
+            if (pushmenuBtn) {
+                pushmenuBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    wrapper.classList.toggle('sidebar-open');
+                    sidebar.classList.toggle('sidebar-open');
+                });
+            }
+
+            // Close sidebar on mobile when clicking outside
+            if (window.innerWidth < 768) {
+                document.addEventListener('click', function (e) {
+                    if (!e.target.closest('.sidebar') && !e.target.closest('[data-widget="pushmenu"]')) {
+                        wrapper.classList.remove('sidebar-open');
+                        sidebar.classList.remove('sidebar-open');
+                    }
+                });
+            }
         });
-    });
-</script>
+    </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
+
 </html>
