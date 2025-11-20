@@ -72,4 +72,9 @@ urlpatterns = [
 
     path('accademicWrittings/', views.accademicWrittings, name='accademicWrittings'),
     path('userManagement/', views.userManagement, name='userManagement'),
+    path('admin/system-health/', views.system_health_check, name='system_health'),
+    path('admin/documentation/', views.app_documentation, name='documentation'),
+    path('admin/endpoints/', views.api_endpoints, name='endpoints'),
+    path('admin/audit-log/', views.audit_log, name='audit_log'),
+
 ]

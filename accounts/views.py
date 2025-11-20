@@ -1489,3 +1489,120 @@ def user_delete(request, user_id):
         messages.error(request, f'Error deleting user: {str(e)}')
         return redirect('accounts:userManagement')
 
+
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+import logging
+
+logger = logging.getLogger(__name__)
+
+def is_admin(user):
+    """Check if user is admin"""
+    return user.is_superuser or getattr(user, 'is_staff', False)
+
+@login_required
+@user_passes_test(is_admin)
+def system_health_check(request):
+    """
+    System diagnostics - Check health of YOUR OWN application.
+    """
+    from django.conf import settings
+    from django.db import connection
+    
+    try:
+        # Database connection test
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_status = "✓ Connected"
+    except Exception as e:
+        db_status = f"✗ Error: {str(e)}"
+    
+    health_data = {
+        'database': db_status,
+        'debug_mode': settings.DEBUG,
+        'allowed_hosts': settings.ALLOWED_HOSTS,
+        'installed_apps': len(settings.INSTALLED_APPS),
+        'middleware': len(settings.MIDDLEWARE),
+    }
+    
+    context = {
+        'page_title': 'System Health Check',
+        'health_data': health_data,
+    }
+    
+    return render(request, 'accounts/health_check.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def app_documentation(request):
+    """
+    View app documentation and configuration.
+    For INTERNAL USE ONLY - admin eyes only.
+    """
+    from django.apps import apps
+    
+    installed_apps = []
+    for app in apps.get_app_configs():
+        installed_apps.append({
+            'name': app.name,
+            'label': app.label,
+            'module': str(app.module),
+        })
+    
+    context = {
+        'page_title': 'Application Documentation',
+        'installed_apps': installed_apps,
+    }
+    
+    return render(request, 'accounts/app_documentation.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["GET"])
+def api_endpoints(request):
+    """
+    Display API endpoints available in the system.
+    For INTERNAL ADMIN DOCUMENTATION only.
+    """
+    from django.urls import get_resolver
+    
+    endpoints = []
+    resolver = get_resolver()
+    
+    for pattern in resolver.url_patterns:
+        endpoints.append({
+            'pattern': str(pattern.pattern),
+            'name': pattern.name,
+        })
+    
+    context = {
+        'page_title': 'API Endpoints',
+        'endpoints': endpoints,
+    }
+    
+    return render(request, 'accounts/api_endpoints.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def audit_log(request):
+    """
+    Log admin activities for security audit.
+    """
+    action = request.POST.get('action', '')
+    details = request.POST.get('details', '')
+    
+    logger.warning(f"ADMIN ACTION: {request.user.username} - {action} - {details}")
+    
+    return JsonResponse({
+        'success': True,
+        'message': 'Action logged for audit trail.'
+    })
