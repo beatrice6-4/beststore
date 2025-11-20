@@ -185,10 +185,6 @@ JAZZMIN_SETTINGS = {
     "list_filter_toggle": True,
     "list_per_page": 25,
     
-    # ========== LANGUAGE & FONTS ==========
-    "use_google_fonts_cdn": True,
-    "language_chooser": True,
-    
     # ========== THEME COLORS ==========
     "theme": {
         "primary-color": "#1f3a5f",
