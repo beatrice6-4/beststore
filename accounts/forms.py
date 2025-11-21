@@ -1,73 +1,552 @@
 from django import forms
-from .models import Account
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.core.exceptions import ValidationError
+from .models import (
+    Account, ContactMessage, Transaction, Wishlist, 
+    TradeHistory, UserProfile, Category
+)
 
 
-class RegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'placeholder': 'Enter Password',
-        'class': 'form-control',
-    }))
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'placeholder': 'Confirm Password'
-    }))
+# ============ REGISTRATION FORM ============
+class RegistrationForm(UserCreationForm):
+    """
+    Form for user registration
+    """
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email',
+            'autocomplete': 'email',
+        })
+    )
+    
+    first_name = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'First name',
+            'autocomplete': 'given-name',
+        })
+    )
+    
+    last_name = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Last name',
+            'autocomplete': 'family-name',
+        })
+    )
+    
+    username = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Username',
+            'autocomplete': 'username',
+        })
+    )
+    
+    password1 = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter password',
+            'autocomplete': 'new-password',
+        })
+    )
+    
+    password2 = forms.CharField(
+        label='Confirm Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm password',
+            'autocomplete': 'new-password',
+        })
+    )
 
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name', 'phone_number', 'email', 'password']
+        fields = ('email', 'username', 'first_name', 'last_name', 'password1', 'password2')
 
-    def clean(self):
-        cleaned_data = super(RegistrationForm, self).clean()
-        password = cleaned_data.get('password')
-        confirm_password = cleaned_data.get('confirm_password')
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if Account.objects.filter(email=email).exists():
+            raise ValidationError('This email is already registered.')
+        return email
 
-        if password != confirm_password:
-            raise forms.ValidationError(
-                "Password does not match!"
-            )
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if Account.objects.filter(username=username).exists():
+            raise ValidationError('This username is already taken.')
+        return username
 
-    def __init__(self, *args, **kwargs):
-        super(RegistrationForm, self).__init__(*args, **kwargs)
-        self.fields['first_name'].widget.attrs['placeholder'] = 'Enter First Name'
-        self.fields['last_name'].widget.attrs['placeholder'] = 'Enter last Name'
-        self.fields['phone_number'].widget.attrs['placeholder'] = 'Enter Phone Number'
-        self.fields['email'].widget.attrs['placeholder'] = 'Enter Email Address'
-        for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        if password1 and password2 and password1 != password2:
+            raise ValidationError('Passwords do not match.')
+        return password2
 
 
+# ============ USER FORM ============
 class UserForm(forms.ModelForm):
+    """
+    Form for updating user profile information
+    """
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'readonly': 'readonly',
+        })
+    )
+    
+    first_name = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'First name',
+        })
+    )
+    
+    last_name = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Last name',
+        })
+    )
+    
+    phone_number = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Phone number',
+        })
+    )
+    
+    role = forms.ChoiceField(
+        choices=Account.ROLE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+
     class Meta:
         model = Account
-        fields = ('first_name', 'last_name', 'phone_number')
-
-    def __init__(self, *args, **kwargs):
-        super(UserForm, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'role')
 
 
+# ============ ACCOUNT CREATION FORM ============
+class AccountCreationForm(UserCreationForm):
+    """
+    Form for creating a new account (admin)
+    """
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter email',
+        })
+    )
+    
+    first_name = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'First name',
+        })
+    )
+    
+    last_name = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Last name',
+        })
+    )
+    
+    username = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Username',
+        })
+    )
+    
+    password1 = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter password',
+        })
+    )
+    
+    password2 = forms.CharField(
+        label='Confirm Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm password',
+        })
+    )
+
+    class Meta:
+        model = Account
+        fields = ('email', 'username', 'first_name', 'last_name', 'password1', 'password2')
 
 
-from django import forms
-from .models import ContactMessage
+# ============ ACCOUNT CHANGE FORM ============
+class AccountChangeForm(UserChangeForm):
+    """
+    Form for updating account information
+    """
+    class Meta:
+        model = Account
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'role')
 
+
+# ============ CONTACT FORM ============
 class ContactForm(forms.ModelForm):
+    """
+    Contact form for user inquiries
+    """
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your name',
+        })
+    )
+    
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your email',
+        })
+    )
+    
+    subject = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Subject',
+        })
+    )
+    
+    message = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your message',
+            'rows': 5,
+        })
+    )
+
     class Meta:
         model = ContactMessage
-        fields = ['subject', 'message']
-from django import forms
-from .models import Category
+        fields = ('name', 'email', 'subject', 'message')
 
+
+# ============ TRANSACTION FORM ============
+class TransactionForm(forms.ModelForm):
+    """
+    Form for creating transactions
+    """
+    transaction_type = forms.ChoiceField(
+        choices=Transaction.TRANSACTION_TYPE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+    
+    amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Amount',
+            'min': '0.01',
+            'step': '0.01',
+        })
+    )
+    
+    payment_method = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Payment method',
+        })
+    )
+    
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Description',
+            'rows': 3,
+        })
+    )
+
+    class Meta:
+        model = Transaction
+        fields = ('transaction_type', 'amount', 'payment_method', 'description')
+
+
+# ============ WISHLIST FORM ============
+class WishlistForm(forms.ModelForm):
+    """
+    Form for adding items to wishlist
+    """
+    product_id = forms.CharField(
+        max_length=100,
+        widget=forms.HiddenInput()
+    )
+    
+    product_name = forms.CharField(
+        max_length=255,
+        widget=forms.HiddenInput()
+    )
+
+    class Meta:
+        model = Wishlist
+        fields = ('product_id', 'product_name')
+
+
+# ============ TRADE FORM ============
+class TradeForm(forms.ModelForm):
+    """
+    Form for placing trades
+    """
+    symbol = forms.ChoiceField(
+        choices=[
+            ('EUR/USD', 'EUR/USD - Euro vs US Dollar'),
+            ('GBP/USD', 'GBP/USD - British Pound vs US Dollar'),
+            ('USD/JPY', 'USD/JPY - US Dollar vs Japanese Yen'),
+            ('AUD/USD', 'AUD/USD - Australian Dollar vs US Dollar'),
+            ('EURUSD', 'EURUSD - Euro vs US Dollar'),
+            ('GBPUSD', 'GBPUSD - British Pound vs US Dollar'),
+            ('USDJPY', 'USDJPY - US Dollar vs Japanese Yen'),
+        ],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+    
+    contract_type = forms.ChoiceField(
+        choices=TradeHistory.TRADE_TYPE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+    
+    amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Trade amount',
+            'min': '1',
+            'max': '10000',
+            'step': '1',
+        })
+    )
+    
+    duration = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Duration (minutes)',
+            'min': '1',
+            'max': '1440',
+        })
+    )
+
+    class Meta:
+        model = TradeHistory
+        fields = ('symbol', 'contract_type', 'amount', 'duration')
+
+
+# ============ USER PROFILE FORM ============
+class UserProfileForm(forms.ModelForm):
+    """
+    Form for updating user trading profile
+    """
+    account_level = forms.ChoiceField(
+        choices=UserProfile.ACCOUNT_LEVEL_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+    
+    notification_email = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+        })
+    )
+    
+    two_factor_enabled = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+        })
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = ('account_level', 'notification_email', 'two_factor_enabled')
+
+
+# ============ PASSWORD CHANGE FORM ============
+class PasswordChangeForm(forms.Form):
+    """
+    Form for changing password
+    """
+    old_password = forms.CharField(
+        label='Old Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter old password',
+            'autocomplete': 'current-password',
+        })
+    )
+    
+    new_password = forms.CharField(
+        label='New Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter new password',
+            'autocomplete': 'new-password',
+        })
+    )
+    
+    confirm_password = forms.CharField(
+        label='Confirm New Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm new password',
+            'autocomplete': 'new-password',
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if new_password and confirm_password:
+            if new_password != confirm_password:
+                raise ValidationError('New passwords do not match.')
+        return cleaned_data
+
+
+# ============ DERIV CONNECTION FORM ============
+class DerivConnectionForm(forms.Form):
+    """
+    Form for connecting Deriv account
+    """
+    api_token = forms.CharField(
+        label='Deriv API Token',
+        max_length=255,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your Deriv API token',
+            'autocomplete': 'off',
+        })
+    )
+    
+    confirm = forms.BooleanField(
+        label='I confirm this is a valid Deriv API token',
+        required=True,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+        })
+    )
+
+    def clean_api_token(self):
+        api_token = self.cleaned_data.get('api_token')
+        if len(api_token) < 10:
+            raise ValidationError('API token is too short. Please verify.')
+        return api_token
+
+
+# ============ SEARCH FORM ============
+class SearchForm(forms.Form):
+    """
+    General search form
+    """
+    q = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Search...',
+            'autocomplete': 'off',
+        })
+    )
+    
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.filter(is_active=True),
+        required=False,
+        empty_label='All Categories',
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+
+
+# ============ CATEGORY FORM ============
 class CategoryForm(forms.ModelForm):
+    """
+    Form for creating/updating categories
+    """
+    name = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Category name',
+        })
+    )
+    
+    slug = forms.SlugField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Slug (auto-generated)',
+        })
+    )
+    
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Category description',
+            'rows': 4,
+        })
+    )
+    
+    image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+        })
+    )
+    
+    is_active = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+        })
+    )
+
     class Meta:
         model = Category
-        fields = ['category_name', 'description']  # Add other fields if needed
-
-
-from django import forms
-from .models import Payment
-
-class PaymentForm(forms.ModelForm):
-    class Meta:
-        model = Payment
-        fields = ['amount', 'description']
+        fields = ('name', 'slug', 'description', 'image', 'is_active')
