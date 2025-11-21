@@ -12,13 +12,30 @@ LOGS_DIR.mkdir(exist_ok=True)
 MEDIA_ROOT_DIR = BASE_DIR / 'mediafiles'
 MEDIA_ROOT_DIR.mkdir(exist_ok=True)
 
+STATIC_FILES_DIR = BASE_DIR / 'staticfiles'
+STATIC_FILES_DIR.mkdir(exist_ok=True)
+
 # ============ SECURITY SETTINGS ============
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = os.environ.get('DEBUG', 'False') == 'False'
-ALLOWED_HOSTS = ['*'] if DEBUG else os.environ.get('ALLOWED_HOSTS', 'mamamaasaibakers.com').split(',')  # FIXED: Allow all in DEBUG
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY', 
+    'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4'
+)
+
+# FIXED: Proper DEBUG configuration
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
+# Allow all hosts in DEBUG, restrict in production
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = os.environ.get(
+        'ALLOWED_HOSTS', 
+        'mamamaasaibakers.com,www.mamamaasaibakers.com'
+    ).split(',')
 
 # ============ INSTALLED APPS ============
 INSTALLED_APPS = [
+    # Admin
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -26,18 +43,33 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'category',
+    
+    # Local apps
     'accounts',
+    'category',
     'store',
     'carts',
     'orders',
-    'admin_thumbnails',
     'finance',
-    'storages',
     'CDMIS',
+    
+    # Third-party
+    'admin_thumbnails',
+    'storages',
     'cloudinary',
     'cloudinary_storage',
+]
 
+# ============ MIDDLEWARE ============
+MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 # ============ JAZZMIN ADMIN CONFIGURATION ============
@@ -46,7 +78,8 @@ JAZZMIN_SETTINGS = {
     "site_header": "Mama Maasai Bakers Admin",
     "site_brand": "Mama Maasai Bakers",
     "brand_html": """
-        <img src="/static/images/gov.png" alt="Logo" style="width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;">
+        <img src="/static/images/gov.png" alt="Logo" 
+             style="width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;">
         <strong>Mama Maasai Bakers</strong>
     """,
     "welcome_sign": "Welcome to Admin Dashboard",
@@ -104,7 +137,6 @@ JAZZMIN_SETTINGS = {
         "accounts.TradeHistory": "fas fa-chart-line",
         "accounts.UserProfile": "fas fa-user-cog",
         "accounts.Wishlist": "fas fa-heart",
-        "accounts.Category": "fas fa-tag",
         "store.Product": "fas fa-box",
         "store.ProductGallery": "fas fa-images",
         "store.Variation": "fas fa-sliders-h",
@@ -149,33 +181,15 @@ JAZZMIN_SETTINGS = {
     },
 }
 
+# ============ CRISPY FORMS CONFIGURATION ============
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# ============ SESSION CONFIGURATION ============
-SESSION_COOKIE_AGE = 2400
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_HTTPONLY = True
-
-# ============ MIDDLEWARE ============
-MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# ============ URL CONFIGURATION ============
+# ============ ROOT URLCONF & LOGIN CONFIGURATION ============
 ROOT_URLCONF = 'beststore.urls'
-LOGIN_REDIRECT_URL = 'redirect_after_login'
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'home'
 
 # ============ TEMPLATES ============
 TEMPLATES = [
@@ -189,8 +203,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'category.context_processors.menu_links',
-                'carts.context_processors.counter',
             ],
         },
     },
@@ -203,6 +215,7 @@ AUTH_USER_MODEL = 'accounts.Account'
 
 # ============ DATABASE CONFIGURATION ============
 if os.environ.get('DATABASE_URL'):
+    # Production: Use PostgreSQL from environment variable
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
@@ -211,36 +224,13 @@ if os.environ.get('DATABASE_URL'):
         )
     }
 else:
+    # Development: Use SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
-# ============ CLOUDINARY STORAGE ============
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
-}
-
-if not DEBUG:
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-else:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
-
-# ============ EMAIL CONFIGURATION ============
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
 # ============ PASSWORD VALIDATION ============
 AUTH_PASSWORD_VALIDATORS = [
@@ -267,12 +257,61 @@ TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
+# ============ SESSION CONFIGURATION ============
+SESSION_COOKIE_AGE = 2400  # 40 minutes
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# ============ CSRF CONFIGURATION ============
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+] if DEBUG else []
+
 # ============ STATIC FILES ============
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ============ MEDIA FILES ============
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'mediafiles'
+
+# ============ FILE UPLOAD SETTINGS ============
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+ALLOWED_UPLOAD_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx']
+
+# ============ CLOUDINARY STORAGE ============
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
+}
+
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# ============ EMAIL CONFIGURATION ============
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
 # ============ MESSAGE TAGS ============
 MESSAGE_TAGS = {
@@ -286,23 +325,23 @@ MESSAGE_TAGS = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ============ SECURITY SETTINGS ============
-SECURE_SSL_REDIRECT = not DEBUG
+SECURE_SSL_REDIRECT = False if DEBUG else True
 SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_SECURITY_POLICY = {
-    "default-src": ("'self'",),
-    "script-src": ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"),
-    "style-src": ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"),
-    "font-src": ("'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"),
-    "img-src": ("'self'", "data:", "https:", "res.cloudinary.com"),
-    "media-src": ("'self'", "https:", "res.cloudinary.com"),
-    "connect-src": ("'self'", "https:", "res.cloudinary.com", "api.deriv.com"),
-}
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_SECURITY_POLICY = {
+        "default-src": ("'self'",),
+        "script-src": ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"),
+        "style-src": ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"),
+        "font-src": ("'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"),
+        "img-src": ("'self'", "data:", "https:", "res.cloudinary.com"),
+        "media-src": ("'self'", "https:", "res.cloudinary.com"),
+        "connect-src": ("'self'", "https:", "res.cloudinary.com", "api.deriv.com"),
+    }
 
 # ============ LOGGING CONFIGURATION ============
 LOGGING = {
@@ -328,15 +367,15 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': str(LOGS_DIR / 'debug.log'),  # Convert to string for compatibility
-            'maxBytes': 1024 * 1024 * 15,
+            'filename': str(LOGS_DIR / 'debug.log'),
+            'maxBytes': 1024 * 1024 * 15,  # 15MB
             'backupCount': 10,
             'formatter': 'verbose',
         },
@@ -344,47 +383,38 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
         },
         'django.db.backends': {
             'handlers': ['console', 'file'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'accounts': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'store': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'orders': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'carts': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'WARNING',
             'propagate': False,
         },
     },
 }
 
 # ============ CACHE CONFIGURATION ============
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'mama-maasai-cache',
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000
+if DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'mama-maasai-cache',
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000
+            }
         }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
 
 # ============ DERIV TRADING CONFIGURATION ============
 DERIV_APP_ID = os.environ.get('DERIV_APP_ID', 'YOUR_DERIV_APP_ID')
@@ -397,17 +427,12 @@ ITEMS_PER_PAGE = 12
 TRADES_PER_PAGE = 10
 TRANSACTIONS_PER_PAGE = 10
 
-# ============ FILE UPLOAD SETTINGS ============
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
-ALLOWED_UPLOAD_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx']
-
-# ============ CSRF TRUSTED ORIGINS ============
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',')
-
 # ============ TESTING ============
 if 'test' in os.sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
     }
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
