@@ -92,7 +92,7 @@ def login_view(request):
     return render(request, 'accounts/login.html', context)
 
 
-@login_required(login_url='accounts:login')
+
 def logout_view(request):
     """User logout view"""
     email = request.user.email
@@ -119,7 +119,7 @@ def forgot_password(request):
 
 
 # ============ PROFILE VIEWS ============
-@login_required(login_url='accounts:login')
+
 def dashboard(request):
     """User dashboard view"""
     user = request.user
@@ -136,7 +136,7 @@ def dashboard(request):
     return render(request, 'accounts/dashboard.html', context)
 
 
-@login_required(login_url='accounts:login')
+
 def profile(request):
     """User profile view"""
     user = request.user
@@ -146,7 +146,7 @@ def profile(request):
     
 
 
-@login_required(login_url='accounts:login')
+
 def edit_profile(request):
     """Edit user profile view"""
     user = request.user
