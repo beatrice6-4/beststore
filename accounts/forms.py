@@ -2,8 +2,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from .models import (
-    Account, ContactMessage, Transaction, Wishlist, 
-    TradeHistory, UserProfile, Category
+    Account, ContactMessage, Wishlist, 
+    UserProfile, Category
 )
 
 
@@ -255,50 +255,7 @@ class ContactForm(forms.ModelForm):
         fields = ('name', 'email', 'subject', 'message')
 
 
-# ============ TRANSACTION FORM ============
-class TransactionForm(forms.ModelForm):
-    """
-    Form for creating transactions
-    """
-    transaction_type = forms.ChoiceField(
-        choices=Transaction.TRANSACTION_TYPE_CHOICES,
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
-    )
-    
-    amount = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Amount',
-            'min': '0.01',
-            'step': '0.01',
-        })
-    )
-    
-    payment_method = forms.CharField(
-        max_length=50,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Payment method',
-        })
-    )
-    
-    description = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'placeholder': 'Description',
-            'rows': 3,
-        })
-    )
 
-    class Meta:
-        model = Transaction
-        fields = ('transaction_type', 'amount', 'payment_method', 'description')
 
 
 # ============ WISHLIST FORM ============
@@ -321,57 +278,7 @@ class WishlistForm(forms.ModelForm):
         fields = ('product_id', 'product_name')
 
 
-# ============ TRADE FORM ============
-class TradeForm(forms.ModelForm):
-    """
-    Form for placing trades
-    """
-    symbol = forms.ChoiceField(
-        choices=[
-            ('EUR/USD', 'EUR/USD - Euro vs US Dollar'),
-            ('GBP/USD', 'GBP/USD - British Pound vs US Dollar'),
-            ('USD/JPY', 'USD/JPY - US Dollar vs Japanese Yen'),
-            ('AUD/USD', 'AUD/USD - Australian Dollar vs US Dollar'),
-            ('EURUSD', 'EURUSD - Euro vs US Dollar'),
-            ('GBPUSD', 'GBPUSD - British Pound vs US Dollar'),
-            ('USDJPY', 'USDJPY - US Dollar vs Japanese Yen'),
-        ],
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
-    )
-    
-    contract_type = forms.ChoiceField(
-        choices=TradeHistory.TRADE_TYPE_CHOICES,
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
-    )
-    
-    amount = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Trade amount',
-            'min': '1',
-            'max': '10000',
-            'step': '1',
-        })
-    )
-    
-    duration = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Duration (minutes)',
-            'min': '1',
-            'max': '1440',
-        })
-    )
 
-    class Meta:
-        model = TradeHistory
-        fields = ('symbol', 'contract_type', 'amount', 'duration')
 
 
 # ============ USER PROFILE FORM ============

@@ -10,13 +10,13 @@ import logging
 import uuid
 
 from .forms import (
-    RegistrationForm, UserForm, ContactForm, TransactionForm,
-    WishlistForm, TradeForm, UserProfileForm, PasswordChangeForm,
+    RegistrationForm, UserForm, ContactForm,
+    WishlistForm, UserProfileForm, PasswordChangeForm,
     DerivConnectionForm, SearchForm, CategoryForm
 )
 from .models import (
-    Account, ContactMessage, Transaction, Wishlist,
-    TradeHistory, UserProfile, Category
+    Account, ContactMessage, Wishlist,
+    UserProfile, Category
 )
 
 logger = logging.getLogger(__name__)
@@ -102,6 +102,22 @@ def logout_view(request):
     return redirect('accounts:login')
 
 
+
+
+def forgot_password(request):
+    """Handle forgot password request"""
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = Account.objects.get(email=email)
+            # Send password reset email here
+            messages.success(request, 'Password reset link has been sent to your email.')
+        except Account.DoesNotExist:
+            messages.error(request, 'Email address not found.')
+        return redirect('login')
+    return render(request, 'accounts/forgot_password.html')
+
+
 # ============ PROFILE VIEWS ============
 @login_required(login_url='accounts:login')
 def dashboard(request):
@@ -109,25 +125,13 @@ def dashboard(request):
     user = request.user
     profile = user.trading_profile
     
-    # Get recent trades
-    recent_trades = TradeHistory.objects.filter(user=user).order_by('-created_at')[:5]
+   
     
-    # Get recent transactions
-    recent_transactions = Transaction.objects.filter(user=user).order_by('-created_at')[:5]
-    
-    # Calculate statistics
-    total_trades = TradeHistory.objects.filter(user=user).count()
-    winning_trades = TradeHistory.objects.filter(user=user, profit_loss__gt=0).count()
-    total_profit = sum([t.profit_loss or 0 for t in TradeHistory.objects.filter(user=user)])
+
     
     context = {
         'page_title': 'Dashboard',
         'profile': profile,
-        'recent_trades': recent_trades,
-        'recent_transactions': recent_transactions,
-        'total_trades': total_trades,
-        'winning_trades': winning_trades,
-        'total_profit': total_profit,
     }
     return render(request, 'accounts/dashboard.html', context)
 
@@ -138,17 +142,8 @@ def profile(request):
     user = request.user
     profile = user.trading_profile
     
-    # Get user statistics
-    trades_count = TradeHistory.objects.filter(user=user).count()
-    transactions_count = Transaction.objects.filter(user=user).count()
+
     
-    context = {
-        'page_title': 'User Profile',
-        'profile': profile,
-        'trades_count': trades_count,
-        'transactions_count': transactions_count,
-    }
-    return render(request, 'accounts/profile.html', context)
 
 
 @login_required(login_url='accounts:login')
@@ -208,138 +203,6 @@ def change_password(request):
     }
     return render(request, 'accounts/change_password.html', context)
 
-
-# ============ TRADING VIEWS ============
-@login_required(login_url='accounts:login')
-def tradings(request):
-    """Trading platform view"""
-    user = request.user
-    profile = user.trading_profile
-    
-    # Get all user trades with pagination
-    trades_list = TradeHistory.objects.filter(user=user).order_by('-created_at')
-    paginator = Paginator(trades_list, 10)
-    page_number = request.GET.get('page', 1)
-    trades = paginator.get_page(page_number)
-    
-    context = {
-        'page_title': 'Trading Platform',
-        'profile': profile,
-        'trades': trades,
-    }
-    return render(request, 'accounts/tradings.html', context)
-
-
-@login_required(login_url='accounts:login')
-def trade_detail(request, trade_id):
-    """Trade detail view"""
-    if not is_valid_uuid(trade_id):
-        messages.error(request, 'Invalid trade ID.')
-        return redirect('accounts:tradings')
-    
-    try:
-        trade = TradeHistory.objects.get(id=trade_id, user=request.user)
-    except (TradeHistory.DoesNotExist, ValueError):
-        messages.error(request, 'Trade not found.')
-        return redirect('accounts:tradings')
-    
-    context = {
-        'page_title': f'Trade {trade.symbol}',
-        'trade': trade,
-    }
-    return render(request, 'accounts/trade_detail.html', context)
-
-
-@login_required(login_url='accounts:login')
-@require_http_methods(["POST"])
-def place_trade(request):
-    """Place a trade via AJAX"""
-    try:
-        form = TradeForm(request.POST)
-        if form.is_valid():
-            trade = form.save(commit=False)
-            trade.user = request.user
-            trade.save()
-            
-            logger.info(f'Trade placed by {request.user.email}: {trade.symbol}')
-            return JsonResponse({
-                'success': True,
-                'message': 'Trade placed successfully!',
-                'trade_id': str(trade.id)
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'errors': form.errors
-            }, status=400)
-    except Exception as e:
-        logger.error(f'Error placing trade: {str(e)}')
-        return JsonResponse({
-            'success': False,
-            'error': 'Error placing trade'
-        }, status=500)
-
-
-# ============ TRANSACTION VIEWS ============
-@login_required(login_url='accounts:login')
-def transactions(request):
-    """User transactions view"""
-    user = request.user
-    
-    # Get all transactions with pagination
-    transactions_list = Transaction.objects.filter(user=user).order_by('-created_at')
-    paginator = Paginator(transactions_list, 10)
-    page_number = request.GET.get('page', 1)
-    transaction_page = paginator.get_page(page_number)
-    
-    context = {
-        'page_title': 'Transactions',
-        'transactions': transaction_page,
-    }
-    return render(request, 'accounts/transactions.html', context)
-
-
-@login_required(login_url='accounts:login')
-def transaction_detail(request, transaction_id):
-    """Transaction detail view"""
-    if not is_valid_uuid(transaction_id):
-        messages.error(request, 'Invalid transaction ID.')
-        return redirect('accounts:transactions')
-    
-    try:
-        transaction = Transaction.objects.get(id=transaction_id, user=request.user)
-    except (Transaction.DoesNotExist, ValueError):
-        messages.error(request, 'Transaction not found.')
-        return redirect('accounts:transactions')
-    
-    context = {
-        'page_title': 'Transaction Details',
-        'transaction': transaction,
-    }
-    return render(request, 'accounts/transaction_detail.html', context)
-
-
-@login_required(login_url='accounts:login')
-@require_http_methods(["POST"])
-def create_transaction(request):
-    """Create a transaction"""
-    try:
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            transaction = form.save(commit=False)
-            transaction.user = request.user
-            transaction.save()
-            
-            messages.success(request, 'Transaction created successfully!')
-            logger.info(f'Transaction created by {request.user.email}')
-            return redirect('accounts:transactions')
-        else:
-            messages.error(request, 'Error creating transaction.')
-    except Exception as e:
-        logger.error(f'Error creating transaction: {str(e)}')
-        messages.error(request, 'Error creating transaction.')
-    
-    return redirect('accounts:transactions')
 
 
 # ============ CONTACT VIEW ============

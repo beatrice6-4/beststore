@@ -8,6 +8,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('forgot-password/', views.forgot_password, name='forgotPassword'),  # Add this
     
     # ============ PROFILE ============
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -15,15 +16,7 @@ urlpatterns = [
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/change-password/', views.change_password, name='change_password'),
     
-    # ============ TRADING ============
-    path('tradings/', views.tradings, name='tradings'),
-    path('tradings/<str:trade_id>/', views.trade_detail, name='trade_detail'),
-    path('tradings/place/', views.place_trade, name='place_trade'),
-    
-    # ============ TRANSACTIONS ============
-    path('transactions/', views.transactions, name='transactions'),
-    path('transactions/<str:transaction_id>/', views.transaction_detail, name='transaction_detail'),
-    path('transactions/create/', views.create_transaction, name='create_transaction'),
+ 
     
     # ============ WISHLIST ============
     path('wishlist/', views.wishlist, name='wishlist'),

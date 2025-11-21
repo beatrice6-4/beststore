@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
-    Account, ContactMessage, Transaction, TradeHistory, 
+    Account, ContactMessage, Transaction,
     UserProfile, Wishlist, AdminLog, Category
 )
 
@@ -95,35 +95,7 @@ class ContactMessageAdmin(admin.ModelAdmin):
         return False
 
 
-# ============ TRANSACTION ADMIN ============
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
-    """Admin for Transaction"""
-    list_display = ['transaction_id', 'get_user', 'transaction_type', 'amount', 'status', 'created_at']
-    list_filter = ['status', 'transaction_type', 'created_at']
-    search_fields = ['transaction_id', 'user__email', 'description']
-    readonly_fields = ['id', 'created_at', 'completed_at']
 
-    fieldsets = (
-        ('User Info', {
-            'fields': ('user', 'id')
-        }),
-        ('Transaction Details', {
-            'fields': ('transaction_type', 'amount', 'payment_method', 'transaction_id', 'status')
-        }),
-        ('Description', {
-            'fields': ('description',),
-            'classes': ('wide',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'completed_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-    def get_user(self, obj):
-        return obj.user.email
-    get_user.short_description = 'User Email'
 
 
 # ============ WISHLIST ADMIN ============
@@ -150,42 +122,6 @@ class WishlistAdmin(admin.ModelAdmin):
     get_user.short_description = 'User Email'
 
 
-# ============ TRADE HISTORY ADMIN ============
-@admin.register(TradeHistory)
-class TradeHistoryAdmin(admin.ModelAdmin):
-    """Admin for TradeHistory"""
-    list_display = ['get_user', 'symbol', 'contract_type', 'amount', 'status', 'profit_loss', 'created_at']
-    list_filter = ['status', 'contract_type', 'symbol', 'created_at']
-    search_fields = ['user__email', 'symbol', 'contract_id']
-    readonly_fields = ['id', 'created_at', 'updated_at', 'opened_at', 'closed_at']
-
-    fieldsets = (
-        ('User Info', {
-            'fields': ('user', 'id')
-        }),
-        ('Trade Details', {
-            'fields': ('symbol', 'contract_type', 'amount', 'duration', 'status')
-        }),
-        ('Pricing & Performance', {
-            'fields': ('entry_price', 'exit_price', 'profit_loss', 'profit_percentage')
-        }),
-        ('Contract Info', {
-            'fields': ('contract_id',),
-            'classes': ('collapse',)
-        }),
-        ('Trade Data', {
-            'fields': ('trade_data',),
-            'classes': ('collapse',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'opened_at', 'closed_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-    def get_user(self, obj):
-        return obj.user.email
-    get_user.short_description = 'User Email'
 
 
 # ============ USER PROFILE ADMIN ============
