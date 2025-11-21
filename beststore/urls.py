@@ -14,26 +14,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# or similar main project urls.py
+
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
-from . import views
-
-
-
-
-
-
-
-
+from accounts import views as accounts_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('store/', include('store.urls')),
-    path('carts/', include('carts.urls')), 
-    path('orders/', include('orders.urls')),
     path('accounts/', include('accounts.urls')),
-    path('cdmis/', include('CDMIS.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('', include('home.urls')) if 'home' in settings.INSTALLED_APPS else path('', accounts_views.dashboard, name='home'),
+    path('contact/', accounts_views.contact, name='contact'),
+    path('search/', accounts_views.search, name='search'),
+]
+
+# Handle static files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Custom error handlers
+handler404 = 'accounts.views.custom_404'
+handler500 = 'accounts.views.custom_500'
+handler403 = 'accounts.views.custom_403'
+handler400 = 'accounts.views.custom_400'

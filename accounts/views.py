@@ -5,7 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.views.decorators.csrf import csrf_exempt
 import logging
+import uuid
 
 from .forms import (
     RegistrationForm, UserForm, ContactForm, TransactionForm,
@@ -20,11 +22,21 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 
+# ============ HELPER FUNCTIONS ============
+def is_valid_uuid(uuid_string):
+    """Check if string is valid UUID"""
+    try:
+        uuid.UUID(str(uuid_string))
+        return True
+    except (ValueError, AttributeError):
+        return False
+
+
 # ============ AUTHENTICATION VIEWS ============
 def register(request):
     """User registration view"""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')
     
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -32,7 +44,7 @@ def register(request):
             user = form.save()
             messages.success(request, 'Account created successfully! Please login.')
             logger.info(f'New user registered: {user.email}')
-            return redirect('login')
+            return redirect('accounts:login')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -50,11 +62,15 @@ def register(request):
 def login_view(request):
     """User login view"""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')
     
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        if not email or not password:
+            messages.error(request, 'Please provide both email and password.')
+            return render(request, 'accounts/login.html', {'page_title': 'Login'})
         
         try:
             user = Account.objects.get(email=email)
@@ -64,7 +80,7 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.get_full_name()}!')
                 logger.info(f'User logged in: {user.email}')
-                return redirect('dashboard')
+                return redirect('accounts:dashboard')
             else:
                 messages.error(request, 'Invalid email or password.')
                 logger.warning(f'Failed login attempt for: {email}')
@@ -76,18 +92,18 @@ def login_view(request):
     return render(request, 'accounts/login.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def logout_view(request):
     """User logout view"""
     email = request.user.email
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     logger.info(f'User logged out: {email}')
-    return redirect('login')
+    return redirect('accounts:login')
 
 
 # ============ PROFILE VIEWS ============
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def dashboard(request):
     """User dashboard view"""
     user = request.user
@@ -102,7 +118,7 @@ def dashboard(request):
     # Calculate statistics
     total_trades = TradeHistory.objects.filter(user=user).count()
     winning_trades = TradeHistory.objects.filter(user=user, profit_loss__gt=0).count()
-    total_profit = sum([t.profit_loss for t in TradeHistory.objects.filter(user=user) if t.profit_loss])
+    total_profit = sum([t.profit_loss or 0 for t in TradeHistory.objects.filter(user=user)])
     
     context = {
         'page_title': 'Dashboard',
@@ -116,7 +132,7 @@ def dashboard(request):
     return render(request, 'accounts/dashboard.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def profile(request):
     """User profile view"""
     user = request.user
@@ -135,7 +151,7 @@ def profile(request):
     return render(request, 'accounts/profile.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def edit_profile(request):
     """Edit user profile view"""
     user = request.user
@@ -150,7 +166,7 @@ def edit_profile(request):
             profile_form.save()
             messages.success(request, 'Profile updated successfully!')
             logger.info(f'Profile updated for: {user.email}')
-            return redirect('profile')
+            return redirect('accounts:profile')
         else:
             messages.error(request, 'Error updating profile. Please check the form.')
     else:
@@ -165,7 +181,7 @@ def edit_profile(request):
     return render(request, 'accounts/edit_profile.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def change_password(request):
     """Change password view"""
     if request.method == 'POST':
@@ -180,7 +196,7 @@ def change_password(request):
                 user.save()
                 messages.success(request, 'Password changed successfully! Please login again.')
                 logger.info(f'Password changed for: {user.email}')
-                return redirect('login')
+                return redirect('accounts:login')
             else:
                 messages.error(request, 'Old password is incorrect.')
     else:
@@ -194,7 +210,7 @@ def change_password(request):
 
 
 # ============ TRADING VIEWS ============
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def tradings(request):
     """Trading platform view"""
     user = request.user
@@ -214,10 +230,18 @@ def tradings(request):
     return render(request, 'accounts/tradings.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def trade_detail(request, trade_id):
     """Trade detail view"""
-    trade = get_object_or_404(TradeHistory, id=trade_id, user=request.user)
+    if not is_valid_uuid(trade_id):
+        messages.error(request, 'Invalid trade ID.')
+        return redirect('accounts:tradings')
+    
+    try:
+        trade = TradeHistory.objects.get(id=trade_id, user=request.user)
+    except (TradeHistory.DoesNotExist, ValueError):
+        messages.error(request, 'Trade not found.')
+        return redirect('accounts:tradings')
     
     context = {
         'page_title': f'Trade {trade.symbol}',
@@ -226,7 +250,7 @@ def trade_detail(request, trade_id):
     return render(request, 'accounts/trade_detail.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 @require_http_methods(["POST"])
 def place_trade(request):
     """Place a trade via AJAX"""
@@ -257,7 +281,7 @@ def place_trade(request):
 
 
 # ============ TRANSACTION VIEWS ============
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def transactions(request):
     """User transactions view"""
     user = request.user
@@ -275,10 +299,18 @@ def transactions(request):
     return render(request, 'accounts/transactions.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def transaction_detail(request, transaction_id):
     """Transaction detail view"""
-    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    if not is_valid_uuid(transaction_id):
+        messages.error(request, 'Invalid transaction ID.')
+        return redirect('accounts:transactions')
+    
+    try:
+        transaction = Transaction.objects.get(id=transaction_id, user=request.user)
+    except (Transaction.DoesNotExist, ValueError):
+        messages.error(request, 'Transaction not found.')
+        return redirect('accounts:transactions')
     
     context = {
         'page_title': 'Transaction Details',
@@ -287,7 +319,7 @@ def transaction_detail(request, transaction_id):
     return render(request, 'accounts/transaction_detail.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 @require_http_methods(["POST"])
 def create_transaction(request):
     """Create a transaction"""
@@ -300,14 +332,14 @@ def create_transaction(request):
             
             messages.success(request, 'Transaction created successfully!')
             logger.info(f'Transaction created by {request.user.email}')
-            return redirect('transactions')
+            return redirect('accounts:transactions')
         else:
             messages.error(request, 'Error creating transaction.')
     except Exception as e:
         logger.error(f'Error creating transaction: {str(e)}')
         messages.error(request, 'Error creating transaction.')
     
-    return redirect('transactions')
+    return redirect('accounts:transactions')
 
 
 # ============ CONTACT VIEW ============
@@ -333,7 +365,7 @@ def contact(request):
 
 
 # ============ WISHLIST VIEWS ============
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def wishlist(request):
     """User wishlist view"""
     user = request.user
@@ -346,13 +378,14 @@ def wishlist(request):
     return render(request, 'accounts/wishlist.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 @require_http_methods(["POST"])
+@csrf_exempt
 def add_to_wishlist(request):
     """Add item to wishlist via AJAX"""
     try:
-        product_id = request.POST.get('product_id')
-        product_name = request.POST.get('product_name')
+        product_id = request.POST.get('product_id', '').strip()
+        product_name = request.POST.get('product_name', '').strip()
         
         if not product_id or not product_name:
             return JsonResponse({
@@ -385,25 +418,28 @@ def add_to_wishlist(request):
         }, status=500)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 def remove_from_wishlist(request, item_id):
     """Remove item from wishlist"""
+    if not is_valid_uuid(item_id):
+        messages.error(request, 'Invalid item ID.')
+        return redirect('accounts:wishlist')
+    
     try:
-        wishlist_item = get_object_or_404(Wishlist, id=item_id, user=request.user)
+        wishlist_item = Wishlist.objects.get(id=item_id, user=request.user)
         wishlist_item.delete()
         messages.success(request, 'Removed from wishlist')
         logger.info(f'Item removed from wishlist by {request.user.email}')
-        return redirect('wishlist')
-    except Exception as e:
-        logger.error(f'Error removing from wishlist: {str(e)}')
-        messages.error(request, 'Error removing from wishlist')
-        return redirect('wishlist')
+        return redirect('accounts:wishlist')
+    except (Wishlist.DoesNotExist, ValueError):
+        messages.error(request, 'Item not found.')
+        return redirect('accounts:wishlist')
 
 
 # ============ CATEGORY VIEWS ============
 def categories(request):
     """List all categories"""
-    categories_list = Category.objects.filter(is_active=True).order_by('order', 'name')
+    categories_list = Category.objects.filter(is_active=True).order_by('name')
     
     context = {
         'page_title': 'Categories',
@@ -423,13 +459,13 @@ def category_detail(request, slug):
     return render(request, 'accounts/category_detail.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='accounts:login')
 @require_http_methods(["GET", "POST"])
 def manage_categories(request):
     """Manage categories (admin only)"""
     if not request.user.is_staff:
         messages.error(request, 'You do not have permission to access this page.')
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')
     
     if request.method == 'POST':
         form = CategoryForm(request.POST, request.FILES)
@@ -437,7 +473,7 @@ def manage_categories(request):
             form.save()
             messages.success(request, 'Category created successfully!')
             logger.info(f'Category created by {request.user.email}')
-            return redirect('manage_categories')
+            return redirect('accounts:manage_categories')
     else:
         form = CategoryForm()
     
@@ -459,7 +495,7 @@ def search(request):
     query = ''
     
     if request.GET.get('q'):
-        query = request.GET.get('q')
+        query = request.GET.get('q', '').strip()
         results = Category.objects.filter(
             name__icontains=query,
             is_active=True

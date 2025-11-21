@@ -1,18 +1,23 @@
 import os
 from pathlib import Path
-import django_heroku
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.messages import constants as messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ============ CREATE NECESSARY DIRECTORIES ============
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
+MEDIA_ROOT_DIR = BASE_DIR / 'mediafiles'
+MEDIA_ROOT_DIR.mkdir(exist_ok=True)
+
+# ============ SECURITY SETTINGS ============
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'False'
-
-ALLOWED_HOSTS = ['mamamaasaibakers.com']
-
+# ============ INSTALLED APPS ============
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -32,11 +37,11 @@ INSTALLED_APPS = [
     'CDMIS',
     'cloudinary',
     'cloudinary_storage',
+
 ]
 
 # ============ JAZZMIN ADMIN CONFIGURATION ============
 JAZZMIN_SETTINGS = {
-    # ========== BRANDING ==========
     "site_title": "Mama Maasai Bakers",
     "site_header": "Mama Maasai Bakers Admin",
     "site_brand": "Mama Maasai Bakers",
@@ -46,8 +51,6 @@ JAZZMIN_SETTINGS = {
     """,
     "welcome_sign": "Welcome to Admin Dashboard",
     "copyright": "Mama Maasai Bakers © 2025. All rights reserved.",
-    
-    # ========== SIDEBAR & NAVIGATION ==========
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
@@ -61,18 +64,14 @@ JAZZMIN_SETTINGS = {
         "CDMIS",
         "finance",
     ],
-    
-    # ========== SEARCH CONFIGURATION ==========
     "search_model": [
         "accounts.Account",
         "store.Product",
         "category.Category",
         "orders.Order",
         "CDMIS.Group",
-        "finance.Payment",
+        "finance.FinanceRecord",
     ],
-    
-    # ========== CUSTOM LINKS ==========
     "custom_links": {
         "accounts": [
             {
@@ -91,51 +90,38 @@ JAZZMIN_SETTINGS = {
             },
             {
                 "name": "💰 Finance Dashboard",
-                "url": "https://mamamaasaibakers.com/cdmis/finance/",
+                "url": "https://mamamaasaibakers.com/finance/",
                 "icon": "fas fa-money-bill-wave",
                 "new_window": True,
                 "permissions": ["finance.view_financerecord"]
             },
         ]
     },
-    
-    # ========== ICONS FOR MODELS ==========
     "icons": {
-        # Accounts
         "accounts.Account": "fas fa-user-circle",
         "accounts.ContactMessage": "fas fa-envelope",
         "accounts.Transaction": "fas fa-exchange-alt",
-        
-        # Store
+        "accounts.TradeHistory": "fas fa-chart-line",
+        "accounts.UserProfile": "fas fa-user-cog",
+        "accounts.Wishlist": "fas fa-heart",
+        "accounts.Category": "fas fa-tag",
         "store.Product": "fas fa-box",
         "store.ProductGallery": "fas fa-images",
         "store.Variation": "fas fa-sliders-h",
-        
-        # Category
         "category.Category": "fas fa-list",
-        
-        # Cart & Orders
         "carts.Cart": "fas fa-shopping-cart",
         "carts.CartItem": "fas fa-shopping-bag",
         "orders.Order": "fas fa-receipt",
         "orders.OrderProduct": "fas fa-package",
         "orders.Payment": "fas fa-credit-card",
-        
-        # CDMIS
         "CDMIS.Group": "fas fa-people-carry",
         "CDMIS.Payment": "fas fa-money-bill",
         "CDMIS.Training": "fas fa-graduation-cap",
         "CDMIS.Requirement": "fas fa-tasks",
-        
-        # Finance
         "finance.FinanceRecord": "fas fa-chart-bar",
     },
-    
-    # ========== DEFAULT ICONS ==========
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
-    
-    # ========== UI CONFIGURATION ==========
     "show_ui_builder": False,
     "ui_tweaks": {
         "navbar_small": False,
@@ -148,44 +134,10 @@ JAZZMIN_SETTINGS = {
         "sidebar_fixed": True,
         "sidebar_navigation_collapse": False,
     },
-    
-    # ========== FORM CONFIGURATION ==========
     "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {
-        # Accounts
-        "accounts.Account": "single",
-        "accounts.ContactMessage": "single",
-        "accounts.Transaction": "single",
-        
-        # Store
-        "store.Product": "collapsible",
-        "store.ProductGallery": "single",
-        "store.Variation": "single",
-        
-        # Category
-        "category.Category": "single",
-        
-        # Orders
-        "orders.Order": "horizontal_tabs",
-        "orders.OrderProduct": "single",
-        "orders.Payment": "single",
-        
-        # CDMIS
-        "CDMIS.Group": "collapsible",
-        "CDMIS.Payment": "single",
-        "CDMIS.Training": "single",
-        "CDMIS.Requirement": "single",
-        
-        # Finance
-        "finance.FinanceRecord": "horizontal_tabs",
-    },
-    
-    # ========== MODAL CONFIGURATION ==========
     "related_modal_active": True,
     "list_filter_toggle": True,
     "list_per_page": 25,
-    
-    # ========== THEME COLORS ==========
     "theme": {
         "primary-color": "#1f3a5f",
         "primary-dark": "#1a2f47",
@@ -197,27 +149,14 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-# ============ JAZZMIN UI TWEAKS ============
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small": False,
-    "footer_small": False,
-    "body_small": False,
-    "brand_small": False,
-    "brand_colour": "navbar-navy",
-    "accent": "accent-primary",
-    "toolbar_fixed": True,
-    "sidebar_fixed": True,
-    "sidebar_navigation_collapse": False,
-    "theme": "default",
-    "dark_mode_theme": "darkly",
-}
 
 # ============ SESSION CONFIGURATION ============
-SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
+SESSION_COOKIE_AGE = 2400
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = True  # For HTTPS
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True  # For HTTPS
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
 
 # ============ MIDDLEWARE ============
 MIDDLEWARE = [
@@ -262,35 +201,43 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 # ============ USER MODEL ============
 AUTH_USER_MODEL = 'accounts.Account'
 
-
-
-
-
-
 # ============ DATABASE CONFIGURATION ============
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render',
-        conn_max_age=600
-    )
-}
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ============ CLOUDINARY STORAGE ============
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'df44dwnwg',
-    'API_KEY': '626193889524544',
-    'API_SECRET': 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
 }
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
 # ============ EMAIL CONFIGURATION ============
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
@@ -331,22 +278,31 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.INFO: 'info',
 }
 
 # ============ DEFAULT FIELD TYPE ============
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ============ SECURITY SETTINGS ============
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = not DEBUG
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_SECURITY_POLICY = {
     "default-src": ("'self'",),
-    "script-src": ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net"),
-    "style-src": ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdn.jsdelivr.net"),
-    "font-src": ("'self'", "fonts.gstatic.com"),
-    "img-src": ("'self'", "data:", "https:"),
+    "script-src": ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"),
+    "style-src": ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"),
+    "font-src": ("'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"),
+    "img-src": ("'self'", "data:", "https:", "res.cloudinary.com"),
+    "media-src": ("'self'", "https:", "res.cloudinary.com"),
+    "connect-src": ("'self'", "https:", "res.cloudinary.com", "api.deriv.com"),
 }
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # ============ LOGGING CONFIGURATION ============
 LOGGING = {
@@ -379,8 +335,8 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'debug.log',
-            'maxBytes': 1024 * 1024 * 15,  # 15MB
+            'filename': str(LOGS_DIR / 'debug.log'),  # Convert to string for compatibility
+            'maxBytes': 1024 * 1024 * 15,
             'backupCount': 10,
             'formatter': 'verbose',
         },
@@ -390,6 +346,11 @@ LOGGING = {
             'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
         },
         'accounts': {
             'handlers': ['console', 'file'],
@@ -406,6 +367,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'carts': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 
@@ -414,15 +380,34 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'mama-maasai-cache',
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
     }
 }
-
-
 
 # ============ DERIV TRADING CONFIGURATION ============
 DERIV_APP_ID = os.environ.get('DERIV_APP_ID', 'YOUR_DERIV_APP_ID')
 DERIV_API_TOKEN = os.environ.get('DERIV_API_TOKEN', '')
 DERIV_API_URL = 'https://api.deriv.com/api'
+DERIV_WS_URL = 'wss://ws.binaryx.com/websockets/v3'
 
-# ============ ACTIVATE DJANGO-HEROKU SETTINGS ============
-django_heroku.settings(locals())
+# ============ PAGINATION ============
+ITEMS_PER_PAGE = 12
+TRADES_PER_PAGE = 10
+TRANSACTIONS_PER_PAGE = 10
+
+# ============ FILE UPLOAD SETTINGS ============
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
+ALLOWED_UPLOAD_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx']
+
+# ============ CSRF TRUSTED ORIGINS ============
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',')
+
+# ============ TESTING ============
+if 'test' in os.sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }

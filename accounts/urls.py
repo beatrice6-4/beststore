@@ -17,18 +17,18 @@ urlpatterns = [
     
     # ============ TRADING ============
     path('tradings/', views.tradings, name='tradings'),
-    path('tradings/<uuid:trade_id>/', views.trade_detail, name='trade_detail'),
+    path('tradings/<str:trade_id>/', views.trade_detail, name='trade_detail'),
     path('tradings/place/', views.place_trade, name='place_trade'),
     
     # ============ TRANSACTIONS ============
     path('transactions/', views.transactions, name='transactions'),
-    path('transactions/<uuid:transaction_id>/', views.transaction_detail, name='transaction_detail'),
+    path('transactions/<str:transaction_id>/', views.transaction_detail, name='transaction_detail'),
     path('transactions/create/', views.create_transaction, name='create_transaction'),
     
     # ============ WISHLIST ============
     path('wishlist/', views.wishlist, name='wishlist'),
     path('wishlist/add/', views.add_to_wishlist, name='add_to_wishlist'),
-    path('wishlist/remove/<uuid:item_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    path('wishlist/remove/<str:item_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
     
     # ============ CATEGORIES ============
     path('categories/', views.categories, name='categories'),
