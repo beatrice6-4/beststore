@@ -27,7 +27,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('home.urls')) if 'home' in settings.INSTALLED_APPS else path('', accounts_views.dashboard, name='home'),
     path('contact/', accounts_views.contact, name='contact'),
-    path('search/', accounts_views.search, name='search'),
 ]
 
 # Handle static files in development
@@ -35,8 +34,3 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-# Custom error handlers
-handler404 = 'accounts.views.custom_404'
-handler500 = 'accounts.views.custom_500'
-handler403 = 'accounts.views.custom_403'
-handler400 = 'accounts.views.custom_400'
