@@ -36,15 +36,14 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Account)
 class AccountAdmin(UserAdmin):
     """Custom admin for Account model"""
-    list_display = ['email', 'username', 'get_full_name', 'role', 'deriv_connected', 'created_at']
-    list_filter = ['is_active', 'role', 'deriv_connected', 'created_at']
+    list_display = ['email', 'username', 'get_full_name', 'role', 'created_at']
+    list_filter = ['is_active', 'role', 'created_at']
     search_fields = ['email', 'username', 'first_name', 'last_name', 'phone_number']
     readonly_fields = ['id', 'created_at', 'updated_at', 'date_joined', 'last_login']
 
     fieldsets = (
         ('Login', {'fields': ('email', 'username', 'password')}),
         ('Personal', {'fields': ('first_name', 'last_name', 'phone_number')}),
-        ('Trading', {'fields': ('deriv_token', 'deriv_connected')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'role', 'is_superadmin')}),
         ('Dates', {'fields': ('date_joined', 'last_login', 'created_at', 'updated_at'), 'classes': ('collapse',)}),
     )

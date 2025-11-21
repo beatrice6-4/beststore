@@ -74,18 +74,7 @@ class Account(AbstractUser):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     is_superadmin = models.BooleanField(default=False)
     
-    # Trading fields
-    deriv_token = models.CharField(
-        max_length=255, 
-        blank=True, 
-        null=True,
-        help_text='Deriv API token'
-    )
-    deriv_connected = models.BooleanField(
-        default=False,
-        help_text='Whether user has connected Deriv account'
-    )
-    
+   
     # Timestamp fields with proper defaults
     created_at = models.DateTimeField(
         auto_now_add=True,

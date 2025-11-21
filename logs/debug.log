@@ -204,3 +204,7 @@ Traceback (most recent call last):
            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
 django.db.utils.OperationalError: no such table: django_session
 ERROR 2025-11-21 12:37:38,509 basehttp 12384 10348 "GET /accounts/login/?next=/ HTTP/1.1" 500 187247
+INFO 2025-11-21 15:52:18,420 autoreload 17364 13428 Watching for file changes with StatReloader
+INFO 2025-11-21 16:01:39,668 autoreload 7144 6708 Watching for file changes with StatReloader
+INFO 2025-11-21 16:10:01,147 autoreload 7144 6708 C:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\accounts\models.py changed, reloading.
+INFO 2025-11-21 16:10:04,750 autoreload 560 16696 Watching for file changes with StatReloader
