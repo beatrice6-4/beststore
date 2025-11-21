@@ -44,7 +44,7 @@ def register(request):
             user = form.save()
             messages.success(request, 'Account created successfully! Please login.')
             logger.info(f'New user registered: {user.email}')
-            return redirect('accounts:login')
+            return redirect('accounts/login.html')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
