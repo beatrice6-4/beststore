@@ -1,8 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
 from CDMIS.models import FinancialAccount
 
 
@@ -18,7 +17,9 @@ class MyAccountManager(BaseUserManager):
             username=username,
             first_name=first_name,
             last_name=last_name,
+            # role will default to 'normal' automatically
         )
+
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -35,10 +36,12 @@ class MyAccountManager(BaseUserManager):
         user.is_active = True
         user.is_staff = True
         user.is_superuser = True
-        user.role = 'admin'
+        user.role = 'admin'  # Set superuser as administrator
         user.save(using=self._db)
         return user
 
+# accounts/models.py
+from django.contrib.auth.models import AbstractUser
 
 class Account(AbstractUser):
     ROLE_CHOICES = (
@@ -46,19 +49,36 @@ class Account(AbstractUser):
         ('finance', 'Finance'),
         ('user', 'User'),
     )
-    
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
+
+
+
+
+    def is_administrator(self):
+        """General roles for administrator."""
+        return self.role == self.Role.ADMINISTRATOR
+
+    def is_finance(self):
+        """Specific roles for finance."""
+        return self.role == self.Role.FINANCE
+
+    def is_normal_user(self):
+        """Normal roles for normal user."""
+        return self.role == self.Role.NORMAL
+
+    # required
     date_joined = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(auto_now=True)
+    last_login = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_superadmin = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
@@ -69,7 +89,7 @@ class Account(AbstractUser):
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 
-    def __str__(self):
+    def _str_(self):
         return self.email
 
     def has_perm(self, perm, obj=None):
@@ -77,7 +97,10 @@ class Account(AbstractUser):
 
     def has_module_perms(self, add_label):
         return True
+    
 
+from django.db import models
+from django.conf import settings
 
 class ContactMessage(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -86,42 +109,56 @@ class ContactMessage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=True)
 
-    def __str__(self):
-        return f"{self.subject} from {self.user.email}"
 
+    def _str_(self):
+        return f"{self.subject} from {self.user.email}"
+    
+
+from django.db import models
+from orders.models import Order
 
 class Transaction(models.Model):
-    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='transactions')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='transactions')
     transaction_id = models.CharField(max_length=100, unique=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50)
     status = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.transaction_id} - {self.status}"
+    
 
+from django.db import models
+from django.conf import settings
+from store.models import Product
 
 class Wishlist(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist_items')
-    product = models.ForeignKey('store.Product', on_delete=models.CASCADE, related_name='wishlisted_by')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlisted_by')
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'product')
         ordering = ['-added_at']
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.user.email} - {self.product.product_name}"
+    
 
+
+from django.db import models
 
 class Category(models.Model):
     category_name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
 
-    def __str__(self):
+    def _str_(self):
         return self.category_name
 
+
+from django.db import models
+from accounts.models import Account
 
 class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -129,11 +166,16 @@ class Payment(models.Model):
     created_by = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='created_payments')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.amount} - {self.description}"
+    
 
 
-@receiver(post_save, sender=Account)
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_financial_account(sender, instance, created, **kwargs):
     if created:
         FinancialAccount.objects.create(user=instance)
