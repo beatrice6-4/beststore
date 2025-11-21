@@ -262,6 +262,11 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 # ============ USER MODEL ============
 AUTH_USER_MODEL = 'accounts.Account'
 
+
+
+
+
+
 # ============ DATABASE CONFIGURATION ============
 DATABASES = {
     'default': dj_database_url.config(
@@ -411,6 +416,13 @@ CACHES = {
         'LOCATION': 'mama-maasai-cache',
     }
 }
+
+
+
+# ============ DERIV TRADING CONFIGURATION ============
+DERIV_APP_ID = os.environ.get('DERIV_APP_ID', 'YOUR_DERIV_APP_ID')
+DERIV_API_TOKEN = os.environ.get('DERIV_API_TOKEN', '')
+DERIV_API_URL = 'https://api.deriv.com/api'
 
 # ============ ACTIVATE DJANGO-HEROKU SETTINGS ============
 django_heroku.settings(locals())

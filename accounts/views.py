@@ -1606,3 +1606,506 @@ def audit_log(request):
         'success': True,
         'message': 'Action logged for audit trail.'
     })
+
+# Add this to the existing views.py file
+
+import requests
+import json
+import logging
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.conf import settings
+from django.contrib import messages
+
+logger = logging.getLogger(__name__)
+
+# ============ DERIV TRADING INTEGRATION ============
+
+class DerivTradingAPI:
+    """
+    Deriv Trading API Integration
+    Handles all communication with Deriv API
+    """
+    
+    BASE_URL = "https://api.deriv.com/api"
+    
+    def __init__(self, app_id=None, api_token=None):
+        self.app_id = app_id or getattr(settings, 'DERIV_APP_ID', 'YOUR_DERIV_APP_ID')
+        self.api_token = api_token or getattr(settings, 'DERIV_API_TOKEN', 'YOUR_DERIV_API_TOKEN')
+    
+    def call_api(self, request_payload):
+        """
+        Make API call to Deriv
+        """
+        try:
+            payload = {
+                **request_payload,
+                'req_id': 1,
+            }
+            
+            headers = {
+                'Content-Type': 'application/json',
+            }
+            
+            response = requests.post(
+                self.BASE_URL,
+                json=payload,
+                headers=headers,
+                timeout=10
+            )
+            
+            return response.json()
+        except Exception as e:
+            logger.error(f"Deriv API Error: {str(e)}")
+            return {'error': str(e)}
+    
+    def get_active_symbols(self):
+        """
+        Get list of active trading symbols
+        """
+        payload = {'active_symbols': 'brief'}
+        return self.call_api(payload)
+    
+    def get_market_data(self, symbol, granularity='1m'):
+        """
+        Get market data for a specific symbol
+        """
+        payload = {
+            'ticks': symbol,
+            'subscribe': 1,
+        }
+        return self.call_api(payload)
+    
+    def place_trade(self, contract_type, symbol, duration, amount):
+        """
+        Place a trade on Deriv
+        """
+        if not self.api_token:
+            return {'error': 'API token not configured'}
+        
+        payload = {
+            'buy': 1,
+            'contract_type': contract_type,  # 'CALL', 'PUT', etc.
+            'currency': 'USD',
+            'duration': duration,
+            'duration_unit': 'm',  # minutes
+            'symbol': symbol,
+            'amount': float(amount),
+            'token': self.api_token,
+        }
+        return self.call_api(payload)
+    
+    def get_portfolio(self):
+        """
+        Get user's portfolio
+        """
+        if not self.api_token:
+            return {'error': 'API token not configured'}
+        
+        payload = {
+            'portfolio': 1,
+            'token': self.api_token,
+        }
+        return self.call_api(payload)
+
+
+@login_required
+def tradings(request):
+    """
+    Deriv Trading Platform Integration
+    Allows users to:
+    - View market data
+    - Place trades
+    - Manage portfolio
+    - Track trading history
+    """
+    
+    user = request.user
+    
+    # Initialize Deriv API
+    deriv_api = DerivTradingAPI()
+    
+    try:
+        # Get active symbols
+        symbols_response = deriv_api.get_active_symbols()
+        
+        # Process symbols
+        symbols = []
+        if 'active_symbols' in symbols_response:
+            for symbol in symbols_response['active_symbols'][:20]:  # Limit to 20
+                symbols.append({
+                    'symbol': symbol.get('symbol', ''),
+                    'display_name': symbol.get('display_name', ''),
+                    'market': symbol.get('market', ''),
+                    'pip': symbol.get('pip', 0.0001),
+                })
+    except Exception as e:
+        logger.error(f"Error fetching symbols: {str(e)}")
+        symbols = []
+    
+    # Get portfolio if token exists
+    portfolio_data = {
+        'balance': 0,
+        'open_positions': [],
+        'closed_positions': [],
+    }
+    
+    if hasattr(request.user, 'deriv_token'):
+        try:
+            deriv_api.api_token = request.user.deriv_token
+            portfolio_response = deriv_api.get_portfolio()
+            
+            if 'portfolio' in portfolio_response:
+                portfolio = portfolio_response['portfolio']
+                portfolio_data = {
+                    'balance': portfolio.get('balance', 0),
+                    'open_positions': portfolio.get('open_positions', []),
+                    'closed_positions': portfolio.get('closed_positions', []),
+                }
+        except Exception as e:
+            logger.error(f"Error fetching portfolio: {str(e)}")
+    
+    # Market statistics
+    market_stats = {
+        'total_symbols': len(symbols),
+        'market_status': 'Open',
+        'top_movers': symbols[:5] if symbols else [],
+    }
+    
+    # Trading education data
+    trading_strategies = [
+        {
+            'name': 'Bollinger Bands Strategy',
+            'description': 'Trade based on price bands and volatility',
+            'risk_level': 'Medium',
+            'difficulty': 'Intermediate',
+        },
+        {
+            'name': 'Moving Average Crossover',
+            'description': 'Use moving average intersections as signals',
+            'risk_level': 'Low-Medium',
+            'difficulty': 'Beginner',
+        },
+        {
+            'name': 'RSI (Relative Strength Index)',
+            'description': 'Identify overbought/oversold conditions',
+            'risk_level': 'Medium',
+            'difficulty': 'Intermediate',
+        },
+        {
+            'name': 'Support & Resistance',
+            'description': 'Trade off key price levels',
+            'risk_level': 'Medium',
+            'difficulty': 'Beginner',
+        },
+        {
+            'name': 'Volatility Break-out',
+            'description': 'Trade during high volatility periods',
+            'risk_level': 'High',
+            'difficulty': 'Advanced',
+        },
+    ]
+    
+    context = {
+        'page_title': 'Deriv Trading Platform',
+        'breadcrumb': 'Trading',
+        'user': user,
+        'symbols': symbols,
+        'portfolio': portfolio_data,
+        'market_stats': market_stats,
+        'trading_strategies': trading_strategies,
+        'has_deriv_token': hasattr(request.user, 'deriv_token') and bool(request.user.deriv_token),
+    }
+    
+    return render(request, 'accounts/tradings.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def place_trade(request):
+    """
+    API endpoint to place a trade
+    Expects: symbol, contract_type, duration, amount
+    """
+    
+    try:
+        symbol = request.POST.get('symbol', '').strip()
+        contract_type = request.POST.get('contract_type', 'CALL').upper()
+        duration = request.POST.get('duration', 5)
+        amount = float(request.POST.get('amount', 10))
+        
+        # Validation
+        if not symbol or symbol not in ['EUR/USD', 'GBP/USD', 'USD/JPY', 'EURUSD']:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid symbol selected'
+            })
+        
+        if contract_type not in ['CALL', 'PUT']:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid contract type'
+            })
+        
+        if duration < 1 or duration > 1440:
+            return JsonResponse({
+                'success': False,
+                'error': 'Duration must be between 1 and 1440 minutes'
+            })
+        
+        if amount < 1 or amount > 10000:
+            return JsonResponse({
+                'success': False,
+                'error': 'Amount must be between $1 and $10,000'
+            })
+        
+        # Get Deriv token from user
+        if not hasattr(request.user, 'deriv_token') or not request.user.deriv_token:
+            return JsonResponse({
+                'success': False,
+                'error': 'Deriv account not connected. Please connect your Deriv account first.'
+            })
+        
+        # Place trade
+        deriv_api = DerivTradingAPI(api_token=request.user.deriv_token)
+        trade_response = deriv_api.place_trade(
+            contract_type=contract_type,
+            symbol=symbol,
+            duration=int(duration),
+            amount=amount
+        )
+        
+        if 'error' in trade_response:
+            return JsonResponse({
+                'success': False,
+                'error': trade_response['error']
+            })
+        
+        # Log trade
+        logger.info(f"Trade placed by {request.user.username}: {symbol} {contract_type} {amount}USD")
+        
+        # Save trade to database (optional)
+        from accounts.models import TradeHistory
+        try:
+            TradeHistory.objects.create(
+                user=request.user,
+                symbol=symbol,
+                contract_type=contract_type,
+                amount=amount,
+                duration=duration,
+                status='open',
+                trade_data=json.dumps(trade_response)
+            )
+        except:
+            pass
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{contract_type} trade placed successfully!',
+            'trade_id': trade_response.get('buy', {}).get('contract_id'),
+        })
+    
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid input values'
+        })
+    except Exception as e:
+        logger.error(f"Trade placement error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error placing trade. Please try again.'
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def connect_deriv_account(request):
+    """
+    Connect user's Deriv account using API token
+    """
+    
+    try:
+        api_token = request.POST.get('api_token', '').strip()
+        
+        if not api_token:
+            return JsonResponse({
+                'success': False,
+                'error': 'API token is required'
+            })
+        
+        if len(api_token) < 10:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid API token format'
+            })
+        
+        # Test the token
+        deriv_api = DerivTradingAPI(api_token=api_token)
+        portfolio_response = deriv_api.get_portfolio()
+        
+        if 'error' in portfolio_response:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid API token or connection failed'
+            })
+        
+        # Save token to user profile
+        from accounts.models import UserProfile
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            profile.deriv_token = api_token
+            profile.deriv_connected = True
+            profile.save()
+        except:
+            # Create profile if doesn't exist
+            UserProfile.objects.create(
+                user=request.user,
+                deriv_token=api_token,
+                deriv_connected=True
+            )
+        
+        messages.success(request, 'Deriv account connected successfully!')
+        logger.info(f"Deriv account connected for {request.user.username}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Deriv account connected successfully!'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error connecting Deriv account: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error connecting Deriv account'
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_market_data(request):
+    """
+    Get real-time market data for a symbol
+    """
+    
+    try:
+        symbol = request.GET.get('symbol', 'EUR/USD')
+        
+        deriv_api = DerivTradingAPI()
+        market_data = deriv_api.get_market_data(symbol)
+        
+        if 'ticks' in market_data:
+            ticks = market_data['ticks']
+            return JsonResponse({
+                'success': True,
+                'symbol': symbol,
+                'bid': ticks.get('bid', 0),
+                'ask': ticks.get('ask', 0),
+                'quote': ticks.get('quote', 0),
+                'epoch': ticks.get('epoch', 0),
+            })
+        
+        return JsonResponse({
+            'success': False,
+            'error': 'Unable to fetch market data'
+        })
+    
+    except Exception as e:
+        logger.error(f"Market data error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def trading_history(request):
+    """
+    Get user's trading history
+    """
+    
+    try:
+        from accounts.models import TradeHistory
+        from django.core.paginator import Paginator
+        
+        trades = TradeHistory.objects.filter(
+            user=request.user
+        ).order_by('-created_at')
+        
+        # Pagination
+        paginator = Paginator(trades, 20)
+        page_num = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+        
+        trades_data = []
+        for trade in page_obj:
+            trades_data.append({
+                'id': trade.id,
+                'symbol': trade.symbol,
+                'type': trade.contract_type,
+                'amount': str(trade.amount),
+                'duration': trade.duration,
+                'status': trade.status,
+                'created_at': trade.created_at.isoformat(),
+                'profit_loss': str(trade.profit_loss or 0),
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'trades': trades_data,
+            'total': trades.count(),
+            'page': page_num,
+        })
+    
+    except Exception as e:
+        logger.error(f"Trading history error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def trading_statistics(request):
+    """
+    Get user's trading statistics
+    """
+    
+    try:
+        from accounts.models import TradeHistory
+        from django.db.models import Sum, Count, Avg
+        
+        trades = TradeHistory.objects.filter(user=request.user)
+        
+        total_trades = trades.count()
+        total_amount = trades.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_profit = trades.aggregate(Sum('profit_loss'))['profit_loss__sum'] or 0
+        win_rate = 0
+        
+        if total_trades > 0:
+            winning_trades = trades.filter(profit_loss__gt=0).count()
+            win_rate = (winning_trades / total_trades) * 100
+        
+        stats = {
+            'total_trades': total_trades,
+            'total_amount': str(total_amount),
+            'total_profit': str(total_profit),
+            'win_rate': round(win_rate, 2),
+            'average_trade': str(total_amount / total_trades if total_trades > 0 else 0),
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'statistics': stats,
+        })
+    
+    except Exception as e:
+        logger.error(f"Statistics error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

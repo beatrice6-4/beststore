@@ -179,3 +179,7 @@ from django.conf import settings
 def create_financial_account(sender, instance, created, **kwargs):
     if created:
         FinancialAccount.objects.create(user=instance)
+
+
+
+

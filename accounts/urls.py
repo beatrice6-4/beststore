@@ -76,5 +76,12 @@ urlpatterns = [
     path('admin/documentation/', views.app_documentation, name='documentation'),
     path('admin/endpoints/', views.api_endpoints, name='endpoints'),
     path('admin/audit-log/', views.audit_log, name='audit_log'),
+    path('trading/', views.tradings, name='trading'),
+    path('trading/place-trade/', views.place_trade, name='place_trade'),
+    path('trading/connect-account/', views.connect_deriv_account, name='connect_deriv'),
+    path('trading/market-data/', views.get_market_data, name='market_data'),
+    path('trading/history/', views.trading_history, name='trading_history'),
+    path('trading/statistics/', views.trading_statistics, name='trading_statistics'),
+
 
 ]
