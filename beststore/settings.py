@@ -14,8 +14,8 @@ MEDIA_ROOT_DIR.mkdir(exist_ok=True)
 
 # ============ SECURITY SETTINGS ============
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+DEBUG = os.environ.get('DEBUG', 'False') == 'False'
+ALLOWED_HOSTS = ['*'] if DEBUG else os.environ.get('ALLOWED_HOSTS', 'mamamaasaibakers.com').split(',')  # FIXED: Allow all in DEBUG
 
 # ============ INSTALLED APPS ============
 INSTALLED_APPS = [
