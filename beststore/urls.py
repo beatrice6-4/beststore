@@ -25,8 +25,14 @@ from accounts import views as accounts_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('', include('home.urls')) if 'home' in settings.INSTALLED_APPS else path('', accounts_views.dashboard, name='home'),
+    path('store/', include('store.urls')),
+    path('category/', include('category.urls')),
+    path('cart/', include('carts.urls')),
+    path('orders/', include('orders.urls')),
+    path('cdmis/', include('CDMIS.urls')),
+    path('finance/', include('finance.urls')),
     path('contact/', accounts_views.contact, name='contact'),
+    path('', include('home.urls')) if 'home' in settings.INSTALLED_APPS else path('', accounts_views.dashboard, name='home'),
 ]
 
 # Handle static files in development
