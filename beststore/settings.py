@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', 'mamamaasaibakers.com']
+ALLOWED_HOSTS = ['mamamaasaibakers.com']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -48,13 +48,13 @@ JAZZMIN_SETTINGS = {
         "accounts": [
             {
                 "name": "View Site",
-                "url": "http://127.0.0.1:8000",
+                "url": "https://mamamaasaibakers.com",
                 "icon": "fas fa-globe",
                 "new_window": True
             },
             {
                 "name": "Visit CDMIS",
-                "url": "http://127.0.0.1:8000/cdmis/groups",
+                "url": "https://mamamaasaibakers.com/cdmis/groups",
                 "icon": "fas fa-users",
                 "new_window": True
             }
