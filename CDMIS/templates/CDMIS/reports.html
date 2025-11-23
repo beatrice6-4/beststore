@@ -1,172 +1,393 @@
 {% extends 'gov.html' %}
-{% block page_title %}CDMIS Reports{% endblock %}
-{% block breadcrumb %}CDMIS Reports{% endblock %}
+{% block page_title %}CDMIS Financial Reports{% endblock %}
+{% block breadcrumb %}Financial Reports{% endblock %}
 {% load static %}
+
 {% block content %}
 <style>
-    .reports-card {
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 4px 24px rgba(44,62,80,0.10);
-        padding: 36px 28px;
-        margin: 40px auto;
-        max-width: 900px;
+    :root {
+        --primary: #004080;
+        --success: #2d7a2d;
+        --accent: #4ff005;
+        --light-bg: #f7f8fa;
+        --border: #e0e0ef;
+        --shadow: 0 4px 24px rgba(44,62,80,0.10);
     }
+
+    .reports-container {
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .reports-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
     .reports-header {
         text-align: center;
-        margin-bottom: 32px;
+        margin-bottom: 48px;
+        animation: slideDown 0.6s ease-out;
     }
-    .reports-header h2 {
-        color: #004080;
-        font-weight: 700;
-        font-size: 2rem;
-        letter-spacing: 1px;
+
+    .reports-header h1 {
+        color: var(--primary);
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+        letter-spacing: 1.5px;
+    }
+
+    .reports-header p {
+        color: var(--success);
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    /* Summary Statistics */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 28px;
+        margin-bottom: 48px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px 24px;
+        box-shadow: var(--shadow);
+        border-left: 5px solid var(--primary);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 32px rgba(44,62,80,0.15);
+    }
+
+    .stat-card.success {
+        border-left-color: var(--success);
+    }
+
+    .stat-card.accent {
+        border-left-color: var(--accent);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        color: var(--primary);
+    }
+
+    .stat-card.success .stat-icon {
+        color: var(--success);
+    }
+
+    .stat-card.accent .stat-icon {
+        color: var(--accent);
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         margin-bottom: 8px;
     }
-    .reports-header p {
-        color: #2d7a2d;
-        font-size: 1.1em;
-        margin-bottom: 0;
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 4px;
     }
-    .summary-row {
-        display: flex;
-        justify-content: space-around;
+
+    .stat-card.success .stat-value {
+        color: var(--success);
+    }
+
+    .stat-card.accent .stat-value {
+        color: var(--accent);
+    }
+
+    .stat-subtitle {
+        font-size: 0.85rem;
+        color: #999;
+        font-weight: 500;
+    }
+
+    /* Tables */
+    .table-section {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: var(--shadow);
         margin-bottom: 32px;
-        gap: 24px;
-        flex-wrap: wrap;
+        animation: slideUp 0.6s ease-out;
     }
-    .summary-box {
-        background: linear-gradient(90deg, #4ff005 0%, #004080 100%);
-        color: #fff;
-        border-radius: 12px;
-        padding: 18px 24px;
-        font-size: 1.2em;
-        font-weight: 700;
-        text-align: center;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
-        flex: 1 1 220px;
-        margin: 8px 0;
-    }
-    .group-table {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+
+    .table-header {
+        display: flex;
+        align-items: center;
         margin-bottom: 24px;
-        border: 1px solid #e0e0ef;
-        width: 100%;
-        overflow: hidden;
+        padding-bottom: 16px;
+        border-bottom: 2px solid var(--border);
     }
-    .group-table th, .group-table td {
-        border: 1px solid #e0e0ef !important;
-        padding: 10px 12px;
-        font-size: 1.05em;
+
+    .table-header-icon {
+        font-size: 1.8rem;
+        color: var(--primary);
+        margin-right: 12px;
     }
-    .group-table th {
-        background: #f3f3fa;
-        color: #004080;
+
+    .table-header h2 {
+        font-size: 1.5rem;
+        color: var(--primary);
         font-weight: 700;
+        margin: 0;
     }
-    .group-table tbody tr:nth-child(even) {
-        background: #f7f8fa;
-    }
-    .group-table tbody tr:nth-child(odd) {
-        background: #eafbe7;
-    }
-    .section-title {
-        color: #4e54c8;
+
+    .table-header .badge {
+        margin-left: auto;
+        background: var(--accent);
+        color: #000;
         font-weight: 600;
-        font-size: 1.15em;
-        margin: 24px 0 12px 0;
-        letter-spacing: 1px;
+        padding: 6px 16px;
+        border-radius: 20px;
     }
-    @media (max-width: 700px) {
-        .reports-card {
-            padding: 16px 4px;
+
+    /* Data Table */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+    .data-table thead {
+        background: linear-gradient(90deg, var(--primary) 0%, #005fa3 100%);
+        color: white;
+    }
+
+    .data-table th {
+        padding: 16px 12px;
+        text-align: left;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .data-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .data-table tbody tr:nth-child(odd) {
+        background: var(--light-bg);
+    }
+
+    .data-table tbody tr:hover {
+        background: #e8f4f8;
+    }
+
+    .data-table .amount {
+        font-weight: 700;
+        color: var(--success);
+    }
+
+    .data-table .row-number {
+        color: #999;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: #999;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .reports-header h1 {
+            font-size: 1.8rem;
         }
-        .reports-header h2 {
-            font-size: 1.3rem;
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
-        .summary-row {
+
+        .table-section {
+            padding: 16px;
+        }
+
+        .data-table {
+            font-size: 0.85rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 10px 6px;
+        }
+
+        .table-header {
             flex-direction: column;
-            gap: 12px;
+            align-items: flex-start;
         }
-        .summary-box {
-            font-size: 1em;
-            padding: 12px 8px;
+
+        .table-header .badge {
+            margin-left: 0;
+            margin-top: 12px;
         }
-        .group-table th, .group-table td {
-            font-size: 0.97em;
-            padding: 8px 6px;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 </style>
-<div class="reports-card">
-    <div class="reports-header">
-        <h2><i class="fa fa-chart-bar me-2"></i>CDMIS Reports</h2>
-        <p>Overview of financials, groups, and trainings</p>
+
+<div class="reports-container">
+    <div class="reports-wrapper">
+        <!-- Header -->
+        <div class="reports-header">
+            <h1><i class="fa fa-chart-bar me-2"></i>Financial Reports</h1>
+            <p>Comprehensive overview of CDMIS financials and group activities</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa fa-money-bill-wave"></i></div>
+                <div class="stat-label">Total Financials</div>
+                <div class="stat-value">Ksh. {{ total_financials|floatformat:2 }}</div>
+                <div class="stat-subtitle">All transactions combined</div>
+            </div>
+
+            <div class="stat-card success">
+                <div class="stat-icon"><i class="fa fa-users"></i></div>
+                <div class="stat-label">Active Groups</div>
+                <div class="stat-value">{{ below_5000_groups|length|add:above_5000_groups|length }}</div>
+                <div class="stat-subtitle">Groups registered in system</div>
+            </div>
+
+            <div class="stat-card accent">
+                <div class="stat-icon"><i class="fa fa-graduation-cap"></i></div>
+                <div class="stat-label">Trainings Covered</div>
+                <div class="stat-value">{{ total_trainings }}</div>
+                <div class="stat-subtitle">Total training sessions</div>
+            </div>
+        </div>
+
+        <!-- Groups Below 5000 -->
+        <div class="table-section">
+            <div class="table-header">
+                <div class="table-header-icon"><i class="fa fa-arrow-down"></i></div>
+                <h2>Groups Paid Below Ksh. 5,000</h2>
+                <span class="badge">{{ below_5000_groups|length }} Groups</span>
+            </div>
+
+            {% if below_5000_groups %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Group Name</th>
+                        <th style="width: 150px;">Amount Paid</th>
+                        <th style="width: 120px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in below_5000_groups %}
+                    <tr>
+                        <td class="row-number">{{ forloop.counter }}</td>
+                        <td>{{ group.name }}</td>
+                        <td class="amount">Ksh. {{ group.total_paid|default:0|floatformat:2 }}</td>
+                        <td><span class="badge bg-warning">Active</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="fa fa-inbox"></i></div>
+                <p>No groups found below Ksh. 5,000</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Groups 5000 and Above -->
+        <div class="table-section">
+            <div class="table-header">
+                <div class="table-header-icon"><i class="fa fa-arrow-up"></i></div>
+                <h2>Groups Paid Ksh. 5,000 and Above</h2>
+                <span class="badge">{{ above_5000_groups|length }} Groups</span>
+            </div>
+
+            {% if above_5000_groups %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Group Name</th>
+                        <th style="width: 150px;">Amount Paid</th>
+                        <th style="width: 120px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in above_5000_groups %}
+                    <tr>
+                        <td class="row-number">{{ forloop.counter }}</td>
+                        <td>{{ group.name }}</td>
+                        <td class="amount">Ksh. {{ group.total_paid|default:0|floatformat:2 }}</td>
+                        <td><span class="badge bg-success">Premium</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="fa fa-inbox"></i></div>
+                <p>No groups found at Ksh. 5,000 or above</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    <div class="summary-row">
-        <div class="summary-box">
-            <i class="fa fa-coins me-2"></i>
-            Total Financials<br>
-            <span style="font-size:1.3em;">Ksh. {{ total_financials|floatformat:2 }}</span>
-        </div>
-        <div class="summary-box">
-            <i class="fa fa-users me-2"></i>
-            Total Groups<br>
-            <span style="font-size:1.3em;">{{ below_5000_groups|length|add:above_5000_groups|length }}</span>
-        </div>
-        <div class="summary-box">
-            <i class="fa fa-chalkboard-teacher me-2"></i>
-            Trainings Covered<br>
-            <span style="font-size:1.3em;">{{ total_trainings }}</span>
-        </div>
-    </div>
-    <div class="section-title"><i class="fa fa-arrow-down me-2"></i>Groups Paid Below Ksh. 5,000</div>
-    <table class="group-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Group Name</th>
-                <th>Amount Paid</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for group in below_5000_groups %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ group.name }}</td>
-                <td>Ksh. {{ group.total_paid|default:0|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">No groups found below Ksh. 5,000.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="section-title"><i class="fa fa-arrow-up me-2"></i>Groups Paid Ksh. 5,000 and Above</div>
-    <table class="group-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Group Name</th>
-                <th>Amount Paid</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for group in above_5000_groups %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ group.name }}</td>
-                <td>Ksh. {{ group.total_paid|default:0|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">No groups found above Ksh. 5,000.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
+
 {% endblock %}

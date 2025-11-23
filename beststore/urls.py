@@ -12,7 +12,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # Home
-    path('', views.dashboard, name='dashboard'),
+    path('', views.home, name='home'),
     
     # Apps
     path('store/', include('store.urls')),
