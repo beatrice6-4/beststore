@@ -50,6 +50,8 @@ urlpatterns = [
     path('resendOTP/', views.resendOTP, name='resendOTP'),
     path('verifyOTP/', views.verifyOTP, name='verifyOTP'),
     path('send_otp_email/', views.send_otp_email, name='send_otp_email'),
+    path('api/verify-otp/', views.verify_otp_ajax, name='verify_otp_ajax'),
+    path('api/check-otp-expiry/', views.check_otp_expiry, name='check_otp_expiry'),
 
     # Misc
     path('contact/', views.contact, name='contact'),
