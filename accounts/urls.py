@@ -47,6 +47,8 @@ urlpatterns = [
     path('forgotPassword/', views.forgotPassword, name='forgotPassword'),
     path('resetpassword_validate/<uidb64>/<token>/', views.resetpassword_validate, name='resetpassword_validate'),
     path('resetPassword/', views.resetPassword, name='resetPassword'),
+    path('resendOTP/', views.resendOTP, name='resendOTP'),
+    path('verifyOTP/', views.verifyOTP, name='verifyOTP'),
 
     # Misc
     path('contact/', views.contact, name='contact'),

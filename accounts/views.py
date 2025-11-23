@@ -1728,3 +1728,13 @@ def variation_by_product(request, product_id):
 def category_list(request):
     # categories = Category.objects.all()
     return render(request, 'accounts/category_list.html')
+
+
+
+def verifyOTP(request):
+    # Your OTP verification logic here
+    return redirect('resetPassword')
+
+def resendOTP(request):
+    # Your OTP resend logic here
+    return redirect('forgotPassword')
