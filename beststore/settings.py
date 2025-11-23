@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['mamamaasaibakers.com', 'localhost', '127.0.0.1', '*']
+ALLOWED_HOSTS = ['mamamaasaibakers.com']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -21,7 +21,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',  # Add this for sites framework
     'category',
     'accounts',
     'store',
@@ -34,9 +33,6 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
 ]
-
-# Sites Framework Configuration
-SITE_ID = 1
 
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
@@ -129,8 +125,6 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
-# ========================= DATABASE CONFIGURATION =========================
-
 # LOCAL DEVELOPMENT - SQLite
 DATABASES = {
     'default': {
@@ -138,8 +132,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-# ========================= CLOUDINARY CONFIGURATION =========================
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'df44dwnwg',
@@ -150,75 +142,15 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'
 
-# ========================= EMAIL CONFIGURATION =========================
-# Configure email for OTP sending
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
-# For Gmail: Use App-Specific Passwords
-# 1. Enable 2-Factor Authentication on your Google Account
-# 2. Go to myaccount.google.com/apppasswords
-# 3. Create an app password for Django
-# 4. Use that password below
-
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')  # Gmail App Password
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
-# Email configuration timeout
-EMAIL_TIMEOUT = 10
 
-# For production, add these:
-if not DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_USE_SSL = False
-    EMAIL_USE_TLS = True
-
-# ========================= CACHE CONFIGURATION =========================
-# Cache for storing OTP temporarily
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'beststore-cache',
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-        }
-    }
-}
-
-# For production with Redis (optional):
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': 'redis://127.0.0.1:6379/1',
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#             'CONNECTION_POOL_KWARGS': {'max_connections': 50}
-#         }
-#     }
-# }
-
-# ========================= SESSION CONFIGURATION =========================
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SECURE = not DEBUG  # Set to True in production with HTTPS
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = not DEBUG  # Set to True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = True
-
-# ========================= OTP CONFIGURATION =========================
-
-# OTP Settings for Password Reset
-OTP_LENGTH = 6
-OTP_EXPIRY_TIME = 600  # 10 minutes in seconds
-OTP_MAX_ATTEMPTS = 5
-OTP_RESEND_COOLDOWN = 30  # 30 seconds between resends
-
-# ========================= SECURITY SETTINGS =========================
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
@@ -227,33 +159,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-# Password validation settings
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-# ========================= INTERNATIONALIZATION =========================
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
-
-# ========================= STATIC FILES =========================
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
@@ -264,98 +173,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-# ========================= MESSAGE TAGS =========================
-
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
-    
 }
-
-# ========================= DEFAULT SETTINGS =========================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# ========================= LOGGING CONFIGURATION =========================
-# For debugging OTP issues
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'beststore.log',
-            'formatter': 'verbose',
-        },
-        'email_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'email.log',
-            'formatter': 'verbose',
-        },
-        'otp_file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'otp.log',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'accounts': {
-            'handlers': ['console', 'file', 'otp_file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'django.core.mail': {
-            'handlers': ['console', 'email_file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-}
-
-# Create logs directory if it doesn't exist
-import os
-LOGS_DIR = BASE_DIR / 'logs'
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-# ========================= HEROKU DEPLOYMENT =========================
 
 # Activate Django-Heroku settings (for Heroku deployment)
 # django_heroku.settings(locals())  # Comment out for local development
 
-# For Heroku, uncomment above and add these:
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
