@@ -1,8 +1,7 @@
-"""
-URL configuration for beststore project.
+"""greatkart URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+    https://docs.djangoproject.com/en/3.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -14,25 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# or similar main project urls.py
-
 from django.contrib import admin
-from django.conf import settings
-from django.conf.urls.static import static
 from django.urls import path, include
-from accounts import views as accounts_views
+from . import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
+
+    path('', views.dashboard, name='dashboard'),
     path('store/', include('store.urls')),
-    path('cdmis/', include('CDMIS.urls')),
-    path('contact/', accounts_views.contact, name='contact'),
-    path('', include('home.urls')) if 'home' in settings.INSTALLED_APPS else path('', accounts_views.dashboard, name='home'),
-]
+    path('cart/', include('carts.urls')),
+    path('accounts/', include('accounts.urls')),
 
-# Handle static files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+    # ORDERS
+    path('orders/', include('orders.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

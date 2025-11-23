@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Registered Groups</h2>
+<a href="{% url 'cdmis:group_add' %}" class="btn btn-success mb-3">Add Group</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Registration Date</th>
+            <th>Description</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.registration_date }}</td>
+            <td>{{ group.description }}</td>
+            <td><a href="{% url 'cdmis:group_detail' group.pk %}" class="btn btn-info btn-sm">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No groups registered.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
