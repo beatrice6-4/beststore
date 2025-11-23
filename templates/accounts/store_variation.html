@@ -619,7 +619,7 @@ function submitAddVariation() {
     const form = document.getElementById('addVariationForm');
     const formData = new FormData(form);
 
-    fetch("{% url 'variation_create' %}", {
+    fetch("#", {
         method: 'POST',
         body: formData,
         headers: {
