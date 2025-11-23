@@ -1487,3 +1487,238 @@ def user_delete(request, user_id):
         return redirect('accounts:userManagement')
 
 
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.views.decorators.http import require_http_methods
+from store.models import Product, Variation
+from django.http import JsonResponse
+
+def is_admin(user):
+    """Check if user is admin"""
+    return user.is_superuser or user.is_staff
+
+@login_required
+@user_passes_test(is_admin)
+def store_variation(request):
+    """
+    Manage product variations (add, view, edit, delete).
+    Admin-only view for managing product sizes, colors, and other variations.
+    """
+    # Get filter and search parameters
+    search_query = request.GET.get('q', '').strip()
+    product_filter = request.GET.get('product', '').strip()
+    page_num = request.GET.get('page', 1)
+    
+    # Base queryset
+    variations = Variation.objects.all().select_related('product').order_by('-id')
+    
+    # Search by product name or variation name
+    if search_query:
+        variations = variations.filter(
+            Q(product__product_name__icontains=search_query) |
+            Q(variation_category__icontains=search_query) |
+            Q(variation_value__icontains=search_query)
+        )
+    
+    # Filter by product
+    if product_filter:
+        variations = variations.filter(product__id=product_filter)
+    
+    # Pagination
+    paginator = Paginator(variations, 15)  # 15 variations per page
+    page_obj = paginator.get_page(page_num)
+    
+    # Get all products for filter dropdown
+    products = Product.objects.all().values('id', 'product_name').order_by('product_name')
+    
+    # Statistics
+    stats = {
+        'total_variations': Variation.objects.count(),
+        'products_with_variations': Variation.objects.values('product').distinct().count(),
+        'variation_categories': Variation.objects.values('variation_category').distinct().count(),
+    }
+    
+    context = {
+        'page_obj': page_obj,
+        'variations': page_obj.object_list,
+        'products': products,
+        'search_query': search_query,
+        'product_filter': product_filter,
+        'stats': stats,
+        'page_title': 'Product Variations',
+        'breadcrumb': 'Variations',
+    }
+    
+    return render(request, 'accounts/store_variation.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def variation_create(request):
+    """
+    Create a new product variation via AJAX/modal.
+    """
+    try:
+        product_id = request.POST.get('product_id', '').strip()
+        category = request.POST.get('category', '').strip()
+        value = request.POST.get('value', '').strip()
+        price = request.POST.get('price', '0')
+        
+        # Validation
+        if not product_id or not category or not value:
+            return JsonResponse({
+                'success': False,
+                'error': 'Product, category, and value are required.'
+            }, status=400)
+        
+        # Get product
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Product not found.'
+            }, status=404)
+        
+        # Check for duplicate variation
+        if Variation.objects.filter(
+            product=product,
+            variation_category=category,
+            variation_value=value
+        ).exists():
+            return JsonResponse({
+                'success': False,
+                'error': f'This {category} variation already exists for this product.'
+            }, status=400)
+        
+        # Create variation
+        variation = Variation.objects.create(
+            product=product,
+            variation_category=category,
+            variation_value=value,
+            variation_price=price if price else 0
+        )
+        
+        messages.success(request, f'Variation "{value}" added successfully.')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Variation "{value}" created successfully.',
+            'variation_id': variation.id,
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def variation_update(request, variation_id):
+    """
+    Update an existing product variation.
+    """
+    try:
+        variation = get_object_or_404(Variation, id=variation_id)
+        
+        category = request.POST.get('category', '').strip()
+        value = request.POST.get('value', '').strip()
+        price = request.POST.get('price', '0')
+        
+        # Validation
+        if not category or not value:
+            return JsonResponse({
+                'success': False,
+                'error': 'Category and value are required.'
+            }, status=400)
+        
+        # Check for duplicate (excluding current variation)
+        if Variation.objects.filter(
+            product=variation.product,
+            variation_category=category,
+            variation_value=value
+        ).exclude(id=variation_id).exists():
+            return JsonResponse({
+                'success': False,
+                'error': f'This {category} variation already exists for this product.'
+            }, status=400)
+        
+        # Update variation
+        old_value = variation.variation_value
+        variation.variation_category = category
+        variation.variation_value = value
+        variation.variation_price = price if price else 0
+        variation.save()
+        
+        messages.success(request, f'Variation "{old_value}" updated to "{value}" successfully.')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Variation updated successfully.',
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST", "DELETE"])
+def variation_delete(request, variation_id):
+    """
+    Delete a product variation.
+    """
+    try:
+        variation = get_object_or_404(Variation, id=variation_id)
+        
+        value = variation.variation_value
+        category = variation.variation_category
+        variation.delete()
+        
+        messages.success(request, f'{category} variation "{value}" deleted successfully.')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Variation deleted successfully.',
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@user_passes_test(is_admin)
+def variation_by_product(request, product_id):
+    """
+    Get all variations for a specific product (AJAX endpoint).
+    """
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        variations = Variation.objects.filter(product=product).values(
+            'id', 'variation_category', 'variation_value', 'variation_price'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'variations': list(variations),
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

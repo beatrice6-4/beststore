@@ -74,4 +74,8 @@ urlpatterns = [
     path('userManagement/', views.userManagement, name='userManagement'),
 
 
+
+    path('store_variation/', views.store_variation, name='store_variation'),
+
+
 ]
