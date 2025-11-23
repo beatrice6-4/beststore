@@ -76,6 +76,7 @@ urlpatterns = [
 
 
     path('store_variation/', views.store_variation, name='store_variation'),
+    path('categories/', views.category_list, name='categories'),
 
 
 ]

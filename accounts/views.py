@@ -1722,3 +1722,9 @@ def variation_by_product(request, product_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+
+def category_list(request):
+    # categories = Category.objects.all()
+    return render(request, 'accounts/category_list.html')
