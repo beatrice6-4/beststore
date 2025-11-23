@@ -1,136 +1,768 @@
 {% extends 'bases.html' %}
-
 {% load static %}
 
-{% block title %}Register - BestStore{% endblock %}
+{% block title %}Register - BESTSTORE{% endblock %}
 
 {% block content %}
-
 <style>
-body {
-    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Arial, sans-serif;
-}
-.section-content {
-    padding-top: 40px;
-    padding-bottom: 40px;
-}
-.card {
-    border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
-    border: none;
-    background: #fff;
-    padding: 2.5rem 2rem 2rem 2rem;
-}
-.card-title {
-    font-weight: 700;
-    color: #198754;
-    letter-spacing: 1px;
-}
-.form-group label {
-    font-weight: 600;
-    color: #198754;
-}
-.form-control, input[type="text"], input[type="email"], input[type="password"] {
-    border-radius: 8px;
-    border: 1px solid #d1e7dd;
-    box-shadow: none;
-    transition: border-color 0.2s;
-    font-size: 1rem;
-}
-.form-control:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.1rem rgba(25, 135, 84, 0.15);
-}
-.btn-primary {
-    background: #198754;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: background 0.2s;
-}
-.btn-primary:hover {
-    background: #145c32;
-}
-.text-center a {
-    color: #198754;
-    text-decoration: none;
-    font-weight: 500;
-}
-.text-center a:hover {
-    text-decoration: underline;
-    color: #145c32;
-}
-.form-row {
-    margin-bottom: 1.2rem;
-}
-.form-group {
-    margin-bottom: 1.2rem;
-}
-.card .alert {
-    border-radius: 8px;
-}
-@media (max-width: 600px) {
-    .card {
-        padding: 1.2rem 0.5rem;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
-}
+
+    body {
+        font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .register-container {
+        width: 100%;
+        max-width: 550px;
+        padding: 20px;
+    }
+
+    .register-wrapper {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Header Section */
+    .register-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .register-header-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.8rem;
+    }
+
+    .register-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+    }
+
+    .register-header p {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    /* Body Section */
+    .register-body {
+        padding: 2.5rem 2rem;
+    }
+
+    /* Alerts */
+    .alert-box {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        border-left: 4px solid;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-success {
+        background: #d4edda;
+        border-left-color: #28a745;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+        color: #721c24;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+        border-left-color: #ffc107;
+        color: #856404;
+    }
+
+    .alert-info {
+        background: #d1ecf1;
+        border-left-color: #17a2b8;
+        color: #0c5460;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        color: #2c3e50;
+        font-family: inherit;
+    }
+
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .form-control:hover:not(:focus) {
+        border-color: #dee2e6;
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    /* Error Messages */
+    .error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+        display: block;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .errorlist li {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+    }
+
+    /* Password Strength Indicator */
+    .password-strength {
+        margin-top: 0.5rem;
+        height: 4px;
+        border-radius: 2px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0;
+        background: #dc3545;
+        transition: all 0.3s ease;
+    }
+
+    .password-strength-bar.weak {
+        width: 33%;
+        background: #ffc107;
+    }
+
+    .password-strength-bar.fair {
+        width: 66%;
+        background: #17a2b8;
+    }
+
+    .password-strength-bar.strong {
+        width: 100%;
+        background: #28a745;
+    }
+
+    .password-strength-text {
+        font-size: 0.75rem;
+        margin-top: 0.3rem;
+        font-weight: 600;
+    }
+
+    .password-strength-text.weak {
+        color: #ffc107;
+    }
+
+    .password-strength-text.fair {
+        color: #17a2b8;
+    }
+
+    .password-strength-text.strong {
+        color: #28a745;
+    }
+
+    /* Submit Button */
+    .btn-register {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #0bc70e 0%, #3bd343 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 211, 67, 0.4);
+        letter-spacing: 0.5px;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    .btn-register:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Checkbox Agreement */
+    .agreement-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .agreement-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        cursor: pointer;
+        accent-color: #667eea;
+        flex-shrink: 0;
+    }
+
+    .agreement-checkbox a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .agreement-checkbox a:hover {
+        text-decoration: underline;
+    }
+
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        color: #adb5bd;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e9ecef;
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Footer */
+    .register-footer {
+        text-align: center;
+        padding: 1.5rem 2rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .register-footer p {
+        color: #6c757d;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .register-footer a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.3s ease;
+    }
+
+    .register-footer a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    /* Progress Steps */
+    .steps-progress {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .steps-progress::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e9ecef;
+        z-index: -1;
+    }
+
+    .step-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: 700;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.active .step-number {
+        background: #667eea;
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .register-container {
+            padding: 10px;
+        }
+
+        .register-body {
+            padding: 1.5rem 1.2rem;
+        }
+
+        .register-header {
+            padding: 1.5rem 1.2rem;
+        }
+
+        .register-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .register-footer {
+            padding: 1rem;
+        }
+
+        .form-group-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .form-group-row .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .steps-progress {
+            display: none;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Tooltip */
+    .tooltip-icon {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 18px;
+        font-size: 0.75rem;
+        cursor: help;
+        margin-left: 0.5rem;
+        position: relative;
+    }
+
+    .tooltip-icon:hover::after {
+        content: 'Min 8 chars, uppercase, number, special char';
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2c3e50;
+        color: white;
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 10;
+    }
 </style>
 
-<section class="section-content padding-y">
+<div class="register-container">
+    <div class="register-wrapper">
+        <!-- Header -->
+        <div class="register-header">
+            <div class="register-header-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1>Create Account</h1>
+            <p>Join our community today</p>
+        </div>
 
-<!-- ============================ COMPONENT REGISTER   ================================= -->
-    <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
-      <article class="card-body">
-    {% include 'includes/alerts.html' %}
-        <header class="mb-4"><h4 class="card-title">Sign up</h4></header>
-        <form action="{% url 'register' %}" method="POST">
-      {% csrf_token %}
+        <!-- Body -->
+        <div class="register-body">
+            <!-- Alerts -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert-box alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
 
-                <div class="form-row">
-                    <div class="col form-group">
-                        <label>First name</label>
-                      	{{ form.first_name }}
+            <!-- Registration Form -->
+            <form method="POST" action="{% url 'register' %}" novalidate>
+                {% csrf_token %}
+
+                <!-- Personal Information -->
+                <h5 style="color: #667eea; font-weight: 700; margin-bottom: 1.5rem;">
+                    <i class="fas fa-user"></i> Personal Information
+                </h5>
+
+                <!-- First & Last Name -->
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="first_name" class="form-label">
+                            <i class="fas fa-user-circle"></i> First Name *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="first_name"
+                            name="first_name" 
+                            class="form-control{% if form.first_name.errors %} is-invalid{% endif %}" 
+                            placeholder="John"
+                            required
+                        >
+                        {% if form.first_name.errors %}
+                            {% for error in form.first_name.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
-                    <div class="col form-group">
-                        <label>Last name</label>
-                      	{{ form.last_name }}
+
+                    <div class="form-group">
+                        <label for="last_name" class="form-label">
+                            <i class="fas fa-user-circle"></i> Last Name *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="last_name"
+                            name="last_name" 
+                            class="form-control{% if form.last_name.errors %} is-invalid{% endif %}" 
+                            placeholder="Doe"
+                            required
+                        >
+                        {% if form.last_name.errors %}
+                            {% for error in form.last_name.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                      <label>Email Address</label>
-                      {{form.email}}
+                <!-- Email & Phone -->
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address *
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email"
+                            name="email" 
+                            class="form-control{% if form.email.errors %} is-invalid{% endif %}" 
+                            placeholder="john@example.com"
+                            required
+                        >
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
-                    <div class="form-group col-md-6">
-                      <label>Phone Number</label>
-                      {{form.phone_number}}
+
+                    <div class="form-group">
+                        <label for="phone_number" class="form-label">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="phone_number"
+                            name="phone_number" 
+                            class="form-control" 
+                            placeholder="+254 712 345 678"
+                        >
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Create password</label>
-                        {{ form.password }}
+
+                <!-- Security Information -->
+                <h5 style="color: #667eea; font-weight: 700; margin-bottom: 1.5rem; margin-top: 2rem;">
+                    <i class="fas fa-lock"></i> Security Information
+                </h5>
+
+                <!-- Password Fields -->
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-key"></i> Password *
+                            <span class="tooltip-icon">?</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password"
+                            name="password" 
+                            class="form-control{% if form.password.errors %} is-invalid{% endif %}" 
+                            placeholder="••••••••"
+                            required
+                            onchange="checkPasswordStrength()"
+                            oninput="checkPasswordStrength()"
+                        >
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="password-strength-text" id="strengthText"></div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
-                    <div class="form-group col-md-6">
-                        <label>Repeat password</label>
-            {{form.confirm_password}}
+
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">
+                            <i class="fas fa-check"></i> Confirm Password *
+                        </label>
+                        <input 
+                            type="password" 
+                            id="confirm_password"
+                            name="confirm_password" 
+                            class="form-control{% if form.confirm_password.errors %} is-invalid{% endif %}" 
+                            placeholder="••••••••"
+                            required
+                            onchange="checkPasswordMatch()"
+                            oninput="checkPasswordMatch()"
+                        >
+                        <div id="passwordMatch"></div>
+                        {% if form.confirm_password.errors %}
+                            {% for error in form.confirm_password.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-block"> Register  </button>
+
+                <!-- Non-field Errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert-box alert-danger" style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Agreement -->
+                <div class="agreement-checkbox">
+                    <input type="checkbox" id="agreement" name="agreement" required>
+                    <label for="agreement" style="margin: 0;">
+                        I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+                    </label>
                 </div>
-      {{ form.email.errors }}
-      {{ form.non_field_errors }}
+
+                <!-- Register Button -->
+                <button type="submit" class="btn-register">
+                    <i class="fas fa-user-check"></i> Create Account
+                </button>
             </form>
-        </article>
-    </div>
-    <p class="text-center mt-4">Have an account? <a href="{% url 'login' %}">Log In</a></p>
-    <br><br>
-<!-- ============================ COMPONENT REGISTER  END.// ================================= -->
 
-</section>
+            <!-- Divider -->
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <!-- Social Login -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="button" style="padding: 12px; border: 2px solid #e9ecef; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 600; color: #2c3e50;" title="Sign up with Google">
+                    <i class="fab fa-google"></i> Google
+                </button>
+                <button type="button" style="padding: 12px; border: 2px solid #e9ecef; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 600; color: #2c3e50;" title="Sign up with Facebook">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="register-footer">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Password Strength Checker
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthText = document.getElementById('strengthText');
+        
+        let strength = 0;
+        
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+        
+        strengthBar.className = 'password-strength-bar';
+        strengthText.textContent = '';
+        
+        if (password.length === 0) {
+            strengthBar.className = 'password-strength-bar';
+        } else if (strength <= 2) {
+            strengthBar.classList.add('weak');
+            strengthText.classList.add('weak');
+            strengthText.textContent = '⚠️ Weak';
+        } else if (strength <= 3) {
+            strengthBar.classList.add('fair');
+            strengthText.classList.add('fair');
+            strengthText.textContent = '⚡ Fair';
+        } else {
+            strengthBar.classList.add('strong');
+            strengthText.classList.add('strong');
+            strengthText.textContent = '✓ Strong';
+        }
+    }
+
+    // Password Match Checker
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const matchDiv = document.getElementById('passwordMatch');
+        
+        if (confirmPassword === '') {
+            matchDiv.innerHTML = '';
+        } else if (password === confirmPassword) {
+            matchDiv.innerHTML = '<span style="color: #28a745; font-size: 0.85rem; font-weight: 600;">✓ Passwords match</span>';
+        } else {
+            matchDiv.innerHTML = '<span style="color: #dc3545; font-size: 0.85rem; font-weight: 600;">✗ Passwords do not match</span>';
+        }
+    }
+
+    // Form Validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const agreement = document.getElementById('agreement').checked;
+        
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+            return false;
+        }
+        
+        if (!agreement) {
+            e.preventDefault();
+            alert('Please agree to the terms and conditions');
+            return false;
+        }
+    });
+</script>
 
 {% endblock %}
