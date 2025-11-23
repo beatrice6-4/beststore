@@ -1737,8 +1737,6 @@ def resendOTP(request):
 
 
 
-
-
 import random
 import string
 from django.core.cache import cache
@@ -1750,6 +1748,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from datetime import datetime, timedelta
 import json
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # ========================= OTP GENERATION & STORAGE =========================
 
@@ -1762,27 +1764,56 @@ def generate_otp(length=6):
 
 def send_otp_email(request, user_email, otp):
     """
-    Send OTP to user's email address.
+    Send OTP to user's email address with proper error handling.
     """
     try:
+        # Get current site
         current_site = get_current_site(request)
-        subject = 'Your Password Reset OTP - BESTSTORE'
         
+        # Prepare email context
         context = {
             'otp': otp,
             'email': user_email,
             'domain': current_site.domain,
             'expiry_time': 10,  # 10 minutes
+            'site_name': 'BESTSTORE',
         }
         
-        message = render_to_string('accounts/otp_email.html', context)
-        email = EmailMessage(subject, message, to=[user_email])
-        email.content_subtype = 'html'
-        email.send()
+        # Render email template
+        try:
+            message_html = render_to_string('accounts/otp_email.html', context)
+        except Exception as template_error:
+            logger.error(f"Template rendering error: {str(template_error)}")
+            # Fallback to plain text email if template fails
+            message_html = f"""
+            <html>
+                <body>
+                    <h2>Password Reset OTP</h2>
+                    <p>Your OTP code is: <strong>{otp}</strong></p>
+                    <p>This code will expire in 10 minutes.</p>
+                    <p>If you didn't request this, please ignore this email.</p>
+                </body>
+            </html>
+            """
         
+        # Send email
+        email = EmailMessage(
+            subject='Your Password Reset OTP - BESTSTORE',
+            body=message_html,
+            from_email='noreply@beststore.com',  # Change to your email
+            to=[user_email]
+        )
+        email.content_subtype = 'html'
+        
+        # Try sending
+        result = email.send(fail_silently=False)
+        
+        logger.info(f"OTP email sent successfully to {user_email}. Result: {result}")
         return True
+        
     except Exception as e:
-        print(f"Error sending OTP email: {str(e)}")
+        logger.error(f"Error sending OTP email to {user_email}: {str(e)}")
+        print(f"DEBUG - Email sending error: {str(e)}")
         return False
 
 
@@ -1796,25 +1827,33 @@ def forgotPassword(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         
-        # Validate email
+        # Validate email format
         if not email:
             messages.error(request, 'Please enter your email address.')
-            return redirect('forgotPassword')
+            return render(request, 'accounts/forgotPassword.html')
+        
+        # Basic email format validation
+        if '@' not in email or '.' not in email:
+            messages.error(request, 'Please enter a valid email address.')
+            return render(request, 'accounts/forgotPassword.html')
         
         # Check if user exists
         try:
+            from accounts.models import Account
             user = Account.objects.get(email__exact=email)
         except Account.DoesNotExist:
-            messages.error(request, 'No account found with this email address.')
-            return redirect('forgotPassword')
+            # Security: Don't reveal if account exists
+            messages.info(request, f'If an account exists with {email}, you will receive an OTP email.')
+            return render(request, 'accounts/forgotPassword.html')
         
         # Check if user is active
         if not user.is_active:
-            messages.error(request, 'This account has been deactivated.')
-            return redirect('forgotPassword')
+            messages.error(request, 'This account has been deactivated. Please contact support.')
+            return render(request, 'accounts/forgotPassword.html')
         
         # Generate OTP
         otp = generate_otp()
+        logger.info(f"Generated OTP for {email}: {otp}")
         
         # Store OTP in cache with 10-minute expiration
         cache_key = f'otp_{email}'
@@ -1826,7 +1865,7 @@ def forgotPassword(request):
         
         # Send OTP via email
         if send_otp_email(request, email, otp):
-            messages.success(request, f'OTP has been sent to {email}. Check your inbox.')
+            messages.success(request, f'OTP has been sent to {email}. It will expire in 10 minutes.')
             
             # Store email in session for next step
             request.session['forgot_password_email'] = email
@@ -1834,8 +1873,11 @@ def forgotPassword(request):
             
             return redirect('verify_otp')
         else:
-            messages.error(request, 'Failed to send OTP. Please try again.')
-            return redirect('forgotPassword')
+            messages.error(request, 'Failed to send OTP. Please check your email address or try again later.')
+            logger.error(f"Failed to send OTP to {email}")
+            return render(request, 'accounts/forgotPassword.html', {
+                'email': email,
+            })
     
     return render(request, 'accounts/forgotPassword.html')
 
@@ -1860,12 +1902,14 @@ def verifyOTP(request):
         # If OTP comes as separate digits, combine them
         if not otp_input:
             otp_digits = [
-                request.POST.get(f'otp_{i}', '') for i in range(1, 7)
+                request.POST.get(f'otp_{i}', '') for i in range(6)
             ]
             otp_input = ''.join(otp_digits)
         
+        logger.info(f"OTP verification attempt for {email}: {otp_input}")
+        
         # Validate OTP input
-        if not otp_input or len(otp_input) != 6:
+        if not otp_input or len(otp_input) != 6 or not otp_input.isdigit():
             messages.error(request, 'Please enter a valid 6-digit OTP.')
             return render(request, 'accounts/verify_otp.html', {
                 'email': email,
@@ -1880,6 +1924,7 @@ def verifyOTP(request):
         # Check if OTP exists and hasn't expired
         if not otp_data:
             messages.error(request, 'OTP has expired. Please request a new one.')
+            request.session.pop('forgot_password_email', None)
             return redirect('forgotPassword')
         
         stored_otp = otp_data.get('otp')
@@ -1890,11 +1935,14 @@ def verifyOTP(request):
             cache.delete(cache_key)
             messages.error(request, 'Maximum OTP attempts exceeded. Please request a new OTP.')
             request.session.pop('forgot_password_email', None)
+            logger.warning(f"Max OTP attempts exceeded for {email}")
             return redirect('forgotPassword')
         
         # Verify OTP
         if otp_input == stored_otp:
             # OTP verified successfully
+            logger.info(f"OTP verified successfully for {email}")
+            
             # Store in session for password reset
             request.session['otp_verified'] = True
             request.session['otp_verified_email'] = email
@@ -1911,6 +1959,8 @@ def verifyOTP(request):
             cache.set(cache_key, otp_data, timeout=600)
             
             remaining_attempts = 5 - attempts
+            logger.warning(f"Incorrect OTP for {email}. Attempts: {attempts}")
+            
             if remaining_attempts > 0:
                 messages.error(request, f'Incorrect OTP. {remaining_attempts} attempts remaining.')
             else:
@@ -1921,6 +1971,7 @@ def verifyOTP(request):
             return render(request, 'accounts/verify_otp.html', {
                 'email': email,
                 'attempts': attempts,
+                'remaining_attempts': remaining_attempts,
                 'page_title': 'Verify OTP',
                 'breadcrumb': 'Verify OTP',
             })
@@ -1935,7 +1986,7 @@ def verifyOTP(request):
 
 # ========================= RESEND OTP =========================
 
-def resend_otp(request):
+def resendOTP(request):
     """
     Resend OTP to user's email with rate limiting.
     """
@@ -1948,15 +1999,17 @@ def resend_otp(request):
     # Check rate limiting (only resend after 30 seconds)
     resend_key = f'otp_resend_{email}'
     if cache.get(resend_key):
-        messages.error(request, 'Please wait before requesting a new OTP.')
+        messages.warning(request, 'Please wait 30 seconds before requesting a new OTP.')
         return redirect('verify_otp')
     
     try:
         # Get user
+        from accounts.models import Account
         user = Account.objects.get(email__exact=email)
         
         # Generate new OTP
         otp = generate_otp()
+        logger.info(f"Resending OTP for {email}: {otp}")
         
         # Store OTP in cache
         cache_key = f'otp_{email}'
@@ -1972,13 +2025,16 @@ def resend_otp(request):
         # Send OTP via email
         if send_otp_email(request, email, otp):
             messages.success(request, f'New OTP has been sent to {email}.')
+            logger.info(f"OTP resent successfully to {email}")
         else:
             messages.error(request, 'Failed to send OTP. Please try again.')
+            logger.error(f"Failed to resend OTP to {email}")
         
         return redirect('verify_otp')
     
     except Account.DoesNotExist:
         messages.error(request, 'User not found.')
+        logger.error(f"User not found for email: {email}")
         return redirect('forgotPassword')
 
 
@@ -2024,9 +2080,12 @@ def resetPassword(request):
         
         try:
             # Get user and update password
+            from accounts.models import Account
             user = Account.objects.get(email__exact=email)
             user.set_password(new_password)
             user.save()
+            
+            logger.info(f"Password reset successfully for {email}")
             
             # Clear session data
             request.session.pop('forgot_password_email', None)
@@ -2039,9 +2098,11 @@ def resetPassword(request):
         
         except Account.DoesNotExist:
             messages.error(request, 'User not found.')
+            logger.error(f"User not found during password reset: {email}")
             return redirect('forgotPassword')
         except Exception as e:
             messages.error(request, f'Error resetting password: {str(e)}')
+            logger.error(f"Error resetting password for {email}: {str(e)}")
             return render(request, 'accounts/resetPassword.html')
     
     context = {
@@ -2054,7 +2115,7 @@ def resetPassword(request):
 
 # ========================= AJAX ENDPOINTS FOR OTP =========================
 
-def verifyOtp_ajax(request):
+def verify_otp_ajax(request):
     """
     AJAX endpoint for real-time OTP verification.
     Returns JSON response for frontend validation.
@@ -2070,7 +2131,7 @@ def verifyOtp_ajax(request):
         if not email:
             return JsonResponse({'success': False, 'error': 'Email not found in session'}, status=400)
         
-        if not otp_input or len(otp_input) != 6:
+        if not otp_input or len(otp_input) != 6 or not otp_input.isdigit():
             return JsonResponse({'success': False, 'error': 'Invalid OTP format'}, status=400)
         
         # Get OTP from cache
@@ -2117,6 +2178,7 @@ def verifyOtp_ajax(request):
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
     except Exception as e:
+        logger.error(f"AJAX OTP verification error: {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
@@ -2131,69 +2193,14 @@ def check_otp_expiry(request):
         return JsonResponse({'expired': True, 'remaining_time': 0})
     
     cache_key = f'otp_{email}'
-    ttl = cache.ttl(cache_key) if hasattr(cache, 'ttl') else None
+    
+    # Try to get remaining time from cache
+    try:
+        ttl = cache.ttl(cache_key) if hasattr(cache, 'ttl') else None
+    except:
+        ttl = None
     
     if ttl is None or ttl <= 0:
         return JsonResponse({'expired': True, 'remaining_time': 0})
     
     return JsonResponse({'expired': False, 'remaining_time': ttl})
-
-
-# ========================= OTP EMAIL TEMPLATE =========================
-
-# Create file: accounts/templates/accounts/otp_email.html
-
-otp_email_template = """
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #667eea; padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { color: #667eea; margin: 0; }
-        .content { line-height: 1.6; color: #333; }
-        .otp-box { background: #f0f0f0; border-left: 4px solid #667eea; padding: 20px; margin: 30px 0; text-align: center; }
-        .otp-value { font-size: 2em; font-weight: bold; color: #667eea; letter-spacing: 2px; }
-        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; color: #856404; }
-        .footer { text-align: center; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; font-size: 0.9em; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔐 Password Reset OTP</h1>
-        </div>
-        
-        <div class="content">
-            <p>Hello,</p>
-            <p>You requested to reset your password. Use the One-Time Password (OTP) below to complete the reset process.</p>
-            
-            <div class="otp-box">
-                <div class="otp-value">{{ otp }}</div>
-                <p>This code will expire in <strong>{{ expiry_time }} minutes</strong></p>
-            </div>
-            
-            <div class="warning">
-                <strong>⚠️ Security Notice:</strong>
-                <p>Never share this OTP with anyone. BESTSTORE staff will never ask for your OTP.</p>
-            </div>
-            
-            <p><strong>Steps to reset your password:</strong></p>
-            <ol>
-                <li>Enter the OTP code: <strong>{{ otp }}</strong></li>
-                <li>Create a new strong password</li>
-                <li>Confirm your new password</li>
-            </ol>
-            
-            <p>If you did not request this password reset, please ignore this email or contact our support team immediately.</p>
-        </div>
-        
-        <div class="footer">
-            <p>© 2024 BESTSTORE. All rights reserved.</p>
-            <p>{{ domain }}</p>
-        </div>
-    </div>
-</body>
-</html>
-"""

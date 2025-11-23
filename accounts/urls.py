@@ -49,6 +49,7 @@ urlpatterns = [
     path('resetPassword/', views.resetPassword, name='resetPassword'),
     path('resendOTP/', views.resendOTP, name='resendOTP'),
     path('verifyOTP/', views.verifyOTP, name='verifyOTP'),
+    path('send_otp_email/', views.send_otp_email, name='send_otp_email'),
 
     # Misc
     path('contact/', views.contact, name='contact'),
