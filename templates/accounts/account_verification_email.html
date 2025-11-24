@@ -1,11 +1,670 @@
-
 {% autoescape off %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - BESTSTORE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .wrapper {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .header-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Welcome Section */
+        .welcome-section {
+            background: #f8f9ff;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .welcome-section h2 {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .welcome-section p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        
+        /* Content */
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 1.15rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .message {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        
+        .message p {
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        /* CTA Button */
+        .cta-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .verify-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 50px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            letter-spacing: 0.5px;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .verify-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .verify-button:active {
+            transform: translateY(-1px);
+        }
+        
+        /* Steps */
+        .steps-section {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .steps-section h3 {
+            color: #2c3e50;
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .steps-section h3::before {
+            content: '📋';
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        /* Alternative Link */
+        .alternative-link {
+            text-align: center;
+            margin: 25px 0;
+            padding-top: 25px;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .alternative-link p {
+            margin-bottom: 10px;
+        }
+        
+        .alternative-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .alternative-link a:hover {
+            background: #f0f0f0;
+            text-decoration: underline;
+        }
+        
+        /* Info Boxes */
+        .info-box {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .info-box.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        
+        .info-box.warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .info-box.security {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            color: #01579b;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .info-box p {
+            margin: 0;
+        }
+        
+        .info-box ul {
+            margin: 10px 0 0 20px;
+            font-size: 0.95rem;
+        }
+        
+        .info-box li {
+            margin-bottom: 6px;
+        }
+        
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 30px 0;
+        }
+        
+        /* Features */
+        .features-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .feature-title {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .feature-desc {
+            color: #999;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #f9f9f9;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .footer p {
+            margin: 8px 0;
+        }
+        
+        .footer-contact {
+            margin: 15px 0;
+            padding: 15px 0;
+            border-top: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .footer-contact p {
+            margin: 5px 0;
+        }
+        
+        .footer-contact a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer-contact a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-links {
+            margin-top: 15px;
+        }
+        
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            color: #999;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.8rem;
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 36px;
+            text-decoration: none;
+            margin: 0 5px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        /* Expiry Notice */
+        .expiry-notice {
+            background: #fff5e1;
+            border: 2px dashed #ffb74d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            color: #e65100;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 25px 15px;
+            }
+            
+            .header {
+                padding: 35px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header-icon {
+                font-size: 3rem;
+            }
+            
+            .verify-button {
+                padding: 16px 40px;
+                font-size: 1rem;
+                width: 100%;
+            }
+            
+            .features-section {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .message {
+                font-size: 0.9rem;
+            }
+            
+            .greeting {
+                font-size: 1.05rem;
+            }
+            
+            .step {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-icon">✉️</div>
+                <h1>Verify Your Email</h1>
+                <p>Complete your account setup</p>
+            </div>
 
-Hi {{user.first_name}},
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h2>Welcome to BESTSTORE! 🎉</h2>
+                <p>We're excited to have you on board. Let's get your account verified and ready to go!</p>
+            </div>
 
-Please click on below link to confirm your registration.
-https://{{domain}}{% url 'activate' uidb64=uid token=token %}
+            <!-- Main Content -->
+            <div class="content">
+                <div class="greeting">
+                    Hello {{ user.first_name|default:"User" }},
+                </div>
 
-If you think it's not you, please ignore this email.
+                <div class="message">
+                    <p>Thank you for creating a new account with <span class="highlight">BESTSTORE</span>. To complete your registration and start shopping, you need to verify your email address.</p>
+                    
+                    <p>Click the button below to verify your email address and activate your account:</p>
+                </div>
 
+                <!-- CTA Button -->
+                <div class="cta-section">
+                    <a href="https://{{domain}}{% url 'activate' uidb64=uid token=token %}" class="verify-button">
+                        ✓ Verify Email Address
+                    </a>
+                </div>
+
+                <!-- Expiry Notice -->
+                <div class="expiry-notice">
+                    ⏱️ This link expires in 24 hours
+                </div>
+
+                <!-- Steps -->
+                <div class="steps-section">
+                    <h3>What happens next?</h3>
+                    <div class="steps-container">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>Click the verification button</strong><br>
+                                This will confirm your email address
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Your account will be activated</strong><br>
+                                You'll be ready to start shopping
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <strong>Log in and enjoy</strong><br>
+                                Browse our products and make purchases
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="features-section">
+                    <div class="feature">
+                        <div class="feature-icon">🛍️</div>
+                        <div class="feature-title">Shop Freely</div>
+                        <div class="feature-desc">Browse our full product catalog</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🚚</div>
+                        <div class="feature-title">Fast Shipping</div>
+                        <div class="feature-desc">Quick delivery to your doorstep</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💳</div>
+                        <div class="feature-title">Secure Payment</div>
+                        <div class="feature-desc">Safe transaction processing</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Alternative Link -->
+                <div class="alternative-link">
+                    <p>Can't click the button? Copy and paste this link in your browser:</p>
+                    <a href="https://{{domain}}{% url 'activate' uidb64=uid token=token %}">
+                        https://{{domain}}{% url 'activate' uidb64=uid token=token %}
+                    </a>
+                </div>
+
+                <!-- Info Boxes -->
+                <div class="info-box success">
+                    <strong>✓ What you get:</strong>
+                    <p>Access to exclusive deals, order tracking, wishlist, personalized recommendations, and more!</p>
+                </div>
+
+                <div class="info-box security">
+                    <strong>🔒 Your account is secure:</strong>
+                    <ul>
+                        <li>We never share your personal information</li>
+                        <li>Your data is encrypted and protected</li>
+                        <li>Only you have access to your account</li>
+                        <li>You can change your password anytime</li>
+                    </ul>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Didn't create this account?</strong>
+                    <p>If you didn't sign up for a BESTSTORE account, please ignore this email. If you believe this was done without your permission, contact us immediately at <a href="mailto:support@beststore.com" style="color: inherit; font-weight: 700;">support@beststore.com</a></p>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Account Info -->
+                <div class="message">
+                    <p>
+                        <strong>Account Email:</strong> {{ user.email }}<br>
+                        <strong>Account Name:</strong> {{ user.first_name }} {{ user.last_name }}<br>
+                        <strong>Registration Date:</strong> Today
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p><strong>BESTSTORE</strong></p>
+                <p style="color: #999; font-size: 0.8rem;">{{ domain }}</p>
+                
+                <div class="footer-contact">
+                    <p>Have questions? We're here to help!</p>
+                    <p>
+                        📧 <a href="mailto:support@beststore.com">support@beststore.com</a><br>
+                        🕐 Monday - Friday, 9 AM - 6 PM
+                    </p>
+                </div>
+
+                <div class="social-links">
+                    <a href="#" title="Facebook">f</a>
+                    <a href="#" title="Twitter">𝕏</a>
+                    <a href="#" title="Instagram">📷</a>
+                    <a href="#" title="LinkedIn">in</a>
+                </div>
+
+                <div class="footer-links">
+                    <a href="https://{{ domain }}">Visit Website</a>
+                    <a href="https://{{ domain }}/accounts/login/">Login</a>
+                    <a href="https://{{ domain }}/contact/">Contact</a>
+                </div>
+
+                <div class="copyright">
+                    <p>© 2024 BESTSTORE. All rights reserved.</p>
+                    <p>This is an automated email. Please do not reply to this message.</p>
+                    <p style="color: #bbb; margin-top: 10px;">
+                        Your verification link will expire in 24 hours for security purposes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
 {% endautoescape %}
