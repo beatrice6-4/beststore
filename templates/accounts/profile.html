@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block page_title %}User Profile - BestStore{% endblock %}
+{% block page_title %}User Profile - Mama Maasai Bakers{% endblock %}
 {% block breadcrumb %}User Profile{% endblock %}
 {% load static %}
 
@@ -8,90 +8,811 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Profile</title>
+    <title>User Profile - Mama Maasai Bakers</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
             font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .profile-container {
-            max-width: 400px;
-            margin: 40px auto;
-            background: #fff;
+
+        .profile-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             border-radius: 18px;
-            box-shadow: 0 8px 32px rgba(60, 72, 88, 0.12);
-            padding: 32px 24px;
-            text-align: center;
+            padding: 40px 30px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
         }
+
+        .profile-avatar-section {
+            flex-shrink: 0;
+        }
+
         .profile-avatar {
-            width: 110px;
-            height: 110px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #6366f1;
-            margin-bottom: 18px;
-            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
         }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
         .profile-name {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #3730a3;
-            margin-bottom: 6px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .profile-email {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin-bottom: 12px;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-active {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: white;
             color: #6366f1;
-            margin-bottom: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .profile-details {
-            text-align: left;
-            margin-top: 24px;
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
         }
-        .profile-details h3 {
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            color: #6366f1;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
             font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
             color: #6366f1;
             margin-bottom: 8px;
         }
-        .profile-details p {
-            font-size: 1rem;
-            color: #374151;
-            margin: 4px 0;
+
+        .card-description {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.5;
         }
-        .edit-btn {
-            display: inline-block;
-            margin-top: 22px;
-            padding: 10px 28px;
-            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
-            color: #fff;
+
+        .profile-tabs {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px 20px;
+            background: none;
             border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            min-width: 140px;
+        }
+
+        .tab-btn.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+
+        .tab-btn:hover {
+            color: #6366f1;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .details-list {
+            list-style: none;
+        }
+
+        .details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .details-item:last-child {
+            border-bottom: none;
+        }
+
+        .details-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .details-value {
+            color: #6b7280;
+        }
+
+        .order-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            background: #f3f4f6;
+            border-color: #6366f1;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
-            transition: background 0.2s;
+            font-family: inherit;
+            transition: all 0.3s ease;
         }
-        .edit-btn:hover {
-            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-save {
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: white;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: #d1d5db;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: #f3f4f6;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #0c4a6e;
+            border: 1px solid #93c5fd;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-name {
+                font-size: 1.8rem;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs-header {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-btn {
+                min-width: 100px;
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <div class="profile-container">
-        <img src="#" alt="Avatar" class="profile-avatar">
-        <div class="profile-name">{{ user.get_full_name }}</div>
-        <div class="profile-email">{{ user.email }}</div>
-        <div class="profile-details">
-            <h3>Profile Details</h3>
-            <p><strong>Username:</strong> {{ user.username }}</p>
-            <p><strong>Joined:</strong> {{ user.date_joined|date:"F j, Y" }}</p>
-            <p><strong>Last Login:</strong> {{ user.last_login|date:"F j, Y, g:i a" }}</p>
+    <div class="profile-wrapper">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar-section">
+                <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}https://via.placeholder.com/140?text={{ user.username|upper|truncatewords:1 }}{% endif %}" 
+                     alt="{{ user.get_full_name }}" 
+                     class="profile-avatar">
+            </div>
+
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.get_full_name }}</h1>
+                <p class="profile-email">
+                    <i class="fas fa-envelope"></i> {{ user.email }}
+                </p>
+                <div style="margin-bottom: 12px;">
+                    <span class="profile-badge status-badge">
+                        <i class="fas fa-circle" style="font-size: 0.6rem;"></i> Active Member
+                    </span>
+                    {% if user.is_superuser %}
+                        <span class="profile-badge status-active">
+                            <i class="fas fa-crown"></i> Administrator
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="profile-actions">
+                    <button class="btn btn-primary" onclick="switchTab('profile-details')">
+                        <i class="fas fa-user-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-secondary" onclick="switchTab('orders')">
+                        <i class="fas fa-shopping-bag"></i> View Orders
+                    </button>
+                </div>
+            </div>
         </div>
-        <a href="#" class="edit-btn">Edit Profile</a>
+
+        <!-- Stats Grid -->
+        <div class="profile-grid">
+            <div class="profile-card">
+                <div class="card-icon"><i class="fas fa-shopping-bag"></i></div>
+                <div class="card-title">Total Orders</div>
+                <div class="card-value">{{ orders_count|default:0 }}</div>
+                <div class="card-description">Your complete order history</div>
+            </div>
+
+            <div class="profile-card">
+                <div class="card-icon"><i class="fas fa-sack-dollar"></i></div>
+                <div class="card-title">Total Spent</div>
+                <div class="card-value">Ksh {{ total_spent|default:0 }}</div>
+                <div class="card-description">Lifetime purchases</div>
+            </div>
+
+            <div class="profile-card">
+                <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="card-title">Member Since</div>
+                <div class="card-value" style="font-size: 1.2rem;">{{ user.date_joined|date:"M Y" }}</div>
+                <div class="card-description">{{ user.date_joined|timesince }} ago</div>
+            </div>
+        </div>
+
+        <!-- Profile Tabs -->
+        <div class="profile-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab('profile-details')">
+                    <i class="fas fa-user"></i> Profile Details
+                </button>
+                <button class="tab-btn" onclick="switchTab('orders')">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </button>
+                <button class="tab-btn" onclick="switchTab('settings')">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <button class="tab-btn" onclick="switchTab('security')">
+                    <i class="fas fa-lock"></i> Security
+                </button>
+            </div>
+
+            <!-- Profile Details Tab -->
+            <div id="profile-details" class="tab-content active">
+                <h3 style="margin-bottom: 20px; color: #1f2937;">
+                    <i class="fas fa-user-circle"></i> Profile Information
+                </h3>
+
+                <ul class="details-list">
+                    <li class="details-item">
+                        <span class="details-label">Full Name</span>
+                        <span class="details-value">{{ user.get_full_name|default:"Not provided" }}</span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Username</span>
+                        <span class="details-value">{{ user.username }}</span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Email</span>
+                        <span class="details-value">{{ user.email }}</span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Phone</span>
+                        <span class="details-value">{{ user.phone_number|default:"Not provided" }}</span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Address</span>
+                        <span class="details-value">{{ user.address|default:"Not provided" }}</span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Account Status</span>
+                        <span class="details-value">
+                            {% if user.is_active %}
+                                <span style="color: #10b981;"><i class="fas fa-check-circle"></i> Active</span>
+                            {% else %}
+                                <span style="color: #ef4444;"><i class="fas fa-times-circle"></i> Inactive</span>
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Member Since</span>
+                        <span class="details-value">{{ user.date_joined|date:"F j, Y" }}</span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Last Login</span>
+                        <span class="details-value">
+                            {% if user.last_login %}
+                                {{ user.last_login|date:"F j, Y \a\t g:i a" }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </span>
+                    </li>
+                </ul>
+
+                <div style="margin-top: 24px;">
+                    <a href="#" class="btn btn-save">
+                        <i class="fas fa-edit"></i> Edit Profile Information
+                    </a>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders" class="tab-content">
+                <h3 style="margin-bottom: 20px; color: #1f2937;">
+                    <i class="fas fa-shopping-bag"></i> Your Orders
+                </h3>
+
+                {% if user_orders %}
+                    {% for order in user_orders %}
+                        <div class="order-card">
+                            <div class="order-header">
+                                <span class="order-id">
+                                    <i class="fas fa-hashtag"></i> Order #{{ order.order_number }}
+                                </span>
+                                <span class="order-status status-{% if order.status == 'Pending' %}pending{% elif order.status == 'Completed' %}completed{% else %}cancelled{% endif %}">
+                                    {{ order.status|default:"Pending" }}
+                                </span>
+                            </div>
+                            <div class="order-details">
+                                <span><i class="fas fa-calendar"></i> {{ order.created_at|date:"F j, Y" }}</span>
+                                <span><i class="fas fa-money-bill-wave"></i> Ksh {{ order.order_total|default:0 }}</span>
+                                <span><i class="fas fa-box"></i> {{ order.order_items|length }} items</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="empty-state-title">No Orders Yet</div>
+                        <p class="empty-state-text">Start shopping and your orders will appear here!</p>
+                        <a href="{% url 'store' %}" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> Continue Shopping
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <h3 style="margin-bottom: 20px; color: #1f2937;">
+                    <i class="fas fa-cog"></i> Settings
+                </h3>
+
+                <form method="POST" action="#" style="max-width: 500px;">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" checked> Receive Email Notifications
+                        </label>
+                        <p style="font-size: 0.9rem; color: #6b7280; margin-top: 8px;">
+                            Get notified about orders, promotions, and special offers
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" checked> Subscribe to Newsletter
+                        </label>
+                        <p style="font-size: 0.9rem; color: #6b7280; margin-top: 8px;">
+                            Stay updated with our latest news and offers
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox"> Marketing Communications
+                        </label>
+                        <p style="font-size: 0.9rem; color: #6b7280; margin-top: 8px;">
+                            Receive personalized recommendations
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save"></i> Save Preferences
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="security" class="tab-content">
+                <h3 style="margin-bottom: 20px; color: #1f2937;">
+                    <i class="fas fa-lock"></i> Security Settings
+                </h3>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Keep your account secure by regularly updating your password</span>
+                </div>
+
+                <form method="POST" action="#" style="max-width: 500px;">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="current_password" class="form-input" required 
+                               placeholder="Enter your current password">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password" class="form-input" required 
+                               placeholder="Enter your new password">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="form-input" required 
+                               placeholder="Confirm your new password">
+                    </div>
+
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </form>
+
+                <div class="divider"></div>
+
+                <h4 style="margin: 20px 0 12px; color: #1f2937;">Login Activity</h4>
+                <ul class="details-list">
+                    <li class="details-item">
+                        <span class="details-label">Last Login</span>
+                        <span class="details-value">
+                            {{ user.last_login|date:"F j, Y \a\t g:i a"|default:"Never" }}
+                        </span>
+                    </li>
+                    <li class="details-item">
+                        <span class="details-label">Account Created</span>
+                        <span class="details-value">{{ user.date_joined|date:"F j, Y" }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Set active button
+            event.target.classList.add('active');
+        }
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 {% endblock %}
