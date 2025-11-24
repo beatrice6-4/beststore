@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'False'
 
 ALLOWED_HOSTS = ['mamamaasaibakers.com']
 
@@ -32,7 +32,10 @@ INSTALLED_APPS = [
     'CDMIS',
     'cloudinary',
     'cloudinary_storage',
+
 ]
+
+
 
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
@@ -84,37 +87,11 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-# ========================= SESSION CONFIGURATION ========================= 
-# ISSUE #1: Your session was expiring too quickly (2400 seconds = 40 minutes)
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Store sessions in database
-SESSION_COOKIE_AGE = 2592000  # 30 days in seconds (was 2400 = 40 mins - THIS WAS THE PROBLEM!)
-SESSION_SAVE_EVERY_REQUEST = False  # Don't save on every request (performance)
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep sessions even after closing browser
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
-SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access
-SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_COOKIE_AGE = 2400  # 40 minutes in seconds
+SESSION_SAVE_EVERY_REQUEST = True
 
-# ========================= CACHE CONFIGURATION =========================
-# ISSUE #2: You didn't have a cache configured
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'django_cache_table',
-        'TIMEOUT': 300,  # 5 minutes default cache
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-        }
-    }
-}
-
-# ========================= CSRF CONFIGURATION =========================
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_AGE = 31449600  # 1 year
-
-# ========================= MIDDLEWARE =========================
 MIDDLEWARE = [
+    
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,12 +101,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 ROOT_URLCONF = 'beststore.urls'
 
 LOGIN_REDIRECT_URL = 'redirect_after_login'
-LOGIN_URL = 'login'
 
 TEMPLATES = [
     {
@@ -153,47 +128,25 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
-# ========================= DATABASE CONFIGURATION =========================
-# ISSUE #3: Using SQLite with auto-delete settings
-
-# For local development
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-            'ATOMIC_REQUESTS': True,  # Ensure data integrity
-            'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
-        }
-    }
-else:
-    # For production (Heroku)
-    DATABASES = {
-        'default': dj_database_url.config(
-            default='sqlite:///db.sqlite3',
-            conn_max_age=600,
-            conn_health_checks=True,
-            atomic_requests=True,
-        )
-    }
-
-# ========================= CLOUDINARY STORAGE =========================
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render',
+        conn_max_age=600
+    )
 }
 
-# Only use Cloudinary in production
-if not DEBUG:
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-else:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'df44dwnwg',
+    'API_KEY': '626193889524544',
+    'API_SECRET': 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU',
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-# ========================= EMAIL CONFIGURATION =========================
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -202,70 +155,34 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
 
-# ========================= PASSWORD VALIDATION =========================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-# ========================= INTERNATIONALIZATION =========================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
-# ========================= STATIC FILES =========================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# ========================= MESSAGES =========================
-MESSAGE_TAGS = {
-    
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
     messages.SUCCESS: 'success',
 
-    messages.ERROR: 'danger',
 }
 
-# ========================= SECURITY SETTINGS =========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SECURE_SSL_REDIRECT = False  # Set to True in production
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-X_FRAME_OPTIONS = 'DENY'
-SECURE_CONTENT_SECURITY_POLICY = {
-    "default-src": ("'self'",),
-    "script-src": ("'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"),
-    "style-src": ("'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"),
-    "img-src": ("'self'", "data:", "https:", "res.cloudinary.com"),
-}
-
-# ========================= DATA RETENTION =========================
-# Prevent accidental data deletion
-AUTO_DELETE_INACTIVE_USERS = False
-AUTO_DELETE_EXPIRED_SESSIONS = False
-KEEP_DATA_FOR_DAYS = 365  # Keep data for at least 1 year
-
-# ========================= HEROKU CONFIGURATION =========================
-# Only enable django_heroku for production
-if not DEBUG:
-    django_heroku.settings(locals())
+# Activate Django-Heroku settings (for Heroku deployment)
+django_heroku.settings(locals())
