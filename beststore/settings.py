@@ -130,8 +130,7 @@ AUTH_USER_MODEL = 'accounts.Account'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://beststore_django_render_user:jg79k7m3AvDtfKKfXcdHOwQa9QyLEF6F@dpg-d3sckm3e5dus73e162vg-a.oregon-postgres.render.com/beststore_django_render',
-        conn_max_age=600
+        default=os.environ.get('DATABASE_URL')
     )
 }
 
