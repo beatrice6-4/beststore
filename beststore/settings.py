@@ -9,10 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
 
-# ✅ FIXED: DEBUG logic
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['mamamaasaibakers.com', 'localhost', '127.0.0.1', '*.herokuapp.com', '*.render.com']
+ALLOWED_HOSTS = [
+    'mamamaasaibakers.com'
+]
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -53,6 +54,12 @@ JAZZMIN_SETTINGS = {
                 "icon": "fas fa-globe",
                 "new_window": True
             },
+            {
+                "name": "Visit CDMIS",
+                "url": "https://mamamaasaibakers.com/cdmis/groups",
+                "icon": "fas fa-users",
+                "new_window": True
+            }
         ]
     },
     "icons": {
@@ -62,6 +69,20 @@ JAZZMIN_SETTINGS = {
         "orders.Order": "fas fa-shopping-cart",
         "CDMIS.Group": "fas fa-users",
         "finance.Payment": "fas fa-money-bill-wave",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": True,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "accounts.Account": "single",
+        "store.Product": "collapsible",
+        "category.Category": "vertical_tabs",
+        "orders.Order": "horizontal_tabs",
+        "CDMIS.Group": "collapsible",
+        "finance.Payment": "horizontal_tabs",
     },
 }
 
@@ -90,7 +111,7 @@ CACHES = {
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_AGE = 31449600
+CSRF_COOKIE_AGE = 31449600  # 1 year
 
 # ========================= MIDDLEWARE =========================
 MIDDLEWARE = [
@@ -133,13 +154,9 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
 
 # ========================= DATABASE CONFIGURATION =========================
-# ✅ BULLETPROOF FIX: Explicit database configuration
-
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DEBUG or not DATABASE_URL:
-    # Local development with SQLite
-    print("🔹 Using SQLite database (Development Mode)")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -149,43 +166,21 @@ if DEBUG or not DATABASE_URL:
         }
     }
 else:
-    # Production with PostgreSQL
-    print("🔹 Using PostgreSQL database (Production Mode)")
-    
-    try:
-        # ✅ FIXED: Parse DATABASE_URL manually to ensure ENGINE is set
-        parsed_db = dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-            atomic_requests=True,
-        )
-        
-        # ✅ VERIFY ENGINE exists
-        if not parsed_db.get('ENGINE'):
-            raise ValueError("DATABASE_URL parsing failed - no ENGINE found")
-        
-        # ✅ Add SSL options
-        parsed_db['OPTIONS'] = {
-            'sslmode': 'require',
-            'connect_timeout': 10,
-        }
-        
-        DATABASES = {'default': parsed_db}
-        print(f"✅ Database configured: {parsed_db['HOST']}")
-        
-    except Exception as e:
-        print(f"❌ Database configuration error: {e}")
-        print(f"DATABASE_URL: {DATABASE_URL[:50]}..." if DATABASE_URL else "DATABASE_URL not set")
-        # Fallback to SQLite if PostgreSQL fails
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
+    parsed_db = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+        atomic_requests=True,
+    )
+    if not parsed_db.get('ENGINE'):
+        raise ImproperlyConfigured("DATABASE_URL parsing failed - no ENGINE found")
+    parsed_db['OPTIONS'] = {
+        'sslmode': 'require',
+        'connect_timeout': 10,
+    }
+    DATABASES = {'default': parsed_db}
 
-# ========================= CLOUDINARY CONFIGURATION =========================
+# ========================= CLOUDINARY STORAGE =========================
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
@@ -205,9 +200,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaassaibakers@gmail.com')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaasaibakers@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaassaibakers@gmail.com')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaasaibakers@gmail.com')
 
 # ========================= PASSWORD VALIDATION =========================
 AUTH_PASSWORD_VALIDATORS = [
@@ -243,10 +238,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # ========================= MESSAGES =========================
 MESSAGE_TAGS = {
-    messages.DEBUG: 'debug',
-    messages.INFO: 'info',
     messages.SUCCESS: 'success',
-    messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
 
@@ -259,8 +251,19 @@ SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
 X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_SECURITY_POLICY = {
+    "default-src": ("'self'",),
+    "script-src": ("'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"),
+    "style-src": ("'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"),
+    "img-src": ("'self'", "data:", "https:", "res.cloudinary.com"),
+}
 
-# ========================= HEROKU DEPLOYMENT SETTINGS =========================
+# ========================= DATA RETENTION =========================
+AUTO_DELETE_INACTIVE_USERS = False
+AUTO_DELETE_EXPIRED_SESSIONS = False
+KEEP_DATA_FOR_DAYS = None  # Keep data permanently (no automatic deletion)
+
+# ========================= HEROKU/RENDER CONFIGURATION =========================
 if not DEBUG:
     try:
         django_heroku.settings(locals())

@@ -1,0 +1,1 @@
+KEEP_DATA_FOR_DAYS = None  # Set to None or a very large value to store data permanently in the database, allowing for indefinite data retention without automatic deletion.
