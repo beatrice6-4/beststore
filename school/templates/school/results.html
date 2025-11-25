@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block page_title %}Student Results{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-chart-bar"></i> Student Results
+                <span class="badge bg-secondary">{{ results.paginator.count|default:0 }}</span>
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:result_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Result
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="border-left: 4px solid #28a745;">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Records</h6>
+                    <h3 class="text-success">{{ total_results }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="border-left: 4px solid #10b981;">
+                <div class="card-body">
+                    <h6 class="text-muted">Passed</h6>
+                    <h3 class="text-success">{{ passed_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="border-left: 4px solid #ef4444;">
+                <div class="card-body">
+                    <h6 class="text-muted">Failed</h6>
+                    <h3 class="text-danger">{{ failed_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0" style="border-left: 4px solid #3b82f6;">
+                <div class="card-body">
+                    <h6 class="text-muted">Avg. Score</h6>
+                    <h3 class="text-info">{{ average_score|default:0|add:0|floatformat:1 }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Search by student name or registration..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="session" class="form-control">
+                        <option value="">All Sessions</option>
+                        {% for session in sessions %}
+                            <option value="{{ session.id }}" {% if request.GET.session == session.id|stringformat:'s' %}selected{% endif %}>
+                                {{ session.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="course" class="form-control">
+                        <option value="">All Courses</option>
+                        {% for course in courses %}
+                            <option value="{{ course.id }}" {% if request.GET.course == course.id|stringformat:'s' %}selected{% endif %}>
+                                {{ course.code }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="grade" class="form-control">
+                        <option value="">All Grades</option>
+                        <option value="A+" {% if request.GET.grade == 'A+' %}selected{% endif %}>A+ (90-100)</option>
+                        <option value="A" {% if request.GET.grade == 'A' %}selected{% endif %}>A (80-89)</option>
+                        <option value="B+" {% if request.GET.grade == 'B+' %}selected{% endif %}>B+ (75-79)</option>
+                        <option value="B" {% if request.GET.grade == 'B' %}selected{% endif %}>B (70-74)</option>
+                        <option value="C+" {% if request.GET.grade == 'C+' %}selected{% endif %}>C+ (65-69)</option>
+                        <option value="C" {% if request.GET.grade == 'C' %}selected{% endif %}>C (60-64)</option>
+                        <option value="D" {% if request.GET.grade == 'D' %}selected{% endif %}>D (50-59)</option>
+                        <option value="F" {% if request.GET.grade == 'F' %}selected{% endif %}>F (Below 50)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><i class="fas fa-user"></i> Student</th>
+                        <th><i class="fas fa-book"></i> Course</th>
+                        <th><i class="fas fa-calendar"></i> Session</th>
+                        <th><i class="fas fa-file-alt"></i> CA/40</th>
+                        <th><i class="fas fa-pencil"></i> Exam/60</th>
+                        <th><i class="fas fa-sum"></i> Total</th>
+                        <th><i class="fas fa-star"></i> Grade</th>
+                        <th><i class="fas fa-check-circle"></i> Status</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'school:student_detail' result.student.id %}" class="text-primary fw-bold">
+                                {{ result.student.get_full_name }}
+                            </a>
+                            <br>
+                            <small class="text-muted">{{ result.student.registration_number }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ result.course.code }}</strong>
+                            <br>
+                            <small class="text-muted">{{ result.course.name|truncatewords:3 }}</small>
+                        </td>
+                        <td>{{ result.session.name }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ result.continuous_assessment }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ result.exam_score }}</span>
+                        </td>
+                        <td>
+                            <strong class="text-primary">{{ result.total_score }}</strong>/100
+                        </td>
+                        <td>
+                            <span class="badge" style="background-color: 
+                                {% if result.grade == 'A+' or result.grade == 'A' %}#10b981
+                                {% elif result.grade == 'B+' or result.grade == 'B' %}#3b82f6
+                                {% elif result.grade == 'C+' or result.grade == 'C' %}#f59e0b
+                                {% else %}#ef4444{% endif %}; font-size: 12px; padding: 6px 10px;">
+                                {{ result.grade }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if result.is_pass %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i> Pass
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle"></i> Fail
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'school:result_detail' result.id %}" class="btn btn-outline-info" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'school:result_update' result.id %}" class="btn btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>No results found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1"><i class="fas fa-step-backward"></i> First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-chevron-left"></i> Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next <i class="fas fa-chevron-right"></i></a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last <i class="fas fa-step-forward"></i></a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-group-sm {
+        gap: 2px;
+    }
+</style>
+{% endblock %}
