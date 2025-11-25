@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}School Dashboard - Mama Maasai Bakers{% endblock %}
+{% block breadcrumb %}School Management{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; margin-bottom: 30px; border-radius: 10px; color: white;">
+    <h1 style="margin: 0; font-size: 2.5rem;">
+        <i class="fas fa-graduation-cap"></i> School Management System
+    </h1>
+    <p style="margin: 10px 0 0 0; opacity: 0.9;">
+        Welcome to the comprehensive school management dashboard
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <!-- Total Students Card -->
+    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #3498db;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <p style="color: #7f8c8d; margin: 0; font-size: 0.9rem;">Total Active Students</p>
+                <h2 style="margin: 10px 0 0 0; color: #2c3e50; font-size: 2rem;">{{ total_students }}</h2>
+            </div>
+            <i class="fas fa-users" style="font-size: 2.5rem; color: #3498db; opacity: 0.2;"></i>
+        </div>
+    </div>
+
+    <!-- Departments Card -->
+    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #e74c3c;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <p style="color: #7f8c8d; margin: 0; font-size: 0.9rem;">Active Departments</p>
+                <h2 style="margin: 10px 0 0 0; color: #2c3e50; font-size: 2rem;">{{ total_departments }}</h2>
+            </div>
+            <i class="fas fa-building" style="font-size: 2.5rem; color: #e74c3c; opacity: 0.2;"></i>
+        </div>
+    </div>
+
+    <!-- Courses Card -->
+    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #2ecc71;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <p style="color: #7f8c8d; margin: 0; font-size: 0.9rem;">Active Courses</p>
+                <h2 style="margin: 10px 0 0 0; color: #2c3e50; font-size: 2rem;">{{ total_courses }}</h2>
+            </div>
+            <i class="fas fa-book" style="font-size: 2.5rem; color: #2ecc71; opacity: 0.2;"></i>
+        </div>
+    </div>
+
+    <!-- Fees Collected Card -->
+    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #f39c12;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <p style="color: #7f8c8d; margin: 0; font-size: 0.9rem;">Fees Collected</p>
+                <h2 style="margin: 10px 0 0 0; color: #2c3e50; font-size: 2rem;">Ksh {{ total_fees_collected }}</h2>
+            </div>
+            <i class="fas fa-sack-dollar" style="font-size: 2.5rem; color: #f39c12; opacity: 0.2;"></i>
+        </div>
+    </div>
+</div>
+
+<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
+    <h3 style="margin-top: 0; color: #2c3e50;">
+        <i class="fas fa-calendar-alt"></i> Current Academic Session
+    </h3>
+    {% if current_session %}
+        <div style="background: #ecf0f1; padding: 16px; border-radius: 8px;">
+            <p><strong>Session:</strong> {{ current_session.name }}</p>
+            <p><strong>Semester:</strong> {{ current_session.get_semester_display }}</p>
+            <p><strong>Duration:</strong> {{ current_session.start_date }} to {{ current_session.end_date }}</p>
+        </div>
+    {% else %}
+        <p style="color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> No current session set</p>
+    {% endif %}
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <!-- Quick Links -->
+    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; color: #2c3e50;">
+            <i class="fas fa-link"></i> Quick Links
+        </h3>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:student_list' %}" style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-right"></i> View All Students
+                </a>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:course_list' %}" style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-right"></i> View All Courses
+                </a>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:department_list' %}" style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-right"></i> View Departments
+                </a>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:fee_list' %}" style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-right"></i> Manage Fees
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'school:result_list' %}" style="color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-right"></i> View Results
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Create New -->
+    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; color: #2c3e50;">
+            <i class="fas fa-plus-circle"></i> Create New
+        </h3>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:student_create' %}" style="color: #27ae60; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </a>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:course_create' %}" style="color: #27ae60; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-book-plus"></i> Add Course
+                </a>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:department_create' %}" style="color: #27ae60; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-building-plus"></i> Add Department
+                </a>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <a href="{% url 'school:fee_create' %}" style="color: #27ae60; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-receipt"></i> Record Fee
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'school:result_create' %}" style="color: #27ae60; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-star-plus"></i> Record Result
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
