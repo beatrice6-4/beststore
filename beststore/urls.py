@@ -10,6 +10,7 @@ from . import views
 urlpatterns = [
     # Admin Panel
     path('admin/', admin.site.urls),
+    path('school/', include('school.urls')),
     
     # Home
     path('', views.home, name='home'),

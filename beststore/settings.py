@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'CDMIS',
     'cloudinary',
     'cloudinary_storage',
+    'school',
 ]
 
 JAZZMIN_SETTINGS = {
