@@ -21,9 +21,9 @@ urlpatterns = [
 
     # Students
     path('students/', views.StudentListView.as_view(), name='student_list'),
-    path('students/<str:registration_number>/', views.StudentDetailView.as_view(), name='student_detail'),
+    path('students/<slug:registration_number>/', views.StudentDetailView.as_view(), name='student_detail'),
     path('students/create/', views.StudentCreateView.as_view(), name='student_create'),
-    path('students/<str:registration_number>/update/', views.StudentUpdateView.as_view(), name='student_update'),
+    path('students/<slug:registration_number>/update/', views.StudentUpdateView.as_view(), name='student_update'),
 
     # Sessions
     path('sessions/', views.SessionListView.as_view(), name='session_list'),
