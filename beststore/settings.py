@@ -9,7 +9,7 @@ from django.contrib.messages import constants as messages
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ========================= SECRET KEY =========================
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 
 # ========================= DEBUG MODE =========================
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -159,9 +159,9 @@ else:
 
 # ========================= CLOUDINARY STORAGE =========================
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': os.environ.get('df44dwnwg'),
+    'API_KEY': os.environ.get('626193889524544'),
+    'API_SECRET': os.environ.get('r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
 }
 
 if not DEBUG:
@@ -172,14 +172,34 @@ else:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
+# ========================= AUTHENTICATION =========================
+AUTH_USER_MODEL = 'accounts.Account'
+
+# ========================= TEMPLATES CONFIGURATION =========================
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],  # Add your custom templates directory here
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 # ========================= EMAIL CONFIGURATION =========================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = os.environ.get('mamamaassaibakers@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('ujqc yeoo sagb zajx')
+DEFAULT_FROM_EMAIL = os.environ.get('mamamaassaibakers@gmail.com')
 
 # ========================= PASSWORD VALIDATION =========================
 AUTH_PASSWORD_VALIDATORS = [
