@@ -674,4 +674,9 @@ def paid_orders_api(request):
             'receiptUrl': (o.payment.payment_id if getattr(o, 'payment', None) else None),
         })
     return JsonResponse(results, safe=False)
-# ...existing code...
+
+
+from django.http import HttpResponse
+
+def mpesa_transaction_result(request):
+    return HttpResponse("OK", status=200)
