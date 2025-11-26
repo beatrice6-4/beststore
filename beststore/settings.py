@@ -15,7 +15,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # ========================= ALLOWED HOSTS =========================
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'mamamaasaibakers.com').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # ========================= INSTALLED APPS =========================
 INSTALLED_APPS = [
@@ -51,44 +51,6 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
     "order_with_respect_to": ["accounts", "store", "category", "orders", "CDMIS", "finance"],
-    "custom_links": {
-        "accounts": [
-            {
-                "name": "View Site",
-                "url": "https://mamamaasaibakers.com",
-                "icon": "fas fa-globe",
-                "new_window": True
-            },
-            {
-                "name": "Visit CDMIS",
-                "url": "https://mamamaasaibakers.com/cdmis/groups",
-                "icon": "fas fa-users",
-                "new_window": True
-            }
-        ]
-    },
-    "icons": {
-        "accounts.Account": "fas fa-user",
-        "store.Product": "fas fa-bread-slice",
-        "category.Category": "fas fa-list",
-        "orders.Order": "fas fa-shopping-cart",
-        "CDMIS.Group": "fas fa-users",
-        "finance.Payment": "fas fa-money-bill-wave",
-    },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-    "related_modal_active": True,
-    "use_google_fonts_cdn": True,
-    "show_ui_builder": False,
-    "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {
-        "accounts.Account": "single",
-        "store.Product": "collapsible",
-        "category.Category": "vertical_tabs",
-        "orders.Order": "horizontal_tabs",
-        "CDMIS.Group": "collapsible",
-        "finance.Payment": "horizontal_tabs",
-    },
 }
 
 # ========================= SESSION CONFIGURATION =========================
@@ -159,9 +121,9 @@ else:
 
 # ========================= CLOUDINARY STORAGE =========================
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('df44dwnwg'),
-    'API_KEY': os.environ.get('626193889524544'),
-    'API_SECRET': os.environ.get('r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
 if not DEBUG:
@@ -197,9 +159,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('mamamaassaibakers@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('ujqc yeoo sagb zajx')
-DEFAULT_FROM_EMAIL = os.environ.get('mamamaassaibakers@gmail.com')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
 # ========================= PASSWORD VALIDATION =========================
 AUTH_PASSWORD_VALIDATORS = [
