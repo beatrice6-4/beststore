@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block page_title %}Course - {{ course.name }}{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-book"></i> Course Details
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:course_update' course.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
+            <a href="{% url 'school:course_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Course Information -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-book"></i> Course Information</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Course Code:</span>
+                        <h6 class="mb-0">{{ course.code }}</h6>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Course Name:</span>
+                        <h6 class="mb-0">{{ course.name }}</h6>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Department:</span>
+                        <h6 class="mb-0">
+                            <span class="badge bg-info">{{ course.department.name }}</span>
+                        </h6>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Credits:</span>
+                        <h6 class="mb-0">
+                            <span class="badge bg-success">{{ course.credits }} Units</span>
+                        </h6>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Level:</span>
+                        <h6 class="mb-0">{{ course.level }}</h6>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Semester:</span>
+                        <h6 class="mb-0">
+                            <span class="badge bg-warning text-dark">{{ course.get_semester_display }}</span>
+                        </h6>
+                    </div>
+                    <div>
+                        <span class="text-muted">Status:</span>
+                        <h6 class="mb-0">
+                            {% if course.is_active %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i> Active
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-times-circle"></i> Inactive
+                                </span>
+                            {% endif %}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructor Information -->
+            {% if course.instructor %}
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-chalkboard-user"></i> Instructor</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="text-center mb-3">
+                        {% if course.instructor.profile_picture %}
+                            <img src="{{ course.instructor.profile_picture.url }}" alt="{{ course.instructor.get_full_name }}" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle mb-2 bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="fas fa-user fa-2x text-white"></i>
+                            </div>
+                        {% endif %}
+                        <h6>{{ course.instructor.get_full_name }}</h6>
+                    </div>
+                    <div class="mb-2 pb-2 border-bottom">
+                        <span class="text-muted">Email:</span>
+                        <p class="mb-0">
+                            <a href="mailto:{{ course.instructor.email }}">{{ course.instructor.email }}</a>
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-muted">Phone:</span>
+                        <p class="mb-0">{{ course.instructor.phone_number|default:"—" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Statistics</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Enrolled Students:</span>
+                        <strong>{{ enrolled_students|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Results:</span>
+                        <strong>{{ total_results|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Avg. Score:</span>
+                        <strong>{{ average_score|default:0|add:0|floatformat:1 }}%</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Details -->
+        <div class="col-md-8">
+            <!-- Description & Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-align-left"></i> Course Description</h6>
+                </div>
+                <div class="card-body">
+                    {% if course.description %}
+                        <p>{{ course.description }}</p>
+                    {% else %}
+                        <p class="text-muted">No description available</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Prerequisites -->
+            {% if course.prerequisites.exists %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-list"></i> Prerequisites</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for prerequisite in course.prerequisites.all %}
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'school:course_detail' prerequisite.id %}" class="card text-decoration-none">
+                                <div class="card-body py-2 px-3">
+                                    <strong>{{ prerequisite.code }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ prerequisite.name|truncatewords:3 }}</small>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabs for Students & Results -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
+                        <i class="fas fa-users"></i> Enrolled Students ({{ enrolled_students|default:0 }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
+                        <i class="fas fa-chart-bar"></i> Results ({{ total_results|default:0 }})
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Students Tab -->
+                <div class="tab-pane fade show active" id="students" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Enrolled Students</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Student Name</th>
+                                        <th><i class="fas fa-id-card"></i> Registration No</th>
+                                        <th><i class="fas fa-building"></i> Department</th>
+                                        <th><i class="fas fa-envelope"></i> Email</th>
+                                        <th><i class="fas fa-cogs"></i> Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enrollment in enrollments %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ enrollment.student.get_full_name }}</strong>
+                                        </td>
+                                        <td>{{ enrollment.student.registration_number }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ enrollment.student.department.name }}</span>
+                                        </td>
+                                        <td>
+                                            <a href="mailto:{{ enrollment.student.email }}">{{ enrollment.student.email }}</a>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'school:student_detail' enrollment.student.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p>No students enrolled</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Tab -->
+                <div class="tab-pane fade" id="results" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Course Results</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Student</th>
+                                        <th><i class="fas fa-calendar"></i> Session</th>
+                                        <th><i class="fas fa-sum"></i> Score</th>
+                                        <th><i class="fas fa-star"></i> Grade</th>
+                                        <th><i class="fas fa-check-circle"></i> Status</th>
+                                        <th><i class="fas fa-cogs"></i> Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ result.student.get_full_name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ result.student.registration_number }}</small>
+                                        </td>
+                                        <td>{{ result.session.name }}</td>
+                                        <td>
+                                            <strong>{{ result.total_score }}</strong>/100
+                                        </td>
+                                        <td>
+                                            <span class="badge" style="background-color: 
+                                                {% if result.grade == 'A+' or result.grade == 'A' %}#10b981
+                                                {% elif result.grade == 'B+' or result.grade == 'B' %}#3b82f6
+                                                {% elif result.grade == 'C+' or result.grade == 'C' %}#f59e0b
+                                                {% else %}#ef4444{% endif %};">
+                                                {{ result.grade }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if result.is_pass %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle"></i> Pass
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times-circle"></i> Fail
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'school:result_detail' result.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p>No results recorded</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        border-bottom: 3px solid #0d6efd;
+        background: none;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}

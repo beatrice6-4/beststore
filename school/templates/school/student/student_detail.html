@@ -1,29 +1,294 @@
 {% extends "base.html" %}
-{% block page_title %}Student Details{% endblock %}
+{% block page_title %}Student Details - {{ student.get_full_name }}{% endblock %}
 {% load static %}
 
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">Student Details</h1>
-    <div class="card">
-        <div class="card-header">
-            <h5>{{ student.get_full_name }}</h5>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-user-graduate"></i> Student Details
+            </h1>
         </div>
-        <div class="card-body">
-            <p><strong>Registration Number:</strong> {{ student.registration_number }}</p>
-            <p><strong>Email:</strong> {{ student.email }}</p>
-            <p><strong>Phone:</strong> {{ student.phone_number|default:"—" }}</p>
-            <p><strong>Department:</strong> {{ student.department.name }}</p>
-            <p><strong>Status:</strong> 
-                {% if student.status == 'active' %}
-                    <span class="badge bg-success">Active</span>
-                {% elif student.status == 'graduated' %}
-                    <span class="badge bg-primary">Graduated</span>
-                {% else %}
-                    <span class="badge bg-secondary">{{ student.get_status_display }}</span>
-                {% endif %}
-            </p>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:student_update' student.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
+            <a href="{% url 'school:student_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Student Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-id-card"></i> Profile Information</h6>
+                </div>
+                <div class="card-body text-center">
+                    {% if student.profile_picture %}
+                        <img src="{{ student.profile_picture.url }}" alt="{{ student.get_full_name }}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle mb-3 bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                            <i class="fas fa-user fa-3x text-white"></i>
+                        </div>
+                    {% endif %}
+                    <h5 class="card-title">{{ student.get_full_name }}</h5>
+                    <p class="text-muted mb-3">{{ student.registration_number }}</p>
+                    <div class="mb-3">
+                        {% if student.status == 'active' %}
+                            <span class="badge bg-success p-2">
+                                <i class="fas fa-check-circle"></i> Active
+                            </span>
+                        {% elif student.status == 'graduated' %}
+                            <span class="badge bg-primary p-2">
+                                <i class="fas fa-graduation-cap"></i> Graduated
+                            </span>
+                        {% elif student.status == 'suspended' %}
+                            <span class="badge bg-warning p-2">
+                                <i class="fas fa-exclamation-circle"></i> Suspended
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary p-2">
+                                {{ student.get_status_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Quick Stats</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Courses:</span>
+                        <strong>{{ results.count|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Passed:</span>
+                        <strong class="text-success">{{ passed_count|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Failed:</span>
+                        <strong class="text-danger">{{ failed_count|default:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Details -->
+        <div class="col-md-8">
+            <!-- Contact & Academic Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Personal Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Email</label>
+                            <p class="mb-0">
+                                <a href="mailto:{{ student.email }}">{{ student.email }}</a>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Phone Number</label>
+                            <p class="mb-0">{{ student.phone_number|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Department</label>
+                            <p class="mb-0">
+                                <span class="badge bg-info">{{ student.department.name }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Date of Admission</label>
+                            <p class="mb-0">{{ student.date_of_admission|date:"F j, Y"|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Date of Birth</label>
+                            <p class="mb-0">{{ student.date_of_birth|date:"F j, Y"|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Gender</label>
+                            <p class="mb-0">{{ student.get_gender_display|default:"—" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs for Results and Fees -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">
+                        <i class="fas fa-chart-bar"></i> Results
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="fees-tab" data-bs-toggle="tab" data-bs-target="#fees" type="button" role="tab">
+                        <i class="fas fa-money-bill"></i> Fees
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Results Tab -->
+                <div class="tab-pane fade show active" id="results" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Academic Results</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-book"></i> Course</th>
+                                        <th><i class="fas fa-calendar"></i> Session</th>
+                                        <th><i class="fas fa-sum"></i> Score</th>
+                                        <th><i class="fas fa-star"></i> Grade</th>
+                                        <th><i class="fas fa-check-circle"></i> Status</th>
+                                        <th><i class="fas fa-cogs"></i> Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ result.course.code }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ result.course.name|truncatewords:3 }}</small>
+                                        </td>
+                                        <td>{{ result.session.name }}</td>
+                                        <td>
+                                            <strong>{{ result.total_score }}</strong>/100
+                                        </td>
+                                        <td>
+                                            <span class="badge" style="background-color: 
+                                                {% if result.grade == 'A+' or result.grade == 'A' %}#10b981
+                                                {% elif result.grade == 'B+' or result.grade == 'B' %}#3b82f6
+                                                {% elif result.grade == 'C+' or result.grade == 'C' %}#f59e0b
+                                                {% else %}#ef4444{% endif %};">
+                                                {{ result.grade }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if result.is_pass %}
+                                                <span class="badge bg-success">Pass</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Fail</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'school:result_detail' result.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p>No results found</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fees Tab -->
+                <div class="tab-pane fade" id="fees" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Fee Records</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-bookmark"></i> Fee Type</th>
+                                        <th><i class="fas fa-money-bill"></i> Amount</th>
+                                        <th><i class="fas fa-check-circle"></i> Paid</th>
+                                        <th><i class="fas fa-clock"></i> Balance</th>
+                                        <th><i class="fas fa-tag"></i> Status</th>
+                                        <th><i class="fas fa-cogs"></i> Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fee in fees %}
+                                    <tr>
+                                        <td>{{ fee.get_fee_type_display }}</td>
+                                        <td>Ksh {{ fee.amount|add:0|floatformat:2 }}</td>
+                                        <td>Ksh {{ fee.paid_amount|add:0|floatformat:2 }}</td>
+                                        <td>
+                                            {% if fee.balance == 0 %}
+                                                <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                                <strong class="text-danger">Ksh {{ fee.balance|add:0|floatformat:2 }}</strong>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if fee.payment_status == 'unpaid' %}
+                                                <span class="badge bg-danger">Unpaid</span>
+                                            {% elif fee.payment_status == 'partial' %}
+                                                <span class="badge bg-warning">Partial</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Paid</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'school:fee_detail' fee.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p>No fee records found</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        border-bottom: 3px solid #0d6efd;
+        background: none;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: #0d6efd;
+    }
+</style>
 {% endblock %}

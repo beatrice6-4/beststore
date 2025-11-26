@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block page_title %}{% if form.instance.id %}Edit{% else %}Add{% endif %} Course{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-book"></i>
+                {% if form.instance.id %}Edit Course{% else %}Add New Course{% endif %}
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'school:course_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Course Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Errors:</strong>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Course Code & Name -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-hashtag"></i> Course Code *</label>
+                                {{ form.code }}
+                                {% if form.code.errors %}
+                                    <div class="invalid-feedback d-block text-danger">{{ form.code.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted d-block">e.g., CS101, MTH201</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-book"></i> Course Name *</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block text-danger">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Department & Credits -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-building"></i> Department *</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}
+                                    <div class="invalid-feedback d-block text-danger">{{ form.department.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-star"></i> Credits *</label>
+                                {{ form.credits }}
+                                {% if form.credits.errors %}
+                                    <div class="invalid-feedback d-block text-danger">{{ form.credits.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Semester & Level -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-calendar"></i> Semester *</label>
+                                {{ form.semester }}
+                                {% if form.semester.errors %}
+                                    <div class="invalid-feedback d-block text-danger">{{ form.semester.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-graduation-cap"></i> Level *</label>
+                                {{ form.level }}
+                                {% if form.level.errors %}
+                                    <div class="invalid-feedback d-block text-danger">{{ form.level.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Instructor -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-chalkboard-user"></i> Instructor</label>
+                            {{ form.instructor }}
+                            {% if form.instructor.errors %}
+                                <div class="invalid-feedback d-block text-danger">{{ form.instructor.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Prerequisites -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-list"></i> Prerequisites</label>
+                            {{ form.prerequisites }}
+                            {% if form.prerequisites.errors %}
+                                <div class="invalid-feedback d-block text-danger">{{ form.prerequisites.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted d-block">Select courses that must be completed before this course</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if form.instance.id %}Update{% else %}Add{% endif %} Course
+                            </button>
+                            <a href="{% url 'school:course_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="col-md-4">
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Instructions</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="ps-3">
+                        <li class="mb-2">Enter a unique course code</li>
+                        <li class="mb-2">Provide a descriptive course name</li>
+                        <li class="mb-2">Select the appropriate department</li>
+                        <li class="mb-2">Specify credit hours</li>
+                        <li class="mb-2">Choose semester and level</li>
+                        <li class="mb-2">Add course description</li>
+                        <li class="mb-2">Assign an instructor (optional)</li>
+                        <li>Select prerequisites if applicable</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm bg-light">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-question-circle"></i> Need Help?</h6>
+                </div>
+                <div class="card-body small">
+                    <p class="mb-2"><strong>Course Code:</strong> A unique identifier for the course (e.g., CS101)</p>
+                    <p class="mb-2"><strong>Credits:</strong> Number of credit hours for the course</p>
+                    <p class="mb-2"><strong>Semester:</strong> When the course is offered (1st, 2nd, etc.)</p>
+                    <p class="mb-0"><strong>Level:</strong> Academic year level (100, 200, 300, etc.)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    select,
+    textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}
