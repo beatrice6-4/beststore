@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block page_title %}Result Details{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Result Details</h1>
+    <div class="card">
+        <div class="card-header">
+            <h5>Student: {{ result.student.get_full_name }}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Course:</strong> {{ result.course.name }}</p>
+            <p><strong>Session:</strong> {{ result.session.name }}</p>
+            <p><strong>Continuous Assessment:</strong> {{ result.continuous_assessment }}/40</p>
+            <p><strong>Exam Score:</strong> {{ result.exam_score }}/60</p>
+            <p><strong>Total Score:</strong> {{ result.total_score }}/100</p>
+            <p><strong>Grade:</strong> {{ result.grade }}</p>
+            <p><strong>Status:</strong> {% if result.is_pass %}Pass{% else %}Fail{% endif %}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

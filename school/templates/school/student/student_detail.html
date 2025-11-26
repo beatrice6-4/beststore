@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_title %}Student Details{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Student Details</h1>
+    <div class="card">
+        <div class="card-header">
+            <h5>{{ student.get_full_name }}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Registration Number:</strong> {{ student.registration_number }}</p>
+            <p><strong>Email:</strong> {{ student.email }}</p>
+            <p><strong>Phone:</strong> {{ student.phone_number|default:"—" }}</p>
+            <p><strong>Department:</strong> {{ student.department.name }}</p>
+            <p><strong>Status:</strong> 
+                {% if student.status == 'active' %}
+                    <span class="badge bg-success">Active</span>
+                {% elif student.status == 'graduated' %}
+                    <span class="badge bg-primary">Graduated</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ student.get_status_display }}</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
