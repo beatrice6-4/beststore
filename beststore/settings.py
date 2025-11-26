@@ -5,16 +5,19 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.messages import constants as messages
 
+# ========================= BASE DIRECTORY =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ========================= SECRET KEY =========================
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
 
+# ========================= DEBUG MODE =========================
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [
-    'mamamaasaibakers.com'
-]
+# ========================= ALLOWED HOSTS =========================
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'mamamaasaibakers.com').split(',')
 
+# ========================= INSTALLED APPS =========================
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -37,6 +40,7 @@ INSTALLED_APPS = [
     'school',
 ]
 
+# ========================= JAZZMIN SETTINGS =========================
 JAZZMIN_SETTINGS = {
     "site_title": "Mama Maasai Bakers Admin",
     "site_header": "Mama Maasai Bakers",
@@ -126,34 +130,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-ROOT_URLCONF = 'beststore.urls'
-
-LOGIN_REDIRECT_URL = 'redirect_after_login'
-LOGIN_URL = 'login'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'category.context_processors.menu_links',
-                'carts.context_processors.counter',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'beststore.wsgi.application'
-
-AUTH_USER_MODEL = 'accounts.Account'
-
 # ========================= DATABASE CONFIGURATION =========================
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
@@ -183,9 +159,9 @@ else:
 
 # ========================= CLOUDINARY STORAGE =========================
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'df44dwnwg'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '626193889524544'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'r40hH_tPzZ8BRQKaTKnb-2ZdAfU'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
 if not DEBUG:
@@ -201,9 +177,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mamamaasaibakers@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ujqc yeoo sagb zajx')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mamamaasaibakers@gmail.com')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
 # ========================= PASSWORD VALIDATION =========================
 AUTH_PASSWORD_VALIDATORS = [
@@ -252,17 +228,6 @@ SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
 X_FRAME_OPTIONS = 'DENY'
-SECURE_CONTENT_SECURITY_POLICY = {
-    "default-src": ("'self'",),
-    "script-src": ("'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"),
-    "style-src": ("'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"),
-    "img-src": ("'self'", "data:", "https:", "res.cloudinary.com"),
-}
-
-# ========================= DATA RETENTION =========================
-AUTO_DELETE_INACTIVE_USERS = False
-AUTO_DELETE_EXPIRED_SESSIONS = False
-KEEP_DATA_FOR_DAYS = None  # Keep data permanently (no automatic deletion)
 
 # ========================= HEROKU/RENDER CONFIGURATION =========================
 if not DEBUG:
