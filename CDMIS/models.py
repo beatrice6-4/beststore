@@ -1,6 +1,8 @@
+from datetime import timezone
 from django.db import models
 
 from django.apps import apps
+from django.utils import timezone
 
 # Create your models here.
 
@@ -19,7 +21,7 @@ class Group(models.Model):
 class Payment(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_date = models.DateField()
+    payment_date = models.DateTimeField(default=timezone.now)  # Add default
     notes = models.TextField(blank=True)
 
     def __str__(self):

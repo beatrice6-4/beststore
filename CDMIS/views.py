@@ -1,3 +1,4 @@
+from multiprocessing import context
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView
@@ -120,9 +121,8 @@ class PaymentListView(UserPassesTestMixin, ListView):
         payments_by_date = defaultdict(list)
         for payment in all_payments:
             payments_by_date[payment.payment_date].append(payment)
-        # Create a sorted list of (date, payments) tuples
-        context['payments_by_date'] = sorted(payments_by_date.items())
-
+        filtered_payments = {k: v for k, v in payments_by_date.items() if k is not None}
+        context['payments_by_date'] = sorted(filtered_payments.items())
         return context
 
 class PaymentCreateView(UserPassesTestMixin, CreateView):
@@ -220,12 +220,13 @@ class FinanceView(UserPassesTestMixin, View):
                 'payments': items,
                 'date_total': date_total
             })
+        finance_list = [item for item in finance_list if item['date'] is not None]
         finance_list.sort(key=lambda x: x['date'])
 
         grand_total = payments.aggregate(total=Sum('amount'))['total'] or 0
 
-        # Prepare date choices for the form
-        date_choices = sorted(list(date_choices))
+        date_choices = [d for d in date_choices if d is not None]
+        date_choices = sorted(date_choices)
         form = FinanceDateForm()
         form.fields['dates'].choices = [(str(d), d.strftime("%b %d, %Y")) for d in date_choices]
 

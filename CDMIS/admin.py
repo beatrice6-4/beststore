@@ -194,44 +194,30 @@ class ServiceAdmin(admin.ModelAdmin):
     status_badge.short_description = '✓ Status'
 
 
+
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    """Beautiful Payment Admin Interface"""
-    list_display = ('colored_group', 'colored_amount', 'payment_date_badge', 'status_badge')
-    list_filter = ('payment_date', 'group')
+    list_display = ('group', 'amount', 'payment_date', 'notes')
+    list_filter = ('group', 'payment_date')
     search_fields = ('group__name', 'notes')
-    readonly_fields = ('payment_date',)
-    actions = ['download_payments_csv']
-    
     fieldsets = (
         ('💰 Payment Details', {
             'fields': ('group', 'amount', 'payment_date'),
             'classes': ('wide',),
         }),
         ('📝 Additional Info', {
-            'fields': ('notes',),  # REMOVED 'added_by'
+            'fields': ('notes',),
             'classes': ('wide', 'collapse'),
         }),
     )
-    
-    class Media:
-        css = {
-            'all': ('admin/css/cdmis_admin.css',)
-        }
-    
-    def get_initial_data(self, request):
-        initial = super().get_initial_data(request)
-        if 'group' in request.GET:
-            initial['group'] = request.GET.get('group')
-        return initial
-    
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        if 'group' in request.GET:
+        if 'group' in request.GET and 'group' in form.base_fields:
             try:
                 group_id = request.GET.get('group')
-                form.base_fields['group'].initial = Group.objects.get(pk=group_id)
-            except (Group.DoesNotExist, ValueError):
+                form.base_fields['group'].initial = group_id
+            except Exception:
                 pass
         return form
     
