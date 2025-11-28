@@ -194,7 +194,6 @@ class ServiceAdmin(admin.ModelAdmin):
     status_badge.short_description = '✓ Status'
 
 
-# ========================= PAYMENT ADMIN =========================
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     """Beautiful Payment Admin Interface"""
@@ -210,7 +209,7 @@ class PaymentAdmin(admin.ModelAdmin):
             'classes': ('wide',),
         }),
         ('📝 Additional Info', {
-            'fields': ('notes',),
+            'fields': ('notes',),  # REMOVED 'added_by'
             'classes': ('wide', 'collapse'),
         }),
     )
@@ -221,14 +220,12 @@ class PaymentAdmin(admin.ModelAdmin):
         }
     
     def get_initial_data(self, request):
-        """Pre-fill group field if group_id is in query params"""
         initial = super().get_initial_data(request)
         if 'group' in request.GET:
             initial['group'] = request.GET.get('group')
         return initial
     
     def get_form(self, request, obj=None, **kwargs):
-        """Pre-fill group field in form"""
         form = super().get_form(request, obj, **kwargs)
         if 'group' in request.GET:
             try:
@@ -239,7 +236,6 @@ class PaymentAdmin(admin.ModelAdmin):
         return form
     
     def colored_group(self, obj):
-        """Display group with icon"""
         return format_html(
             '<span style="color: #667eea; font-weight: 600;"><i class="fas fa-users"></i> {}</span>',
             obj.group.name
@@ -247,7 +243,6 @@ class PaymentAdmin(admin.ModelAdmin):
     colored_group.short_description = '👥 Group'
     
     def colored_amount(self, obj):
-        """Display amount with currency symbol"""
         return format_html(
             '<span style="color: #28a745; font-weight: 600; font-size: 14px;">💰 Ksh {}</span>',
             f'{obj.amount:,.2f}'
@@ -255,7 +250,6 @@ class PaymentAdmin(admin.ModelAdmin):
     colored_amount.short_description = '💰 Amount'
     
     def payment_date_badge(self, obj):
-        """Display payment date as badge"""
         return format_html(
             '<span style="background: #e7f3ff; color: #004085; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 11px;">📅 {}</span>',
             obj.payment_date.strftime('%d %b %Y') if obj.payment_date else 'N/A'
@@ -263,7 +257,6 @@ class PaymentAdmin(admin.ModelAdmin):
     payment_date_badge.short_description = '📅 Date'
     
     def status_badge(self, obj):
-        """Display payment status"""
         return format_html(
             '<span style="background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px;">✓ Recorded</span>'
         )
@@ -273,19 +266,17 @@ class PaymentAdmin(admin.ModelAdmin):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=payments.csv'
         writer = csv.writer(response)
-        writer.writerow(['Group', 'Amount', 'Date', 'Recorded By', 'Notes'])
+        writer.writerow(['Group', 'Amount', 'Date', 'Notes'])  # REMOVED 'Recorded By'
         for payment in queryset:
             writer.writerow([
                 payment.group.name,
                 payment.amount,
                 payment.payment_date,
-                payment.added_by.username if payment.added_by else '',
                 payment.notes
             ])
         return response
 
     download_payments_csv.short_description = "📥 Download selected payments as CSV"
-
 
 # ========================= REQUIREMENT ADMIN =========================
 @admin.register(Requirement)
