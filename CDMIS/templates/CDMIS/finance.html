@@ -19,6 +19,40 @@
                 <button class="btn-action btn-print" onclick="printSelectedFinance()" title="Print selected dates">
                     <i class="fas fa-print"></i> Print Selected
                 </button>
+                <button class="btn-action btn-download" onclick="downloadCSV()" title="Download as CSV">
+                    <i class="fas fa-download"></i> Download CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards-grid">
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Total Amount</h4>
+                    <h2 id="totalAmount">Ksh 0</h2>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Groups</h4>
+                    <h2 id="totalGroups">0</h2>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Transactions</h4>
+                    <h2 id="totalTransactions">0</h2>
+                </div>
             </div>
         </div>
 
@@ -32,7 +66,7 @@
                 <div class="filter-grid">
                     {% for item in finance_list %}
                         <div class="filter-checkbox">
-                            <input type="checkbox" name="dates" value="{{ item.date }}" id="date-{{ forloop.counter }}">
+                            <input type="checkbox" name="dates" value="{{ item.date }}" id="date-{{ forloop.counter }}" onchange="updateSummary()">
                             <label for="date-{{ forloop.counter }}">{{ item.date }}</label>
                         </div>
                     {% endfor %}
@@ -74,14 +108,14 @@
                                             <i class="fas fa-calendar-alt"></i>
                                             {{ item.date }}
                                         </span>
-                                        <span>
-                                            <i class="fas fa-sack-dollar"></i> Daily Total: <strong>Ksh {{ item.date_total }}</strong>
+                                        <span class="daily-total">
+                                            <i class="fas fa-sack-dollar"></i> Daily Total: <strong class="amount-highlight">Ksh {{ item.date_total }}</strong>
                                         </span>
                                     </div>
                                 </td>
                             </tr>
                             {% for payment in item.payments %}
-                                <tr class="payment-row" data-date="{{ item.date }}">
+                                <tr class="payment-row" data-date="{{ item.date }}" data-amount="{{ payment.amount }}" data-group="{{ payment.group }}">
                                     <td></td>
                                     <td>
                                         <span class="group-badge">
@@ -108,16 +142,96 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Group Summary Table (for printing) -->
+        <div class="group-summary-card" id="groupSummaryPrint" style="display: none;">
+            <h3><i class="fas fa-chart-bar"></i> Group Summary</h3>
+            <table class="table group-summary-table">
+                <thead>
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Total Amount</th>
+                        <th>Transactions</th>
+                    </tr>
+                </thead>
+                <tbody id="groupSummaryBody">
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td><strong>GRAND TOTAL</strong></td>
+                        <td colspan="2"><strong id="grandTotal">Ksh 0</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
 </div>
 
+<style>
+    @media print {
+        .finance-header-card,
+        .filter-card,
+        .header-actions,
+        .btn-action,
+        .filter-actions,
+        .summary-cards-grid {
+            display: none;
+        }
+
+        .group-summary-card {
+            display: block !important;
+            page-break-before: always;
+        }
+
+        .finance-table {
+            page-break-inside: avoid;
+        }
+
+        .group-summary-table {
+            page-break-inside: avoid;
+        }
+
+        .total-row {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            border-top: 2px solid #333;
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        h1, h2, h3 {
+            color: #000;
+        }
+    }
+</style>
+
 <script>
+    // Data from backend
+    var financeData = {
+        {% for item in finance_list %}
+            "{{ item.date }}": {
+                total: {{ item.date_total }},
+                payments: [
+                    {% for payment in item.payments %}
+                        {
+                            group: "{{ payment.group }}",
+                            amount: {{ payment.amount }}
+                        }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
     // Select all dates
     function selectAllDates() {
         document.querySelectorAll('input[name="dates"]').forEach(function(checkbox) {
             checkbox.checked = true;
         });
         updateCheckboxStyles();
+        updateSummary();
     }
 
     // Clear all dates
@@ -126,6 +240,7 @@
             checkbox.checked = false;
         });
         updateCheckboxStyles();
+        updateSummary();
     }
 
     // Update checkbox styles
@@ -139,6 +254,49 @@
                 checkbox.style.background = '#f8f9fa';
             }
         });
+    }
+
+    // Update summary
+    function updateSummary() {
+        var checked = document.querySelectorAll('input[name="dates"]:checked');
+        var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
+        var totalAmount = 0;
+        var groupMap = {};
+        var totalTransactions = 0;
+
+        document.querySelectorAll('.payment-row').forEach(function(row) {
+            var rowDate = row.getAttribute('data-date');
+            if (selectedDates.includes(rowDate)) {
+                var amount = parseFloat(row.getAttribute('data-amount'));
+                var group = row.getAttribute('data-group');
+                totalAmount += amount;
+                totalTransactions += 1;
+
+                if (!groupMap[group]) {
+                    groupMap[group] = { total: 0, count: 0 };
+                }
+                groupMap[group].total += amount;
+                groupMap[group].count += 1;
+            }
+        });
+
+        document.getElementById('totalAmount').textContent = 'Ksh ' + totalAmount.toLocaleString();
+        document.getElementById('totalGroups').textContent = Object.keys(groupMap).length;
+        document.getElementById('totalTransactions').textContent = totalTransactions;
+
+        // Update group summary table
+        var groupSummaryBody = document.getElementById('groupSummaryBody');
+        groupSummaryBody.innerHTML = '';
+        var grandTotal = 0;
+
+        Object.keys(groupMap).sort().forEach(function(group) {
+            var row = document.createElement('tr');
+            row.innerHTML = '<td>' + group + '</td><td>Ksh ' + groupMap[group].total.toLocaleString() + '</td><td>' + groupMap[group].count + '</td>';
+            groupSummaryBody.appendChild(row);
+            grandTotal += groupMap[group].total;
+        });
+
+        document.getElementById('grandTotal').textContent = 'Ksh ' + grandTotal.toLocaleString();
     }
 
     // Print only selected dates
@@ -162,6 +320,9 @@
             }
         });
 
+        // Show group summary for printing
+        document.getElementById('groupSummaryPrint').style.display = 'block';
+
         window.print();
 
         // Restore all rows after printing
@@ -169,7 +330,35 @@
             allDateRows.forEach(function(row) {
                 row.style.display = '';
             });
+            document.getElementById('groupSummaryPrint').style.display = 'none';
         }, 1000);
+    }
+
+    // Download CSV
+    function downloadCSV() {
+        var checked = document.querySelectorAll('input[name="dates"]:checked');
+        var selectedDates = Array.from(checked).map(function(cb) { return cb.value; });
+
+        if (selectedDates.length === 0) {
+            alert('Please select at least one date to download.');
+            return;
+        }
+
+        var csv = 'Date,Group,Amount\n';
+        document.querySelectorAll('.payment-row').forEach(function(row) {
+            var rowDate = row.getAttribute('data-date');
+            if (selectedDates.includes(rowDate)) {
+                var cells = row.querySelectorAll('td');
+                var group = cells[1].textContent.trim();
+                var amount = cells[2].textContent.replace('Ksh ', '').trim();
+                csv += rowDate + ',' + group + ',' + amount + '\n';
+            }
+        });
+
+        var link = document.createElement('a');
+        link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+        link.download = 'finance_report.csv';
+        link.click();
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -178,6 +367,7 @@
             checkbox.addEventListener('change', updateCheckboxStyles);
         });
         updateCheckboxStyles();
+        updateSummary();
     });
 </script>
 {% endblock %}
