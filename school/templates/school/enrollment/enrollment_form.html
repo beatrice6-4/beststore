@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% block page_title %}{% if form.instance.id %}Edit{% else %}New{% endif %} Enrollment{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-book-open"></i>
+                {% if form.instance.id %}Edit Enrollment{% else %}New Course Enrollment{% endif %}
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'school:enrollment_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Enrollment Details</h5>
+                </div>
+                <div class="card-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Errors:</strong>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Student Selection -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-user-graduate"></i> Student *</label>
+                            {{ form.student }}
+                            {% if form.student.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.student.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Select the student to enroll in a course</small>
+                        </div>
+
+                        <!-- Course Selection -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-book"></i> Course *</label>
+                            {{ form.course }}
+                            {% if form.course.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.course.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Select the course to enroll the student in</small>
+                        </div>
+
+                        <!-- Enrollment Date -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-calendar"></i> Enrollment Date *</label>
+                                {{ form.enrollment_date }}
+                                {% if form.enrollment_date.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.enrollment_date.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">When the student enrolled in this course</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-calendar-check"></i> Completion Date</label>
+                                {{ form.completion_date }}
+                                {% if form.completion_date.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.completion_date.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">When the student completed the course (optional)</small>
+                            </div>
+                        </div>
+
+                        <!-- Academic Session -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-book-open"></i> Academic Session</label>
+                            {{ form.session }}
+                            {% if form.session.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.session.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Select the academic session for this enrollment</small>
+                        </div>
+
+                        <!-- Enrollment Status -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-toggle-on"></i> Enrollment Status *</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.status.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">
+                                <strong>Active:</strong> Currently enrolled | 
+                                <strong>Completed:</strong> Course finished | 
+                                <strong>Dropped:</strong> Withdrew from course
+                            </small>
+                        </div>
+
+                        <!-- Grade (Optional) -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-star"></i> Grade</label>
+                            {{ form.grade }}
+                            {% if form.grade.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.grade.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Letter grade (A, B, C, D, F) - optional</small>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-sticky-note"></i> Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.notes.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Add any notes about this enrollment (optional)</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if form.instance.id %}Update{% else %}Create{% endif %} Enrollment
+                            </button>
+                            <a href="{% url 'school:enrollment_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            {% if form.instance.id %}
+                                <a href="{% url 'school:enrollment_detail' form.instance.id %}" class="btn btn-outline-info ms-auto">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Instructions -->
+        <div class="col-md-4">
+            <!-- Quick Guide -->
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-list-check"></i> Enrollment Steps</h6>
+                </div>
+                <div class="card-body small">
+                    <ol class="ps-3 mb-0">
+                        <li class="mb-2"><strong>Select Student:</strong> Choose student to enroll</li>
+                        <li class="mb-2"><strong>Choose Course:</strong> Pick the course</li>
+                        <li class="mb-2"><strong>Set Enrollment Date:</strong> When enrolled</li>
+                        <li class="mb-2"><strong>Select Session:</strong> Academic session</li>
+                        <li class="mb-2"><strong>Set Status:</strong> Active, Completed, or Dropped</li>
+                        <li class="mb-2"><strong>Add Grade:</strong> If course is completed</li>
+                        <li>Add any additional notes</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Status Guide -->
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Enrollment Status</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="mb-2 pb-2 border-bottom">
+                        <span class="badge bg-success">Active</span>
+                        <p class="mb-0 mt-1">Student is currently enrolled</p>
+                    </div>
+                    <div class="mb-2 pb-2 border-bottom">
+                        <span class="badge bg-primary">Completed</span>
+                        <p class="mb-0 mt-1">Course has been completed</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-danger">Dropped</span>
+                        <p class="mb-0 mt-1">Student withdrew from course</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Guide -->
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-star"></i> Grade Scale</h6>
+                </div>
+                <div class="card-body small">
+                    <dl class="mb-0">
+                        <dt><strong>A:</strong></dt>
+                        <dd class="mb-2">Excellent (90-100%)</dd>
+
+                        <dt><strong>B:</strong></dt>
+                        <dd class="mb-2">Very Good (80-89%)</dd>
+
+                        <dt><strong>C:</strong></dt>
+                        <dd class="mb-2">Good (70-79%)</dd>
+
+                        <dt><strong>D:</strong></dt>
+                        <dd class="mb-2">Pass (60-69%)</dd>
+
+                        <dt><strong>F:</strong></dt>
+                        <dd class="mb-0">Fail (Below 60%)</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Important Notes -->
+            <div class="card shadow-sm bg-light">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Important</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="ps-3 mb-0">
+                        <li class="mb-2">Verify student is eligible for course</li>
+                        <li class="mb-2">Check course prerequisites</li>
+                        <li class="mb-2">Ensure no duplicate enrollments</li>
+                        <li class="mb-2">Set completion date when status is "Completed"</li>
+                        <li>Grades only for completed courses</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        outline: none;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .invalid-feedback {
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    dl dt {
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    dl dd {
+        margin-left: 0;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}

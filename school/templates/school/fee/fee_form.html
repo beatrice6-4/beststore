@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block page_title %}{% if form.instance.id %}Edit{% else %}Add{% endif %} Fee{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-money-bill"></i>
+                {% if form.instance.id %}Edit Fee{% else %}Add New Fee{% endif %}
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'school:fee_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-money-bill-wave"></i> Fee Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Errors:</strong>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Student & Fee Type -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-user-graduate"></i> Student *</label>
+                                {{ form.student }}
+                                {% if form.student.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.student.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">Select a student from the list</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-tag"></i> Fee Type *</label>
+                                {{ form.fee_type }}
+                                {% if form.fee_type.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.fee_type.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">Select type of fee (Tuition, Hostel, etc.)</small>
+                            </div>
+                        </div>
+
+                        <!-- Amount & Paid Amount -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-money-bill-wave"></i> Total Amount (Ksh) *</label>
+                                {{ form.amount }}
+                                {% if form.amount.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.amount.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">Total fee amount</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-check-circle"></i> Amount Paid (Ksh) *</label>
+                                {{ form.paid_amount }}
+                                {% if form.paid_amount.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.paid_amount.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">Amount already paid by student</small>
+                            </div>
+                        </div>
+
+                        <!-- Balance Display -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="alert alert-info py-2 px-3">
+                                    <strong>Balance Due:</strong> 
+                                    <span id="balance-display">Ksh 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Status & Due Date -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-hourglass-end"></i> Payment Status *</label>
+                                {{ form.payment_status }}
+                                {% if form.payment_status.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.payment_status.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">
+                                    <strong>Unpaid:</strong> No payment received | 
+                                    <strong>Partial:</strong> Some payment | 
+                                    <strong>Paid:</strong> Full payment
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-calendar-alt"></i> Due Date</label>
+                                {{ form.due_date }}
+                                {% if form.due_date.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.due_date.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">When payment is due (optional)</small>
+                            </div>
+                        </div>
+
+                        <!-- Academic Session -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-book-open"></i> Academic Session</label>
+                                {{ form.session }}
+                                {% if form.session.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.session.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">Select academic session (optional)</small>
+                            </div>
+                        </div>
+
+                        <!-- Description/Notes -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-sticky-note"></i> Description/Notes</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Add any notes or remarks (optional)</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if form.instance.id %}Update{% else %}Create{% endif %} Fee
+                            </button>
+                            <a href="{% url 'school:fee_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            {% if form.instance.id %}
+                                <a href="{% url 'school:fee_detail' form.instance.id %}" class="btn btn-outline-info ms-auto">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Instructions -->
+        <div class="col-md-4">
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-list-check"></i> How to Fill</h6>
+                </div>
+                <div class="card-body small">
+                    <ol class="ps-3 mb-0">
+                        <li class="mb-2"><strong>Select Student:</strong> Choose the student from dropdown</li>
+                        <li class="mb-2"><strong>Fee Type:</strong> Select what fee this is for</li>
+                        <li class="mb-2"><strong>Total Amount:</strong> Enter the total fee amount</li>
+                        <li class="mb-2"><strong>Paid Amount:</strong> Enter what student has paid</li>
+                        <li class="mb-2"><strong>Status:</strong> Set payment status</li>
+                        <li class="mb-2"><strong>Due Date:</strong> Set deadline for payment</li>
+                        <li class="mb-2"><strong>Session:</strong> Select academic session</li>
+                        <li>Add any notes or remarks</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Fee Types</h6>
+                </div>
+                <div class="card-body small">
+                    <dl class="mb-0">
+                        <dt><strong>Tuition:</strong></dt>
+                        <dd class="mb-2">Main course/tuition fees</dd>
+
+                        <dt><strong>Hostel:</strong></dt>
+                        <dd class="mb-2">Accommodation fees</dd>
+
+                        <dt><strong>Activity:</strong></dt>
+                        <dd class="mb-2">Activity or miscellaneous fees</dd>
+
+                        <dt><strong>Other:</strong></dt>
+                        <dd class="mb-0">Any other fees</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card shadow-sm bg-light">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Important</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="ps-3 mb-0">
+                        <li class="mb-2">Paid amount cannot exceed total amount</li>
+                        <li class="mb-2">Status updates based on amount paid</li>
+                        <li class="mb-2">Due date helps track overdue payments</li>
+                        <li>Always verify student information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        outline: none;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .invalid-feedback {
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .alert {
+        border-radius: 6px;
+    }
+</style>
+
+<script>
+    // Calculate balance on page load and input change
+    function calculateBalance() {
+        const amountInput = document.querySelector('input[name="amount"]');
+        const paidInput = document.querySelector('input[name="paid_amount"]');
+        const balanceDisplay = document.getElementById('balance-display');
+
+        const amount = parseFloat(amountInput.value) || 0;
+        const paid = parseFloat(paidInput.value) || 0;
+        const balance = amount - paid;
+
+        balanceDisplay.textContent = 'Ksh ' + balance.toFixed(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const amountInput = document.querySelector('input[name="amount"]');
+        const paidInput = document.querySelector('input[name="paid_amount"]');
+
+        amountInput.addEventListener('input', calculateBalance);
+        paidInput.addEventListener('input', calculateBalance);
+
+        calculateBalance();
+    });
+</script>
+{% endblock %}

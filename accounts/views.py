@@ -2216,3 +2216,303 @@ def check_otp_expiry(request):
         return JsonResponse({'expired': True, 'remaining_time': 0})
     
     return JsonResponse({'expired': False, 'remaining_time': ttl})
+
+
+
+# ========================= M-PESA PAYMENT =========================
+import requests
+import base64
+import json
+from django.utils import timezone
+from django.conf import settings
+from datetime import datetime
+import logging
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.contrib import messages
+
+logger = logging.getLogger(__name__)
+
+# M-Pesa Configuration
+MPESA_SHORTCODE = getattr(settings, 'MPESA_SHORTCODE', '3581517')
+MPESA_PARTYB = getattr(settings, 'MPESA_PARTYB', '6391014')
+MPESA_CONSUMER_KEY = getattr(settings, 'MPESA_CONSUMER_KEY', 'kfy4wKPlLpC4AGlZRphJl1VgpzAVc1fNVs4w2l3vNVb1GuqM')
+MPESA_CONSUMER_SECRET = getattr(settings, 'MPESA_CONSUMER_SECRET', '4TgAMbmpG5wbH4mqFpIYZ6tOCGFWGnJjMBvFE7Z4DobFfcJjmvDjLnsWcoIm9FL')
+MPESA_PASSKEY = getattr(settings, 'MPESA_PASSKEY', '46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933')
+MPESA_CALLBACK_URL = getattr(settings, 'MPESA_CALLBACK_URL', 'https://mamamaasaibakers.com/accounts/mpesa-callback/')
+
+
+def get_mpesa_access_token():
+    """Get M-Pesa access token for API authentication"""
+    try:
+        auth_url = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+        auth = (MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET)
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.get(auth_url, auth=auth, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            access_token = response.json().get('access_token')
+            logger.info("✅ M-Pesa access token obtained successfully")
+            return access_token
+        else:
+            logger.error(f"❌ Failed to get M-Pesa access token: {response.status_code}")
+            return None
+    except Exception as e:
+        logger.error(f"❌ Error getting M-Pesa access token: {str(e)}")
+        return None
+
+
+def initiate_mpesa_payment(phone_number, amount, account_reference, description):
+    """Initiate M-Pesa Lipa Na M-Pesa Online payment"""
+    try:
+        # Get access token
+        access_token = get_mpesa_access_token()
+        if not access_token:
+            return {'success': False, 'error': 'Failed to authenticate with M-Pesa'}
+        
+        # Prepare timestamp
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        
+        # Generate password
+        password_str = f"{MPESA_SHORTCODE}{MPESA_PASSKEY}{timestamp}"
+        password = base64.b64encode(password_str.encode()).decode()
+        
+        # Prepare headers and payload
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        payload = {
+            "BusinessShortCode": MPESA_SHORTCODE,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": int(amount),
+            "PartyA": phone_number,
+            "PartyB": MPESA_PARTYB,
+            "PhoneNumber": phone_number,
+            "CallBackURL": MPESA_CALLBACK_URL,
+            "AccountReference": account_reference,
+            "TransactionDesc": description
+        }
+        
+        process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+        response = requests.post(process_request_url, json=payload, headers=headers, timeout=10)
+        
+        logger.info(f"📡 M-Pesa response: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            
+            if response_data.get('ResponseCode') == '0':
+                logger.info(f"✅ Payment initiated for {phone_number}")
+                return {
+                    'success': True,
+                    'checkout_request_id': response_data.get('CheckoutRequestID'),
+                    'message': 'Payment prompt sent to your phone',
+                    'response_code': response_data.get('ResponseCode')
+                }
+            else:
+                error_msg = response_data.get('ResponseDescription', 'Payment initiation failed')
+                logger.warning(f"⚠️ M-Pesa error: {error_msg}")
+                return {'success': False, 'error': error_msg}
+        else:
+            logger.error(f"❌ M-Pesa API error: {response.status_code}")
+            return {'success': False, 'error': f'Payment service error: {response.status_code}'}
+    
+    except Exception as e:
+        logger.error(f"❌ Error initiating M-Pesa payment: {str(e)}")
+        return {'success': False, 'error': str(e)}
+
+
+@login_required
+def recharge(request):
+    """Recharge view for users to add funds to their account via M-Pesa"""
+    user = request.user
+    
+    try:
+        from accounts.models import Profile
+        user_profile = Profile.objects.get(user=user)
+    except:
+        user_profile = None
+    
+    if request.method == 'POST':
+        amount = request.POST.get('amount', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        
+        errors = {}
+        
+        # Validate amount
+        if not amount:
+            errors['amount'] = 'Amount is required'
+        else:
+            try:
+                amount_float = float(amount)
+                if amount_float < 10:
+                    errors['amount'] = 'Minimum recharge amount is Ksh. 10'
+                elif amount_float > 1000000:
+                    errors['amount'] = 'Maximum recharge amount is Ksh. 1,000,000'
+            except ValueError:
+                errors['amount'] = 'Please enter a valid amount'
+        
+        # Validate phone number
+        if not phone:
+            errors['phone'] = 'Phone number is required'
+        else:
+            phone_clean = phone.replace(' ', '').replace('-', '').replace('+', '')
+            
+            if phone_clean.startswith('0'):
+                phone_clean = '254' + phone_clean[1:]
+            elif not phone_clean.startswith('254'):
+                phone_clean = '254' + phone_clean
+            
+            if not (phone_clean.startswith('2547') or phone_clean.startswith('2541')):
+                errors['phone'] = 'Please enter a valid Safaricom M-Pesa phone number'
+            elif len(phone_clean) != 12:
+                errors['phone'] = 'Phone number must be 12 digits (including country code)'
+        
+        if errors:
+            context = {
+                'errors': errors,
+                'amount': amount,
+                'phone': phone,
+                'user': user,
+                'user_profile': user_profile,
+                'page_title': 'Recharge Account',
+                'breadcrumb': 'Recharge',
+            }
+            return render(request, 'accounts/recharge.html', context)
+        
+        account_reference = f"{user.username}_{user.id}"
+        description = f"Account Recharge - {user.get_full_name()}"
+        
+        payment_response = initiate_mpesa_payment(
+            phone_number=phone_clean,
+            amount=amount_float,
+            account_reference=account_reference,
+            description=description
+        )
+        
+        if payment_response.get('success'):
+            try:
+                from accounts.models import Transaction
+                transaction = Transaction.objects.create(
+                    user=user,
+                    amount=amount_float,
+                    transaction_type='recharge',
+                    phone_number=phone_clean,
+                    checkout_request_id=payment_response.get('checkout_request_id'),
+                    status='pending'
+                )
+                logger.info(f"✅ Transaction created: {transaction.id}")
+            except Exception as e:
+                logger.error(f"Error creating transaction: {str(e)}")
+            
+            context = {
+                'success': True,
+                'message': payment_response.get('message'),
+                'amount': amount_float,
+                'phone': phone_clean,
+                'user': user,
+                'user_profile': user_profile,
+                'page_title': 'Recharge Account',
+                'breadcrumb': 'Recharge',
+            }
+            return render(request, 'accounts/recharge.html', context)
+        else:
+            messages.error(request, f"Payment failed: {payment_response.get('error')}")
+            context = {
+                'errors': {'form': payment_response.get('error')},
+                'amount': amount,
+                'phone': phone,
+                'user': user,
+                'user_profile': user_profile,
+                'page_title': 'Recharge Account',
+                'breadcrumb': 'Recharge',
+            }
+            return render(request, 'accounts/recharge.html', context)
+    
+    context = {
+        'user': user,
+        'user_profile': user_profile,
+        'page_title': 'Recharge Account',
+        'breadcrumb': 'Recharge',
+        'min_amount': 10,
+        'max_amount': 1000000,
+        'phone_placeholder': '0712345678 or 254712345678',
+    }
+    return render(request, 'accounts/recharge.html', context)
+
+
+@login_required
+def mpesa_callback(request):
+    """M-Pesa callback URL to receive payment status updates"""
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+            result = body.get('Body', {}).get('stkCallback', {})
+            checkout_request_id = result.get('CheckoutRequestID')
+            result_code = result.get('ResultCode')
+            result_desc = result.get('ResultDesc')
+            
+            logger.info(f"📨 M-Pesa Callback - CheckoutID: {checkout_request_id}, Code: {result_code}")
+            
+            if result_code == 0:
+                callback_metadata = result.get('CallbackMetadata', {}).get('Item', [])
+                
+                amount = None
+                phone = None
+                transaction_id = None
+                
+                for item in callback_metadata:
+                    name = item.get('Name')
+                    value = item.get('Value')
+                    
+                    if name == 'Amount':
+                        amount = value
+                    elif name == 'MpesaReceiptNumber':
+                        transaction_id = value
+                    elif name == 'PhoneNumber':
+                        phone = value
+                
+                try:
+                    from accounts.models import Transaction
+                    transaction = Transaction.objects.get(checkout_request_id=checkout_request_id)
+                    transaction.status = 'completed'
+                    transaction.transaction_id = transaction_id
+                    transaction.save()
+                    
+                    user = transaction.user
+                    try:
+                        user_profile = user.profile
+                        user_profile.balance += amount
+                        user_profile.save()
+                    except:
+                        pass
+                    
+                    logger.info(f"✅ Payment successful: {transaction_id}, Amount: {amount}")
+                except Exception as e:
+                    logger.error(f"Error updating transaction: {str(e)}")
+            else:
+                try:
+                    from accounts.models import Transaction
+                    transaction = Transaction.objects.get(checkout_request_id=checkout_request_id)
+                    transaction.status = 'failed'
+                    transaction.save()
+                    logger.warning(f"⚠️ Payment failed: {result_desc}")
+                except Exception as e:
+                    logger.error(f"Error updating failed transaction: {str(e)}")
+            
+            return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Received successfully'})
+        
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON in M-Pesa callback")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error(f"M-Pesa callback error: {str(e)}")
+            return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Error processing'}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)

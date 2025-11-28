@@ -430,3 +430,197 @@ class ResultUpdateView(AdminRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Result updated successfully!')
         return super().form_valid(form)
+
+
+
+from django.views.generic import CreateView, UpdateView, ListView, DetailView
+from django.urls import reverse_lazy
+from django.db.models import Q
+
+
+# ... your existing views ...
+
+class EnrollmentFormView(CreateView, UpdateView):
+    model = Enrollment
+    template_name = 'school/enrollment/enrollment_form.html'
+    fields = ['student', 'course', 'completion_date', 
+              'session', 'status', 'grade', 'notes']
+    success_url = reverse_lazy('school:enrollment_list')
+
+    def get_queryset(self):
+        return Enrollment.objects.select_related(
+            'student', 'course', 'session'
+        )
+
+
+class EnrollmentDetailView(DetailView):
+    model = Enrollment
+    template_name = 'school/enrollment/enrollment_detail.html'
+    context_object_name = 'enrollment'
+
+    def get_queryset(self):
+        return Enrollment.objects.select_related(
+            'student', 'course', 'session'
+        )
+
+
+class EnrollmentListView(ListView):
+    model = Enrollment
+    template_name = 'school/enrollment/enrollment_list.html'
+    context_object_name = 'enrollments'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Enrollment.objects.select_related(
+            'student', 'course', 'session'
+        ).order_by('-enrollment_date')
+        
+        # Search
+        search = self.request.GET.get('search', '')
+        if search:
+            queryset = queryset.filter(
+                Q(student__first_name__icontains=search) |
+                Q(student__last_name__icontains=search) |
+                Q(course__name__icontains=search) |
+                Q(course__code__icontains=search)
+            )
+        
+        # Filter by status
+        status = self.request.GET.get('status', '')
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        # Filter by session
+        session_id = self.request.GET.get('session', '')
+        if session_id:
+            queryset = queryset.filter(session_id=session_id)
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+     
+        context['total_enrollments'] = Enrollment.objects.count()
+        context['total_active'] = Enrollment.objects.filter(status='active').count()
+        context['total_completed'] = Enrollment.objects.filter(status='completed').count()
+        context['total_dropped'] = Enrollment.objects.filter(status='dropped').count()
+        return context
+
+
+
+
+from django.views.generic import CreateView, UpdateView, ListView, DetailView
+from django.urls import reverse_lazy
+from django.db.models import Q
+from django.utils import timezone
+from .models import Session, Enrollment, ReportingSession
+
+# ... your existing views ...
+
+class SessionListView(ListView):
+    model = Session
+    template_name = 'school/session/session_list.html'
+    context_object_name = 'sessions'
+    paginate_by = 12
+
+    def get_queryset(self):
+        queryset = Session.objects.prefetch_related(
+            'enrollments', 'courses'
+        ).order_by('-start_date')
+        
+        # Search
+        search = self.request.GET.get('search', '')
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+        
+        # Filter by status
+        status = self.request.GET.get('status', '')
+        if status:
+            today = timezone.now().date()
+            if status == 'active':
+                queryset = queryset.filter(
+                    start_date__lte=today,
+                    end_date__gte=today
+                )
+            elif status == 'upcoming':
+                queryset = queryset.filter(start_date__gt=today)
+            elif status == 'closed':
+                queryset = queryset.filter(end_date__lt=today)
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = timezone.now().date()
+        
+        context['active_sessions'] = Session.objects.filter(
+            start_date__lte=today,
+            end_date__gte=today
+        ).count()
+        context['upcoming_sessions'] = Session.objects.filter(
+            start_date__gt=today
+        ).count()
+        context['closed_sessions'] = Session.objects.filter(
+            end_date__lt=today
+        ).count()
+        context['total_sessions'] = Session.objects.count()
+        
+        return context
+
+
+class SessionDetailView(DetailView):
+    model = Session
+    template_name = 'school/session/session_detail.html'
+    context_object_name = 'session'
+
+    def get_queryset(self):
+        return Session.objects.prefetch_related(
+            'enrollments', 'courses'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        session = self.get_object()
+        today = timezone.now().date()
+        
+        # Calculate status
+        if session.start_date > today:
+            context['status'] = 'upcoming'
+            context['days_until'] = (session.start_date - today).days
+        elif session.end_date < today:
+            context['status'] = 'closed'
+            context['days_ago'] = (today - session.end_date).days
+        else:
+            context['status'] = 'active'
+            context['days_elapsed'] = (today - session.start_date).days
+            context['remaining_days'] = (session.end_date - today).days
+        
+        context['duration_days'] = session.duration_days
+        
+        return context
+
+
+class SessionCreateView(CreateView):
+    """Create a new session"""
+    model = Session
+    template_name = 'school/session/session_form.html'
+    fields = ['name', 'start_date', 'end_date', 'description']
+    success_url = reverse_lazy('school:session_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Create New Session'
+        return context
+
+
+class SessionUpdateView(UpdateView):
+    """Update an existing session"""
+    model = Session
+    template_name = 'school/session/session_form.html'
+    fields = ['name', 'start_date', 'end_date', 'description']
+    success_url = reverse_lazy('school:session_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Edit Session'
+        return context

@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+{% block page_title %}Fee Details - {{ fee.student.get_full_name }}{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-money-bill"></i> Fee Details
+            </h1>
+            <p class="text-muted mt-2">
+                Student: <strong>{{ fee.student.get_full_name }}</strong>
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:fee_update' fee.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
+            <a href="{% url 'school:fee_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Fee Status Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-information-circle"></i> Fee Status</h5>
+                        <span class="badge 
+                            {% if fee.payment_status == 'paid' %}bg-success
+                            {% elif fee.payment_status == 'partial' %}bg-warning
+                            {% else %}bg-danger
+                            {% endif %}">
+                            {{ fee.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="metric-box">
+                                <small class="text-muted d-block"><i class="fas fa-money-bill-wave"></i> Total Amount</small>
+                                <h4 class="text-primary mb-0">Ksh {{ fee.amount|floatformat:2 }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="metric-box">
+                                <small class="text-muted d-block"><i class="fas fa-check-circle"></i> Amount Paid</small>
+                                <h4 class="text-success mb-0">Ksh {{ fee.paid_amount|floatformat:2 }}</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><strong>Payment Progress</strong></span>
+                            <span>{{ payment_percentage|floatformat:1 }}%</span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div 
+                                class="progress-bar 
+                                    {% if payment_percentage == 100 %}bg-success
+                                    {% elif payment_percentage > 0 %}bg-warning
+                                    {% else %}bg-danger
+                                    {% endif %}" 
+                                role="progressbar" 
+                                style="width: {{ payment_percentage }}%"
+                                aria-valuenow="{{ payment_percentage }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                                {{ payment_percentage|floatformat:1 }}%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Balance Due -->
+                    <div class="alert 
+                        {% if balance_due == 0 %}alert-success
+                        {% elif balance_due > 0 and balance_due < fee.amount %}alert-warning
+                        {% else %}alert-danger
+                        {% endif %} py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><strong>Balance Due:</strong></span>
+                            <h5 class="mb-0">Ksh {{ balance_due|floatformat:2 }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Information Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Fee Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-tag"></i> Fee Type</small>
+                            <h6 class="mb-3">{{ fee.get_fee_type_display }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-book-open"></i> Academic Session</small>
+                            <h6 class="mb-3">
+                                {% if fee.session %}
+                                    {{ fee.session.name }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-calendar-alt"></i> Due Date</small>
+                            <h6 class="mb-3">
+                                {% if fee.due_date %}
+                                    <span class="{% if fee.is_overdue %}text-danger{% else %}text-info{% endif %}">
+                                        {{ fee.due_date|date:"M d, Y" }}
+                                        {% if fee.is_overdue %}
+                                            <span class="badge bg-danger ms-2">Overdue</span>
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-calendar-plus"></i> Created Date</small>
+                            <h6 class="mb-3">{{ fee.created_at|date:"M d, Y" }}</h6>
+                        </div>
+                    </div>
+
+                    {% if fee.description %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <small class="text-muted d-block"><i class="fas fa-sticky-note"></i> Notes/Description</small>
+                            <p class="mb-0">{{ fee.description }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Student Information Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-user-graduate"></i> Student Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-user"></i> Full Name</small>
+                            <h6 class="mb-3">{{ fee.student.get_full_name }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-id-card"></i> Registration Number</small>
+                            <h6 class="mb-3">{{ fee.student.registration_number }}</h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-building"></i> Department</small>
+                            <h6 class="mb-3">
+                                <a href="{% url 'school:department_detail' fee.student.department.id %}">
+                                    {{ fee.student.department.name }}
+                                </a>
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-envelope"></i> Email</small>
+                            <h6 class="mb-3">
+                                <a href="mailto:{{ fee.student.email }}">{{ fee.student.email }}</a>
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-phone"></i> Phone</small>
+                            <h6 class="mb-0">
+                                {% if fee.student.phone_number %}
+                                    <a href="tel:{{ fee.student.phone_number }}">{{ fee.student.phone_number }}</a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-toggle-on"></i> Status</small>
+                            <h6 class="mb-0">
+                                <span class="badge 
+                                    {% if fee.student.status == 'active' %}bg-success
+                                    {% elif fee.student.status == 'graduated' %}bg-primary
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ fee.student.get_status_display }}
+                                </span>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            {% if user.is_staff %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-cogs"></i> Actions</h6>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'school:fee_update' fee.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit Fee
+                    </a>
+                    {% if fee.payment_status != 'paid' %}
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        <i class="fas fa-money-bill-wave"></i> Record Payment
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'school:fee_list' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-list"></i> All Fees
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Payment Summary -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-chart-pie"></i> Payment Summary</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span><i class="fas fa-money-bill"></i> Total Fee:</span>
+                        <strong>Ksh {{ fee.amount|floatformat:2 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span><i class="fas fa-check"></i> Amount Paid:</span>
+                        <strong class="text-success">Ksh {{ fee.paid_amount|floatformat:2 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-exclamation"></i> Balance Due:</span>
+                        <strong class="text-danger">Ksh {{ balance_due|floatformat:2 }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Badge -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-badge"></i> Current Status</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="mb-3">
+                        <span class="badge 
+                            {% if fee.payment_status == 'paid' %}bg-success
+                            {% elif fee.payment_status == 'partial' %}bg-warning
+                            {% else %}bg-danger
+                            {% endif %} p-3">
+                            {{ fee.get_payment_status_display }}
+                        </span>
+                    </h5>
+                    {% if fee.payment_status == 'paid' %}
+                        <p class="text-muted mb-0"><i class="fas fa-check-circle"></i> Payment Complete</p>
+                    {% elif fee.payment_status == 'partial' %}
+                        <p class="text-muted mb-0"><i class="fas fa-exclamation-circle"></i> Partial Payment Received</p>
+                    {% else %}
+                        <p class="text-muted mb-0"><i class="fas fa-times-circle"></i> Awaiting Payment</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Due Date Alert -->
+            {% if fee.due_date %}
+            <div class="card shadow-sm mb-3 border-{% if fee.is_overdue %}danger{% else %}info{% endif %}">
+                <div class="card-header {% if fee.is_overdue %}bg-danger text-white{% else %}bg-info text-white{% endif %}">
+                    <h6 class="mb-0">
+                        {% if fee.is_overdue %}
+                            <i class="fas fa-exclamation-triangle"></i> Overdue Payment
+                        {% else %}
+                            <i class="fas fa-calendar-alt"></i> Due Date
+                        {% endif %}
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="mb-0">{{ fee.due_date|date:"M d, Y" }}</h5>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Fee Type Info -->
+            <div class="card shadow-sm bg-light">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Fee Type</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>{{ fee.get_fee_type_display }}</strong>
+                        <br>
+                        <small class="text-muted">
+                            {% if fee.fee_type == 'tuition' %}
+                                Main course and tuition fees
+                            {% elif fee.fee_type == 'hostel' %}
+                                Accommodation and housing fees
+                            {% elif fee.fee_type == 'activity' %}
+                                Activity and miscellaneous fees
+                            {% else %}
+                                Other fees
+                            {% endif %}
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+{% if user.is_staff and fee.payment_status != 'paid' %}
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-money-bill-wave"></i> Record Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'school:fee_update' fee.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Current Paid Amount</label>
+                        <input type="number" class="form-control" value="{{ fee.paid_amount }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Balance Due</label>
+                        <input type="number" class="form-control" value="{{ balance_due }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Payment Amount</label>
+                        <input type="number" name="new_payment" class="form-control" step="0.01" required>
+                        <small class="text-muted">Enter the payment amount to add</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .metric-box {
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .badge {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .progress {
+        border-radius: 4px;
+        background-color: #e9ecef;
+    }
+
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 500;
+    }
+
+    a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        border-radius: 6px;
+        border: none;
+    }
+</style>
+{% endblock %}

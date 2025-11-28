@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% block page_title %}Course Enrollments{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-book-open"></i> Course Enrollments
+                <span class="badge bg-secondary">{{ enrollments.paginator.count|default:0 }}</span>
+            </h1>
+            <p class="text-muted mt-2">Manage student course enrollments</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:enrollment_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Enrollment
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Search by student or course..." 
+                            value="{{ request.GET.search }}"
+                        >
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>
+                            <i class="fas fa-check-circle"></i> Active
+                        </option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>
+                            <i class="fas fa-graduation-cap"></i> Completed
+                        </option>
+                        <option value="dropped" {% if request.GET.status == 'dropped' %}selected{% endif %}>
+                            <i class="fas fa-times-circle"></i> Dropped
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="session" class="form-select">
+                        <option value="">All Sessions</option>
+                        {% for session in sessions %}
+                            <option value="{{ session.id }}" {% if request.GET.session == session.id|stringformat:"s" %}selected{% endif %}>
+                                {{ session.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table View -->
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><i class="fas fa-user"></i> Student</th>
+                        <th><i class="fas fa-book"></i> Course</th>
+                        <th><i class="fas fa-code"></i> Code</th>
+                        <th><i class="fas fa-bookmark"></i> Session</th>
+                        <th><i class="fas fa-calendar"></i> Enrollment Date</th>
+                        <th><i class="fas fa-toggle-on"></i> Status</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if enrollment.student.profile_picture %}
+                                    <img src="{{ enrollment.student.profile_picture.url }}" alt="{{ enrollment.student.get_full_name }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="fas fa-user text-white" style="font-size: 12px;"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <strong>
+                                        <a href="{% url 'school:student_detail' enrollment.student.id %}">
+                                            {{ enrollment.student.get_full_name }}
+                                        </a>
+                                    </strong>
+                                    <br>
+                                    <small class="text-muted">{{ enrollment.student.registration_number }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{% url 'school:course_detail' enrollment.course.id %}">
+                                {{ enrollment.course.name }}
+                            </a>
+                            <br>
+                            <small class="text-muted">{{ enrollment.course.department.name }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ enrollment.course.code }}</span>
+                        </td>
+                        <td>
+                            {% if enrollment.session %}
+                                {{ enrollment.session.name }}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ enrollment.enrollment_date|date:"M d, Y" }}
+                            <br>
+                            <small class="text-muted">{{ enrollment.enrollment_date|timesince }} ago</small>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if enrollment.status == 'active' %}bg-success
+                                {% elif enrollment.status == 'completed' %}bg-primary
+                                {% else %}bg-danger
+                                {% endif %}">
+                                {{ enrollment.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'school:enrollment_detail' enrollment.id %}" class="btn btn-outline-info" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user.is_staff %}
+                                <a href="{% url 'school:enrollment_update' enrollment.id %}" class="btn btn-outline-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div>
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No enrollments found</p>
+                                {% if user.is_staff %}
+                                <a href="{% url 'school:enrollment_create' %}" class="btn btn-primary btn-sm mt-3">
+                                    <i class="fas fa-plus"></i> Create First Enrollment
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        <i class="fas fa-step-backward"></i> First
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            <!-- Page Numbers -->
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        Last <i class="fas fa-step-forward"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- Statistics Footer -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-primary mb-0">{{ total_active }}</h4>
+                    <small class="text-muted"><i class="fas fa-check-circle"></i> Active Enrollments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-success mb-0">{{ total_completed }}</h4>
+                    <small class="text-muted"><i class="fas fa-graduation-cap"></i> Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-danger mb-0">{{ total_dropped }}</h4>
+                    <small class="text-muted"><i class="fas fa-times-circle"></i> Dropped</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-info mb-0">{{ total_enrollments }}</h4>
+                    <small class="text-muted"><i class="fas fa-users"></i> Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .btn-group-sm .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+    }
+
+    .form-select {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

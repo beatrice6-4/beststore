@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block page_title %}{% if form.instance.id %}Edit{% else %}Add{% endif %} Department{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-building"></i>
+                {% if form.instance.id %}Edit Department{% else %}Add New Department{% endif %}
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'school:department_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Department Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Errors:</strong>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Department Code & Name -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-hashtag"></i> Department Code *</label>
+                                {{ form.code }}
+                                {% if form.code.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.code.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">e.g., CS, ENG, BUS</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-book"></i> Department Name *</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.name.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block">Full name of the department</small>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Brief description of the department</small>
+                        </div>
+
+                        <!-- Head of Department -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-user-tie"></i> Head of Department</label>
+                            {{ form.head_of_department }}
+                            {% if form.head_of_department.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.head_of_department.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Select the department head (optional)</small>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.email.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-phone"></i> Phone Number</label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                    <div class="invalid-feedback d-block text-danger">
+                                        <i class="fas fa-times-circle"></i> {{ form.phone_number.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Location/Building -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-map-marker-alt"></i> Location/Building</label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.location.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Building or location of the department office</small>
+                        </div>
+
+                        <!-- Department Logo/Image -->
+                        {% if form.logo %}
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-image"></i> Department Logo</label>
+                            {% if form.instance.logo %}
+                                <div class="mb-2">
+                                    <img src="{{ form.instance.logo.url }}" alt="{{ form.instance.name }}" style="max-width: 200px; height: auto;">
+                                    <br>
+                                    <small class="text-muted">Current logo</small>
+                                </div>
+                            {% endif %}
+                            {{ form.logo }}
+                            {% if form.logo.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.logo.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block">Upload department logo (PNG, JPG)</small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-toggle-on"></i> Status</label>
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                                <div class="invalid-feedback d-block text-danger">
+                                    <i class="fas fa-times-circle"></i> {{ form.is_active.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if form.instance.id %}Update{% else %}Create{% endif %} Department
+                            </button>
+                            <a href="{% url 'school:department_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            {% if form.instance.id %}
+                                <a href="{% url 'school:department_detail' form.instance.id %}" class="btn btn-outline-info ms-auto">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions Sidebar -->
+        <div class="col-md-4">
+            <div class="card shadow-sm bg-light mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Instructions</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="ps-3 mb-0">
+                        <li class="mb-2">Enter a unique department code</li>
+                        <li class="mb-2">Provide the full department name</li>
+                        <li class="mb-2">Add a descriptive overview</li>
+                        <li class="mb-2">Assign a department head</li>
+                        <li class="mb-2">Include contact information</li>
+                        <li class="mb-2">Specify the department location</li>
+                        <li class="mb-2">Upload a department logo</li>
+                        <li>Set the active status</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm bg-light">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-question-circle"></i> Field Guide</h6>
+                </div>
+                <div class="card-body small">
+                    <dl>
+                        <dt><strong>Code:</strong></dt>
+                        <dd class="mb-2">Short identifier (e.g., CS, ENG)</dd>
+
+                        <dt><strong>Name:</strong></dt>
+                        <dd class="mb-2">Full department name</dd>
+
+                        <dt><strong>Head:</strong></dt>
+                        <dd class="mb-2">Staff member leading the department</dd>
+
+                        <dt><strong>Email:</strong></dt>
+                        <dd class="mb-2">Department contact email</dd>
+
+                        <dt><strong>Phone:</strong></dt>
+                        <dd class="mb-2">Department contact number</dd>
+
+                        <dt><strong>Location:</strong></dt>
+                        <dd class="mb-0">Building/office location</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="file"],
+    select,
+    textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        outline: none;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        margin-top: 0.25em;
+    }
+
+    .invalid-feedback {
+        font-size: 13px;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}

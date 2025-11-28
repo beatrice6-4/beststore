@@ -27,13 +27,15 @@ urlpatterns = [
 
     # Sessions
     path('sessions/', views.SessionListView.as_view(), name='session_list'),
-    path('sessions/<int:pk>/', views.SessionDetailView.as_view(), name='session_detail'),
     path('sessions/create/', views.SessionCreateView.as_view(), name='session_create'),
+    path('sessions/<int:pk>/', views.SessionDetailView.as_view(), name='session_detail'),
+    path('sessions/<int:pk>/edit/', views.SessionUpdateView.as_view(), name='session_update'),
 
     # Enrollments
     path('enrollments/', views.EnrollmentListView.as_view(), name='enrollment_list'),
     path('enrollments/create/', views.EnrollmentCreateView.as_view(), name='enrollment_create'),
-
+    path('enrollments/<int:pk>/', views.EnrollmentDetailView.as_view(), name='enrollment_detail'),
+    path('enrollments/<int:pk>/edit/', views.EnrollmentFormView.as_view(), name='enrollment_update'),
     # Fees
     path('fees/', views.StudentFeeListView.as_view(), name='fee_list'),
     path('fees/<int:pk>/', views.StudentFeeDetailView.as_view(), name='fee_detail'),

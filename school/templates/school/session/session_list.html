@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+{% block page_title %}Academic Sessions{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-calendar-alt"></i> Academic Sessions
+                <span class="badge bg-secondary">{{ sessions.paginator.count|default:0 }}</span>
+            </h1>
+            <p class="text-muted mt-2">Manage academic calendar and sessions</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:session_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Session
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Search by session name..." 
+                            value="{{ request.GET.search }}"
+                        >
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>
+                            <i class="fas fa-check-circle"></i> Active
+                        </option>
+                        <option value="upcoming" {% if request.GET.status == 'upcoming' %}selected{% endif %}>
+                            <i class="fas fa-clock"></i> Upcoming
+                        </option>
+                        <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>
+                            <i class="fas fa-lock"></i> Closed
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sessions Grid View -->
+    <div class="row">
+        {% for session in sessions %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100 hover-shadow transition">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-1">
+                                <i class="fas fa-calendar-alt"></i> {{ session.name }}
+                            </h5>
+                            <span class="badge 
+                                {% if session.status == 'active' %}bg-success
+                                {% elif session.status == 'upcoming' %}bg-warning
+                                {% else %}bg-secondary
+                                {% endif %}">
+                                {{ session.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Date Range -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block"><i class="fas fa-calendar"></i> Duration</small>
+                        <p class="mb-0">
+                            <strong>{{ session.start_date|date:"M d, Y" }}</strong><br>
+                            <span class="text-muted">to</span><br>
+                            <strong>{{ session.end_date|date:"M d, Y" }}</strong>
+                        </p>
+                    </div>
+
+                    <!-- Days Remaining/Elapsed -->
+                    <div class="alert alert-light py-2 px-3 mb-3">
+                        <small>
+                            {% if session.status == 'upcoming' %}
+                                <i class="fas fa-hourglass-start"></i>
+                                <strong>Starts in:</strong> {{ days_until|default:"—" }} days
+                            {% elif session.status == 'active' %}
+                                <i class="fas fa-hourglass-half"></i>
+                                <strong>Active:</strong> {{ days_elapsed|default:"—" }} days
+                            {% else %}
+                                <i class="fas fa-hourglass-end"></i>
+                                <strong>Ended:</strong> {{ days_ago|default:"—" }} days ago
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row text-center mb-3 g-2">
+                        <div class="col-6">
+                            <div class="bg-light p-2 rounded">
+                                <h6 class="mb-0">
+                                    {{ session.enrollments.count|default:0 }}
+                                </h6>
+                                <small class="text-muted">Enrollments</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light p-2 rounded">
+                                <h6 class="mb-0">
+                                    {{ session.courses.count|default:0 }}
+                                </h6>
+                                <small class="text-muted">Courses</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    {% if session.description %}
+                    <p class="card-text text-muted small">
+                        {{ session.description|truncatewords:20 }}
+                    </p>
+                    {% else %}
+                    <p class="card-text text-muted small">
+                        <em>No description available</em>
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Card Footer with Actions -->
+                <div class="card-footer bg-light">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'school:session_detail' session.id %}" class="btn btn-outline-info btn-sm" title="View Details">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        {% if user.is_staff %}
+                        <a href="{% url 'school:session_update' session.id %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>No Sessions Found</h5>
+                <p class="text-muted">There are no academic sessions to display.</p>
+                {% if user.is_staff %}
+                <a href="{% url 'school:session_create' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus"></i> Create First Session
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="fas fa-step-backward"></i> First
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            <!-- Page Numbers -->
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        Last <i class="fas fa-step-forward"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- Statistics Footer -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-success mb-0">{{ active_sessions }}</h4>
+                    <small class="text-muted"><i class="fas fa-check-circle"></i> Active Sessions</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-warning mb-0">{{ upcoming_sessions }}</h4>
+                    <small class="text-muted"><i class="fas fa-clock"></i> Upcoming Sessions</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-secondary mb-0">{{ closed_sessions }}</h4>
+                    <small class="text-muted"><i class="fas fa-lock"></i> Closed Sessions</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h4 class="text-info mb-0">{{ total_sessions }}</h4>
+                    <small class="text-muted"><i class="fas fa-calendar-alt"></i> Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .hover-shadow:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-4px);
+    }
+
+    .transition {
+        transition: all 0.3s ease;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .btn-group-sm .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+    }
+
+    .form-select {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+    }
+</style>
+{% endblock %}

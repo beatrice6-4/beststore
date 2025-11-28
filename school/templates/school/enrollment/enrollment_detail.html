@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% block page_title %}Enrollment - {{ enrollment.student.get_full_name }}{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-book-open"></i> Enrollment Details
+            </h1>
+            <p class="text-muted mt-2">
+                {{ enrollment.student.get_full_name }} - {{ enrollment.course.name }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:enrollment_update' enrollment.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
+            <a href="{% url 'school:enrollment_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Enrollment Status Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-information-circle"></i> Enrollment Status</h5>
+                        <span class="badge 
+                            {% if enrollment.status == 'active' %}bg-success
+                            {% elif enrollment.status == 'completed' %}bg-primary
+                            {% else %}bg-danger
+                            {% endif %}">
+                            {{ enrollment.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-calendar"></i> Enrollment Date</small>
+                            <h6 class="mb-0">{{ enrollment.enrollment_date|date:"M d, Y" }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-calendar-check"></i> Completion Date</small>
+                            <h6 class="mb-0">
+                                {% if enrollment.completion_date %}
+                                    {{ enrollment.completion_date|date:"M d, Y" }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </h6>
+                        </div>
+                    </div>
+
+                    {% if enrollment.grade %}
+                    <div class="alert alert-info py-3 mb-0">
+                        <strong>Grade:</strong> 
+                        <span class="badge bg-primary" style="font-size: 16px;">{{ enrollment.grade }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Course Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-book"></i> Course Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-book"></i> Course Name</small>
+                            <h6 class="mb-3">
+                                <a href="{% url 'school:course_detail' enrollment.course.id %}">
+                                    {{ enrollment.course.name }}
+                                </a>
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-hashtag"></i> Course Code</small>
+                            <h6 class="mb-3">
+                                <span class="badge bg-info">{{ enrollment.course.code }}</span>
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-star"></i> Credits</small>
+                            <h6 class="mb-3">{{ enrollment.course.credits }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-building"></i> Department</small>
+                            <h6 class="mb-0">
+                                <a href="{% url 'school:department_detail' enrollment.course.department.id %}">
+                                    {{ enrollment.course.department.name }}
+                                </a>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-user-graduate"></i> Student Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-user"></i> Full Name</small>
+                            <h6 class="mb-3">
+                                <a href="{% url 'school:student_detail' enrollment.student.id %}">
+                                    {{ enrollment.student.get_full_name }}
+                                </a>
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-id-card"></i> Registration Number</small>
+                            <h6 class="mb-3">{{ enrollment.student.registration_number }}</h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-building"></i> Department</small>
+                            <h6 class="mb-3">
+                                <a href="{% url 'school:department_detail' enrollment.student.department.id %}">
+                                    {{ enrollment.student.department.name }}
+                                </a>
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-envelope"></i> Email</small>
+                            <h6 class="mb-3">
+                                <a href="mailto:{{ enrollment.student.email }}">{{ enrollment.student.email }}</a>
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-phone"></i> Phone</small>
+                            <h6 class="mb-0">
+                                {% if enrollment.student.phone_number %}
+                                    <a href="tel:{{ enrollment.student.phone_number }}">{{ enrollment.student.phone_number }}</a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-toggle-on"></i> Status</small>
+                            <h6 class="mb-0">
+                                <span class="badge 
+                                    {% if enrollment.student.status == 'active' %}bg-success
+                                    {% elif enrollment.student.status == 'graduated' %}bg-primary
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ enrollment.student.get_status_display }}
+                                </span>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            {% if user.is_staff %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-cogs"></i> Actions</h6>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'school:enrollment_update' enrollment.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit Enrollment
+                    </a>
+                    <a href="{% url 'school:enrollment_list' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-list"></i> All Enrollments
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Session Information -->
+            {% if enrollment.session %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-book-open"></i> Academic Session</h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2">{{ enrollment.session.name }}</h6>
+                    <small class="text-muted">
+                        {{ enrollment.session.start_date|date:"M d, Y" }} - {{ enrollment.session.end_date|date:"M d, Y" }}
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Status Summary -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-badge"></i> Summary</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span><i class="fas fa-toggle-on"></i> Status:</span>
+                        <strong>
+                            <span class="badge 
+                                {% if enrollment.status == 'active' %}bg-success
+                                {% elif enrollment.status == 'completed' %}bg-primary
+                                {% else %}bg-danger
+                                {% endif %}">
+                                {{ enrollment.get_status_display }}
+                            </span>
+                        </strong>
+                    </div>
+                    {% if enrollment.grade %}
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span><i class="fas fa-star"></i> Grade:</span>
+                        <strong>{{ enrollment.grade }}</strong>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-calendar"></i> Enrolled:</span>
+                        <strong>{{ enrollment.enrollment_date|date:"M d, Y" }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            {% if enrollment.notes %}
+            <div class="card shadow-sm bg-light">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-sticky-note"></i> Notes</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 small">{{ enrollment.notes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

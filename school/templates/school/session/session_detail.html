@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block page_title %}Session - {{ session.name }}{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-calendar-alt"></i> {{ session.name }}
+            </h1>
+            <p class="text-muted mt-2">
+                <span class="badge 
+                    {% if status == 'active' %}bg-success
+                    {% elif status == 'upcoming' %}bg-warning
+                    {% else %}bg-secondary
+                    {% endif %}">
+                    {% if status == 'active' %}Active{% elif status == 'upcoming' %}Upcoming{% else %}Closed{% endif %}
+                </span>
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+                <a href="{% url 'school:session_update' session.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
+            <a href="{% url 'school:session_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Session Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-information-circle"></i> Session Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-calendar"></i> Start Date</small>
+                            <h6 class="mb-0">{{ session.start_date|date:"F d, Y" }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block"><i class="fas fa-calendar-check"></i> End Date</small>
+                            <h6 class="mb-0">{{ session.end_date|date:"F d, Y" }}</h6>
+                        </div>
+                    </div>
+
+                    {% if session.description %}
+                    <div class="alert alert-light py-3">
+                        <h6 class="mb-2"><i class="fas fa-sticky-note"></i> Description</h6>
+                        <p class="mb-0">{{ session.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Duration Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-hourglass-half"></i> Duration</h5>
+                </div>
+                <div class="card-body">
+                    {% if status == 'active' %}
+                        <div class="alert alert-info mb-0">
+                            <strong>Active Since:</strong> {{ days_elapsed }} days ago
+                            <br>
+                            <strong>Days Remaining:</strong> {{ remaining_days|default:"—" }} days
+                        </div>
+                    {% elif status == 'upcoming' %}
+                        <div class="alert alert-warning mb-0">
+                            <strong>Starts In:</strong> {{ days_until }} days
+                        </div>
+                    {% else %}
+                        <div class="alert alert-secondary mb-0">
+                            <strong>Closed:</strong> {{ days_ago }} days ago
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Enrollments -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-book-open"></i> Enrollments ({{ session.enrollments.count }})</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enrollment in session.enrollments.all|slice:":10" %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'school:student_detail' enrollment.student.id %}">
+                                        {{ enrollment.student.get_full_name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'school:course_detail' enrollment.course.id %}">
+                                        {{ enrollment.course.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if enrollment.status == 'active' %}bg-success
+                                        {% elif enrollment.status == 'completed' %}bg-primary
+                                        {% else %}bg-danger
+                                        {% endif %}">
+                                        {{ enrollment.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'school:enrollment_detail' enrollment.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No enrollments yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if session.enrollments.count > 10 %}
+                <div class="card-footer text-center">
+                    <a href="{% url 'school:enrollment_list' %}?session={{ session.id }}" class="btn btn-sm btn-outline-primary">
+                        View All {{ session.enrollments.count }} Enrollments
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Courses -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-book"></i> Courses ({{ session.courses.count }})</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Credits</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in session.courses.all|slice:":10" %}
+                            <tr>
+                                <td><span class="badge bg-info">{{ course.code }}</span></td>
+                                <td>
+                                    <a href="{% url 'school:course_detail' course.id %}">
+                                        {{ course.name }}
+                                    </a>
+                                </td>
+                                <td>{{ course.credits }}</td>
+                                <td>
+                                    <a href="{% url 'school:course_detail' course.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No courses yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Status Summary -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-chart-pie"></i> Summary</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span><i class="fas fa-book-open"></i> Courses:</span>
+                        <strong>{{ session.courses.count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span><i class="fas fa-users"></i> Enrollments:</span>
+                        <strong>{{ session.enrollments.count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-calendar"></i> Duration:</span>
+                        <strong>{{ duration_days }} days</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            {% if user.is_staff %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-cogs"></i> Actions</h6>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'school:session_update' session.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit Session
+                    </a>
+                    <a href="{% url 'school:session_list' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-list"></i> All Sessions
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Status Badge -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-badge"></i> Status</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="mb-3">
+                        <span class="badge 
+                            {% if status == 'active' %}bg-success
+                            {% elif status == 'upcoming' %}bg-warning
+                            {% else %}bg-secondary
+                            {% endif %} p-3">
+                            {% if status == 'active' %}
+                                <i class="fas fa-check-circle"></i> Active
+                            {% elif status == 'upcoming' %}
+                                <i class="fas fa-clock"></i> Upcoming
+                            {% else %}
+                                <i class="fas fa-lock"></i> Closed
+                            {% endif %}
+                        </span>
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

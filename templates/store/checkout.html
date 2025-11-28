@@ -533,7 +533,7 @@
 
             <!-- ========================= BILLING FORM ========================= -->
             <div>
-                <form action="{% url 'placeOrder' %}" method="POST" id="checkout-form">
+                <form action="{% url 'orders:placeOrder' %}" method="POST" id="checkout-form">
                     {% csrf_token %}
 
                     <!-- Personal Information -->

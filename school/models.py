@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+
 
 class Department(models.Model):
     """School departments"""
@@ -64,6 +66,55 @@ class ReportingSession(models.Model):
         return f"{self.name} - Semester {self.semester}"
 
 
+class Session(models.Model):
+    """Academic Session/Term model"""
+    name = models.CharField(max_length=50, unique=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-start_date']
+        verbose_name = 'Academic Session'
+        verbose_name_plural = 'Academic Sessions'
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError('Start date must be before end date.')
+
+    @property
+    def status(self):
+        """Get session status: active, upcoming, or closed"""
+        today = timezone.now().date()
+        
+        if self.start_date <= today <= self.end_date:
+            return 'active'
+        elif self.start_date > today:
+            return 'upcoming'
+        else:
+            return 'closed'
+
+    @property
+    def get_status_display(self):
+        status_map = {
+            'active': 'Active',
+            'upcoming': 'Upcoming',
+            'closed': 'Closed'
+        }
+        return status_map.get(self.status, 'Unknown')
+
+    @property
+    def duration_days(self):
+        """Get total duration in days"""
+        return (self.end_date - self.start_date).days
+
+
 class Student(models.Model):
     """Student profile"""
     GENDER_CHOICES = [
@@ -109,24 +160,43 @@ class Student(models.Model):
 class Enrollment(models.Model):
     """Student course enrollment"""
     STATUS_CHOICES = [
-        ('enrolled', 'Enrolled'),
-        ('dropped', 'Dropped'),
+        ('active', 'Active'),
         ('completed', 'Completed'),
+        ('dropped', 'Dropped'),
+    ]
+    
+    GRADE_CHOICES = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('D', 'D'),
+        ('F', 'F'),
     ]
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='enrollments')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
-    session = models.ForeignKey(ReportingSession, on_delete=models.CASCADE, related_name='enrollments')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='enrolled')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='enrollments_list')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_enrollments')
+    session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True, related_name='enrollments')
     enrollment_date = models.DateTimeField(auto_now_add=True)
+    completion_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    grade = models.CharField(max_length=1, choices=GRADE_CHOICES, null=True, blank=True)
+    notes = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['student', 'course', 'session']
         ordering = ['-enrollment_date']
+        unique_together = ('student', 'course', 'session')
 
     def __str__(self):
-        return f"{self.student.registration_number} - {self.course.code}"
+        return f"{self.student.get_full_name()} - {self.course.name}"
+
+    def clean(self):
+        if Enrollment.objects.filter(
+            student=self.student, 
+            course=self.course,
+            session=self.session
+        ).exclude(id=self.id).exists():
+            raise ValidationError("This student is already enrolled in this course for this session.")
 
 
 class StudentFee(models.Model):

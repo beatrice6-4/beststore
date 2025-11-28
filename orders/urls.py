@@ -6,7 +6,7 @@ app_name = 'orders'
 
 
 urlpatterns = [
-    path('placeOrder/', views.placeOrder, name='placeOrder'),
+    path('place-order/', views.placeOrder, name='placeOrder'),
     path('payments/', views.payments, name='payments'),
     
     path('access_token/', views.get_access_token, name='get_access_token'),

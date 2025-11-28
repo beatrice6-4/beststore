@@ -166,6 +166,22 @@ TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
+
+
+# ========================= M-PESA CONFIGURATION =========================
+MPESA_ENVIRONMENT = 'production'  # or 'sandbox' for testing
+MPESA_SHORTCODE = '3581517'
+MPESA_PARTYB = '6391014'
+
+# Get real credentials from https://developer.safaricom.co.ke/
+MPESA_CONSUMER_KEY = '4TgAMbmpG5wbH4mqFpIYZ6tOCGFWGnJjMBvFE7Z4DobFfcJjmvDjLnsWcoIm9FLf'
+MPESA_CONSUMER_SECRET = 'kfy4wKPlLpC4AGlZRphJl1VgpzAVc1fNVs4w2l3vNVb1GuqM'
+MPESA_PASSKEY = '46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933'
+MPESA_CALLBACK_URL = 'https://mamamaasaibakers.com/accounts/mpesa-callback/'
+
+
+
+
 # Static files configuration
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
