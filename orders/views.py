@@ -395,30 +395,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 import json
 
-@csrf_exempt
-def mpesa_transaction_result(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            # Log the result for debugging
-            print("M-Pesa Transaction Result:", data)
-            # Optionally, save the result to your database here
-
-            # You can extract and process fields as needed, for example:
-            result_code = data.get('Result', {}).get('ResultCode')
-            result_desc = data.get('Result', {}).get('ResultDesc')
-            transaction_id = data.get('Result', {}).get('TransactionID')
-            conversation_id = data.get('Result', {}).get('ConversationID')
-
-            # Respond to Safaricom
-            return JsonResponse({"ResultCode": 0, "ResultDesc": "Received successfully"})
-        except Exception as e:
-            print("Error processing M-Pesa transaction result:", str(e))
-            return JsonResponse({"ResultCode": 1, "ResultDesc": "Error processing result"}, status=400)
-    else:
-        return HttpResponse("M-Pesa Transaction Result Endpoint", content_type="text/plain")
-
-
 
 
 
