@@ -321,40 +321,37 @@ def user_profile(request):
     
     return render(request, 'accounts/profile.html', context)
 
-
-@login_required
+@login_required(login_url='login')
 def myOrders(request):
     """
-    Display user's order history with filtering and pagination.
+    Display the user's order history with filtering and pagination.
     """
-    from store.models import Order
-    from django.core.paginator import Paginator
-    
     user = request.user
-    
-    # Get filter parameters
-    status_filter = request.GET.get('status', 'all')
-    page_num = request.GET.get('page', 1)
-    
-    # Base queryset
-    orders = Order.objects.filter(user=user).select_related('user').order_by('-order_date')
-    
-    # Filter by status
+
+    # Get filter parameters from the request
+    status_filter = request.GET.get('status', 'all')  # Default to 'all'
+    page_num = request.GET.get('page', 1)  # Default to page 1
+
+    # Base queryset: Fetch orders for the logged-in user
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+
+    # Apply status filter if provided
     if status_filter != 'all':
         orders = orders.filter(status=status_filter)
-    
-    # Pagination
-    paginator = Paginator(orders, 10)  # 10 orders per page
+
+    # Paginate the orders (10 orders per page)
+    paginator = Paginator(orders, 10)
     page_obj = paginator.get_page(page_num)
-    
+
+    # Context data for the template
     context = {
-        'page_obj': page_obj,
-        'status_filter': status_filter,
-        'total_orders': orders.count(),
-        'page_title': 'My Orders',
-        'breadcrumb': 'Orders',
+        'page_obj': page_obj,  # Paginated orders
+        'status_filter': status_filter,  # Current status filter
+        'total_orders': orders.count(),  # Total number of orders
+        'page_title': 'My Orders',  # Page title
+        'breadcrumb': 'Orders',  # Breadcrumb for navigation
     }
-    
+
     return render(request, 'accounts/myOrders.html', context)
 
 
