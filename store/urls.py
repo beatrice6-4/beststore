@@ -1,6 +1,7 @@
-
-from . import views
 from django.urls import path
+from . import views
+
+app_name = 'store'
 
 urlpatterns = [
     path('', views.store, name='store'),
@@ -8,5 +9,6 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('<slug:category_slug>/<slug:product_slug>/', views.product_detail, name='product_detail'),
     path('submit_review/<int:product_id>/', views.submit_review, name='submit_review'),
-    path('place-order/', views.placeOrder, name='placeOrder'),
-] 
+    path('', views.store, name='store'),
+    path('<slug:category_slug>/<slug:product_slug>/', views.product_detail, name='product_detail'),
+]

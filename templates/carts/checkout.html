@@ -789,7 +789,7 @@
                     <button type="submit" form="checkout-form" class="btn-place-order" id="place-order-btn">
                         <i class="fas fa-lock"></i> Secure Place Order
                     </button>
-                    <a href="{% url 'cart' %}" class="btn-back">
+                    <a href="{% url 'cart:cart' %}" class="btn-back">
                         <i class="fas fa-arrow-left"></i> Back to Cart
                     </a>
 
@@ -879,7 +879,7 @@
             if (response.ok && data.success) {
                 showAlert('Order placed successfully! Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = data.redirect_url || '{% url "cart" %}';
+                    window.location.href = data.redirect_url || '{% url "cart:cart" %}';
                 }, 1500);
             } else {
                 showAlert(data.error || 'Failed to process your order. Please try again.', 'error');

@@ -549,7 +549,7 @@
                         </div>
                         <div class="order-info-row">
                             <span class="order-info-label">Total Amount</span>
-                            <span class="order-info-value highlight">Ksh {{ grand_total|floatformat:2 }}</span>
+                            <span class="order-info-value highlight">Ksh {{ order.total_amount|floatformat:2 }}</span>
                         </div>
                     </div>
                 {% endif %}
@@ -637,7 +637,7 @@
                     </button>
 
                     <!-- Back Button -->
-                    <a href="{% url 'checkout' %}" class="btn-secondary">
+                    <a href="#" class="btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to Checkout
                     </a>
                 </form>

@@ -1,79 +1,149 @@
 from django.contrib import admin
-from django import forms
-from .models import Payment, Order, OrderProduct
+from .models import Order, OrderItem
 
-class PaymentAdminForm(forms.ModelForm):
-    class Meta:
-        model = Payment
-        fields = '__all__'
 
-    def clean(self):
-        cleaned_data = super().clean()
-        reference_code = cleaned_data.get('reference_code')
-        payment_id = cleaned_data.get('payment_id')
-        self._order = None
-
-        # Mpesa code is now optional, so no validation error if blank
-        # If reference code is provided, fetch the order
-        if reference_code:
-            try:
-                order = Order.objects.get(order_number=reference_code)
-                self._order = order
-            except Order.DoesNotExist:
-                raise forms.ValidationError("No order found with this reference code.")
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        # If an order was found, auto-fill fields and update order status
-        if hasattr(self, '_order') and self._order:
-            instance.user = self._order.user
-            instance.amount_paid = self._order.order_total
-            instance.payment_method = 'Mpesa'
-            instance.status = 'Paid Via Mpesa'
-            instance.payment_id = self.cleaned_data.get('payment_id')
-            if commit:
-                instance.save()  # Save Payment first!
-                # Link payment to order and mark as completed
-                self._order.payment = instance
-                self._order.status = "Completed"
-                self._order.is_ordered = True
-                self._order.save()
-        else:
-            if commit:
-                instance.save()
-        return instance
-
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    form = PaymentAdminForm
-    list_display = ('user', 'payment_id', 'payment_method', 'amount_paid', 'status', 'created_at')
-    search_fields = ('user__email', 'payment_id', 'payment_method', 'reference_code')
-    list_filter = ('status', 'payment_method', 'created_at')
-    readonly_fields = ('user', 'payment_id', 'payment_method', 'amount_paid', 'status', 'created_at')
-
-class OrderProductInline(admin.TabularInline):
-    model = OrderProduct
-    readonly_fields = ('payment', 'user', 'product', 'quantity', 'product_price', 'ordered')
+class OrderItemInline(admin.TabularInline):
+    """Inline admin for order items"""
+    model = OrderItem
     extra = 0
+    readonly_fields = ('product', 'quantity', 'price', 'get_total_price')
+    fields = ('product', 'quantity', 'price', 'get_total_price')
 
+    def get_total_price(self, obj):
+        return f"KES {obj.get_total_price():,.2f}"
+    get_total_price.short_description = 'Total Price'
+
+
+@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['order_number', 'full_name', 'phone', 'email', 'city', 'order_total', 'tax', 'status', 'is_ordered', 'created_at']
-    list_filter = ['status', 'is_ordered']
-    search_fields = ['order_number', 'first_name', 'last_name', 'phone', 'email']
-    list_per_page = 20
-    inlines = [OrderProductInline]
-
-admin.site.register(Order, OrderAdmin)
-admin.site.register(OrderProduct)
-
-
-from django.contrib import admin
-from .models import Transaction
-
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('mpesa_receipt', 'user', 'product', 'amount', 'status', 'paid_at')
-    search_fields = ('mpesa_receipt', 'phone_number', 'user__username')
-    list_filter = ('status', 'paid_at')
+    """Admin interface for Order model"""
+    
+    list_display = (
+        'order_id',
+        'customer_name',
+        'email',
+        'phone',
+        'total_amount_display',
+        'status_badge',
+        'payment_method',
+        'created_at'
+    )
+    
+    list_filter = (
+        'status',
+        'payment_method',
+        'created_at',
+    )
+    
+    search_fields = (
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'id'
+    )
+    
+    readonly_fields = (
+        'id',
+        'created_at',
+        'updated_at',
+        'total_items',
+        'order_summary'
+    )
+    
+    inlines = [OrderItemInline]
+    
+    fieldsets = (
+        ('Order Information', {
+            'fields': ('id', 'status', 'payment_method', 'total_amount', 'created_at', 'updated_at')
+        }),
+        ('Customer Information', {
+            'fields': ('first_name', 'last_name', 'email', 'phone', 'user')
+        }),
+        ('Delivery Address', {
+            'fields': ('address_line_1', 'address_line_2', 'city', 'state', 'country')
+        }),
+        ('Order Details', {
+            'fields': ('order_summary', 'total_items', 'order_note'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['mark_pending', 'mark_processing', 'mark_shipped', 'mark_delivered', 'mark_cancelled']
+    
+    def order_id(self, obj):
+        return f"#{obj.pk}"
+    order_id.short_description = 'Order ID'
+    
+    def customer_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    customer_name.short_description = 'Customer Name'
+    
+    def total_amount_display(self, obj):
+        return f"KES {obj.total_amount:,.2f}"
+    total_amount_display.short_description = 'Total Amount'
+    
+    def status_badge(self, obj):
+        """Display status with color coding"""
+        colors = {
+            'pending': '#FFA500',
+            'processing': '#0099FF',
+            'shipped': '#9933FF',
+            'delivered': '#00CC00',
+            'cancelled': '#FF0000',
+            'completed': '#00CC00',
+        }
+        color = colors.get(obj.status, '#808080')
+        return f'<span style="background-color: {color}; color: white; padding: 3px 10px; border-radius: 3px;">{obj.get_status_display()}</span>'
+    status_badge.short_description = 'Status'
+    status_badge.allow_tags = True
+    
+    def total_items(self, obj):
+        """Display total number of items in order"""
+        count = obj.items.count()
+        return count if count else 0
+    total_items.short_description = 'Total Items'
+    
+    def order_summary(self, obj):
+        """Display summary of order items"""
+        items = obj.items.all()
+        if not items.exists():
+            return "No items in this order"
+        
+        summary = "<ul style='margin: 10px 0;'>"
+        for item in items:
+            summary += f"<li>{item.product.product_name} x {item.quantity} - KES {item.get_total_price():,.2f}</li>"
+        summary += "</ul>"
+        return summary
+    order_summary.short_description = 'Order Items'
+    order_summary.allow_tags = True
+    
+    # Actions
+    def mark_pending(self, request, queryset):
+        count = queryset.update(status='pending')
+        self.message_user(request, f'{count} order(s) marked as Pending.')
+    mark_pending.short_description = 'Mark selected as Pending'
+    
+    def mark_processing(self, request, queryset):
+        count = queryset.update(status='processing')
+        self.message_user(request, f'{count} order(s) marked as Processing.')
+    mark_processing.short_description = 'Mark selected as Processing'
+    
+    def mark_shipped(self, request, queryset):
+        count = queryset.update(status='shipped')
+        self.message_user(request, f'{count} order(s) marked as Shipped.')
+    mark_shipped.short_description = 'Mark selected as Shipped'
+    
+    def mark_delivered(self, request, queryset):
+        count = queryset.update(status='delivered')
+        self.message_user(request, f'{count} order(s) marked as Delivered.')
+    mark_delivered.short_description = 'Mark selected as Delivered'
+    
+    def mark_cancelled(self, request, queryset):
+        count = queryset.update(status='cancelled')
+        self.message_user(request, f'{count} order(s) marked as Cancelled.')
+    mark_cancelled.short_description = 'Mark selected as Cancelled'
+    
+    def has_delete_permission(self, request):
+        """Only superusers can delete orders"""
+        return request.user.is_superuser

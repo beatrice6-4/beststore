@@ -21,53 +21,71 @@ class Payment(models.Model):
     def __str__(self):
         return self.payment_id if self.payment_id else "No Code"
 
-class Order(models.Model):
-    STATUS = (
-        ('Pending', 'Pending'),
-        ('Accepted', 'Accepted'),
-        ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled'),
-    )
+from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
+from store.models import Product
 
-    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='orders')
-    payment = models.ForeignKey(
-        Payment,
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        related_name='orders'
-    )
-    order_number = models.CharField(max_length=20)
+
+
+from django.db import models
+from django.conf import settings
+from store.models import Product
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
+    ]
+
+    PAYMENT_CHOICES = [
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Card'),
+        ('bank', 'Bank Transfer'),
+        ('cash', 'Cash on Delivery'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(max_length=50)
-    address_line_1 = models.CharField(max_length=50)
-    address_line_2 = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50)
-    state = models.CharField(max_length=50)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    address_line_1 = models.CharField(max_length=100)
+    address_line_2 = models.CharField(max_length=100, blank=True)
     city = models.CharField(max_length=50)
-    order_note = models.CharField(max_length=100, blank=True)
-    order_total = models.FloatField()
-    tax = models.FloatField()
-    status = models.CharField(max_length=10, choices=STATUS, default='Accepted')
-    ip = models.CharField(blank=True, max_length=20)
-    is_ordered = models.BooleanField(default=False)
+    state = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Correct field for total amount
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='mpesa')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    order_note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def full_name(self):
-        return f'{self.first_name} {self.last_name}'
-
-    def full_address(self):
-        return f'{self.address_line_1} {self.address_line_2}'
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f'Order {self.order_number} by {self.full_name()}'
-    
+        return f"Order #{self.pk} - {self.first_name} {self.last_name}"
 
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    quantity = models.IntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def get_total_price(self):
+        return self.price * self.quantity
+
+    def __str__(self):
+        return f"{self.product.product_name} x {self.quantity}"
 
 
 
@@ -90,7 +108,7 @@ class Order(models.Model):
         callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-        transaction_desc = f'Payment for Order {self.order_number}'
+        transaction_desc = f'Payment for Order {self.order.id}'
 
         # Generate AccountReference: 4 random capital letters + 4 random digits
         random_letters = ''.join(random.choices(string.ascii_uppercase, k=4))

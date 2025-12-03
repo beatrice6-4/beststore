@@ -4,624 +4,6 @@
 {% load static %}
 
 {% block content %}
-<style>
-    :root {
-        --primary: #198754;
-        --primary-dark: #145c32;
-        --secondary: #004080;
-        --accent: #FF6B35;
-        --light-bg: #f8f9fa;
-        --border-color: #e9ecef;
-        --text-dark: #1a1a1a;
-        --text-muted: #6c757d;
-        --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
-        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-        --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
-    }
-
-    /* ============ PAGE WRAPPER ============ */
-    .product-detail-wrapper {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
-        min-height: calc(100vh - 200px);
-        padding: 32px 0;
-    }
-
-    .product-detail-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    /* ============ BREADCRUMB ============ */
-    .breadcrumb-section {
-        margin-bottom: 24px;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .breadcrumb-section a {
-        color: var(--primary);
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .breadcrumb-section a:hover {
-        text-decoration: underline;
-    }
-
-    .breadcrumb-section span {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-    }
-
-    /* ============ MAIN LAYOUT ============ */
-    .product-detail-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        align-items: start;
-    }
-
-    @media (max-width: 991px) {
-        .product-detail-layout {
-            grid-template-columns: 1fr;
-            gap: 32px;
-        }
-    }
-
-    /* ============ PRODUCT GALLERY ============ */
-    .product-gallery {
-        background: #fff;
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: var(--shadow-md);
-        padding: 20px;
-    }
-
-    .main-image {
-        width: 100%;
-        height: 400px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 16px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .main-image img {
-        max-width: 90%;
-        max-height: 90%;
-        object-fit: contain;
-        transition: transform 0.3s ease;
-    }
-
-    .main-image:hover img {
-        transform: scale(1.05);
-    }
-
-    .stock-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        z-index: 10;
-    }
-
-    .stock-badge.in-stock {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .stock-badge.out-of-stock {
-        background: #f8d7da;
-        color: #842029;
-    }
-
-    .gallery-thumbs {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 10px;
-    }
-
-    .thumb-item {
-        width: 100%;
-        aspect-ratio: 1;
-        border-radius: 8px;
-        overflow: hidden;
-        cursor: pointer;
-        border: 2px solid var(--border-color);
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-
-    .thumb-item:hover {
-        border-color: var(--primary);
-    }
-
-    .thumb-item.active {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(25,135,84,0.1);
-    }
-
-    .thumb-item img {
-        max-width: 90%;
-        max-height: 90%;
-        object-fit: contain;
-    }
-
-    /* ============ PRODUCT INFO ============ */
-    .product-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .product-header {
-        margin-bottom: 24px;
-    }
-
-    .product-category {
-        display: inline-block;
-        background: var(--light-bg);
-        color: var(--primary);
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 12px;
-    }
-
-    .product-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        line-height: 1.3;
-        margin-bottom: 14px;
-    }
-
-    .product-rating {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-
-    .stars {
-        display: flex;
-        gap: 4px;
-    }
-
-    .stars i {
-        color: #ffc107;
-        font-size: 1rem;
-    }
-
-    .rating-text {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        font-weight: 600;
-    }
-
-    .product-pricing {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 24px;
-        padding-bottom: 24px;
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    .price-current {
-        font-size: 2.4rem;
-        font-weight: 700;
-        color: var(--accent);
-    }
-
-    .price-original {
-        font-size: 1.2rem;
-        color: var(--text-muted);
-        text-decoration: line-through;
-    }
-
-    .discount-badge {
-        background: var(--accent);
-        color: #fff;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-
-    .product-description {
-        color: var(--text-dark);
-        line-height: 1.6;
-        margin-bottom: 24px;
-        font-size: 0.95rem;
-    }
-
-    /* ============ PRODUCT FORM ============ */
-    .product-form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group label {
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 10px;
-        font-size: 0.95rem;
-    }
-
-    .form-select {
-        padding: 12px 14px;
-        border: 1.5px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 0.95rem;
-        background: #fff;
-        color: var(--text-dark);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(25,135,84,0.1);
-        outline: none;
-    }
-
-    .form-select option {
-        padding: 8px;
-    }
-
-    /* ============ QUANTITY SELECTOR ============ */
-    .qty-selector {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .qty-label {
-        font-weight: 700;
-        color: var(--text-dark);
-        font-size: 0.95rem;
-        min-width: 80px;
-    }
-
-    .qty-control {
-        display: flex;
-        align-items: center;
-        border: 1.5px solid var(--border-color);
-        border-radius: 8px;
-        padding: 4px;
-        background: #fff;
-    }
-
-    .qty-btn {
-        width: 36px;
-        height: 36px;
-        border: 0;
-        background: transparent;
-        color: var(--primary);
-        cursor: pointer;
-        font-weight: 700;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .qty-btn:hover {
-        background: var(--light-bg);
-    }
-
-    .qty-input {
-        width: 50px;
-        border: 0;
-        text-align: center;
-        font-weight: 700;
-        color: var(--text-dark);
-        background: transparent;
-    }
-
-    .qty-input:focus {
-        outline: none;
-    }
-
-    /* ============ ACTION BUTTONS ============ */
-    .action-buttons {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .btn-add-cart {
-        flex: 1;
-        min-width: 200px;
-        padding: 14px 24px;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .btn-add-cart:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .btn-add-cart:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .btn-wishlist {
-        width: 50px;
-        height: 50px;
-        border: 1.5px solid var(--border-color);
-        background: #fff;
-        border-radius: 8px;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-    }
-
-    .btn-wishlist:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: rgba(255,107,53,0.05);
-    }
-
-    .btn-wishlist.added {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: rgba(255,107,53,0.1);
-    }
-
-    /* ============ FEATURES ============ */
-    .product-features {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        padding: 20px;
-        background: var(--light-bg);
-        border-radius: 10px;
-        margin-bottom: 24px;
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .feature-item i {
-        color: var(--primary);
-        font-size: 1.3rem;
-        min-width: 20px;
-    }
-
-    .feature-item span {
-        font-size: 0.9rem;
-        color: var(--text-dark);
-        font-weight: 500;
-    }
-
-    /* ============ REVIEWS SECTION ============ */
-    .reviews-section {
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: var(--shadow-md);
-        padding: 28px;
-        margin-top: 40px;
-    }
-
-    .reviews-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    .reviews-header h2 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-dark);
-    }
-
-    .reviews-summary {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .average-rating {
-        text-align: center;
-    }
-
-    .average-rating .number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary);
-        display: block;
-    }
-
-    .average-rating .stars {
-        justify-content: center;
-    }
-
-    .reviews-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .review-item {
-        background: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        padding: 20px;
-        transition: all 0.2s;
-    }
-
-    .review-item:hover {
-        box-shadow: var(--shadow-md);
-    }
-
-    .review-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 12px;
-    }
-
-    .review-author {
-        font-weight: 700;
-        color: var(--text-dark);
-    }
-
-    .review-date {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-    }
-
-    .review-rating {
-        display: flex;
-        gap: 4px;
-        margin-bottom: 12px;
-    }
-
-    .review-rating i {
-        color: #ffc107;
-        font-size: 0.9rem;
-    }
-
-    .review-title {
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 8px;
-    }
-
-    .review-text {
-        color: var(--text-muted);
-        line-height: 1.6;
-        font-size: 0.95rem;
-    }
-
-    .no-reviews {
-        text-align: center;
-        padding: 40px 20px;
-        color: var(--text-muted);
-    }
-
-    .no-reviews i {
-        font-size: 3rem;
-        margin-bottom: 16px;
-        opacity: 0.5;
-    }
-
-    /* ============ STOCK MESSAGE ============ */
-    .alert-stock {
-        padding: 14px;
-        border-radius: 8px;
-        border-left: 4px solid;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .alert-stock.in-stock {
-        background: #d1e7dd;
-        border-left-color: #198754;
-        color: #0f5132;
-    }
-
-    .alert-stock.out-of-stock {
-        background: #f8d7da;
-        border-left-color: #dc3545;
-        color: #842029;
-    }
-
-    .alert-stock i {
-        font-size: 1.2rem;
-    }
-
-    /* ============ RESPONSIVE ============ */
-    @media (max-width: 768px) {
-        .product-detail-layout {
-            gap: 24px;
-        }
-
-        .product-title {
-            font-size: 1.6rem;
-        }
-
-        .price-current {
-            font-size: 1.8rem;
-        }
-
-        .main-image {
-            height: 300px;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .btn-add-cart {
-            min-width: auto;
-        }
-
-        .product-features {
-            grid-template-columns: 1fr;
-        }
-
-        .reviews-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .reviews-summary {
-            width: 100%;
-            justify-content: space-between;
-        }
-    }
-</style>
-
 <div class="product-detail-wrapper">
     <div class="product-detail-container">
 
@@ -631,7 +13,7 @@
                 <i class="fas fa-home"></i> Home
             </a>
             <i class="fas fa-chevron-right text-muted"></i>
-            <a href="{% url 'store' %}">Store</a>
+            <a href="{% url 'store:store' %}">Store</a>
             <i class="fas fa-chevron-right text-muted"></i>
             <span>{{ single_product.product_name|truncatewords:3 }}</span>
         </nav>
@@ -641,7 +23,7 @@
 
             <!-- ========================= PRODUCT GALLERY ========================= -->
             <div class="product-gallery">
-                <div class="main-image" id="main-image-container">
+                <div class="main-image">
                     <img id="mainImage" src="{{ single_product.image.url }}" alt="{{ single_product.product_name }}">
                     {% if single_product.is_new %}
                         <span class="stock-badge in-stock">NEW</span>
@@ -665,12 +47,12 @@
             <div class="product-info">
                 <div class="product-header">
                     <span class="product-category">
-                        <a href="{{ single_product.category.get_url }}" style="color: inherit; text-decoration: none;">
+                        <a href="{% url 'store:products_by_category' single_product.category.slug %}" style="color: inherit; text-decoration: none;">
                             {{ single_product.category.category_name }}
                         </a>
                     </span>
                     <h1 class="product-title">{{ single_product.product_name }}</h1>
-
+                </div>
 
                 <!-- Pricing -->
                 <div class="product-pricing">
@@ -718,44 +100,8 @@
                 </div>
 
                 <!-- Add to Cart Form -->
-                <form action="{% url 'add_cart' single_product.id %}" method="POST" id="product-form">
+                <form action="{% url 'cart:add_cart' single_product.id %}" method="POST">
                     {% csrf_token %}
-
-                    <!-- Color Selection -->
-                    <div class="form-group">
-                        <label for="color">
-                            <i class="fas fa-palette"></i> Select Color
-                        </label>
-                        <select name="color" id="color" class="form-select">
-                            <option value="" disabled selected>Choose a color...</option>
-                            {% for variation in single_product.variation_set.colors %}
-                                <option value="{{ variation.variation_value|lower }}">
-                                    {{ variation.variation_value|capfirst }}
-                                </option>
-                            {% empty %}
-                                <option disabled>No colors available</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Size Selection -->
-                    <div class="form-group">
-                        <label for="size">
-                            <i class="fas fa-expand"></i> Select Size
-                        </label>
-                        <select name="size" id="size" class="form-select">
-                            <option value="" disabled selected>Choose a size...</option>
-                            {% for variation in single_product.variation_set.sizes %}
-                                <option value="{{ variation.variation_value|lower }}">
-                                    {{ variation.variation_value|capfirst }}
-                                </option>
-                            {% empty %}
-                                <option disabled>No sizes available</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Quantity Selection -->
                     <div class="qty-selector">
                         <label class="qty-label">Quantity:</label>
                         <div class="qty-control">
@@ -768,94 +114,39 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="action-buttons">
-                        {% if single_product.stock > 0 %}
-                            <button type="submit" class="btn-add-cart">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                        {% else %}
-                            <button type="button" class="btn-add-cart" disabled>
-                                <i class="fas fa-ban"></i> Out of Stock
-                            </button>
-                        {% endif %}
-                        <button type="button" class="btn-wishlist" id="wishlist-btn" onclick="toggleWishlist({{ single_product.id }})">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
+                    <button type="submit" class="btn-add-cart">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
                 </form>
             </div>
         </div>
-
-        
-
-        
+    </div>
+</div>
 
 <script>
-// Change main image on thumbnail click
-function changeImage(imageUrl) {
-    document.getElementById('mainImage').src = imageUrl;
-    
-    // Update active thumbnail
-    document.querySelectorAll('.thumb-item').forEach(thumb => {
-        thumb.classList.remove('active');
-    });
-    event.target.closest('.thumb-item').classList.add('active');
-}
-
-// Quantity controls
-function increaseQty() {
-    const input = document.getElementById('quantity');
-    const maxStock = {{ single_product.stock }};
-    if (parseInt(input.value) < maxStock) {
-        input.value = parseInt(input.value) + 1;
+    // Change main image on thumbnail click
+    function changeImage(imageUrl) {
+        document.getElementById('mainImage').src = imageUrl;
+        document.querySelectorAll('.thumb-item').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        event.target.closest('.thumb-item').classList.add('active');
     }
-}
 
-function decreaseQty() {
-    const input = document.getElementById('quantity');
-    if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
+    // Quantity controls
+    function increaseQty() {
+        const input = document.getElementById('quantity');
+        const maxStock = {{ single_product.stock }};
+        if (parseInt(input.value) < maxStock) {
+            input.value = parseInt(input.value) + 1;
+        }
     }
-}
 
-// Wishlist toggle
-function toggleWishlist(productId) {
-    const btn = document.getElementById('wishlist-btn');
-    const isAdded = btn.classList.contains('added');
-    
-    const url = isAdded 
-     
-    
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+    function decreaseQty() {
+        const input = document.getElementById('quantity');
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
         }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            btn.classList.toggle('added');
-            btn.innerHTML = isAdded 
-                ? '<i class="far fa-heart"></i>' 
-                : '<i class="fas fa-heart"></i>';
-        }
-    })
-    .catch(err => console.error('Error:', err));
-}
-
-// Smooth scroll for reviews
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-});
+    }
 </script>
-
 {% endblock %}

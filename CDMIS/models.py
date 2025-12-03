@@ -56,18 +56,18 @@ class Service(models.Model):
         return f"{self.name} ({self.group.name})"
     
 from django.db import models
-from django.conf import Settings, settings
+from django.conf import settings
+from store.models import Product  # Ensure 'store' is in INSTALLED_APPS
 
 class Order(models.Model):
-    user = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='cdmis_orders')
-    product = models.ForeignKey('store.Product', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cdmis_orders')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Correctly import Product
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=32, choices=[('pending', 'Pending'), ('completed', 'Completed')])
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Order #{self.pk} by {self.user}"
-    
 
 # models.py
 from django.db import models

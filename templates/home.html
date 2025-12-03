@@ -486,11 +486,11 @@
                 <h2><i class="fas fa-lightning-bolt"></i> Quick Actions</h2>
             </div>
             <div class="quick-actions">
-                <a href="{% url 'store' %}" class="action-card">
+                <a href="{% url 'store:store' %}" class="action-card">
                     <i class="fas fa-store"></i>
                     <span>Browse Store</span>
                 </a>
-                <a href="{% url 'cart' %}" class="action-card">
+                <a href="{% url 'cart:cart' %}" class="action-card">
                     <i class="fas fa-shopping-cart"></i>
                     <span>View Cart</span>
                 </a>
@@ -512,7 +512,7 @@
             <div class="section-header">
                 <h2><i class="fas fa-star"></i> Featured Products</h2>
                 <div class="section-actions">
-                    <a href="{% url 'store' %}" class="btn-section">
+                    <a href="{% url 'store:store' %}" class="btn-section">
                         <i class="fas fa-eye me-1"></i> View All
                     </a>
                 </div>
@@ -523,7 +523,7 @@
                     {% for product in products|slice:":12" %}
                         <div class="product-card-dash">
                             <div class="product-image-dash">
-                                <a href="{{ product.get_url }}">
+                                <a href="#">
                                     <img src="{{ product.image.url }}" alt="{{ product.product_name }}" loading="lazy">
                                 </a>
                                 {% if product.is_new %}
@@ -551,7 +551,7 @@
                                     <a href="{{ product.get_url }}" class="btn-view-dash">
                                         <i class="fas fa-eye me-1"></i> View
                                     </a>
-                                    <form action="{% url 'add_cart' product.id %}" method="POST" style="margin: 0;">
+                                    <form action="{% url 'cart:add_cart' product.id %}" method="POST" style="margin: 0;">
                                         {% csrf_token %}
                                         <button type="submit" class="btn-cart-dash" title="Add to cart">
                                             <i class="fas fa-shopping-cart"></i>

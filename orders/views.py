@@ -2,76 +2,280 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-from .models import Order, Payment, OrderProduct
-from carts.models import CartItem
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+
+from carts.models import CartItem, Cart
 from store.models import Product
-from accounts.models import Account
-from .forms import OrderForm
-from .generateAcesstoken import get_access_token
-from .query import query_stk_status
+from .models import Order, OrderItem
 from datetime import datetime
 import json
+import csv
 
-# ------------------------------
-# Place Order View
-# ------------------------------
+
+@csrf_exempt
+def placeOrder(request):
+    """Place a new order from checkout"""
+    try:
+        # Get form data
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        address_line_1 = request.POST.get('address_line_1', '').strip()
+        address_line_2 = request.POST.get('address_line_2', '').strip()
+        city = request.POST.get('city', '').strip()
+        state = request.POST.get('state', '').strip()
+        country = request.POST.get('country', '').strip()
+        payment_method = request.POST.get('payment_method', 'mpesa').strip()
+        order_note = request.POST.get('order_note', '').strip()
+
+        # Validate required fields
+        required_fields = {
+            'first_name': 'First name',
+            'last_name': 'Last name',
+            'email': 'Email address',
+            'phone': 'Phone number',
+            'address_line_1': 'Address',
+            'city': 'City',
+            'state': 'State',
+            'country': 'Country'
+        }
+
+        missing_fields = []
+        for field, label in required_fields.items():
+            if not locals().get(field):
+                missing_fields.append(label)
+
+        if missing_fields:
+            return JsonResponse({
+                'success': False,
+                'error': f'Please fill in: {", ".join(missing_fields)}'
+            }, status=400)
+
+        # Validate email format
+        if '@' not in email or '.' not in email.split('@')[1]:
+            return JsonResponse({
+                'success': False,
+                'error': 'Please enter a valid email address'
+            }, status=400)
+
+        # Get cart items
+        session_key = request.session.session_key
+        if not session_key:
+            request.session.create()
+            session_key = request.session.session_key
+
+        try:
+            cart = Cart.objects.get(cart_id=session_key)
+            cart_items = CartItem.objects.filter(cart=cart)
+
+            if not cart_items.exists():
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Your cart is empty. Please add items before ordering.'
+                }, status=400)
+        except Cart.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Cart not found. Please try again.'
+            }, status=400)
+
+        # Create order
+        order = Order.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            address_line_1=address_line_1,
+            address_line_2=address_line_2,
+            city=city,
+            state=state,
+            country=country,
+            payment_method=payment_method,
+            order_note=order_note,
+            status='pending'
+        )
+
+        # Associate with user if logged in
+        if request.user.is_authenticated:
+            order.user = request.user
+            order.save()
+
+        # Create order items from cart
+        total_amount = 0
+        for item in cart_items:
+            order_item = OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+            total_amount += order_item.get_total_price()
+
+        # Update order total
+        order.total_amount = total_amount
+        order.save()
+
+        # Clear cart
+        cart_items.delete()
+
+        # Send confirmation email
+        try:
+            subject = f'Order Confirmation - Order #{order.pk}'
+            html_message = render_to_string('orders/order_confirmation_email.html', {
+                'order': order,
+                'items': order.items.all()
+            })
+            email_msg = EmailMessage(
+                subject,
+                html_message,
+                'noreply@beststore.com',
+                [email],
+            )
+            email_msg.content_subtype = 'html'
+            email_msg.send(fail_silently=True)
+        except Exception as e:
+            print(f"Email sending error: {str(e)}")
+
+        # Return success response
+        return JsonResponse({
+            'success': True,
+            'message': 'Order placed successfully!',
+            'order_number': order.pk,
+            'redirect_url': f'/orders/confirmation/{order.pk}/'
+        })
+
+    except Exception as e:
+        print(f"Order Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': f'Error processing order: {str(e)}'
+        }, status=500)
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Order
+
+def order_confirmation(request, order_id):
+    """Display the order confirmation page."""
+    order = get_object_or_404(Order, id=order_id)  # Return 404 if the order does not exist
+    context = {
+        'order': order,
+    }
+    return render(request, 'orders/confirmation.html', context)
+
 @login_required(login_url='login')
-def placeOrder(request, total=0, quantity=0):
-    current_user = request.user
-
-    # Check if the cart is empty
-    cart_items = CartItem.objects.filter(user=current_user)
-    if not cart_items.exists():
-        return redirect('store')
-
-    # Calculate total, tax, and grand total
-    grand_total = 0
-    tax = 0
-    for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
-    tax = (2 * total) / 100
-    grand_total = total + tax
-
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            # Save billing information to the Order model
-            data = Order()
-            data.user = current_user
-            data.first_name = form.cleaned_data['first_name']
-            data.last_name = form.cleaned_data['last_name']
-            data.phone = form.cleaned_data['phone']
-            data.email = form.cleaned_data['email']
-            data.address_line_1 = form.cleaned_data['address_line_1']
-            data.address_line_2 = form.cleaned_data['address_line_2']
-            data.country = form.cleaned_data['country']
-            data.state = form.cleaned_data['state']
-            data.city = form.cleaned_data['city']
-            data.order_note = form.cleaned_data['order_note']
-            data.order_total = grand_total
-            data.tax = tax
-            data.ip = request.META.get('REMOTE_ADDR')
-            data.is_ordered = False
-            data.save()
-
-            # Generate order number
-            current_date = datetime.now().strftime("%Y%m%d")
-            order_number = current_date + str(data.id)
-            data.order_number = order_number
-            data.save()
-
-            # Redirect to mpesa payment page
-            return redirect('mpesa_payment', order_number=order_number)
-        else:
-            return render(request, 'orders/payments.html', {'form': form, 'cart_items': cart_items})
-    else:
-        return redirect('checkout')
+def order_list(request):
+    """Display user's orders"""
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'orders/order_list.html', {'orders': orders})
 
 
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    """Display order details"""
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    items = order.items.all()
+    return render(request, 'orders/order_detail.html', {
+        'order': order,
+        'items': items
+    })
 
+
+@staff_member_required
+def paidOrders(request):
+    """Staff-only view to list paid orders"""
+    qs = Order.objects.filter(status='completed').select_related('user').order_by('-created_at')
+
+    # Search
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(
+            Q(id__icontains=q) |
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q)
+        )
+
+    # Date filtering
+    date_from = request.GET.get('from')
+    date_to = request.GET.get('to')
+    if date_from:
+        try:
+            dt = datetime.strptime(date_from, '%Y-%m-%d')
+            qs = qs.filter(created_at__date__gte=dt.date())
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            dt = datetime.strptime(date_to, '%Y-%m-%d')
+            qs = qs.filter(created_at__date__lte=dt.date())
+        except ValueError:
+            pass
+
+    # CSV export
+    if request.GET.get('export') == 'csv':
+        filename = f"paid_orders_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        resp = HttpResponse(content_type='text/csv')
+        resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+        writer = csv.writer(resp)
+        writer.writerow(['Order ID', 'Customer', 'Email', 'Phone', 'Total', 'Status', 'Created At'])
+        for o in qs:
+            writer.writerow([
+                o.pk,
+                f'{o.first_name} {o.last_name}',
+                o.email,
+                o.phone,
+                float(o.total_amount or 0),
+                o.status,
+                o.created_at.isoformat() if o.created_at else ''
+            ])
+        return resp
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    per_page = int(request.GET.get('per_page', 25))
+    paginator = Paginator(qs, per_page)
+    try:
+        paid_orders = paginator.page(page)
+    except PageNotAnInteger:
+        paid_orders = paginator.page(1)
+    except EmptyPage:
+        paid_orders = paginator.page(paginator.num_pages)
+
+    context = {
+        'paid_orders': paid_orders,
+        'q': q,
+        'date_from': date_from,
+        'date_to': date_to,
+        'paginator': paginator,
+    }
+    return render(request, 'orders/paidOrders.html', context)
+
+
+def paid_orders_api(request):
+    """API endpoint for paid orders"""
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    qs = Order.objects.filter(status='completed').order_by('-id')
+    results = []
+    for o in qs:
+        results.append({
+            'id': o.pk,
+            'customer': f'{o.first_name} {o.last_name}',
+            'email': o.email,
+            'total': float(o.total_amount or 0),
+            'currency': 'KES',
+            'created_at': o.created_at.isoformat() if o.created_at else '',
+        })
+    return JsonResponse(results, safe=False)
 
 import random
 import string
@@ -83,13 +287,22 @@ from django.contrib.auth.decorators import login_required
 from .models import Order
 from .generateAcesstoken import get_access_token
 
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Order
+from .generateAcesstoken import get_access_token
+import base64
+from datetime import datetime
+import requests
+
 @login_required(login_url='login')
-def mpesa_payment(request, order_number):
+def mpesa_payment(request, order_id):
     """
     Handle M-Pesa payment initiation for orders.
     Generates STK push with custom account reference 'BRAMH' for till identification.
     """
-    order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
+    order = get_object_or_404(Order, id=order_id)  # Fetch the order or return 404 if not found
     payment_response = None
 
     if request.method == "POST":
@@ -101,7 +314,7 @@ def mpesa_payment(request, order_number):
             if not phone_number:
                 payment_response = {'error': 'Phone number not provided. Please enter your phone number.'}
             else:
-                # ========================= PHONE NUMBER FORMATTING =========================
+                # Format phone number
                 if phone_number.startswith("+"):
                     phone_number = phone_number[1:]
                 if phone_number.startswith("0"):
@@ -109,52 +322,31 @@ def mpesa_payment(request, order_number):
                 if not phone_number.startswith("254") or len(phone_number) != 12:
                     payment_response = {'error': 'Invalid phone number format. Use 2547XXXXXXXX.'}
                 else:
-                    # ========================= M-PESA CONFIGURATION =========================
-                    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"  # LIVE passkey for 3581517
-                    business_short_code = '3581517'  # LIVE Paybill shortcode
-                    till_number = 6391014  # Till number (PartyB)
+                    # M-Pesa configuration
+                    passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"
+                    business_short_code = '3581517'
+                    till_number = 6391014
                     process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                     callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
-                    
-                    # ========================= TIMESTAMP & PASSWORD =========================
+
+                    # Timestamp and password
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-                    
-                    # ========================= TRANSACTION DESCRIPTION =========================
-                    transaction_desc = f'Payment for Order {order_number}'
-                    
-                    # ========================= CUSTOM ACCOUNT REFERENCE (BRAMH) =========================
-                    # Use fixed account reference 'BRAMH' for till identification
-                    account_reference = 'BRAMH'
-                    
-                    # ========================= GET AMOUNT FROM FORM =========================
-                    amount = request.POST.get('amount')
-                    try:
-                        amount = int(amount)
-                        if amount <= 0:
-                            payment_response = {'error': 'Amount must be greater than 0.'}
-                            context = {
-                                'order': order,
-                                'grand_total': order.order_total,
-                                'payment_response': payment_response,
-                            }
-                            return render(request, 'orders/mpesa_payment.html', context)
-                    except (TypeError, ValueError):
-                        payment_response = {'error': 'Invalid amount entered.'}
-                        context = {
-                            'order': order,
-                            'grand_total': order.order_total,
-                            'payment_response': payment_response,
-                        }
-                        return render(request, 'orders/mpesa_payment.html', context)
 
-                    # ========================= STK PUSH HEADERS =========================
+                    # Transaction description
+                    transaction_desc = f'Payment for Order {order_id}'
+                    account_reference = 'BRAMH'
+
+                    # Get amount from the order
+                    amount = order.total_amount  # Use the correct field name
+
+                    # STK push headers
                     stk_push_headers = {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + access_token
                     }
 
-                    # ========================= STK PUSH PAYLOAD =========================
+                    # STK push payload
                     stk_push_payload = {
                         'BusinessShortCode': business_short_code,
                         'Password': password,
@@ -162,37 +354,36 @@ def mpesa_payment(request, order_number):
                         'TransactionType': 'CustomerBuyGoodsOnline',
                         'Amount': amount,
                         'PartyA': phone_number,
-                        'PartyB': till_number,  # Till number
+                        'PartyB': till_number,
                         'PhoneNumber': phone_number,
                         'CallBackURL': callback_url,
-                        'AccountReference': account_reference,  # BRAMH
+                        'AccountReference': account_reference,
                         'TransactionDesc': transaction_desc
                     }
 
-                    # ========================= INITIATE STK PUSH =========================
+                    # Initiate STK push
                     try:
                         response = requests.post(
-                            process_request_url, 
-                            headers=stk_push_headers, 
+                            process_request_url,
+                            headers=stk_push_headers,
                             json=stk_push_payload,
                             timeout=30
                         )
-                        print("STK Push API Response:", response.text)
                         response.raise_for_status()
                         response_data = response.json()
                         response_code = response_data.get('ResponseCode')
-                        
+
                         if response_code == "0":
                             checkout_request_id = response_data.get('CheckoutRequestID')
                             payment_response = {
                                 'success': True,
-                                'message': f'STK Push initiated successfully. Please complete payment on your phone by entering your M-Pesa PIN. Payment goes to BRAMH till.',
+                                'message': 'STK Push initiated successfully. Please complete payment on your phone.',
                                 'CheckoutRequestID': checkout_request_id,
                                 'ResponseCode': response_code,
                                 'amount': amount,
                                 'account_reference': account_reference,
                                 'till_number': till_number,
-                                'order_number': order_number,
+                                'order_number': order_id,
                                 'status_url': f'/api/orders/status/{checkout_request_id}/'
                             }
                         else:
@@ -229,13 +420,13 @@ def mpesa_payment(request, order_number):
                             'till_number': till_number
                         }
 
+    # Ensure the view always returns an HttpResponse
     context = {
         'order': order,
-        'grand_total': order.order_total,
+        'grand_total': order.total_amount,  # Use the correct field name
         'payment_response': payment_response,
     }
     return render(request, 'orders/mpesa_payment.html', context)
-
 
 # ========================= MPESA CALLBACK HANDLER =========================
 @csrf_exempt
