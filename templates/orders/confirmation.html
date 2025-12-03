@@ -3,47 +3,629 @@
 {% load static %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 40px auto; padding: 20px;">
-    <div style="text-align: center; padding: 40px; background: #d4edda; border-radius: 10px; margin-bottom: 30px;">
-        <i class="fas fa-check-circle" style="font-size: 4rem; color: #28a745;"></i>
-        <h1 style="color: #28a745; margin: 20px 0;">Order Confirmed!</h1>
-        <p style="color: #155724; font-size: 1.1rem;">Order #{{ order.pk }}</p>
-    </div>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-    <div style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <h2>Order Details</h2>
-        <table style="width: 100%; margin-top: 20px;">
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Order ID:</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;">{{ order.pk }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Customer Name:</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;">{{ order.first_name }} {{ order.last_name }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Email:</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;">{{ order.email }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Phone:</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;">{{ order.phone }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Delivery Address:</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;">{{ order.address_line_1 }}, {{ order.city }}, {{ order.country }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px;"><strong>Payment Method:</strong></td>
-                <td style="padding: 10px;">{{ order.payment_method|capfirst }}</td>
-            </tr>
-        </table>
-    </div>
+    .confirmation-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
 
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="{% url 'orders:mpesa_payment' order.id %}" style="display: inline-block; padding: 12px 30px; background: #198754; color: #fff; text-decoration: none; border-radius: 5px; font-weight: 600;">
-            Continue To Payments
-        </a>
+    .confirmation-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Success Banner */
+    .success-banner {
+        text-align: center;
+        padding: 60px 40px;
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        border-radius: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        animation: slideDown 0.6s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-icon {
+        font-size: 80px;
+        color: #27ae60;
+        margin-bottom: 20px;
+        animation: pulse 0.8s ease;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .success-banner h1 {
+        font-size: 40px;
+        font-weight: 700;
+        color: #27ae60;
+        margin: 20px 0;
+        letter-spacing: 0.5px;
+    }
+
+    .success-banner p {
+        font-size: 18px;
+        color: #155724;
+        margin-bottom: 15px;
+    }
+
+    .order-number-badge {
+        font-size: 20px;
+        color: #155724;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 12px 30px;
+        border-radius: 50px;
+        margin-top: 10px;
+    }
+
+    /* Main Content Container */
+    .confirmation-content {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    /* Order Details Section */
+    .order-details-section {
+        padding: 40px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 15px;
+    }
+
+    .section-title i {
+        color: #667eea;
+        font-size: 28px;
+    }
+
+    /* Details Grid */
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .detail-item {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .detail-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .detail-value.highlight {
+        color: #667eea;
+        font-size: 18px;
+    }
+
+    /* Order Items Table */
+    .order-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    .order-items-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .order-items-table thead th {
+        padding: 16px 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .order-items-table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .order-items-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .order-items-table tbody td {
+        padding: 16px 15px;
+        font-size: 14px;
+    }
+
+    .item-product {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Order Summary */
+    .order-summary {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    @media (max-width: 568px) {
+        .order-summary {
+            flex-direction: column;
+            text-align: center;
+            gap: 15px;
+        }
+    }
+
+    .summary-left {
+        display: flex;
+        gap: 30px;
+    }
+
+    @media (max-width: 568px) {
+        .summary-left {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    .summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .summary-item-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .summary-item-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .summary-item-value.total {
+        color: #667eea;
+        font-size: 28px;
+    }
+
+    /* Address Section */
+    .address-section {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .address-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .address-card {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+    }
+
+    .address-card h3 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2c3e50;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+
+    .address-card p {
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    /* Action Section */
+    .action-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .action-text {
+        color: #555;
+        font-size: 15px;
+        max-width: 500px;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+
+    @media (max-width: 568px) {
+        .btn-group {
+            flex-direction: column;
+        }
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 14px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        min-width: 250px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-primary i {
+        font-size: 16px;
+    }
+
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 40px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 14px;
+        border: 2px solid #667eea;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        min-width: 250px;
+    }
+
+    .btn-secondary:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-secondary i {
+        font-size: 16px;
+    }
+
+    /* Email Confirmation */
+    .email-confirmation {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        text-align: center;
+        border-left: 4px solid #f39c12;
+    }
+
+    .email-confirmation p {
+        color: #7d6608;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .email-confirmation strong {
+        color: #2c3e50;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #27ae60;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .payment-method-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .confirmation-container {
+            padding: 0;
+        }
+
+        .success-banner {
+            padding: 40px 20px;
+            margin-bottom: 20px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+        }
+
+        .success-banner h1 {
+            font-size: 28px;
+        }
+
+        .order-details-section {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+        }
+
+        .action-section {
+            padding: 20px;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            min-width: 150px;
+            padding: 14px 30px;
+            font-size: 13px;
+        }
+    }
+</style>
+
+<div class="confirmation-wrapper">
+    <div class="confirmation-container">
+        <!-- Success Banner -->
+        <div class="success-banner">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Order Confirmed!</h1>
+            <p>Your order has been received and is being processed.</p>
+            <div class="order-number-badge">Order #{{ order.id }}</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="confirmation-content">
+            <!-- Order Details Section -->
+            <div class="order-details-section">
+                <h2 class="section-title">
+                    <i class="fas fa-receipt"></i>
+                    Order Information
+                </h2>
+
+                <!-- Details Grid -->
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Order ID</div>
+                        <div class="detail-value highlight">#{{ order.id }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Order Status</div>
+                        <div class="detail-value"><span class="status-badge">{{ order.status|capfirst }}</span></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Order Date</div>
+                        <div class="detail-value">{{ order.created_at|date:"M d, Y h:i A" }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Payment Method</div>
+                        <div class="detail-value"><span class="payment-method-badge">{{ order.payment_method|capfirst }}</span></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Customer Name</div>
+                        <div class="detail-value">{{ order.first_name }} {{ order.last_name }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Contact Email</div>
+                        <div class="detail-value">{{ order.email }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Phone Number</div>
+                        <div class="detail-value">{{ order.phone }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total Amount</div>
+                        <div class="detail-value highlight">Ksh {{ order.total_amount|floatformat:2 }}</div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <h2 class="section-title" style="margin-top: 40px;">
+                    <i class="fas fa-boxes"></i>
+                    Order Items
+                </h2>
+
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.order_products.all %}
+                            <tr>
+                                <td>
+                                    <div class="item-product">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" class="item-image">
+                                        <span class="item-name">{{ item.product.product_name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ item.quantity }}</td>
+                                <td>Ksh {{ item.product.price|floatformat:2 }}</td>
+                                <td><strong>Ksh {{ item.get_cost|floatformat:2 }}</strong></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items in this order</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <div class="summary-left">
+                        <div class="summary-item">
+                            <span class="summary-item-label">Total Items</span>
+                            <span class="summary-item-value">{{ order.order_products.count }}</span>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-item-label">Order Total</span>
+                        <span class="summary-item-value total">Ksh {{ order.total_amount|floatformat:2 }}</span>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <h2 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Delivery Address
+                </h2>
+
+                <div class="address-section">
+                    <div class="address-card">
+                        <h3><i class="fas fa-home"></i> Delivery Address</h3>
+                        <p>
+                            {{ order.address_line_1 }}<br>
+                            {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+                            {{ order.city }}, {{ order.state }} {{ order.country }}
+                        </p>
+                    </div>
+                    <div class="address-card">
+                        <h3><i class="fas fa-info-circle"></i> Delivery Info</h3>
+                        <p>
+                            Your order will be delivered within 2-5 business days. You will receive a tracking update via email at <strong>{{ order.email }}</strong>. Please keep your phone number <strong>{{ order.phone }}</strong> available for delivery coordination.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Section -->
+            <div class="action-section">
+                <div class="action-text">
+                    <p><strong>Next Step:</strong> Complete payment to confirm your order. Your order will be processed once payment is received.</p>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{% url 'orders:mpesa_payment' order.id %}" class="btn-primary">
+                        <i class="fas fa-mobile-alt"></i> Pay with M-Pesa
+                    </a>
+                    <a href="{% url 'store:store' %}" class="btn-secondary">
+                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    </a>
+                </div>
+
+                <div class="email-confirmation">
+                    <p><i class="fas fa-envelope"></i> A confirmation email has been sent to <strong>{{ order.email }}</strong></p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

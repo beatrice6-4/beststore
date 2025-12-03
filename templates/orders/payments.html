@@ -1,81 +1,866 @@
 {% extends 'base.html' %}
+{% block page_title %}M-Pesa Payment - BESTSTORE{% endblock %}
 {% load static %}
 
 {% block content %}
-<section class="section-content padding-y bg">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white text-center">
-                        <h4>Mpesa Payment</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-center">
-                            <img src="{% static 'images/mpesa-logo.jpg' %}" alt="Mpesa" style="height:50px;">
-                        </p>
-                        <h5 class="text-center mb-4">Order No: {{ order.order_number }}</h5>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-                        {% if payment_response %}
-                            {% if payment_response.error %}
-                                <div class="alert alert-danger text-center auto-hide-message">
-                                    {{ payment_response.error }}
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --mpesa-green: #24b24a;
+        --mpesa-dark: #0a8f2a;
+        --success: #10b981;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #0dcaf0;
+        --light: #f8f9fa;
+        --text-dark: #2c3e50;
+        --text-muted: #6c757d;
+    }
+
+    .mpesa-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .mpesa-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* ========================= PAYMENT CARD ========================= */
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        animation: slideUp 0.6s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ========================= PAYMENT HEADER ========================= */
+    .payment-header {
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: white;
+        padding: 50px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .payment-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .payment-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .payment-header-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+        animation: bounce 1s ease infinite;
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .payment-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .payment-header p {
+        font-size: 16px;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ========================= PAYMENT BODY ========================= */
+    .payment-body {
+        padding: 50px 40px;
+    }
+
+    /* ========================= ALERTS ========================= */
+    .alerts-container {
+        margin-bottom: 30px;
+    }
+
+    .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .alert i {
+        font-size: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        color: var(--success);
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-error {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+        color: var(--error);
+        border-left: 4px solid var(--error);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.05) 100%);
+        color: #0c5aa0;
+        border-left: 4px solid var(--info);
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+        color: #92400e;
+        border-left: 4px solid var(--warning);
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-content strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* ========================= ORDER INFO ========================= */
+    .order-info {
+        background: linear-gradient(135deg, rgba(36, 178, 74, 0.05) 0%, rgba(10, 143, 42, 0.02) 100%);
+        border-left: 4px solid var(--mpesa-green);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 35px;
+    }
+
+    .order-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(36, 178, 74, 0.1);
+    }
+
+    .order-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .order-info-label {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 14px;
+    }
+
+    .order-info-value {
+        color: var(--text-muted);
+        font-size: 15px;
+    }
+
+    .order-info-value.highlight {
+        color: var(--mpesa-dark);
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    /* ========================= FORM ========================= */
+    .payment-form {
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        margin-right: 8px;
+    }
+
+    .form-label small {
+        display: block;
+        font-weight: 400;
+        color: var(--text-muted);
+        margin-top: 5px;
+        font-size: 13px;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 0;
+    }
+
+    .input-prefix {
+        padding: 14px 16px;
+        background: linear-gradient(135deg, var(--light) 0%, #e9ecef 100%);
+        border: 2px solid #e9ecef;
+        border-radius: 12px 0 0 12px;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        user-select: none;
+        font-size: 16px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e9ecef;
+        border-radius: 0 12px 12px 0;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        color: var(--text-dark);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--mpesa-green);
+        box-shadow: 0 0 0 4px rgba(36, 178, 74, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-help {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 8px;
+    }
+
+    .form-help i {
+        margin-right: 5px;
+    }
+
+    .form-error {
+        font-size: 13px;
+        color: var(--error);
+        margin-top: 8px;
+        display: none;
+    }
+
+    .form-error i {
+        margin-right: 5px;
+    }
+
+    /* ========================= PAYMENT STEPS ========================= */
+    .payment-steps {
+        background: linear-gradient(135deg, rgba(36, 178, 74, 0.05) 0%, rgba(10, 143, 42, 0.02) 100%);
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .steps-title {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    .steps-title i {
+        color: var(--mpesa-green);
+        margin-right: 8px;
+    }
+
+    .steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .steps-item {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .steps-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .steps-number {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .steps-text {
+        flex: 1;
+        color: var(--text-muted);
+        padding-top: 6px;
+    }
+
+    /* ========================= BUTTONS ========================= */
+    .btn-pay {
+        width: 100%;
+        padding: 18px 30px;
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 4px 15px rgba(36, 178, 74, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-pay:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(36, 178, 74, 0.4);
+    }
+
+    .btn-pay:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .btn-pay i {
+        font-size: 18px;
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-secondary {
+        width: 100%;
+        padding: 14px 30px;
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 12px;
+        font-size: 15px;
+    }
+
+    .btn-secondary:hover {
+        background: var(--light);
+        border-color: #d0d0d0;
+        text-decoration: none;
+    }
+
+    .btn-secondary i {
+        font-size: 16px;
+    }
+
+    /* ========================= SECURITY INFO ========================= */
+    .security-info {
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.05) 100%);
+        border-left: 4px solid var(--info);
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .security-info i {
+        color: var(--info);
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .security-text {
+        font-size: 14px;
+        color: #0c5aa0;
+        line-height: 1.6;
+    }
+
+    .security-text strong {
+        color: var(--text-dark);
+    }
+
+    /* ========================= PAYMENT FOOTER ========================= */
+    .payment-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 2px solid #e9ecef;
+    }
+
+    .payment-footer a {
+        color: var(--mpesa-green);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .payment-footer a:hover {
+        color: var(--mpesa-dark);
+        text-decoration: underline;
+    }
+
+    .payment-footer p {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    /* ========================= RESPONSIVE ========================= */
+    @media (max-width: 768px) {
+        .payment-header {
+            padding: 40px 25px;
+        }
+
+        .payment-header h1 {
+            font-size: 24px;
+        }
+
+        .payment-header-icon {
+            font-size: 48px;
+        }
+
+        .payment-body {
+            padding: 30px 25px;
+        }
+
+        .order-info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .input-group {
+            flex-direction: column;
+        }
+
+        .input-prefix,
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-control {
+            border-radius: 12px;
+        }
+
+        .btn-pay {
+            font-size: 14px;
+            padding: 16px 24px;
+        }
+    }
+</style>
+
+<div class="mpesa-wrapper">
+    <div class="mpesa-container">
+        <!-- Payment Card -->
+        <div class="payment-card">
+            <!-- Header -->
+            <div class="payment-header">
+                <div class="payment-header-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h1>M-Pesa Payment</h1>
+                <p>Secure payment via Safaricom M-Pesa</p>
+            </div>
+
+            <!-- Body -->
+            <div class="payment-body">
+                <!-- Alerts -->
+                <div class="alerts-container" id="alerts" aria-live="polite" aria-atomic="true">
+                    {% if payment_response %}
+                        {% if payment_response.error %}
+                            <div class="alert alert-error" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <div class="alert-content">
+                                    <strong>Payment Error</strong>
+                                    <p style="margin: 6px 0 0 0;">{{ payment_response.error }}</p>
                                     {% if payment_response.details %}
-                                        <br>{{ payment_response.details }}
+                                        <small style="display: block; margin-top: 6px;">{{ payment_response.details }}</small>
                                     {% endif %}
                                 </div>
-                            {% endif %}
-                            {% if payment_response.message %}
-                                <div class="alert alert-success text-center auto-hide-message">
-                                    {{ payment_response.message }}
-                                </div>
-                            {% endif %}
-                            {% if payment_response.paybill_instructions %}
-                                <div class="alert alert-info text-center mt-2 auto-hide-message">
-                                    {{ payment_response.paybill_instructions }}<br>
-                                    <strong>Paybill:</strong> {{ payment_response.paybill }}<br>
-                                    <strong>Account Number:</strong> {{ payment_response.account_reference }}<br>
-                                    <strong>Amount:</strong> Ksh {{ payment_response.amount }}
-                                </div>
-                            {% endif %}
+                                <button class="alert-close" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                         {% endif %}
 
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label for="phone">Mpesa Phone Number</label>
-                                <input type="text" class="form-control" id="phone" name="phone_number"
-                                       placeholder="e.g. 2547XXXXXXXX"
-                                       pattern="2547[0-9]{8}" maxlength="12" required>
-                                <small class="form-text text-muted">Enter your phone number in the format 2547XXXXXXXX</small>
+                        {% if payment_response.message %}
+                            <div class="alert alert-success" role="alert">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="alert-content">{{ payment_response.message }}</div>
+                                <button class="alert-close" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <div class="form-group">
-                                <label>Amount to Pay</label>
-                                <input type="text" class="form-control" value="Ksh. {{ grand_total }}" readonly>
+                        {% endif %}
+
+                        {% if payment_response.success %}
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="alert-content">
+                                    <strong>STK Push Initiated!</strong>
+                                    <p style="margin: 8px 0 0 0;">Check your phone for a payment prompt. Enter your M-Pesa PIN to complete the payment.</p>
+                                    <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
+                                        <div><strong>Till:</strong> BRAMH</div>
+                                        <div><strong>Amount:</strong> Ksh {{ payment_response.amount }}</div>
+                                        <div><strong>Reference:</strong> {{ payment_response.account_reference }}</div>
+                                        <div><strong>Order:</strong> #{{ payment_response.order_number }}</div>
+                                    </div>
+                                </div>
+                                <button class="alert-close" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <button type="submit" class="btn btn-success btn-block">
-                                <i class="fa fa-mobile"></i> Pay Now
-                            </button>
-                        </form>
-                        <hr>
-                        <p class="text-center text-muted" style="font-size:0.95rem;">
-                            You will receive an Mpesa prompt on your phone to complete the payment.
-                        </p>
-                        <div class="text-center">
-                            <a href="{% url 'checkout' %}" class="btn btn-link">Back to Checkout</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Order Information -->
+                {% if order %}
+                    <div class="order-info">
+                        <div class="order-info-row">
+                            <span class="order-info-label">Order ID</span>
+                            <span class="order-info-value highlight">#{{ order.id }}</span>
+                        </div>
+                        <div class="order-info-row">
+                            <span class="order-info-label">Order Date</span>
+                            <span class="order-info-value">{{ order.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="order-info-row">
+                            <span class="order-info-label">Total Amount</span>
+                            <span class="order-info-value highlight">Ksh {{ order.total_amount|floatformat:2 }}</span>
                         </div>
                     </div>
+                {% endif %}
+
+                <!-- Payment Form -->
+                <form id="mpesa-form" method="POST" class="payment-form">
+                    {% csrf_token %}
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone" class="form-label">
+                            <i class="fas fa-phone"></i>M-Pesa Phone Number
+                            <small>Enter the phone number registered with M-Pesa</small>
+                        </label>
+                        <div class="input-group">
+                            <div class="input-prefix">+254</div>
+                            <input 
+                                id="phone" 
+                                name="phone_number" 
+                                class="form-control" 
+                                inputmode="numeric" 
+                                pattern="[0-9]{9}" 
+                                maxlength="9" 
+                                placeholder="7XXXXXXXX" 
+                                required 
+                                aria-label="M-Pesa phone number">
+                        </div>
+                        <div class="form-help">
+                            <i class="fas fa-info-circle"></i>Format: 7XXXXXXXX (9 digits) - without 254 prefix
+                        </div>
+                        <div class="form-error" id="phone-error"></div>
+                    </div>
+
+                    <!-- Payment Steps -->
+                    <div class="payment-steps">
+                        <p class="steps-title">
+                            <i class="fas fa-list-check"></i>Payment Steps
+                        </p>
+                        <ul class="steps-list">
+                            <li class="steps-item">
+                                <span class="steps-number">1</span>
+                                <span class="steps-text">Enter your M-Pesa registered phone number</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">2</span>
+                                <span class="steps-text">Click "Initiate Payment" button below</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">3</span>
+                                <span class="steps-text">You'll receive an STK push on your phone</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">4</span>
+                                <span class="steps-text">Enter your M-Pesa PIN to complete payment</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Pay Button -->
+                    <button id="pay-btn" class="btn-pay" type="submit" aria-busy="false">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span id="pay-text">Initiate M-Pesa Payment</span>
+                    </button>
+
+                    <!-- Back Button -->
+                    <a href="{% url 'cart:checkout' %}" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Checkout
+                    </a>
+                </form>
+
+                <!-- Security Info -->
+                <div class="security-info">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="security-text">
+                        <strong>🔒 Secure Payment:</strong> Your payment is encrypted and secure. We never store your M-Pesa PIN. Till Reference: <strong>BRAMH</strong>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="payment-footer">
+                    <p>Need help? <a href="mailto:support@beststore.com">Contact Support</a> or call us for assistance</p>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
+
 <script>
-    // Hide messages after 2 minutes (120,000 milliseconds)
-    setTimeout(function() {
-        document.querySelectorAll('.auto-hide-message').forEach(function(el) {
-            el.style.display = 'none';
-        });
-    }, 120000);
+(function () {
+    const form = document.getElementById('mpesa-form');
+    const payBtn = document.getElementById('pay-btn');
+    const payText = document.getElementById('pay-text');
+    const phoneInput = document.getElementById('phone');
+    const alerts = document.getElementById('alerts');
+
+    // Show alert
+    function showAlert(text, type = 'success', timeout = 5000) {
+        const div = document.createElement('div');
+        div.className = `alert alert-${type}`;
+        div.setAttribute('role', 'alert');
+        
+        const icons = {
+            error: 'fa-exclamation-circle',
+            success: 'fa-check-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+        
+        div.innerHTML = `
+            <i class="fas ${icons[type] || icons.info}"></i>
+            <div class="alert-content">${text}</div>
+            <button class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        alerts.insertBefore(div, alerts.firstChild);
+        
+        if (timeout) {
+            setTimeout(() => {
+                if (div.parentNode) div.remove();
+            }, timeout);
+        }
+    }
+
+    // Get CSRF token
+    function getCookie(name) {
+        const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? match.pop() : '';
+    }
+
+    // Validate phone
+    function validatePhone(phone) {
+        phone = phone.replace(/\s/g, '');
+        return /^7\d{8}$/.test(phone);
+    }
+
+    // Show error
+    function showError(message) {
+        const errorEl = document.getElementById('phone-error');
+        errorEl.innerHTML = `<i class="fas fa-exclamation-circle"></i>${message}`;
+        errorEl.style.display = 'block';
+    }
+
+    // Clear error
+    function clearError() {
+        const errorEl = document.getElementById('phone-error');
+        errorEl.innerHTML = '';
+        errorEl.style.display = 'none';
+    }
+
+    if (!form) return;
+
+    // Form submit
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        clearError();
+
+        const phone = phoneInput.value.trim();
+
+        if (!phone) {
+            showError('Phone number is required');
+            phoneInput.focus();
+            return;
+        }
+
+        if (!validatePhone(phone)) {
+            showError('Invalid format. Use 7XXXXXXXX (9 digits)');
+            phoneInput.focus();
+            return;
+        }
+
+        // Disable button and show loader
+        payBtn.disabled = true;
+        payBtn.setAttribute('aria-busy', 'true');
+        payText.innerHTML = '<span class="spinner"></span> Initiating STK Push...';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            const html = await response.text();
+            document.body.innerHTML = html;
+        } catch (err) {
+            console.error('Payment error:', err);
+            showAlert('An error occurred. Please try again.', 'error', 5000);
+            payBtn.disabled = false;
+            payBtn.setAttribute('aria-busy', 'false');
+            payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Initiate M-Pesa Payment</span>';
+        }
+    });
+
+    // Real-time phone validation
+    phoneInput.addEventListener('blur', function () {
+        clearError();
+        if (this.value && !validatePhone(this.value.trim())) {
+            showError('Invalid format. Use 7XXXXXXXX (9 digits)');
+        }
+    });
+
+    // Auto-format phone number
+    phoneInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);
+    });
+
+    // Auto-focus on load
+    window.addEventListener('load', () => {
+        if (!phoneInput.value) {
+            phoneInput.focus();
+        }
+    });
+})();
 </script>
+
 {% endblock %}

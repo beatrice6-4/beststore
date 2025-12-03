@@ -6,143 +6,89 @@
 {% block content %}
 <style>
     :root {
+        --mpesa-green: #24b24a;
+        --mpesa-dark: #0a8f2a;
+        --mpesa-light: #d4f4dd;
         --primary: #198754;
         --primary-dark: #145c32;
         --secondary: #004080;
         --accent: #FF6B35;
-        --mpesa-green: #24b24a;
-        --mpesa-dark: #0a8f2a;
-        --light-bg: #f8f9fa;
-        --border-color: #e9ecef;
+        --success: #10b981;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #0dcaf0;
+        --light: #f8f9fa;
+        --light-secondary: #f0f4f8;
+        --border: #e9ecef;
         --text-dark: #1a1a1a;
         --text-muted: #6c757d;
-        --success-bg: #e6f9ea;
-        --success-color: #0f5132;
-        --error-bg: #fff0f0;
-        --error-color: #9b1f1f;
         --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
         --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
         --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+        --shadow-xl: 0 12px 40px rgba(0,0,0,0.15);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     /* ============ PAGE WRAPPER ============ */
     .mpesa-wrapper {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8eff5 50%, #dfe8f0 100%);
         min-height: calc(100vh - 200px);
-        padding: 40px 0;
+        padding: 50px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mpesa-wrapper::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(36, 178, 74, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .mpesa-wrapper::after {
+        content: '';
+        position: absolute;
+        bottom: -10%;
+        left: -15%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(36, 178, 74, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
     }
 
     .mpesa-container {
-        max-width: 800px;
+        max-width: 850px;
         margin: 0 auto;
         padding: 0 20px;
+        position: relative;
+        z-index: 1;
     }
 
     /* ============ PAYMENT CARD ============ */
     .payment-card {
         background: #fff;
-        border-radius: 16px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: var(--shadow-lg);
-        margin-bottom: 32px;
+        box-shadow: var(--shadow-xl);
+        animation: slideUp 0.6s ease-out;
+        margin-bottom: 40px;
     }
 
-    .payment-header {
-        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
-        color: #fff;
-        padding: 40px 32px;
-        text-align: center;
-    }
-
-    .payment-header-logo {
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 16px;
-    }
-
-    .payment-header-logo img {
-        max-height: 100%;
-        max-width: 100%;
-    }
-
-    .payment-header-logo i {
-        font-size: 3rem;
-    }
-
-    .payment-header h1 {
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin: 0 0 8px 0;
-    }
-
-    .payment-header p {
-        font-size: 0.95rem;
-        margin: 0;
-        opacity: 0.95;
-    }
-
-    /* ============ PAYMENT BODY ============ */
-    .payment-body {
-        padding: 40px 32px;
-    }
-
-    /* ============ ORDER INFO ============ */
-    .order-info {
-        background: linear-gradient(135deg, rgba(36,178,74,0.1) 0%, rgba(10,143,42,0.05) 100%);
-        border-left: 4px solid var(--mpesa-green);
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 32px;
-    }
-
-    .order-info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        font-size: 0.95rem;
-    }
-
-    .order-info-row:last-child {
-        margin-bottom: 0;
-    }
-
-    .order-info-label {
-        font-weight: 700;
-        color: var(--text-dark);
-    }
-
-    .order-info-value {
-        color: var(--text-muted);
-    }
-
-    .order-info-value.highlight {
-        color: var(--mpesa-dark);
-        font-weight: 700;
-        font-size: 1.1rem;
-    }
-
-    /* ============ ALERTS ============ */
-    .alerts-container {
-        margin-bottom: 24px;
-    }
-
-    .alert {
-        padding: 16px;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
+    @keyframes slideUp {
         from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(40px);
         }
         to {
             opacity: 1;
@@ -150,38 +96,152 @@
         }
     }
 
+    /* ============ PAYMENT HEADER ============ */
+    .payment-header {
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: #fff;
+        padding: 50px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .payment-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .payment-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -20%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+    }
+
+    .payment-header-logo {
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .payment-header-logo i {
+        font-size: 3.5rem;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .payment-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 0 0 10px 0;
+        position: relative;
+        z-index: 1;
+        letter-spacing: -0.5px;
+    }
+
+    .payment-header p {
+        font-size: 1rem;
+        margin: 0;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+    }
+
+    /* ============ PAYMENT BODY ============ */
+    .payment-body {
+        padding: 45px 40px;
+    }
+
+    /* ============ ALERTS ============ */
+    .alerts-container {
+        margin-bottom: 30px;
+    }
+
+    .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        animation: slideIn 0.4s ease;
+        border-left: 4px solid;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
     .alert i {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         flex-shrink: 0;
-        margin-top: 2px;
+        margin-top: 3px;
     }
 
     .alert-success {
-        background: var(--success-bg);
-        color: var(--success-color);
-        border-left: 4px solid #10b981;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        color: #10b981;
+        border-left-color: #10b981;
     }
 
     .alert-error {
-        background: var(--error-bg);
-        color: var(--error-color);
-        border-left: 4px solid #ef4444;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+        color: #dc3545;
+        border-left-color: #ef4444;
     }
 
     .alert-info {
-        background: #e7f3ff;
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.05) 100%);
         color: #0c5aa0;
-        border-left: 4px solid #0dcaf0;
+        border-left-color: #0dcaf0;
     }
 
     .alert-warning {
-        background: #fff3cd;
-        color: #856404;
-        border-left: 4px solid #ffc107;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+        color: #7a5c0a;
+        border-left-color: #f59e0b;
     }
 
     .alert-content {
         flex: 1;
+    }
+
+    .alert-content strong {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .alert-content p {
+        margin: 8px 0 0 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
     }
 
     .alert-close {
@@ -192,164 +252,233 @@
         font-size: 1.3rem;
         padding: 0;
         line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        flex-shrink: 0;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* ============ ORDER INFO ============ */
+    .order-info {
+        background: linear-gradient(135deg, rgba(36, 178, 74, 0.08) 0%, rgba(10, 143, 42, 0.04) 100%);
+        border: 2px solid var(--mpesa-light);
+        border-left: 5px solid var(--mpesa-green);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 35px;
+    }
+
+    .order-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(36, 178, 74, 0.15);
+        font-size: 0.98rem;
+    }
+
+    .order-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .order-info-row:first-child {
+        padding-top: 0;
+    }
+
+    .order-info-label {
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .order-info-label i {
+        color: var(--mpesa-green);
+        font-size: 1.1rem;
+    }
+
+    .order-info-value {
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .order-info-value.highlight {
+        color: var(--mpesa-dark);
+        font-weight: 800;
+        font-size: 1.15rem;
     }
 
     /* ============ FORM ============ */
     .payment-form {
-        margin-bottom: 24px;
+        margin-bottom: 30px;
+    }
+
+    .form-section {
+        margin-bottom: 35px;
+    }
+
+    .form-section-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .form-section-title i {
+        color: var(--mpesa-green);
+        font-size: 1.1rem;
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 22px;
     }
 
     .form-label {
         display: block;
         font-weight: 700;
         color: var(--text-dark);
-        margin-bottom: 8px;
-        font-size: 0.95rem;
+        margin-bottom: 10px;
+        font-size: 0.98rem;
     }
 
     .form-label small {
-        font-weight: 400;
+        font-weight: 500;
         color: var(--text-muted);
         display: block;
-        margin-top: 4px;
+        margin-top: 5px;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        gap: 0;
+    }
+
+    .input-prefix {
+        padding: 14px 16px;
+        background: linear-gradient(135deg, var(--light) 0%, var(--light-secondary) 100%);
+        border: 2px solid var(--border);
+        border-radius: 12px 0 0 12px;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        user-select: none;
+        font-size: 1rem;
+        min-width: 55px;
+        justify-content: center;
     }
 
     .form-control {
         width: 100%;
         padding: 14px 16px;
-        border: 1.5px solid var(--border-color);
-        border-radius: 10px;
+        border: 2px solid var(--border);
+        border-radius: 0 12px 12px 0;
         font-size: 1rem;
-        transition: all 0.2s;
+        font-weight: 600;
+        transition: all 0.3s ease;
         background: #fff;
+        color: var(--text-dark);
+    }
+
+    .input-wrapper .form-control {
+        border-left: none;
     }
 
     .form-control:focus {
         outline: none;
         border-color: var(--mpesa-green);
-        box-shadow: 0 0 0 3px rgba(36,178,74,0.1);
+        box-shadow: 0 0 0 4px rgba(36, 178, 74, 0.15);
+        background: #f9fff7;
     }
 
     .form-control::placeholder {
         color: var(--text-muted);
     }
 
-    .input-group {
-        display: flex;
-        gap: 8px;
-    }
-
-    .input-prefix {
-        padding: 14px 14px;
-        background: var(--light-bg);
-        border: 1.5px solid var(--border-color);
-        border-radius: 10px 0 0 10px;
-        font-weight: 700;
-        color: var(--text-dark);
+    .form-help {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-top: 8px;
         display: flex;
         align-items: center;
-        user-select: none;
+        gap: 6px;
     }
 
-    .form-control.with-prefix {
-        border-radius: 0 10px 10px 0;
-    }
-
-    .form-help {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        margin-top: 6px;
+    .form-help i {
+        font-size: 0.95rem;
     }
 
     .form-error {
-        font-size: 0.85rem;
-        color: #dc3545;
-        margin-top: 6px;
-    }
-
-    /* ============ BUTTONS ============ */
-    .btn-pay {
-        width: 100%;
-        padding: 16px 24px;
-        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s;
+        font-size: 0.9rem;
+        color: var(--error);
+        margin-top: 8px;
+        display: none;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 10px;
+        gap: 6px;
     }
 
-    .btn-pay:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(36,178,74,0.3);
+    .form-error i {
+        font-size: 0.95rem;
     }
 
-    .btn-pay:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-
-    .loader-spinner {
-        width: 18px;
-        height: 18px;
-        border: 3px solid rgba(255,255,255,0.25);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 0.9s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .btn-secondary {
-        width: 100%;
-        padding: 14px 24px;
-        background: var(--light-bg);
-        color: var(--text-dark);
-        border: 1.5px solid var(--border-color);
-        border-radius: 10px;
+    /* Amount Input */
+    .amount-input {
+        padding: 14px 16px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font-size: 1.2rem;
         font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 12px;
+        transition: all 0.3s ease;
+        background: #fff;
+        color: var(--mpesa-dark);
+        text-align: center;
     }
 
-    .btn-secondary:hover {
-        background: var(--border-color);
-        text-decoration: none;
-        color: var(--text-dark);
+    .amount-input:focus {
+        outline: none;
+        border-color: var(--mpesa-green);
+        box-shadow: 0 0 0 4px rgba(36, 178, 74, 0.15);
+        background: #f9fff7;
     }
 
     /* ============ PAYMENT STEPS ============ */
     .payment-steps {
-        background: linear-gradient(135deg, rgba(36,178,74,0.05) 0%, rgba(10,143,42,0.02) 100%);
-        border: 1px solid var(--border-color);
+        background: linear-gradient(135deg, rgba(36, 178, 74, 0.06) 0%, rgba(10, 143, 42, 0.03) 100%);
+        border: 2px solid var(--mpesa-light);
         border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
+        padding: 28px;
+        margin-bottom: 30px;
     }
 
     .steps-title {
         font-weight: 700;
         color: var(--text-dark);
-        margin: 0 0 16px 0;
+        margin: 0 0 20px 0;
         font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .steps-title i {
+        color: var(--mpesa-green);
+        font-size: 1.15rem;
     }
 
     .steps-list {
@@ -360,9 +489,9 @@
 
     .steps-item {
         display: flex;
-        gap: 12px;
-        margin-bottom: 12px;
-        font-size: 0.9rem;
+        gap: 16px;
+        margin-bottom: 16px;
+        font-size: 0.95rem;
     }
 
     .steps-item:last-child {
@@ -371,58 +500,159 @@
 
     .steps-number {
         flex-shrink: 0;
-        width: 28px;
-        height: 28px;
-        background: var(--mpesa-green);
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
         color: #fff;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 0.9rem;
+        font-weight: 800;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 8px rgba(36, 178, 74, 0.3);
     }
 
     .steps-text {
         flex: 1;
         color: var(--text-muted);
-        padding-top: 2px;
+        padding-top: 4px;
+        line-height: 1.5;
+    }
+
+    /* ============ BUTTONS ============ */
+    .btn-group {
+        display: flex;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .btn-pay {
+        width: 100%;
+        padding: 18px 30px;
+        background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 4px 15px rgba(36, 178, 74, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-pay:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(36, 178, 74, 0.4);
+    }
+
+    .btn-pay:active:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .btn-pay:disabled {
+        opacity: 0.75;
+        cursor: not-allowed;
+    }
+
+    .btn-pay i {
+        font-size: 1.1rem;
+    }
+
+    .loader-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-secondary {
+        width: 100%;
+        padding: 16px 28px;
+        background: var(--light);
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 0.98rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-secondary:hover {
+        background: var(--border);
+        border-color: var(--text-muted);
+        text-decoration: none;
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary i {
+        font-size: 1rem;
     }
 
     /* ============ SECURITY INFO ============ */
     .security-info {
-        background: linear-gradient(135deg, rgba(13,202,240,0.1) 0%, rgba(13,202,240,0.05) 100%);
-        border-left: 4px solid #0dcaf0;
-        padding: 16px;
-        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.08) 0%, rgba(13, 202, 240, 0.04) 100%);
+        border-left: 4px solid var(--info);
+        border: 2px solid rgba(13, 202, 240, 0.2);
+        border-left: 4px solid var(--info);
+        padding: 20px;
+        border-radius: 12px;
         display: flex;
-        gap: 12px;
-        margin-top: 24px;
+        gap: 16px;
+        margin-top: 30px;
     }
 
     .security-info i {
-        color: #0dcaf0;
-        font-size: 1.3rem;
+        color: var(--info);
+        font-size: 1.4rem;
         flex-shrink: 0;
     }
 
     .security-text {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: #0c5aa0;
+        line-height: 1.6;
+    }
+
+    .security-text strong {
+        color: var(--text-dark);
+        font-weight: 700;
     }
 
     /* ============ FOOTER LINKS ============ */
     .payment-footer {
         text-align: center;
-        margin-top: 24px;
-        padding-top: 24px;
-        border-top: 1px solid var(--border-color);
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid var(--border);
     }
 
     .payment-footer a {
         color: var(--mpesa-green);
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
         transition: all 0.2s;
     }
 
@@ -431,41 +661,129 @@
         color: var(--mpesa-dark);
     }
 
+    .payment-footer p {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
     /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
+        .mpesa-wrapper {
+            padding: 30px 16px;
+        }
+
         .mpesa-container {
             padding: 0 16px;
         }
 
         .payment-header {
-            padding: 32px 20px;
+            padding: 35px 24px;
+        }
+
+        .payment-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .payment-header-logo i {
+            font-size: 2.8rem;
         }
 
         .payment-body {
-            padding: 24px 20px;
+            padding: 30px 24px;
+        }
+
+        .order-info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .input-wrapper {
+            flex-direction: column;
+        }
+
+        .input-prefix,
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            width: 100%;
+        }
+
+        .input-prefix {
+            border-radius: 12px;
+            margin-bottom: 0;
+            border-radius: 12px;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            margin-top: 0;
+            border-radius: 12px;
+        }
+
+        .btn-pay {
+            font-size: 1rem;
+            padding: 16px 24px;
+        }
+
+        .payment-steps {
+            padding: 20px;
+        }
+
+        .steps-item {
+            font-size: 0.9rem;
+        }
+
+        .steps-number {
+            width: 32px;
+            height: 32px;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .payment-header {
+            padding: 30px 16px;
         }
 
         .payment-header h1 {
             font-size: 1.5rem;
         }
 
+        .payment-header p {
+            font-size: 0.9rem;
+        }
+
+        .payment-body {
+            padding: 20px 16px;
+        }
+
+        .order-info {
+            padding: 16px;
+        }
+
         .order-info-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
+            font-size: 0.9rem;
+            padding: 10px 0;
         }
 
-        .input-group {
-            flex-direction: column;
+        .order-info-value.highlight {
+            font-size: 1rem;
         }
 
-        .input-prefix,
-        .form-control.with-prefix {
-            border-radius: 10px;
+        .form-label {
+            font-size: 0.9rem;
         }
 
-        .form-control.with-prefix {
-            border-radius: 10px;
+        .btn-pay {
+            font-size: 0.95rem;
+            padding: 14px 20px;
+        }
+
+        .btn-secondary {
+            font-size: 0.9rem;
+            padding: 12px 20px;
         }
     }
 </style>
@@ -495,20 +813,10 @@
                             <div class="alert alert-error" role="alert">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <div class="alert-content">
-                                    <strong>Payment Error</strong>
-                                    <p style="margin: 4px 0 0 0;">{{ payment_response.error }}{% if payment_response.details %} — {{ payment_response.details }}{% endif %}</p>
-                                </div>
-                                <button class="alert-close" onclick="this.parentElement.remove()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        {% endif %}
-
-                        {% if payment_response.message %}
-                            <div class="alert alert-success" role="alert">
-                                <i class="fas fa-check-circle"></i>
-                                <div class="alert-content">
-                                    {{ payment_response.message }}
+                                    <strong>{{ payment_response.error }}</strong>
+                                    {% if payment_response.details %}
+                                        <p>{{ payment_response.details }}</p>
+                                    {% endif %}
                                 </div>
                                 <button class="alert-close" onclick="this.parentElement.remove()">
                                     <i class="fas fa-times"></i>
@@ -517,15 +825,16 @@
                         {% endif %}
 
                         {% if payment_response.success %}
-                            <div class="alert alert-info" role="alert">
-                                <i class="fas fa-info-circle"></i>
+                            <div class="alert alert-success" role="alert">
+                                <i class="fas fa-check-circle"></i>
                                 <div class="alert-content">
-                                    <strong>Payment Details</strong>
+                                    <strong>STK Push Sent!</strong>
+                                    <p>{{ payment_response.message }}</p>
                                     <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
-                                        <div><strong>Till Number:</strong> BRAMH</div>
+                                        <div><strong>Till:</strong> {{ payment_response.account_reference }}</div>
                                         <div><strong>Amount:</strong> Ksh {{ payment_response.amount }}</div>
-                                        <div><strong>Reference:</strong> {{ payment_response.account_reference }}</div>
-                                        <div><strong>Order:</strong> {{ payment_response.order_number }}</div>
+                                        <div><strong>Phone:</strong> {{ payment_response.phone_number }}</div>
+                                        <div><strong>Order:</strong> #{{ payment_response.order_number }}</div>
                                     </div>
                                 </div>
                                 <button class="alert-close" onclick="this.parentElement.remove()">
@@ -540,16 +849,22 @@
                 {% if order %}
                     <div class="order-info">
                         <div class="order-info-row">
-                            <span class="order-info-label">Order Number</span>
-                            <span class="order-info-value" id="order-no">{{ order.order_number }}</span>
+                            <span class="order-info-label">
+                                <i class="fas fa-box"></i>Order Number
+                            </span>
+                            <span class="order-info-value">#{{ order.id }}</span>
                         </div>
                         <div class="order-info-row">
-                            <span class="order-info-label">Order Date</span>
-                            <span class="order-info-value">{{ order.order_date|date:"M d, Y \a\t H:i"|default:"Today" }}</span>
+                            <span class="order-info-label">
+                                <i class="fas fa-calendar"></i>Order Date
+                            </span>
+                            <span class="order-info-value">{{ order.created_at|date:"M d, Y \a\t H:i"|default:"Today" }}</span>
                         </div>
                         <div class="order-info-row">
-                            <span class="order-info-label">Total Amount</span>
-                            <span class="order-info-value highlight">Ksh {{ order.total_amount|floatformat:2 }}</span>
+                            <span class="order-info-label">
+                                <i class="fas fa-money-bill-wave"></i>Total Amount
+                            </span>
+                            <span class="order-info-value highlight">Ksh {{ grand_total|floatformat:2 }}</span>
                         </div>
                     </div>
                 {% endif %}
@@ -558,57 +873,69 @@
                 <form id="mpesa-form" method="POST" class="payment-form">
                     {% csrf_token %}
 
-                    <!-- Phone Number -->
-                    <div class="form-group">
-                        <label for="phone" class="form-label">
-                            <i class="fas fa-phone me-2"></i>M-Pesa Phone Number
-                            <small>Enter the phone number registered with M-Pesa</small>
-                        </label>
-                        <div class="input-group">
-                            <div class="input-prefix">+</div>
-                            <input 
-                                id="phone" 
-                                name="phone_number" 
-                                class="form-control with-prefix" 
-                                inputmode="numeric" 
-                                pattern="[0-9+]{10,15}" 
-                                maxlength="15" 
-                                placeholder="2547XXXXXXXX" 
-                                required 
-                                aria-label="M-Pesa phone number">
+                    <!-- Phone Number Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-phone"></i>Phone Number
                         </div>
-                        <div class="form-help">
-                            <i class="fas fa-info-circle me-1"></i>Format: 2547XXXXXXXX (12 digits) or 07XXXXXXXX
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">
+                                M-Pesa Registered Number
+                                <small>Enter the phone number registered with M-Pesa</small>
+                            </label>
+                            <div class="input-wrapper">
+                                <div class="input-prefix">+</div>
+                                <input 
+                                    id="phone" 
+                                    name="phone_number" 
+                                    class="form-control" 
+                                    inputmode="numeric" 
+                                    pattern="[0-9+]{10,15}" 
+                                    maxlength="15" 
+                                    placeholder="2547XXXXXXXX" 
+                                    required 
+                                    aria-label="M-Pesa phone number">
+                            </div>
+                            <div class="form-help">
+                                <i class="fas fa-info-circle"></i>Format: 2547XXXXXXXX (12 digits) or 07XXXXXXXX
+                            </div>
+                            <div class="form-error" id="phone-error" style="display: none;"></div>
                         </div>
-                        <div class="form-error" id="phone-error" style="display: none;"></div>
                     </div>
 
-                    <!-- Amount -->
-                    <div class="form-group">
-                        <label for="amount" class="form-label">
-                            <i class="fas fa-money-bill-wave me-2"></i>Amount (Ksh)
-                            <small>The amount to be paid</small>
-                        </label>
-                        <input 
-                            id="amount" 
-                            name="amount" 
-                            class="form-control" 
-                            type="number" 
-                            min="1" 
-                            step="1" 
-                            required 
-                            value="{{ grand_total|floatformat:0 }}"
-                            aria-label="Payment amount in Kenyan Shillings">
-                        <div class="form-help">
-                            <i class="fas fa-lock me-1"></i>Minimum amount: Ksh 1
+                    <!-- Amount Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-money-bill-alt"></i>Payment Amount
                         </div>
-                        <div class="form-error" id="amount-error" style="display: none;"></div>
+
+                        <div class="form-group">
+                            <label for="amount" class="form-label">
+                                Amount in Kenyan Shillings (Ksh)
+                                <small>You can adjust this amount if needed</small>
+                            </label>
+                            <input 
+                                id="amount" 
+                                name="amount" 
+                                class="amount-input" 
+                                type="number" 
+                                min="1" 
+                                step="1" 
+                                required 
+                                value="{{ grand_total|floatformat:0 }}"
+                                aria-label="Payment amount">
+                            <div class="form-help">
+                                <i class="fas fa-lock"></i>Minimum: Ksh 1 | Original: Ksh {{ grand_total|floatformat:2 }}
+                            </div>
+                            <div class="form-error" id="amount-error" style="display: none;"></div>
+                        </div>
                     </div>
 
                     <!-- Payment Steps -->
                     <div class="payment-steps">
                         <p class="steps-title">
-                            <i class="fas fa-list-ol me-2"></i>Payment Steps
+                            <i class="fas fa-list-ol"></i>How It Works
                         </p>
                         <ul class="steps-list">
                             <li class="steps-item">
@@ -617,43 +944,48 @@
                             </li>
                             <li class="steps-item">
                                 <span class="steps-number">2</span>
-                                <span class="steps-text">Click "Pay Now" to request payment</span>
+                                <span class="steps-text">Verify the payment amount is correct</span>
                             </li>
                             <li class="steps-item">
                                 <span class="steps-number">3</span>
-                                <span class="steps-text">You'll receive an STK push on your phone</span>
+                                <span class="steps-text">Click "Pay Now" to send STK push</span>
                             </li>
                             <li class="steps-item">
                                 <span class="steps-number">4</span>
+                                <span class="steps-text">You'll receive a prompt on your phone</span>
+                            </li>
+                            <li class="steps-item">
+                                <span class="steps-number">5</span>
                                 <span class="steps-text">Enter your M-Pesa PIN to complete payment</span>
                             </li>
                         </ul>
                     </div>
 
-                    <!-- Pay Button -->
-                    <button id="pay-btn" class="btn-pay" type="submit" aria-busy="false">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span id="pay-text">Pay Now</span>
-                    </button>
+                    <!-- Buttons -->
+                    <div class="btn-group">
+                        <button id="pay-btn" class="btn-pay" type="submit" aria-busy="false">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span id="pay-text">Pay Now</span>
+                        </button>
 
-                    <!-- Back Button -->
-                    <a href="#" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Checkout
-                    </a>
+                        <a href="{% url 'cart:checkout' %}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Checkout
+                        </a>
+                    </div>
                 </form>
 
                 <!-- Security Info -->
                 <div class="security-info">
                     <i class="fas fa-shield-alt"></i>
                     <div class="security-text">
-                        <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your M-Pesa PIN. Till Reference: <strong>BRAMH</strong>
+                        <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your M-Pesa PIN. Till Reference: <strong>BRAMH</strong>. You have 3 minutes to complete the payment after STK push.
                     </div>
                 </div>
 
                 <!-- Footer -->
                 <div class="payment-footer">
-                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: var(--text-muted);">
-                        Need help? <a href="mailto:support@beststore.com">Contact Support</a>
+                    <p>
+                        Need help? <a href="mailto:support@beststore.com">Contact Support</a> | Call: <a href="tel:+254712345678">+254 7298 731 55 OR +254 791 711 693</a>
                     </p>
                 </div>
 
@@ -672,19 +1004,23 @@
     const alerts = document.getElementById('alerts');
     const phoneInput = document.getElementById('phone');
     const amountInput = document.getElementById('amount');
+    const originalAmount = {{ grand_total|floatformat:0 }};
 
-    // Show alert
-    function showAlert(text, type = 'success', timeout = 120000) {
+    // Show alert helper
+    function showAlert(text, type = 'info', timeout = 5000) {
         const div = document.createElement('div');
         div.className = `alert alert-${type}`;
         div.setAttribute('role', 'alert');
         
-        const icon = type === 'error' ? 'fa-exclamation-circle' : 
-                     type === 'warning' ? 'fa-exclamation-triangle' : 
-                     type === 'info' ? 'fa-info-circle' : 'fa-check-circle';
+        const icons = {
+            error: 'fa-exclamation-circle',
+            success: 'fa-check-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
         
         div.innerHTML = `
-            <i class="fas ${icon}"></i>
+            <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
             <div class="alert-content">${text}</div>
             <button class="alert-close" onclick="this.parentElement.remove()">
                 <i class="fas fa-times"></i>
@@ -708,7 +1044,6 @@
 
     // Validate phone number
     function validatePhone(phone) {
-        // Accept formats: 2547XXXXXXXX, 07XXXXXXXX, +2547XXXXXXXX
         phone = phone.replace(/\s/g, '');
         
         if (phone.startsWith('+')) {
@@ -727,18 +1062,18 @@
         return !isNaN(amount) && parseInt(amount, 10) > 0;
     }
 
-    // Clear form errors
+    // Clear errors
     function clearErrors() {
         document.getElementById('phone-error').style.display = 'none';
         document.getElementById('amount-error').style.display = 'none';
     }
 
-    // Show form error
+    // Show error
     function showError(fieldId, message) {
         const errorElement = document.getElementById(fieldId + '-error');
         if (errorElement) {
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
+            errorElement.innerHTML = `<i class="fas fa-times-circle"></i>${message}`;
+            errorElement.style.display = 'flex';
         }
     }
 
@@ -781,7 +1116,7 @@
         // Disable button and show loader
         payBtn.disabled = true;
         payBtn.setAttribute('aria-busy', 'true');
-        payText.innerHTML = '<span class="loader-spinner" aria-hidden="true"></span> Sending STK Push...';
+        payText.innerHTML = '<span class="loader-spinner"></span> Sending STK Push...';
 
         try {
             const formData = new FormData(form);
@@ -801,93 +1136,54 @@
                 return;
             }
 
-            // Parse JSON response
-            const json = await response.json().catch(() => null);
+            // Parse response
+            const html = await response.text();
+            
+            // Stop loading after 2 seconds
+            setTimeout(() => {
+                payBtn.disabled = false;
+                payBtn.setAttribute('aria-busy', 'false');
+                payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Pay Now</span>';
+                
+                // Update page with response
+                document.body.innerHTML = html;
+            }, 2000);
 
-            if (json) {
-                if (json.success) {
-                    showAlert(
-                        json.message || 'Payment request sent successfully. Confirm on your phone within 3 minutes.',
-                        'success',
-                        180000
-                    );
-
-                    // Redirect to order page if provided
-                    if (json.order_number) {
-                        setTimeout(() => {
-                            window.location.href = `/orders/${json.order_number}/`;
-                        }, 2000);
-                        return;
-                    }
-
-                    // Poll status if URL provided
-                    if (json.status_url) {
-                        pollStatus(json.status_url);
-                        return;
-                    }
-                } else {
-                    showAlert(json.message || 'Payment request failed. Please try again.', 'error');
-                }
-            } else {
-                showAlert('Enter your M-Pesa PIN on your phone to complete the payment within 3 minutes.', 'info', 180000);
-            }
         } catch (err) {
             console.error('Payment error:', err);
-            showAlert('Enter your M-Pesa PIN on your phone to complete the payment within 3 minutes.', 'info', 180000);
-        } finally {
+            showAlert('An error occurred. Please try again.', 'error', 5000);
+            
+            // Stop loading
             payBtn.disabled = false;
             payBtn.setAttribute('aria-busy', 'false');
             payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Pay Now</span>';
         }
     });
 
-    // Poll payment status
-    async function pollStatus(statusUrl, maxAttempts = 12, interval = 3000) {
-        try {
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                await new Promise(r => setTimeout(r, interval));
-
-                const response = await fetch(statusUrl, {
-                    credentials: 'same-origin',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-
-                if (response.ok) {
-                    const data = await response.json().catch(() => null);
-
-                    if (data && data.status) {
-                        if (data.status === 'success') {
-                            showAlert(data.message || 'Payment received successfully!', 'success', 30000);
-
-                            if (data.order_number) {
-                                setTimeout(() => {
-                                    window.location.href = `/orders/${data.order_number}/`;
-                                }, 1000);
-                            }
-                            return;
-                        } else if (data.status === 'failed') {
-                            showAlert(data.message || 'Payment failed. Please try again.', 'error', 60000);
-                            return;
-                        }
-                    }
-                }
-            }
-
-            showAlert('Payment processing is taking longer than expected. Please check your phone or contact support.', 'warning', 60000);
-        } catch (err) {
-            console.error('Status polling error:', err);
-        }
-    }
-
     // Real-time phone validation
     phoneInput.addEventListener('blur', function () {
         clearErrors();
         if (this.value && !validatePhone(this.value.trim())) {
-            showError('phone', 'Invalid phone number format. Use 2547XXXXXXXX or 07XXXXXXXX');
+            showError('phone', 'Invalid format. Use 2547XXXXXXXX or 07XXXXXXXX');
         }
     });
 
-    // Auto-focus on page load
+    // Auto-format phone
+    phoneInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9+]/g, '').slice(0, 15);
+    });
+
+    // Format amount on blur
+    amountInput.addEventListener('blur', function () {
+        if (this.value) {
+            const num = parseInt(this.value, 10);
+            if (num > 0) {
+                this.value = num;
+            }
+        }
+    });
+
+    // Auto-focus on load
     window.addEventListener('load', () => {
         if (!phoneInput.value) {
             phoneInput.focus();
