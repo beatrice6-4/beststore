@@ -1893,7 +1893,7 @@ def forgotPassword(request):
 
 # ========================= VERIFY OTP - STEP 2 =========================
 
-def verifyOTP(request):
+def verify_otp(request):
     """
     Step 2: User enters OTP received in email.
     Validates OTP and allows password reset if valid.
