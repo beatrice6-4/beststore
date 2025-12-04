@@ -8,7 +8,7 @@ from django.core.exceptions import ImproperlyConfigured
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['mamamaasaibakers.com']
 
 INSTALLED_APPS = [
@@ -124,14 +124,13 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
 import dj_database_url
 
-# Database configuration
-if os.environ.get('DATABASE_URL'):
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600)
-    }
-else:
-    # Fallback to SQLite for development
-    DATABASES = {
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgres://postgres:bramwel,12@localhost:5432/postgres'
+    )
+}
+
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',  # Replace 'my_database' with your actual database name
