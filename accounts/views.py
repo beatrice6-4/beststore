@@ -546,24 +546,297 @@ def resetpassword_validate(request, uidb64, token):
         return redirect('login')
 
 
-def resetPassword(request):
-    if request.method == 'POST':
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
+import re
+import logging
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_http_methods
+from django.utils.decorators import method_decorator
+from datetime import datetime
+from django.core.cache import cache
 
-        if password == confirm_password:
-            uid = request.session.get('uid')
-            user = Account.objects.get(pk=uid)
-            user.set_password(password)
-            user.save()
-            messages.success(request, 'Password reset successful')
-            return redirect('login')
+logger = logging.getLogger(__name__)
+
+# ========================= PASSWORD VALIDATION =========================
+
+def validate_password_strength(password):
+    """
+    Validate password strength and return detailed feedback.
+    Returns: {'valid': bool, 'errors': [list of error messages], 'strength': str}
+    """
+    errors = []
+    strength = 'weak'
+    
+    # Check minimum length
+    if len(password) < 8:
+        errors.append('Password must be at least 8 characters long')
+    elif len(password) >= 16:
+        strength = 'very_strong'
+    
+    # Check for uppercase
+    if not re.search(r'[A-Z]', password):
+        errors.append('Password must contain at least one uppercase letter (A-Z)')
+    
+    # Check for lowercase
+    if not re.search(r'[a-z]', password):
+        errors.append('Password must contain at least one lowercase letter (a-z)')
+    
+    # Check for digits
+    if not re.search(r'\d', password):
+        errors.append('Password must contain at least one digit (0-9)')
+    
+    # Check for special characters
+    if not re.search(r'[!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]', password):
+        errors.append('Password must contain at least one special character (!@#$%^&*)')
+    
+    # Determine strength
+    if not errors:
+        if len(password) >= 16 and sum([
+            bool(re.search(r'[A-Z]', password)),
+            bool(re.search(r'[a-z]', password)),
+            bool(re.search(r'\d', password)),
+            bool(re.search(r'[!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]', password)),
+        ]) == 4:
+            strength = 'strong'
         else:
-            messages.error(request, 'Password do not match!')
-            return redirect('resetPassword')
-    else:
-        return render(request, 'accounts/resetPassword.html')
+            strength = 'good'
+    
+    return {
+        'valid': len(errors) == 0,
+        'errors': errors,
+        'strength': strength,
+    }
 
+
+# ========================= RESET PASSWORD VIEW =========================
+
+@require_http_methods(["GET", "POST"])
+def resetPassword(request):
+    """
+    Step 3: User sets new password after OTP verification.
+    Validates password strength and updates user account.
+    
+    GET: Display reset password form
+    POST: Process password reset
+    """
+    
+    # Check if OTP is verified and email exists in session
+    if not request.session.get('otp_verified'):
+        messages.error(request, 'Please verify your OTP first.')
+        return redirect('forgotPassword')
+    
+    email = request.session.get('otp_verified_email')
+    if not email:
+        messages.error(request, 'Session expired. Please start over.')
+        request.session.pop('otp_verified', None)
+        return redirect('forgotPassword')
+    
+    # GET request - display form
+    if request.method == 'GET':
+        context = {
+            'email': email,
+            'page_title': 'Reset Password',
+            'breadcrumb': 'Reset Password',
+        }
+        return render(request, 'accounts/resetPassword.html', context)
+    
+    # POST request - process password reset
+    if request.method == 'POST':
+        try:
+            # Get form data
+            new_password = request.POST.get('password', '').strip()
+            confirm_password = request.POST.get('confirm_password', '').strip()
+            
+            # ========================= VALIDATION =========================
+            
+            # Check if passwords are provided
+            if not new_password or not confirm_password:
+                messages.error(request, 'Please fill in all password fields.')
+                return render(request, 'accounts/resetPassword.html', {
+                    'email': email,
+                    'page_title': 'Reset Password',
+                    'breadcrumb': 'Reset Password',
+                })
+            
+            # Check if passwords match
+            if new_password != confirm_password:
+                messages.error(request, 'Passwords do not match.')
+                return render(request, 'accounts/resetPassword.html', {
+                    'email': email,
+                    'page_title': 'Reset Password',
+                    'breadcrumb': 'Reset Password',
+                })
+            
+            # Validate password strength
+            password_validation = validate_password_strength(new_password)
+            
+            if not password_validation['valid']:
+                for error in password_validation['errors']:
+                    messages.error(request, error)
+                return render(request, 'accounts/resetPassword.html', {
+                    'email': email,
+                    'page_title': 'Reset Password',
+                    'breadcrumb': 'Reset Password',
+                })
+            
+            # ========================= GET USER & UPDATE PASSWORD =========================
+            
+            from accounts.models import Account
+            
+            try:
+                user = Account.objects.get(email__exact=email)
+            except Account.DoesNotExist:
+                logger.error(f'User not found during password reset for email: {email}')
+                messages.error(request, 'User account not found. Please contact support.')
+                request.session.pop('otp_verified', None)
+                request.session.pop('otp_verified_email', None)
+                return redirect('forgotPassword')
+            
+            # Check if user is active
+            if not user.is_active:
+                logger.warning(f'Attempt to reset password for inactive user: {email}')
+                messages.error(request, 'This account has been deactivated. Please contact support.')
+                return redirect('login')
+            
+            # Update password
+            user.set_password(new_password)
+            user.save()
+            
+            logger.info(f'Password reset successfully for user: {email}')
+            
+            # ========================= CLEANUP & REDIRECT =========================
+            
+            # Clear session data
+            request.session.pop('forgot_password_email', None)
+            request.session.pop('otp_verified', None)
+            request.session.pop('otp_verified_email', None)
+            request.session.pop('otp_sent_time', None)
+            
+            # Delete any remaining OTP cache
+            cache.delete(f'otp_{email}')
+            cache.delete(f'otp_resend_{email}')
+            
+            # Show success message and redirect to login
+            messages.success(
+                request,
+                'Password reset successfully! Please login with your new password.'
+            )
+            
+            return redirect('login')
+        
+        except Exception as e:
+            logger.error(f'Unexpected error during password reset: {str(e)}')
+            messages.error(
+                request,
+                'An unexpected error occurred. Please try again or contact support.'
+            )
+            
+            return render(request, 'accounts/resetPassword.html', {
+                'email': email,
+                'page_title': 'Reset Password',
+                'breadcrumb': 'Reset Password',
+            })
+
+
+# ========================= AJAX PASSWORD VALIDATION ENDPOINT =========================
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect
+import json
+
+@csrf_protect
+@require_POST
+def validate_password_ajax(request):
+    """
+    AJAX endpoint for real-time password strength validation.
+    Returns JSON with validation results and strength indicator.
+    """
+    try:
+        data = json.loads(request.body)
+        password = data.get('password', '')
+        
+        if not password:
+            return JsonResponse({
+                'valid': False,
+                'strength': 'none',
+                'errors': ['Password is required'],
+                'progress': 0,
+            })
+        
+        validation = validate_password_strength(password)
+        
+        # Calculate progress (0-100)
+        checks = {
+            'length': len(password) >= 8,
+            'uppercase': bool(re.search(r'[A-Z]', password)),
+            'lowercase': bool(re.search(r'[a-z]', password)),
+            'digit': bool(re.search(r'\d', password)),
+            'special': bool(re.search(r'[!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]', password)),
+        }
+        
+        progress = (sum(checks.values()) / len(checks)) * 100
+        
+        return JsonResponse({
+            'valid': validation['valid'],
+            'strength': validation['strength'],
+            'errors': validation['errors'],
+            'progress': int(progress),
+            'checks': checks,
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'valid': False,
+            'error': 'Invalid request format'
+        }, status=400)
+    except Exception as e:
+        logger.error(f'Password validation AJAX error: {str(e)}')
+        return JsonResponse({
+            'valid': False,
+            'error': 'An error occurred'
+        }, status=500)
+
+
+@csrf_protect
+@require_POST
+def check_password_match_ajax(request):
+    """
+    AJAX endpoint for real-time password match validation.
+    """
+    try:
+        data = json.loads(request.body)
+        password = data.get('password', '')
+        confirm = data.get('confirm_password', '')
+        
+        if not password or not confirm:
+            return JsonResponse({
+                'match': False,
+                'message': 'Both passwords are required'
+            })
+        
+        if password == confirm:
+            return JsonResponse({
+                'match': True,
+                'message': 'Passwords match'
+            })
+        else:
+            return JsonResponse({
+                'match': False,
+                'message': 'Passwords do not match'
+            })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'match': False,
+            'error': 'Invalid request format'
+        }, status=400)
+    except Exception as e:
+        logger.error(f'Password match validation error: {str(e)}')
+        return JsonResponse({
+            'match': False,
+            'error': 'An error occurred'
+        }, status=500)
 
 from orders.models import Order
 
