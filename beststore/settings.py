@@ -132,11 +132,15 @@ if os.environ.get('DATABASE_URL'):
 else:
     # Fallback to SQLite for development
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',  # Replace 'my_database' with your actual database name
+        'USER': 'postgres',
+        'PASSWORD': 'bramwel,12',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
+}
 
 # Cloudinary storage for media files
 CLOUDINARY_STORAGE = {

@@ -1,440 +1,718 @@
-{% extends "base.html" %}
-{% block page_title %}Recharge Account{% endblock %}
+{% extends 'base.html' %}
+{% block page_title %}Recharge Account - BESTSTORE{% endblock %}
 {% load static %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
-            <!-- Page Header -->
-            <div class="mb-4">
-                <h1 class="h3 mb-2">
-                    <i class="fas fa-wallet"></i> Recharge Account
-                </h1>
-                <p class="text-muted">Add funds to your account via M-Pesa</p>
+<style>
+    :root {
+        --primary: #24b24a;
+        --primary-dark: #0a8f2a;
+        --secondary: #ff6b6b;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --info: #0dcaf0;
+        --light: #f8f9fa;
+        --border: #e9ecef;
+        --text-dark: #1a1a1a;
+        --text-muted: #6c757d;
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8eff5 100%);
+        min-height: 100vh;
+    }
+
+    .recharge-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .recharge-wrapper {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .breadcrumb-nav {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-nav a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-nav a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-muted);
+        margin: 0 10px;
+    }
+
+    /* ======================== RECHARGE CARD ======================== */
+    .recharge-card {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ======================== HEADER ======================== */
+    .recharge-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid var(--light);
+    }
+
+    .recharge-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        box-shadow: 0 8px 20px rgba(36, 178, 74, 0.25);
+    }
+
+    .recharge-header h1 {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 800;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+    }
+
+    .recharge-header p {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* ======================== FORM ======================== */
+    .recharge-form {
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label span {
+        color: var(--secondary);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(36, 178, 74, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-help {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+    }
+
+    /* ======================== QUICK AMOUNT BUTTONS ======================== */
+    .amount-section {
+        margin-bottom: 25px;
+    }
+
+    .amount-label {
+        display: block;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .amount-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .amount-btn {
+        background: linear-gradient(135deg, var(--light) 0%, #f0f2f5 100%);
+        border: 2px solid var(--border);
+        padding: 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+    }
+
+    .amount-btn:hover {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(36, 178, 74, 0.1) 0%, rgba(36, 178, 74, 0.05) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(36, 178, 74, 0.15);
+    }
+
+    .amount-btn.active {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-color: var(--primary);
+        color: white;
+        box-shadow: 0 4px 15px rgba(36, 178, 74, 0.3);
+    }
+
+    /* ======================== INFO BOX ======================== */
+    .info-box {
+        background: linear-gradient(135deg, rgba(36, 178, 74, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+        border-left: 4px solid var(--primary);
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+
+    .info-box-title {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .info-box-content {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .info-box-content ul {
+        margin: 8px 0 0 20px;
+        padding: 0;
+    }
+
+    .info-box-content li {
+        margin-bottom: 6px;
+    }
+
+    /* ======================== BUTTON ======================== */
+    .btn-submit {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(36, 178, 74, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(36, 178, 74, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* ======================== FOOTER ======================== */
+    .recharge-footer {
+        text-align: center;
+        padding-top: 30px;
+        border-top: 2px solid var(--light);
+    }
+
+    .back-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+        gap: 12px;
+    }
+
+    /* ======================== ALERTS ======================== */
+    .alert {
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--success);
+        color: var(--success);
+    }
+
+    .alert-error {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid var(--secondary);
+        color: var(--secondary);
+    }
+
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid var(--warning);
+        color: var(--warning);
+    }
+
+    .alert-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    /* ======================== MPESA BADGE ======================== */
+    .mpesa-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 15px;
+    }
+
+    .mpesa-badge i {
+        margin-right: 6px;
+    }
+
+    /* ======================== LOADING SPINNER ======================== */
+    .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-submit.loading .spinner {
+        display: inline-block;
+    }
+
+    .btn-submit.loading {
+        opacity: 0.8;
+    }
+
+    /* ======================== RESPONSIVE ======================== */
+    @media (max-width: 600px) {
+        .recharge-card {
+            padding: 25px;
+        }
+
+        .recharge-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .recharge-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+        }
+
+        .amount-buttons {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .form-control {
+            padding: 12px 14px;
+            font-size: 1rem;
+        }
+
+        .btn-submit {
+            padding: 14px;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .recharge-container {
+            padding: 15px;
+        }
+
+        .recharge-card {
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .recharge-header {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+        }
+
+        .recharge-header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .recharge-header p {
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            font-size: 16px;
+        }
+
+        .amount-buttons {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .amount-btn {
+            padding: 10px;
+            font-size: 0.85rem;
+        }
+
+        .info-box {
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-box-title {
+            font-size: 0.9rem;
+        }
+
+        .info-box-content {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<div class="recharge-container">
+    <div class="recharge-wrapper">
+        
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-nav">
+            <a href="{% url 'home' %}">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{% url 'dashboard' %}">
+                <i class="fas fa-user"></i> Dashboard
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <span style="color: var(--text-dark); font-weight: 600;">Recharge Account</span>
+        </div>
+
+        <div class="recharge-card">
+            
+            <!-- Header -->
+            <div class="recharge-header">
+                <div class="recharge-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h1>Recharge Account</h1>
+                <p>Add funds to your BESTSTORE wallet</p>
             </div>
 
             <!-- Messages -->
             {% if messages %}
                 {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-{{ message.tags }}">
+                    <span class="alert-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
                 </div>
                 {% endfor %}
             {% endif %}
 
-            <!-- Success Response -->
-            {% if success %}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <div class="text-center">
-                    <i class="fas fa-check-circle fa-3x mb-3"></i>
-                    <h5>Payment Initiated Successfully!</h5>
-                    <p class="mb-2">{{ message }}</p>
-                    <p class="text-muted mb-0">
-                        <strong>Amount:</strong> Ksh. {{ amount|floatformat:2 }}<br>
-                        <strong>Phone:</strong> {{ phone }}<br>
-                        <strong>Status:</strong> <span class="badge bg-info">Waiting for confirmation</span>
-                    </p>
-                </div>
-                <hr>
-                <p class="text-muted small mb-0">
-                    <i class="fas fa-info-circle"></i> 
-                    You should receive an M-Pesa prompt on your phone. Please enter your M-Pesa PIN to complete the payment.
-                </p>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <div class="card shadow-sm mt-3">
-                <div class="card-body text-center">
-                    <a href="{% url 'dashboard' %}" class="btn btn-primary">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
-                    </a>
-                    <a href="{% url 'accounts:recharge' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-redo"></i> Make Another Recharge
-                    </a>
-                </div>
-            </div>
-            {% else %}
-
-            <!-- Recharge Form Card -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-credit-card"></i> Recharge via M-Pesa</h5>
-                </div>
-
-                <div class="card-body">
-                    <!-- Form Errors -->
-                    {% if errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong><i class="fas fa-exclamation-circle"></i> Please fix the following errors:</strong>
-                        <ul class="mb-0 mt-2">
-                            {% for field, messages in errors.items %}
-                                {% for message in messages %}
-                                <li>{{ message }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    {% endif %}
-
-                    <form method="post" id="rechargeForm" novalidate>
-                        {% csrf_token %}
-
-                        <!-- Amount Input -->
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">
-                                <i class="fas fa-money-bill-wave"></i> Amount (Ksh)
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">Ksh</span>
-                                <input 
-                                    type="number" 
-                                    id="amount" 
-                                    name="amount" 
-                                    class="form-control {% if errors.amount %}is-invalid{% endif %}"
-                                    placeholder="Enter amount (min: 10, max: 1,000,000)"
-                                    min="{{ min_amount }}"
-                                    max="{{ max_amount }}"
-                                    step="10"
-                                    value="{{ amount }}"
-                                    required
-                                >
-                            </div>
-                            {% if errors.amount %}
-                            <div class="invalid-feedback d-block">
-                                <i class="fas fa-exclamation-circle"></i> {{ errors.amount }}
-                            </div>
-                            {% endif %}
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle"></i>
-                                Minimum: Ksh. {{ min_amount|floatformat:0 }} | 
-                                Maximum: Ksh. {{ max_amount|floatformat:0 }}
-                            </small>
-                        </div>
-
-                        <!-- Quick Amount Buttons -->
-                        <div class="mb-3">
-                            <label class="form-label">Quick Select:</label>
-                            <div class="btn-group-vertical w-100" role="group">
-                                <button type="button" class="btn btn-outline-primary btn-sm text-start amount-btn" data-amount="100">
-                                    <strong>Ksh 100</strong>
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm text-start amount-btn" data-amount="500">
-                                    <strong>Ksh 500</strong>
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm text-start amount-btn" data-amount="1000">
-                                    <strong>Ksh 1,000</strong>
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm text-start amount-btn" data-amount="5000">
-                                    <strong>Ksh 5,000</strong>
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm text-start amount-btn" data-amount="10000">
-                                    <strong>Ksh 10,000</strong>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Phone Number Input -->
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">
-                                <i class="fas fa-phone"></i> M-Pesa Phone Number
-                                <span class="text-danger">*</span>
-                            </label>
-                            <input 
-                                type="tel" 
-                                id="phone" 
-                                name="phone" 
-                                class="form-control {% if errors.phone %}is-invalid{% endif %}"
-                                placeholder="{{ phone_placeholder }}"
-                                value="{{ phone }}"
-                                required
-                            >
-                            {% if errors.phone %}
-                            <div class="invalid-feedback d-block">
-                                <i class="fas fa-exclamation-circle"></i> {{ errors.phone }}
-                            </div>
-                            {% endif %}
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle"></i>
-                                Must be a Safaricom M-Pesa number. Format: 0712345678
-                            </small>
-                        </div>
-
-                        <!-- User Info Display -->
-                        <div class="alert alert-light py-2 mb-3">
-                            <small>
-                                <strong><i class="fas fa-user"></i> Account:</strong> {{ user.get_full_name }}<br>
-                                <strong><i class="fas fa-envelope"></i> Email:</strong> {{ user.email }}<br>
-                                {% if user_profile.balance %}
-                                <strong><i class="fas fa-wallet"></i> Current Balance:</strong> Ksh. {{ user_profile.balance|floatformat:2 }}
-                                {% endif %}
-                            </small>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary w-100 btn-lg" id="submitBtn">
-                            <i class="fas fa-arrow-right"></i> Proceed to Payment
-                        </button>
-
-                        <button type="reset" class="btn btn-outline-secondary w-100 mt-2">
-                            <i class="fas fa-undo"></i> Clear Form
-                        </button>
-                    </form>
-                </div>
-            </div>
-
             <!-- Info Box -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="fas fa-lightbulb"></i> How It Works</h6>
+            <div class="info-box">
+                <div class="info-box-title">
+                    <i class="fas fa-info-circle"></i> How it works
                 </div>
-                <div class="card-body small">
-                    <ol class="mb-0 ps-3">
-                        <li class="mb-2">Enter the amount you want to recharge</li>
-                        <li class="mb-2">Enter your Safaricom M-Pesa phone number</li>
-                        <li class="mb-2">Click "Proceed to Payment"</li>
-                        <li class="mb-2">You'll receive an M-Pesa prompt on your phone</li>
-                        <li class="mb-2">Enter your M-Pesa PIN to complete the payment</li>
-                        <li>Your account will be credited automatically</li>
-                    </ol>
+                <div class="info-box-content">
+                    <ul>
+                        <li>Enter the amount you want to add to your wallet</li>
+                        <li>Enter your M-Pesa registered phone number</li>
+                        <li>You'll receive a payment prompt on your phone</li>
+                        <li>Enter your M-Pesa PIN to complete payment</li>
+                        <li>Your balance updates instantly</li>
+                    </ul>
+                </div>
+                <div class="mpesa-badge">
+                    <i class="fab fa-m"></i> Powered by M-Pesa
                 </div>
             </div>
 
-            <!-- Features Box -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="fas fa-check-circle"></i> Why Choose Us</h6>
-                </div>
-                <div class="card-body small">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <div class="text-center">
-                                <i class="fas fa-lock fa-2x text-primary mb-2"></i>
-                                <p class="mb-0"><strong>Secure</strong></p>
-                                <small class="text-muted">Encrypted transactions</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
-                                <p class="mb-0"><strong>Instant</strong></p>
-                                <small class="text-muted">Real-time processing</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <i class="fas fa-check fa-2x text-success mb-2"></i>
-                                <p class="mb-0"><strong>Verified</strong></p>
-                                <small class="text-muted">Official M-Pesa</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <i class="fas fa-headset fa-2x text-info mb-2"></i>
-                                <p class="mb-0"><strong>Support</strong></p>
-                                <small class="text-muted">24/7 Help available</small>
-                            </div>
-                        </div>
+            <!-- Form -->
+            <form method="POST" class="recharge-form" id="rechargeForm">
+                {% csrf_token %}
+
+                <!-- Amount Section -->
+                <div class="amount-section">
+                    <label class="amount-label">
+                        Quick Amount <span>or</span> Enter Custom
+                    </label>
+
+                    <div class="amount-buttons">
+                        <button type="button" class="amount-btn" onclick="setAmount(500)">
+                            KES 500
+                        </button>
+                        <button type="button" class="amount-btn" onclick="setAmount(1000)">
+                            KES 1,000
+                        </button>
+                        <button type="button" class="amount-btn" onclick="setAmount(2000)">
+                            KES 2,000
+                        </button>
+                        <button type="button" class="amount-btn" onclick="setAmount(5000)">
+                            KES 5,000
+                        </button>
+                        <button type="button" class="amount-btn" onclick="setAmount(10000)">
+                            KES 10,000
+                        </button>
+                        <button type="button" class="amount-btn" onclick="setAmount(20000)">
+                            KES 20,000
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- FAQs -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-secondary text-white">
-                    <h6 class="mb-0"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h6>
-                </div>
-                <div class="card-body">
-                    <div class="accordion accordion-flush" id="faqAccordion">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                    How long does the payment take?
-                                </button>
-                            </h2>
-                            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    <small>Payment is processed instantly. Your account will be credited within seconds of completing the M-Pesa transaction.</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                    What is the minimum recharge amount?
-                                </button>
-                            </h2>
-                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    <small>The minimum amount you can recharge is Ksh. 10. There is no maximum limit, but we recommend not exceeding Ksh. 1,000,000 per transaction.</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                                    Is my payment secure?
-                                </button>
-                            </h2>
-                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    <small>Yes! We use official M-Pesa API with end-to-end encryption. Your payment details are never stored on our servers.</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                                    What if payment fails?
-                                </button>
-                            </h2>
-                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    <small>If a payment fails, you will not be charged. You can try again immediately or contact our support team for assistance.</small>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Amount Input -->
+                <div class="form-group">
+                    <label for="amount" class="form-label">
+                        Amount (KES) <span>*</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="amount" 
+                        name="amount" 
+                        class="form-control" 
+                        placeholder="e.g., 5000" 
+                        required 
+                        min="100"
+                        max="150000"
+                        step="100">
+                    <div class="form-help">
+                        Minimum: KES 100 | Maximum: KES 150,000
                     </div>
                 </div>
-            </div>
 
-            {% endif %}
+                <!-- Phone Input -->
+                <div class="form-group">
+                    <label for="phone" class="form-label">
+                        Phone Number <span>*</span>
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        class="form-control" 
+                        placeholder="e.g., 0712345678" 
+                        required
+                        pattern="[0-9\s\-\+]{9,15}">
+                    <div class="form-help">
+                        Enter your M-Pesa registered Kenyan phone number
+                    </div>
+                </div>
+
+                <!-- Transaction Info -->
+                <div class="info-box">
+                    <div class="info-box-title">
+                        <i class="fas fa-exchange-alt"></i> Transaction Details
+                    </div>
+                    <div class="info-box-content">
+                        <p style="margin: 0;">
+                            <strong>Business Short Code:</strong> {{ business_shortcode }}<br>
+                            <strong>Till Number:</strong> {{ till_number }}<br>
+                            <strong>Transaction Type:</strong> Buy Goods Online
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span class="spinner"></span>
+                    <span class="btn-text">Proceed to Payment</span>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="recharge-footer">
+                <a href="{% url 'dashboard' %}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Styles -->
-<style>
-    .form-control, .input-group-text, select {
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        padding: 10px 12px;
-    }
-
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-    }
-
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: #333;
-    }
-
-    .card {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-    }
-
-    .card-header {
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-group-vertical .btn {
-        border-radius: 6px;
-        margin-bottom: 5px;
-    }
-
-    .amount-btn:hover {
-        background-color: #0d6efd;
-        color: white;
-        border-color: #0d6efd;
-    }
-
-    .input-group-text {
-        font-weight: 600;
-        background-color: #f8f9fa;
-    }
-
-    .alert {
-        border: none;
-        border-radius: 8px;
-    }
-
-    .accordion-button:not(.collapsed) {
-        background-color: #f8f9fa;
-        color: #333;
-    }
-
-    .accordion-button:focus {
-        border-color: #e0e0e0;
-        box-shadow: none;
-    }
-
-    #submitBtn {
-        font-weight: 600;
-        padding: 10px 20px;
-    }
-
-    #submitBtn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
-    }
-
-    small.text-muted {
-        display: block;
-        margin-top: 5px;
-    }
-
-    .text-danger {
-        color: #dc3545;
-    }
-</style>
-
-<!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Quick amount buttons
-    const amountBtns = document.querySelectorAll('.amount-btn');
+    const form = document.getElementById('rechargeForm');
     const amountInput = document.getElementById('amount');
+    const phoneInput = document.getElementById('phone');
+    const submitBtn = document.getElementById('submitBtn');
+    const amountButtons = document.querySelectorAll('.amount-btn');
 
-    amountBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const amount = this.getAttribute('data-amount');
-            amountInput.value = amount;
-            amountInput.focus();
-            
-            // Visual feedback
-            amountBtns.forEach(b => b.classList.remove('btn-primary'));
-            amountBtns.forEach(b => b.addClass('btn-outline-primary'));
-            this.classList.remove('btn-outline-primary');
-            this.classList.add('btn-primary');
-        });
+    // Set amount from quick buttons
+    function setAmount(value) {
+        amountInput.value = value;
+        amountInput.focus();
+        
+        // Update button active state
+        amountButtons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // Remove active state when typing
+    amountInput.addEventListener('input', function() {
+        amountButtons.forEach(btn => btn.classList.remove('active'));
     });
 
-    // Phone number formatting
-    const phoneInput = document.getElementById('phone');
-    phoneInput.addEventListener('input', function() {
-        let value = this.value.replace(/\D/g, '');
+    // Format phone number as user types
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
         
-        // Handle different formats
-        if (value.startsWith('0')) {
-            value = '254' + value.slice(1);
-        } else if (!value.startsWith('254')) {
-            value = '254' + value;
+        if (value.length > 0) {
+            if (value.startsWith('0')) {
+                value = value.substring(1);
+            }
         }
         
-        // Limit to 12 digits
-        value = value.slice(0, 12);
-        
-        // Format display (optional)
-        this.value = value;
+        if (value.length <= 9) {
+            e.target.value = value;
+        } else {
+            e.target.value = value.substring(0, 9);
+        }
     });
 
-    // Form submission
-    const form = document.getElementById('rechargeForm');
-    const submitBtn = document.getElementById('submitBtn');
+    // Form validation and submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-    form.addEventListener('submit', function(e) {
-        // Disable submit button during submission
+        const amount = parseFloat(amountInput.value);
+        const phone = phoneInput.value.trim();
+
+        // Client-side validation
+        if (!amount || amount < 100 || amount > 150000) {
+            alert('Please enter an amount between KES 100 and KES 150,000');
+            return;
+        }
+
+        if (!phone || phone.length < 9) {
+            alert('Please enter a valid phone number');
+            return;
+        }
+
+        // Disable submit button
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.classList.add('loading');
+
+        // Submit form
+        setTimeout(() => {
+            form.submit();
+        }, 500);
     });
-});
+
+    // Set phone input to focus automatically
+    window.addEventListener('load', function() {
+        phoneInput.focus();
+    });
 </script>
+
 {% endblock %}

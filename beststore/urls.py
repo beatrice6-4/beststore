@@ -11,6 +11,8 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('recharge/', views.recharge, name='recharge'),
+
     # Apps
     path('accounts/', include('accounts.urls')),
     path('store/', include('store.urls')),

@@ -181,3 +181,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.mpesa_receipt} - {self.status}"
+    
+
+
+

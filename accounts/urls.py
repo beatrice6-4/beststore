@@ -52,9 +52,7 @@ urlpatterns = [
     path('send_otp_email/', views.send_otp_email, name='send_otp_email'),
     path('api/verify-otp/', views.verify_otp_ajax, name='verify_otp_ajax'),
     path('api/check-otp-expiry/', views.check_otp_expiry, name='check_otp_expiry'),
-    path('resetPassword/', views.resetPassword, name='resetPassword'),
-path('api/validate-password/', views.validate_password_ajax, name='validate_password_ajax'),
-path('api/check-password-match/', views.check_password_match_ajax, name='check_password_match_ajax'),
+    
     # Misc
     path('contact/', views.contact, name='contact'),
     path('contact-messages/', views.contact_messages, name='contact_messages'),
