@@ -1079,7 +1079,7 @@ def add_payment(request):
             })
 
         # create Payment instance
-        payment = Payment(amount=amount, description=description, created_by=request.user)
+        payment = Payment.objects.create(amount=10.00, description='Test', created_by=user)
 
         # attach group if model supports it, otherwise include group in description
         if group_id:
