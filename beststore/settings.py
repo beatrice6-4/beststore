@@ -63,6 +63,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'beststore.wsgi.application'
 
+AUTH_USER_MODEL = 'accounts.Account'
+
 # Database configuration
 if os.environ.get('DATABASE_URL'):
     DATABASES = {
