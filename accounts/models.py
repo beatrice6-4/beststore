@@ -144,3 +144,7 @@ class Payment(models.Model):
 
 
      
+
+class UserFinancialAccount(models.Model):    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='financial_accounts')
+    financial_account = models.ForeignKey(FinancialAccount, on_delete=models.CASCADE, related_name='user_accounts')
