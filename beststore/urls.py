@@ -19,6 +19,7 @@ urlpatterns = [
     path('cart/', include('carts.urls')),
     path('orders/', include('orders.urls')),
     path('cdmis/', include('CDMIS.urls')),
+    path('school/', include('school.urls')),
     path('cart/', include('carts.urls')),  # Carts app URLs
     
     # API endpoints

@@ -141,10 +141,6 @@ class Payment(models.Model):
     def __str__(self):
         return f"{self.amount} - {self.description}"
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_financial_account(sender, instance, created, **kwargs):
-    if created:
-        FinancialAccount.objects.create(user=instance)
+
+     
