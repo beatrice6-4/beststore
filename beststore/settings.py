@@ -6,7 +6,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
 
 INSTALLED_APPS = [
@@ -31,6 +31,56 @@ INSTALLED_APPS = [
     'cloudinary',
 ]
 
+# Jazzmin (Admin UI) configuration - tuned for a clean, modern admin
+JAZZMIN_SETTINGS = {
+    "site_title": "BestStore Admin",
+    "site_header": "BestStore",
+    "site_brand": "BestStore",
+    "welcome_sign": "Welcome to BestStore administration",
+    "copyright": "BestStore © 2025",
+    "search_model": "store.Product",
+    "user_avatar": "img/user-avatar.png",
+    "show_sidebar": True,
+    "navigation_expanded": False,
+    "related_modal_active": True,
+    "custom_css": "css/jazzmin-custom.css",
+    "custom_js": "js/jazzmin-custom.js",
+    "topmenu_links": [
+        {"name": "Home", "url": "/", "new_window": False},
+        {"name": "Docs", "url": "/docs/", "new_window": True},
+    ],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "store": "fas fa-store",
+        "orders": "fas fa-shopping-cart",
+        "carts": "fas fa-shopping-cart",
+        "category": "fas fa-tags",
+        "accounts": "fas fa-user",
+        "finance": "fas fa-dollar-sign",
+        "CDMIS": "fas fa-book-medical",
+        "school": "fas fa-school",
+    },
+}
+
+# UI tweaks: colors, compactness and layout choices for a pleasant UX
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": True,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "bg-success",
+    "accent": "accent-success",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar_scrollbar_small": True,
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+}
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
