@@ -319,3 +319,42 @@ class Result(models.Model):
         self.is_pass = self.total_score >= 40
 
         super().save(*args, **kwargs)
+
+
+class CourseUnit(models.Model):
+    """Course units/topics within a specific semester"""
+    SEMESTER_CHOICES = [
+        ('1', 'First Semester'),
+        ('2', 'Second Semester'),
+        ('3', 'Third Semester'),
+    ]
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='units')
+    session = models.ForeignKey(ReportingSession, on_delete=models.CASCADE, related_name='course_units')
+    title = models.CharField(max_length=200)
+    code = models.CharField(max_length=20, unique=True)
+    description = models.TextField(blank=True, null=True)
+    credits = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(8)])
+    semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES)
+    instructor = models.CharField(max_length=100, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['semester', 'title']
+        unique_together = ['code', 'session', 'course']
+        verbose_name = 'Course Unit'
+        verbose_name_plural = 'Course Units'
+
+    def __str__(self):
+        return f"{self.code} - {self.title} ({self.get_semester_display()})"
+
+    @property
+    def enrollment_count(self):
+        """Get number of students enrolled in this unit"""
+        return Enrollment.objects.filter(
+            course=self.course,
+            session=self.session,
+            status='active'
+        ).count()

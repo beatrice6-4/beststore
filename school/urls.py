@@ -35,7 +35,7 @@ urlpatterns = [
     path('enrollments/', views.EnrollmentListView.as_view(), name='enrollment_list'),
     path('enrollments/create/', views.EnrollmentCreateView.as_view(), name='enrollment_create'),
     path('enrollments/<int:pk>/', views.EnrollmentDetailView.as_view(), name='enrollment_detail'),
-    path('enrollments/<int:pk>/edit/', views.EnrollmentFormView.as_view(), name='enrollment_update'),
+    path('enrollments/<int:pk>/edit/', views.EnrollmentUpdateView.as_view(), name='enrollment_update'),
     # Fees
     path('fees/', views.StudentFeeListView.as_view(), name='fee_list'),
     path('fees/<int:pk>/', views.StudentFeeDetailView.as_view(), name='fee_detail'),
