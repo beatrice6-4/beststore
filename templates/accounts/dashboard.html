@@ -26,6 +26,19 @@
         box-sizing: border-box;
     }
 
+    /* Accessibility helpers */
+    :focus-visible {
+        outline: 3px solid rgba(36, 178, 74, 0.25);
+        outline-offset: 2px;
+    }
+
+    .visually-hidden {
+        position: absolute !important;
+        height: 1px; width: 1px;
+        overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
+        white-space: nowrap;
+    }
+
     .dashboard-container {
         background: linear-gradient(135deg, #f5f7fa 0%, #e8eff5 100%);
         min-height: 100vh;
@@ -177,7 +190,19 @@
         margin-bottom: 10px;
         position: relative;
         z-index: 1;
+        transition: all 0.35s ease;
     }
+
+    .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dark);
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-ghost:focus { outline: none; box-shadow: 0 0 0 3px rgba(36,178,74,0.12); }
 
     .stat-change {
         font-size: 0.85rem;
@@ -280,6 +305,17 @@
 
     .orders-table tbody tr:hover {
         background: var(--light);
+    }
+
+    /* Make rows with role=link keyboard & pointer friendly */
+    .orders-table tbody tr[role="link"] {
+        cursor: pointer;
+    }
+
+    .orders-table tbody tr[role="link"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(36,178,74,0.12);
+        background: rgba(36,178,74,0.03);
     }
 
     .order-id {
@@ -566,7 +602,11 @@
         <div class="card" style="grid-column: 1 / -1;">
             <div class="card-header">
                 <h3 class="card-title">Recent Orders</h3>
-                <a href="{% url 'myOrders' %}" class="card-action">View All</a>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button id="export-orders" class="card-action btn-ghost" title="Export orders as CSV" aria-label="Export orders as CSV">Export CSV</button>
+                    <button id="refresh-orders" class="card-action btn-ghost" title="Refresh orders" aria-label="Refresh orders">Refresh</button>
+                    <a href="{% url 'myOrders' %}" class="card-action">View All</a>
+                </div>
             </div>
 
             {% if recent_orders %}
@@ -584,7 +624,7 @@
                         </thead>
                         <tbody>
                             {% for order in recent_orders %}
-                                <tr>
+                                <tr tabindex="0" role="link" data-href="{% url 'order_detail' order.id %}">
                                     <td>
                                         <span class="order-id">#{{ order.id }}</span>
                                     </td>
@@ -630,22 +670,27 @@
         </div>
 
         <!-- ===================== SUMMARY BOXES ===================== -->
-        <div class="card">
+        <div class="card" data-stats-url="{{ stats_api_url|default:'' }}">
             <div class="card-header">
                 <h3 class="card-title">This Month</h3>
+                <div>
+                    <button id="refresh-stats" class="card-action btn-ghost" title="Refresh" aria-label="Refresh stats">Refresh</button>
+                </div>
             </div>
             <div style="text-align: center;">
                 <div style="margin-bottom: 20px;">
                     <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">Orders</div>
-                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">{{ monthly_orders }}</div>
+                    <div id="monthly-orders" class="stat-value" style="font-size:2rem; font-weight:800; color:var(--primary);">{{ monthly_orders }}</div>
                 </div>
-                <div>
+                <div style="margin-bottom: 12px;">
                     <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">Spending</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">
-                        KES {{ recent_spending|floatformat:2 }}
-                    </div>
+                    <div id="recent-spending" style="font-size:1.5rem; font-weight:800; color:var(--primary);">KES {{ recent_spending|floatformat:2 }}</div>
+                </div>
+                <div style="max-width:420px; margin:0 auto;">
+                    <canvas id="dashboard-sparkline" width="420" height="120" aria-hidden="false"></canvas>
                 </div>
             </div>
+            <div id="dashboard-status" class="visually-hidden" aria-live="polite"></div>
         </div>
 
         <!-- ===================== QUICK STATS ===================== -->
@@ -710,17 +755,137 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Add any interactive features here if needed
-document.addEventListener('DOMContentLoaded', function() {
-    // Animate stat cards on load
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach((card, index) => {
-        setTimeout(() => {
-            card.style.animation = `fadeIn 0.6s ease-out`;
-        }, index * 100);
+(function () {
+    function fmtKES(val) {
+        try { return 'KES ' + Number(val).toLocaleString(); } catch (e) { return val; }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat cards on load
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            setTimeout(() => { card.style.animation = `fadeIn 0.6s ease-out`; }, index * 100);
+        });
+
+        // Initialize small chart (Orders vs Spending) if canvas present
+        const canvas = document.getElementById('dashboard-sparkline');
+        let dashboardChart = null;
+        if (canvas && window.Chart) {
+            const ctx = canvas.getContext('2d');
+            dashboardChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Orders', 'Spending'],
+                    datasets: [{
+                        label: 'This Month',
+                        data: [Number(document.getElementById('monthly-orders')?.textContent || 0) || 0, Number(String(document.getElementById('recent-spending')?.textContent || '').replace(/[^0-9.-]+/g, '')) || 0],
+                        backgroundColor: ['rgba(36,178,74,0.85)', 'rgba(13,202,240,0.85)']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Clickable orders rows
+        const ordersTable = document.querySelector('.orders-table');
+        if (ordersTable) {
+            ordersTable.addEventListener('click', function (e) {
+                const tr = e.target.closest('tr[role="link"]');
+                if (tr && tr.dataset.href) {
+                    window.location.href = tr.dataset.href;
+                }
+            });
+            ordersTable.addEventListener('keydown', function (e) {
+                const tr = e.target.closest('tr[role="link"]');
+                if (!tr) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    tr.click();
+                }
+            });
+        }
+
+        // Export orders as CSV
+        const exportBtn = document.getElementById('export-orders');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function () {
+                const rows = Array.from(document.querySelectorAll('.orders-table thead tr, .orders-table tbody tr'));
+                if (!rows.length) return;
+                const csv = rows.map(r => {
+                    const cells = Array.from(r.querySelectorAll('th, td'));
+                    return cells.map(c => '"' + c.innerText.replace(/"/g,'""').trim() + '"').join(',');
+                }).join('\n');
+                const blob = new Blob([csv], {type: 'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'recent_orders.csv';
+                document.body.appendChild(a); a.click(); a.remove();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Refresh orders button (simple page reload or AJAX if endpoint supplied later)
+        const refreshOrdersBtn = document.getElementById('refresh-orders');
+        if (refreshOrdersBtn) {
+            refreshOrdersBtn.addEventListener('click', function () {
+                // Simple behavior: reload the current page (keeps filters)
+                if (confirm('Reload recent orders to fetch latest data?')) {
+                    location.reload();
+                }
+            });
+        }
+
+        // Refresh stats via optional API on the This Month card
+        const statsCard = document.querySelector('.card[data-stats-url]');
+        const refreshStatsBtn = document.getElementById('refresh-stats');
+        const statusEl = document.getElementById('dashboard-status');
+        const toast = window.showToast || function (msg, type) { alert(msg); };
+
+        async function refreshStats() {
+            if (!statsCard) return toast('No stats endpoint configured', 'warning');
+            const url = statsCard.dataset.statsUrl;
+            if (!url) return toast('No stats endpoint configured', 'warning');
+            try {
+                refreshStatsBtn.disabled = true; refreshStatsBtn.textContent = 'Refreshing...';
+                if (window.Loader && window.Loader.show) window.Loader.show();
+                statusEl.textContent = 'Refreshing statistics...';
+                const res = await fetch(url, { credentials: 'same-origin', headers: {'X-Requested-With':'XMLHttpRequest'} });
+                if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+                const json = await res.json();
+                if (json.monthly_orders !== undefined) document.getElementById('monthly-orders').textContent = json.monthly_orders;
+                if (json.recent_spending !== undefined) document.getElementById('recent-spending').textContent = fmtKES(json.recent_spending);
+                if (dashboardChart && json.chart && Array.isArray(json.chart.data)) {
+                    dashboardChart.data.datasets[0].data = json.chart.data;
+                    dashboardChart.data.labels = json.chart.labels || dashboardChart.data.labels;
+                    dashboardChart.update();
+                }
+                toast(json.message || 'Stats updated', 'success');
+                statusEl.textContent = 'Statistics updated.';
+            } catch (err) {
+                console.error(err);
+                toast('Could not refresh stats', 'error');
+                statusEl.textContent = 'Failed to refresh statistics.';
+            } finally {
+                refreshStatsBtn.disabled = false; refreshStatsBtn.textContent = 'Refresh';
+                if (window.Loader && window.Loader.hide) window.Loader.hide();
+                setTimeout(()=> { statusEl.textContent = ''; }, 2500);
+            }
+        }
+
+        if (refreshStatsBtn) refreshStatsBtn.addEventListener('click', refreshStats);
+
     });
-});
+})();
 </script>
 
 {% endblock %}

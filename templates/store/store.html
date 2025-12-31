@@ -301,13 +301,54 @@
         justify-content: center;
         color: #999;
         transition: all 0.2s;
+        outline: none;
     }
 
-    .btn-wishlist:hover {
+    .btn-wishlist[aria-pressed="true"] {
+        color: #ff6b35;
+        border-color: #ff6b35;
+        background: #fff5f0;
+    }
+
+    .btn-wishlist:hover, .btn-wishlist:focus {
         color: #FF6B35;
         border-color: #FF6B35;
         background: #FFF5F0;
     }
+
+    .btn-add-quick {
+        border: 1px solid #e9f6ed;
+        background: #fff;
+        color: #198754;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .btn-add-quick:hover {
+        background: #198754;
+        color: #fff;
+        border-color: #198754;
+    }
+
+    .btn-add-quick.is-loading::after {
+        content: '';
+        display: inline-block;
+        margin-left: 8px;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,0.9);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ============ EMPTY STATE ============ */
     .empty-state {
@@ -487,12 +528,12 @@
                         <i class="fas fa-box me-2"></i> <strong>{{ product_count }}</strong> items found
                     </div>
                     <div class="sort-options">
-                        <select class="form-select form-select-sm d-inline-block w-auto" onchange="if(this.value) window.location.href=this.value">
+                        <select id="sort-select" class="form-select form-select-sm d-inline-block w-auto" aria-label="Sort products">
                             <option value="">Sort by</option>
-                            <option value="?sort=newest">Newest</option>
-                            <option value="?sort=price-low">Price: Low to High</option>
-                            <option value="?sort=price-high">Price: High to Low</option>
-                            <option value="?sort=popular">Most Popular</option>
+                            <option value="?sort=newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                            <option value="?sort=price-low" {% if request.GET.sort == 'price-low' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="?sort=price-high" {% if request.GET.sort == 'price-high' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="?sort=popular" {% if request.GET.sort == 'popular' %}selected{% endif %}>Most Popular</option>
                         </select>
                     </div>
                 </div>
@@ -527,8 +568,13 @@
                                         <a href="{{ product.get_url }}" class="btn-view">
                                             <i class="fas fa-eye me-1"></i> View
                                         </a>
-                                        <button class="btn-wishlist" title="Add to wishlist" onclick="addToWishlist('{{ product.id }}')">
-                                            <i class="far fa-heart"></i>
+
+                                        <button class="btn-add-quick btn btn-sm btn-outline-success" data-add-url="{% url 'cart:add_cart' product.id %}" aria-label="Add {{ product.product_name }} to cart" title="Add to cart">
+                                            <i class="fas fa-cart-plus" aria-hidden="true"></i>
+                                        </button>
+
+                                        <button class="btn-wishlist" title="Add to wishlist" data-product-id="{{ product.id }}" aria-pressed="false" aria-label="Add {{ product.product_name }} to wishlist">
+                                            <i class="far fa-heart" aria-hidden="true"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -600,11 +646,107 @@
 </section>
 
 <script>
-function addToWishlist(productId) {
-    // TODO: Implement wishlist functionality
-    console.log('Add to wishlist:', productId);
-    alert('Added to wishlist!');
-}
+document.addEventListener('DOMContentLoaded', function () {
+    function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split('; ') : [];
+        for (const cookie of cookies) {
+            const parts = cookie.split('=');
+            if (parts[0] === name) return decodeURIComponent(parts.slice(1).join('='));
+        }
+        return null;
+    }
+
+    const toast = window.showToast || function (msg, type) { alert(msg); };
+
+    // Sort select: update query param without reloading unnecessary parts
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function () {
+            const url = new URL(window.location);
+            const val = (this.value || '').trim();
+            if (!val) {
+                url.searchParams.delete('sort');
+            } else {
+                const params = val.startsWith('?') ? new URLSearchParams(val.slice(1)) : new URLSearchParams(val);
+                for (const [k, v] of params) {
+                    url.searchParams.set(k, v);
+                }
+            }
+            window.location.href = url.toString();
+        });
+    }
+
+    // Quick add to cart via AJAX
+    document.body.addEventListener('click', async function (e) {
+        const btn = e.target.closest('.btn-add-quick');
+        if (!btn) return;
+        e.preventDefault();
+        const url = btn.dataset.addUrl;
+        if (!url) return;
+        btn.disabled = true;
+        btn.classList.add('is-loading');
+        if (window.Loader && window.Loader.show) window.Loader.show();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: new URLSearchParams({ quantity: 1 }),
+                credentials: 'same-origin'
+            });
+            if (response.ok) {
+                let data = null;
+                const ct = response.headers.get('content-type') || '';
+                if (ct.includes('application/json')) data = await response.json();
+                toast((data && data.message) ? data.message : 'Added to cart', 'success');
+                const cartCountEl = document.querySelector('#cart-count');
+                if (cartCountEl && data && typeof data.cart_count !== 'undefined') cartCountEl.textContent = data.cart_count;
+            } else {
+                toast('Could not add to cart', 'error');
+                console.error('Quick add failed', response.status);
+            }
+        } catch (err) {
+            console.error(err);
+            toast('Network error. Please try again.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('is-loading');
+            if (window.Loader && window.Loader.hide) window.Loader.hide();
+        }
+    });
+
+    // Wishlist toggle (optimistic UI, backend wiring optional)
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-wishlist');
+        if (!btn) return;
+        e.preventDefault();
+        const productId = btn.dataset.productId;
+        const pressed = btn.getAttribute('aria-pressed') === 'true';
+        // Toggle UI
+        btn.setAttribute('aria-pressed', (!pressed).toString());
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fas', !pressed);
+            icon.classList.toggle('far', pressed);
+        }
+        toast(!pressed ? 'Added to wishlist' : 'Removed from wishlist', 'success');
+        // TODO: POST to backend to persist the wishlist change if you have an endpoint
+        // Example: fetch('/wishlist/toggle/', {method: 'POST', headers: {'X-CSRFToken': getCookie('csrftoken')}, body: new URLSearchParams({product_id: productId})})
+    });
+
+    // Keyboard activation support
+    document.querySelectorAll('.btn-wishlist, .btn-add-quick').forEach(el => {
+        el.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                el.click();
+            }
+        });
+    });
+});
 </script>
 
 {% endblock %}

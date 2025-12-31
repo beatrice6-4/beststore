@@ -1,23 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en-US" data-theme="light">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="BestStore - Online Shopping Platform">
-    <meta name="theme-color" content="#198754">
+    <meta name="theme-color" content="#0c88bd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BestStore">
     <title>{% block title %}BestStore | Online Shopping{% endblock %}</title>
 
-    <!-- Favicon -->
+    <!-- Favicon & App Icons -->
     <link rel="shortcut icon" href="{% static 'images/faavicom.jpg' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'images/faavicom.jpg' %}" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'images/faavicom.jpg' %}">
     <link rel="manifest" href="{% static 'manifest.json' %}">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Optimized -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- CSS Libraries -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVJkEZSMUkrQ6usznAUUDA7D29XkzpQsaNitWE37WmIkWlIklNcbF0RTHrCroGh/EtB0QDzz7pQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/adminlte/css/adminlte.min.css' %}">
 
@@ -25,510 +31,187 @@
     <style>
         :root {
             --primary: #0c88bd;
-            --primary-dark: #145c32;
+            --primary-light: #2da3d5;
             --secondary: #004080;
             --accent: #FF6B35;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
             --light-bg: #f8f9fa;
+            --lighter-bg: #ffffff;
             --border-color: #e9ecef;
             --text-dark: #1a1a1a;
             --text-muted: #6c757d;
+            --text-light: #ffffff;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
             --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        [data-theme="dark"] {
+            --light-bg: #1e1e2e;
+            --lighter-bg: #2a2a3e;
+            --border-color: #404050;
+            --text-dark: #e8e8e8;
+            --text-muted: #9ca3af;
+            color-scheme: dark;
         }
 
+        * { box-sizing: border-box; }
         html, body {
             height: 100%;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
-            color: var(--text-dark);
-        }
-
-        body {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* ============ NAVBAR ============ */
-        .main-header.navbar {
-            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-            box-shadow: var(--shadow-md);
-            padding: 12px 20px;
-            border: none;
-            height: auto;
-        }
-
-        .main-header .navbar-nav .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            font-weight: 500;
-            transition: all 0.25s ease;
-            padding: 8px 12px;
-        }
-
-        .main-header .navbar-nav .nav-link:hover {
-            color: #fff !important;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
-        }
-
-        .main-header .navbar-nav .nav-link.active {
-            color: #fff !important;
-            background: rgba(255,255,255,0.15);
-            border-radius: 6px;
-        }
-
-        .main-header .dropdown-menu {
-            border: none;
-            border-radius: 10px;
-            box-shadow: var(--shadow-lg);
-            padding: 8px 0;
-            min-width: 200px;
-        }
-
-        .main-header .dropdown-menu .dropdown-header {
-            padding: 12px 16px;
-            font-weight: 700;
-            color: var(--primary);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .main-header .dropdown-menu .dropdown-item {
-            padding: 10px 16px;
-            color: var(--text-dark);
-            transition: all 0.15s ease;
-        }
-
-        .main-header .dropdown-menu .dropdown-item:hover {
-            background: var(--light-bg);
-            color: var(--primary);
-            padding-left: 20px;
-        }
-
-        /* ============ SIDEBAR ============ */
-        .main-sidebar {
-            background: linear-gradient(180deg, #3c06e0 0%, #0808dc 100%);
-            box-shadow: var(--shadow-lg);
-            border-radius: 0 16px 16px 0;
-        }
-
-        .brand-link {
-            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-            border-bottom: none;
-            padding: 12px 16px;
-            height: auto;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-link img {
-            height: 40px;
-            width: auto;
-            opacity: 0.95;
-        }
-
-        .brand-link .brand-text {
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: #fff;
-        }
-
-        .sidebar {
-            padding: 16px 12px;
-            background: transparent;
-        }
-
-        .user-panel {
-            background: rgba(233, 15, 15, 0.05);
-            border-radius: 10px;
-            padding: 12px !important;
-            margin-bottom: 16px !important;
-        }
-
-        .user-panel .image {
-            margin-right: 10px;
-        }
-
-        .user-panel .info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .user-panel .info a {
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.85) !important;
-            font-weight: 500;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 6px;
-            transition: all 0.2s ease;
-            position: relative;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar .nav-link i {
-            width: 20px;
-            text-align: center;
-            margin-right: 10px;
-        }
-
-        .sidebar .nav-link p {
             margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.08);
-            color: #fff !important;
-            border-left-color: var(--accent);
-            transform: translateX(4px);
-        }
-
-        .sidebar .nav-link.active {
-            background: linear-gradient(90deg, var(--primary) 0%, rgba(25,135,84,0.7) 100%);
-            color: #fff !important;
-            font-weight: 600;
-            border-left-color: var(--accent);
-            box-shadow: 0 2px 8px rgba(25,135,84,0.2);
-        }
-
-        /* ============ CONTENT ============ */
-        .content-wrapper {
-            min-height: 100vh;
-            background: transparent;
-            padding: 0;
-        }
-
-        .content {
-            padding: 20px;
-            background: transparent;
-        }
-
-        .content .container-fluid {
-            max-width: 1400px;
-        }
-
-        /* Page header */
-        .content > .container-fluid > .row:first-child {
-            margin-bottom: 24px;
-        }
-
-        .content h1 {
+            font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e8f0f5);
             color: var(--text-dark);
-            font-weight: 700;
-            font-size: 1.8rem;
+            transition: var(--transition);
         }
 
-        .breadcrumb {
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            gap: 8px;
-        }
+        /* NAVBAR */
+        .main-header.navbar { position: sticky; top: 0; z-index: 1030; backdrop-filter: blur(8px); }
+        .navbar-search { flex: 0 1 360px; position: relative; margin: 0 20px; }
+        .search-input { width: 100%; padding: 8px 12px; padding-right: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.12); color: #fff; }
+        .search-input::placeholder { color: rgba(255,255,255,0.7); }
+        .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.6); }
 
-        .breadcrumb-item {
-            font-size: 0.9rem;
-        }
+        /* SIDEBAR */
+        .brand-link { padding: 12px 16px; display:flex; align-items:center; gap:10px; }
+        .brand-image { height:40px; }
+        .brand-text { color: #fff; font-weight:800; }
 
-        .breadcrumb-item a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
+        /* CONTENT */
+        .content { padding: 24px; }
+        .page-subtitle { color: var(--text-muted); }
 
-        .breadcrumb-item a:hover {
-            text-decoration: underline;
-        }
+        /* MESSAGES */
+        .messages { margin-bottom: 16px; }
+        .alert { border-radius: 10px; padding: 12px 16px; }
 
-        .breadcrumb-item.active {
-            color: var(--text-muted);
-        }
+        /* FOOTER */
+        .main-footer { padding: 24px; margin-top: 40px; }
 
-        /* ============ MESSAGES / ALERTS ============ */
-        .messages {
-            padding: 0;
-            margin-bottom: 16px;
-        }
+        /* LOADER */
+        #page-loader { display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.95); position: fixed; inset:0; z-index: 99999; }
+        #page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader { width: 56px; height: 56px; border-radius:50%; border:4px solid rgba(12,136,189,0.15); border-top-color: var(--primary); animation: spin 0.9s linear infinite; }
+        @keyframes spin { to{ transform: rotate(360deg); } }
 
-        .alert {
-            margin: 0 0 12px 0;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: none;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideDown 0.3s ease;
-        }
+        /* Responsive tweaks */
+        @media (max-width:768px){ .navbar-search{display:none;} .brand-text{display:none;} }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-
-        .alert-error, .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border-left: 4px solid #17a2b8;
-        }
-
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-left: 4px solid #ffc107;
-        }
-
-        .alert i {
-            font-size: 1.1rem;
-        }
-
-        /* ============ PAGE LOADER ============ */
-        #page-loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(4px);
-            z-index: 99999;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            visibility: visible;
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        #page-loader.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .loader {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: 4px solid rgba(25,135,84,0.1);
-            border-top-color: var(--primary);
-            animation: spin 0.9s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ============ FOOTER ============ */
-        .main-footer {
-            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            border-top: 1px solid var(--border-color);
-            margin-top: 40px;
-        }
-
-        .main-footer strong {
-            font-weight: 600;
-        }
-
-        /* ============ RESPONSIVE ============ */
-        @media (max-width: 768px) {
-            .content h1 {
-                font-size: 1.4rem;
-            }
-
-            .brand-link .brand-text {
-                display: none;
-            }
-
-            .sidebar {
-                padding: 12px 8px;
-            }
-
-            .main-sidebar {
-                border-radius: 0;
-            }
-
-            .content {
-                padding: 12px;
-            }
-        }
-
-        /* ============ UTILITY CLASSES ============ */
-        .wrapper {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .content-wrapper {
-            flex: 1;
-        }
-
-        .hold-transition * {
-            transition: none !important;
-        }
-
-        .fade.show {
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
     </style>
 
     {% block extra_head %}{% endblock %}
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini" role="application">
 <div class="wrapper">
 
     <!-- Page Loader -->
-    <div id="page-loader" role="status" aria-label="Loading">
-        <div class="loader" aria-hidden="true"></div>
+    <div id="page-loader" role="status" aria-label="Loading page">
+        <div>
+            <div class="loader" aria-hidden="true"></div>
+            <div class="loader-text" style="text-align:center;margin-top:10px;color:var(--text-muted);">Loading...</div>
+        </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
     <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-dark navbar-light">
+    <nav class="main-header navbar navbar-expand navbar-dark" role="navigation" aria-label="Main navigation">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button" title="Toggle Menu">
-                    <i class="fas fa-bars"></i>
-                </a>
+                <button class="nav-link" data-widget="pushmenu" aria-label="Toggle sidebar menu" title="Toggle Menu">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="{% url 'dashboard' %}" class="nav-link">
-                    <i class="fas fa-home me-2"></i> Dashboard
+                <a href="{% url 'dashboard' %}" class="nav-link" title="Dashboard">
+                    <i class="fas fa-home me-2" aria-hidden="true"></i> Dashboard
                 </a>
             </li>
         </ul>
 
-        <ul class="navbar-nav ml-auto">
-            <!-- User Dropdown -->
+        <div class="navbar-search">
+            <input id="navbar-search" class="search-input" type="search" placeholder="Search products, orders..." aria-label="Search">
+            <i class="fas fa-search search-icon" aria-hidden="true"></i>
+        </div>
+
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme" style="background:transparent;border:none;color:#fff;font-size:1.1rem">
+                    <i class="fas fa-moon" aria-hidden="true"></i>
+                </button>
+            </li>
+
             <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button" title="Account">
-                    <i class="fas fa-user-circle"></i>
+                <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-badge" class="badge badge-danger" style="position:absolute;top:6px;right:6px;font-size:0.6rem">3</span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                    <span class="dropdown-header">
-                        <i class="fas fa-user-circle me-2"></i> Account
-                    </span>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <span class="dropdown-header"><i class="fas fa-bell me-2"></i> Notifications</span>
                     <div class="dropdown-divider"></div>
-                    <a href="{% url 'profile' %}" class="dropdown-item">
-                        <i class="fas fa-id-card me-2"></i> Profile
-                    </a>
-                    <a href="{% url 'myOrders' %}" class="dropdown-item">
-                        <i class="fas fa-shopping-bag me-2"></i> My Orders
-                    </a>
+                    <a class="dropdown-item" href="#"><strong>New Order Received</strong><br><small class="text-muted">Just now</small></a>
+                    <a class="dropdown-item" href="#"><strong>Stock Update</strong><br><small class="text-muted">2 minutes ago</small></a>
                     <div class="dropdown-divider"></div>
-                    <a href="{% url 'logout' %}" class="dropdown-item text-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i> Logout
-                    </a>
+                    <a class="dropdown-item" href="#">See all notifications</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button" aria-label="Account menu">
+                    <i class="fas fa-user-circle fa-lg"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <span class="dropdown-header"><i class="fas fa-user-circle me-2"></i> Account</span>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'profile' %}" class="dropdown-item">Profile</a>
+                    <a href="{% url 'myOrders' %}" class="dropdown-item">My Orders</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'logout' %}" class="dropdown-item text-danger">Logout</a>
                 </div>
             </li>
         </ul>
     </nav>
-    <!-- /.navbar -->
 
     <!-- Sidebar -->
-    <aside class="main-sidebar elevation-4 sidebar-dark-primary">
+    <aside class="main-sidebar elevation-4 sidebar-dark-primary" role="navigation" aria-label="Sidebar menu">
         <a href="{% url 'dashboard' %}" class="brand-link">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" class="brand-image">   
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="brand-image">
+            <span class="brand-text">BestStore</span>
         </a>
 
         <div class="sidebar">
-            <!-- User Panel -->
             <div class="user-panel mt-3 pb-3 mb-3">
-                <div class="image">
-                    <i class="fas fa-user-circle fa-2x text-success"></i>
-                </div>
-                <div class="info">
-                    <a href="{% url 'profile' %}" class="d-block">{{ user.username|default:"Guest" }}</a>
-                    <small class="text-muted">{{ user.email|default:"" }}</small>
-                </div>
+                <div class="image"><i class="fas fa-user-circle fa-2x text-success" aria-hidden="true"></i></div>
+                <div class="info"><a href="{% url 'profile' %}" class="d-block">{{ user.username|default:"Guest" }}</a><small class="text-muted">{{ user.email|default:"" }}</small></div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="mt-4">
+            <nav class="mt-4" role="navigation">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard' %}" class="nav-link">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'store:store' %}" class="nav-link">
-                            <i class="nav-icon fas fa-store"></i>
-                            <p>Store</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'cart:cart' %}" class="nav-link">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Shopping Cart</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'myOrders' %}" class="nav-link">
-                            <i class="nav-icon fas fa-list-alt"></i>
-                            <p>My Orders</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'about' %}" class="nav-link">
-                            <i class="nav-icon fas fa-info-circle"></i>
-                            <p>About Us</p>
-                        </a>
-                    </li>
+                    <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link"><i class="nav-icon fas fa-chart-line"></i><p>Dashboard</p></a></li>
+                    <li class="nav-item"><a href="{% url 'store:store' %}" class="nav-link"><i class="nav-icon fas fa-store"></i><p>Store</p></a></li>
+                    <li class="nav-item"><a href="{% url 'cart:cart' %}" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i><p>Shopping Cart</p></a></li>
+                    <li class="nav-item"><a href="{% url 'myOrders' %}" class="nav-link"><i class="nav-icon fas fa-list-alt"></i><p>My Orders</p></a></li>
+                    <li class="nav-item"><a href="{% url 'about' %}" class="nav-link"><i class="nav-icon fas fa-info-circle"></i><p>About Us</p></a></li>
                 </ul>
             </nav>
         </div>
     </aside>
-    <!-- /.sidebar -->
 
     <!-- Content Wrapper -->
     <div class="content-wrapper">
         <!-- Flash Messages -->
-        <div class="messages">
+        <div class="messages" role="region" aria-label="Flash messages" aria-live="polite">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} fade show" role="alert">
-                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'info' %}info-circle{% else %}warning{% endif %}"></i>
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'info' %}info-circle{% else %}exclamation-triangle{% endif %}" aria-hidden="true"></i>
                         <div>{{ message }}</div>
+                        <button type="button" class="alert-close" data-bs-dismiss="alert" aria-label="Close alert"><i class="fas fa-times"></i></button>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -537,104 +220,63 @@
         <!-- Page Header -->
         <div class="content">
             <div class="container-fluid">
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h1 class="m-0">{% block page_title %}Dashboard{% endblock %}</h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="row mb-4"><div class="col-12"><div class="d-flex justify-content-between align-items-center"><div><h1 class="m-0">{% block page_title %}Dashboard{% endblock %}</h1><p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p></div></div></div></div>
 
-                <!-- Breadcrumb -->
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Home</a></li>
-                                <li class="breadcrumb-item active">{% block breadcrumb %}Dashboard{% endblock %}</li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
+                <div class="row mb-3"><div class="col-12"><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Home</a></li><li class="breadcrumb-item active">{% block breadcrumb %}Dashboard{% endblock %}</li></ol></nav></div></div>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="content">
-            <div class="container-fluid">
-                {% block content %}{% endblock %}
-            </div>
-        </div>
+        <div class="content"><div class="container-fluid">{% block content %}{% endblock %}</div></div>
 
         <!-- Footer -->
-        <footer class="main-footer mt-5">
-            <strong>&copy; 2025 BestStore | Mama Maasai Bakers</strong> — All rights reserved.
+        <footer class="main-footer mt-auto" role="contentinfo">
+            <div class="text-center"><strong>&copy; {{ now|date:"Y" }} BestStore | Mama Maasai Bakers</strong> — All rights reserved.
+                <div class="footer-links mt-2"><a href="#">Privacy Policy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+            </div>
         </footer>
     </div>
-    <!-- /.content-wrapper -->
 
 </div>
-<!-- ./wrapper -->
 
 <!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSo6HP5Tr6wO0SKzSoHxwj8+7k5g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" integrity="sha512-VK2zcvntEufaimc+efOYi622VN5ZacdnuEeBSpohgg1Q9atZ3yi/IH80TC+BTsb+sa2YPCBM7htitans8bVtVFg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="{% static 'vendor/adminlte/js/adminlte.min.js' %}"></script>
 
 <script>
-(function() {
-    // Auto-hide flash messages
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.classList.remove('show');
-            setTimeout(() => alert.remove(), 300);
-        });
-    }, 5000);
+(function(){
+    'use strict';
+    const CFG = { THEME_KEY: 'beststore:theme', SEARCH_DEBOUNCE: 500, LOADER_TIMEOUT: 8000, MESSAGE_AUTO_HIDE: 5000, TOAST_DURATION: 5000 };
 
-    // Service Worker Registration
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register("{% static 'service-worker.js' %}")
-            .then(reg => console.log('Service Worker registered'))
-            .catch(err => console.warn('Service Worker registration failed:', err));
+    const Theme = {
+        init(){ const t = localStorage.getItem(CFG.THEME_KEY) || 'light'; document.documentElement.setAttribute('data-theme', t); this.updateIcon(t); this.setup(); },
+        toggle(){ const cur = document.documentElement.getAttribute('data-theme'); this.set(cur === 'light' ? 'dark' : 'light'); },
+        set(v){ document.documentElement.setAttribute('data-theme', v); localStorage.setItem(CFG.THEME_KEY, v); this.updateIcon(v); },
+        updateIcon(theme){ const btn = document.getElementById('theme-toggle'); if(!btn) return; const i = btn.querySelector('i'); if(i) i.className = theme === 'light' ? 'fas fa-sun' : 'fas fa-moon'; },
+        setup(){ const btn = document.getElementById('theme-toggle'); btn?.addEventListener('click', ()=> this.toggle()); }
+    };
+
+    class Toast { constructor(text, type='info', duration=CFG.TOAST_DURATION){ this.text = text; this.type = type; this.duration = duration; this.show(); }
+        show(){ let container = document.getElementById('toast-container'); if(!container){ container = document.createElement('div'); container.id='toast-container'; container.className='toast-container'; container.setAttribute('aria-live','polite'); container.setAttribute('aria-atomic','true'); document.body.appendChild(container);} const el = document.createElement('div'); el.className='toast '+this.type; el.innerHTML=`<i class="fas fa-${this.icon()} me-2"></i><div class="toast-body">${this.escape(this.text)}</div><button class="toast-close" aria-label="Close"><i class="fas fa-times"></i></button>`; el.querySelector('.toast-close').addEventListener('click', ()=> el.remove()); container.appendChild(el); setTimeout(()=>{ el.remove(); }, this.duration); }
+        icon(){ return ({success:'check-circle',error:'exclamation-circle',warning:'exclamation-triangle',info:'info-circle'})[this.type]||'info-circle'; }
+        escape(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
     }
+    window.showToast = (msg,type='info')=> new Toast(msg,type);
 
-    // Page Loader
-    const loader = document.getElementById('page-loader');
-    function hideLoader() {
-        if (loader) {
-            loader.classList.add('hidden');
-            setTimeout(() => {
-                if (loader && loader.parentNode) {
-                    loader.parentNode.removeChild(loader);
-                }
-            }, 300);
-        }
-    }
+    const Loader = { init(){ this.el = document.getElementById('page-loader'); window.addEventListener('load', ()=> this.hide()); setTimeout(()=> this.hide(), CFG.LOADER_TIMEOUT); document.addEventListener('click', e=>{ const a = e.target.closest('a[href]'); if(!a) return; if(this.isInternal(a)) this.show(); }, true); document.addEventListener('submit', ()=> this.show(), true); }, show(){ this.el?.classList.remove('hidden'); }, hide(){ if(!this.el) return; this.el.classList.add('hidden'); setTimeout(()=> this.el?.remove(), 300); }, isInternal(a){ const href = a.getAttribute('href'); if(!href || href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('javascript:')) return false; if(a.target && a.target!=='_self') return false; try{ const u = new URL(href, location.href); return u.origin === location.origin; }catch{return false;} }
+    };
 
-    window.addEventListener('load', hideLoader);
-    setTimeout(hideLoader, 8000);
+    const Flash = { init(){ setTimeout(()=>{ document.querySelectorAll('.alert').forEach((el,i)=> setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=> el.remove(),300); }, i*100)); }, CFG.MESSAGE_AUTO_HIDE); } };
 
-    // Show loader on link clicks
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('a[href]');
-        if (!link) return;
-        const href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:')) return;
-        if (link.target && link.target !== '_self') return;
-        try {
-            const url = new URL(href, window.location.href);
-            if (url.origin !== window.location.origin) return;
-        } catch { return; }
-        if (loader) loader.classList.remove('hidden');
-    }, true);
+    const Search = { init(){ const input = document.getElementById('navbar-search'); if(!input) return; input.addEventListener('keyup', this.debounce(e=> { this.query(e.target.value); }, CFG.SEARCH_DEBOUNCE)); input.addEventListener('keydown', e=>{ if(e.key==='Escape') input.blur(); }); }, query(q){ if(!q.trim()) return; console.log('Search:', q); /* implement search */ }, debounce(fn,wait){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=> fn(...a), wait); }; } };
 
-    // Show loader on form submission
-    document.addEventListener('submit', () => {
-        if (loader) loader.classList.remove('hidden');
-    }, true);
+    const Keys = { init(){ document.addEventListener('keydown', e=>{ const ctrl = e.ctrlKey||e.metaKey; if(ctrl && e.key==='k'){ e.preventDefault(); document.getElementById('navbar-search')?.focus(); } if(ctrl && e.key==='l'){ e.preventDefault(); Theme.toggle(); } if(e.key==='Escape'){ document.querySelectorAll('.modal.show').forEach(m=> bootstrap.Modal.getInstance(m)?.hide()); } }); } };
+
+    const SW = { init(){ if('serviceWorker' in navigator){ navigator.serviceWorker.register("{% static 'service-worker.js' %}").then(()=> console.log('SW registered')).catch(()=>{}); } } };
+
+    function init(){ Theme.init(); Loader.init(); Flash.init(); Search.init(); Keys.init(); SW.init(); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
 

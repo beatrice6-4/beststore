@@ -117,11 +117,30 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
 
 # Database configuration
+# PostgreSQL Configuration
 if os.environ.get('DATABASE_URL'):
+    # Use DATABASE_URL from environment (Render, Heroku, etc.)
     DATABASES = {
         'default': dj_database_url.config(conn_max_age=600)
     }
+elif os.environ.get('DB_ENGINE') == 'postgresql':
+    # PostgreSQL configuration using individual environment variables
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'postgres'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'xxxxxxx'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {
+                'sslmode': os.environ.get('DB_SSLMODE', 'prefer'),
+            }
+        }
+    }
 else:
+    # SQLite configuration for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
