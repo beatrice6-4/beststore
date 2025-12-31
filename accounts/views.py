@@ -110,7 +110,7 @@ def login(request):
                 pass
 
             auth.login(request, user)
-            messages.success(request, 'You are now logged in.')
+            messages.success(request, 'You are now logged in the system.')
 
             role = getattr(user, 'role', None)
             # Strict role-based redirect
@@ -120,7 +120,7 @@ def login(request):
                 return redirect('admin_dashboard')
             return redirect('dashboard')
 
-        messages.error(request, 'Invalid login credentials')
+        messages.error(request, 'Invalid login credentials, try again')
         return redirect('login')
 
     return render(request, 'accounts/login.html')
@@ -129,7 +129,7 @@ def login(request):
 @login_required(login_url = 'login')
 def logout(request):
     auth.logout(request)
-    messages.success(request, 'You are logged out.')
+    messages.success(request, 'You are logged out of the system.')
     return redirect('login')
 
 
@@ -146,7 +146,7 @@ def activate(request, uidb64, token):
         messages.success(request, 'Congratulations! Your account is activated.')
         return redirect('login')
     else:
-        messages.error(request, 'Invalid activation link')
+        messages.error(request, 'Invalid activation link, register again')
         return redirect('register')
 
 
