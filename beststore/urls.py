@@ -20,6 +20,7 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('cdmis/', include('CDMIS.urls')),
     path('school/', include('school.urls')),
+    path('loans/', include('loans.urls')),
     path('cart/', include('carts.urls')),  # Carts app URLs
     
     # API endpoints

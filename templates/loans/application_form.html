@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_create %}Apply for Loan{% else %}Edit Application{% endif %} - BestStore{% endblock %}
+
+{% block page_title %}{% if is_create %}Apply for Loan{% else %}Edit Application{% endif %}{% endblock %}
+{% block page_subtitle %}{% if is_create %}Fill in your details to apply for a loan{% else %}Update your application details{% endif %}{% endblock %}
+{% block breadcrumb %}{% if is_create %}New Application{% else %}Edit Application{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" enctype="multipart/form-data" class="card p-4">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Personal Information Section -->
+            <h5 class="mb-3 border-bottom pb-2"><i class="fas fa-user me-2"></i>Personal Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.first_name.label }}</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}<div class="invalid-feedback d-block">{{ form.first_name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ form.middle_name.label }}</label>
+                    {{ form.middle_name }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ form.last_name.label }}</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}<div class="invalid-feedback d-block">{{ form.last_name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <h5 class="mb-3 border-bottom pb-2 mt-4"><i class="fas fa-phone me-2"></i>Contact Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.phone_number.label }}</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}<div class="invalid-feedback d-block">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                    <small class="form-text text-muted">Format: +254712345678</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Identity Section -->
+            <h5 class="mb-3 border-bottom pb-2 mt-4"><i class="fas fa-id-card me-2"></i>Identity Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.national_id.label }}</label>
+                    {{ form.national_id }}
+                    {% if form.national_id.errors %}<div class="invalid-feedback d-block">{{ form.national_id.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.id_image.label }}</label>
+                    {{ form.id_image }}
+                    {% if form.id_image.errors %}<div class="invalid-feedback d-block">{{ form.id_image.errors.0 }}</div>{% endif %}
+                    <small class="form-text text-muted">Accepted formats: JPG, PNG, PDF (Max 5MB)</small>
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <h5 class="mb-3 border-bottom pb-2 mt-4"><i class="fas fa-map-marker-alt me-2"></i>Location Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.address.label }}</label>
+                    {{ form.address }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ form.city.label }}</label>
+                    {{ form.city }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ form.county.label }}</label>
+                    {{ form.county }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.postal_code.label }}</label>
+                    {{ form.postal_code }}
+                </div>
+            </div>
+
+            <!-- Get Current Location Button -->
+            <div class="mb-3">
+                <button type="button" class="btn btn-outline-info" id="get-location">
+                    <i class="fas fa-location-arrow me-2"></i>Get Current Location
+                </button>
+                <small class="form-text text-muted d-block mt-2">Allow browser access to location for geo-tagging</small>
+            </div>
+
+            <!-- Institution Section -->
+            <h5 class="mb-3 border-bottom pb-2 mt-4"><i class="fas fa-building me-2"></i>Institution Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.institution.label }}</label>
+                    {{ form.institution }}
+                    {% if form.institution.errors %}<div class="invalid-feedback d-block">{{ form.institution.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ form.institution_id.label }}</label>
+                    {{ form.institution_id }}
+                </div>
+            </div>
+
+            <!-- Loan Details Section -->
+            <h5 class="mb-3 border-bottom pb-2 mt-4"><i class="fas fa-money-bill me-2"></i>Loan Details</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.loan_amount.label }}</label>
+                    {{ form.loan_amount }}
+                    {% if form.loan_amount.errors %}<div class="invalid-feedback d-block">{{ form.loan_amount.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.loan_tenure.label }}</label>
+                    {{ form.loan_tenure }}
+                    {% if form.loan_tenure.errors %}<div class="invalid-feedback d-block">{{ form.loan_tenure.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Monthly Payment</label>
+                    <input type="text" class="form-control" id="monthly-payment" readonly>
+                    <small class="form-text text-muted">Calculated at 12% p.a.</small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">{{ form.purpose.label }}</label>
+                {{ form.purpose }}
+                {% if form.purpose.errors %}<div class="invalid-feedback d-block">{{ form.purpose.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- Hidden fields -->
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+            <!-- Buttons -->
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save me-2"></i>{% if is_create %}Submit Application{% else %}Update Application{% endif %}
+                </button>
+                <a href="{% url 'loans:application_list' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Sidebar -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Application Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Complete all fields</strong> - This helps us process your application faster
+                    </li>
+                    <li class="mb-2">
+                        <strong>Upload clear ID image</strong> - Ensure ID is readable and well-lit
+                    </li>
+                    <li class="mb-2">
+                        <strong>Be honest</strong> - Provide accurate information for verification
+                    </li>
+                    <li class="mb-2">
+                        <strong>Current location</strong> - Allow access to your location for better service
+                    </li>
+                    <li class="mb-2">
+                        <strong>Keep documents ready</strong> - You may be asked to upload supporting documents
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-question-circle me-2"></i>Need Help?</h6>
+            </div>
+            <div class="card-body">
+                <p>If you have any questions about the loan application process, please contact our support team.</p>
+                <a href="{% url 'about' %}" class="btn btn-sm btn-outline-primary">Contact Support</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get current location
+    document.getElementById('get-location').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('id_latitude').value = position.coords.latitude;
+                document.getElementById('id_longitude').value = position.coords.longitude;
+                showToast('Location captured successfully', 'success');
+            }, function(error) {
+                showToast('Unable to get location: ' + error.message, 'error');
+            });
+        } else {
+            showToast('Geolocation is not supported by your browser', 'error');
+        }
+    });
+
+    // Calculate monthly payment
+    function calculateMonthly() {
+        const amount = parseFloat(document.getElementById('id_loan_amount').value) || 0;
+        const months = parseFloat(document.getElementById('id_loan_tenure').value) || 12;
+        const rate = 0.12 / 12; // 12% annual rate
+        
+        if (amount > 0 && months > 0) {
+            const monthly = (amount * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
+            document.getElementById('monthly-payment').value = 'KES ' + monthly.toFixed(2);
+        }
+    }
+
+    document.getElementById('id_loan_amount').addEventListener('change', calculateMonthly);
+    document.getElementById('id_loan_tenure').addEventListener('change', calculateMonthly);
+    calculateMonthly();
+</script>
+{% endblock %}

@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'storages',
     'CDMIS',
     'school',
+    'loans',
     'cloudinary_storage',
     'cloudinary',
 ]

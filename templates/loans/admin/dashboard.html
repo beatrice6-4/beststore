@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Loans - BestStore{% endblock %}
+
+{% block page_title %}Loan Administration Dashboard{% endblock %}
+{% block page_subtitle %}Overview of all loan applications{% endblock %}
+{% block breadcrumb %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Total Applications -->
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-primary">
+            <div class="card-body">
+                <div class="text-primary font-weight-bold text-uppercase mb-1">Total Applications</div>
+                <div class="h3 mb-0">{{ total_applications }}</div>
+            </div>
+            <div class="card-footer bg-light">
+                <small><i class="fas fa-arrow-right me-2"></i>
+                    <a href="{% url 'loans:admin_list' %}">View Details</a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Applications -->
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-warning">
+            <div class="card-body">
+                <div class="text-warning font-weight-bold text-uppercase mb-1">Pending Review</div>
+                <div class="h3 mb-0">{{ pending_count }}</div>
+            </div>
+            <div class="card-footer bg-light">
+                <small><i class="fas fa-arrow-right me-2"></i>
+                    <a href="{% url 'loans:admin_list' %}?status=pending">View Pending</a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verified Applications -->
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-success">
+            <div class="card-body">
+                <div class="text-success font-weight-bold text-uppercase mb-1">Verified</div>
+                <div class="h3 mb-0">{{ verified_count }}</div>
+            </div>
+            <div class="card-footer bg-light">
+                <small><i class="fas fa-arrow-right me-2"></i>
+                    <a href="{% url 'loans:admin_list' %}?status=verified">View Verified</a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disbursed Applications -->
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-info">
+            <div class="card-body">
+                <div class="text-info font-weight-bold text-uppercase mb-1">Disbursed</div>
+                <div class="h3 mb-0">{{ disbursed_count }}</div>
+            </div>
+            <div class="card-footer bg-light">
+                <small><i class="fas fa-arrow-right me-2"></i>
+                    <a href="{% url 'loans:admin_list' %}?status=disbursed">View Disbursed</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Total Loan Amount -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Total Loan Amount</h6>
+            </div>
+            <div class="card-body">
+                <div class="h4 text-primary">KES {{ total_amount|floatformat:0 }}</div>
+                <small class="text-muted">Across {{ total_applications }} applications</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Status -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="fas fa-check-circle me-2"></i>Verification Status</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Pending</span>
+                    <span class="badge bg-warning">{{ pending_count }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Verified</span>
+                    <span class="badge bg-success">{{ verified_count }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Rejected</span>
+                    <span class="badge bg-danger">{{ rejected_count }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Disbursed</span>
+                    <span class="badge bg-info">{{ disbursed_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-tasks me-2"></i>Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'loans:admin_list' %}?status=pending" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-clock me-2"></i>Review Pending
+                    </a>
+                    <a href="{% url 'loans:admin_list' %}?status=verified" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-check me-2"></i>Process Verified
+                    </a>
+                    <a href="{% url 'loans:admin_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>All Applications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Applications -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>Recent Applications</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Applicant</th>
+                            <th>National ID</th>
+                            <th>Email</th>
+                            <th>Loan Amount</th>
+                            <th>Status</th>
+                            <th>Application Date</th>
+                            <th>Days Pending</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in recent_applications %}
+                            <tr>
+                                <td>
+                                    <strong>{{ app.get_full_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ app.phone_number }}</small>
+                                </td>
+                                <td>{{ app.national_id }}</td>
+                                <td>{{ app.email }}</td>
+                                <td>
+                                    <strong>KES {{ app.loan_amount|floatformat:0 }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ app.loan_duration }} months</small>
+                                </td>
+                                <td>
+                                    {% if app.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif app.status == 'verified' %}
+                                        <span class="badge bg-success">Verified</span>
+                                    {% elif app.status == 'disbursed' %}
+                                        <span class="badge bg-info">Disbursed</span>
+                                    {% elif app.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ app.created_at|date:"M d, Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ app.created_at|time:"H:i" }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ app.days_pending }} days</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'loans:admin_verify' app.pk %}" class="btn btn-sm btn-primary" title="Verify">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                    <a href="{% url 'loans:application_detail' app.pk %}" class="btn btn-sm btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox me-2"></i>No applications yet
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if recent_applications %}
+                <div class="card-footer">
+                    <a href="{% url 'loans:admin_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-arrow-right me-2"></i>View All Applications
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary {
+        border-left: 4px solid #007bff !important;
+    }
+    .border-left-warning {
+        border-left: 4px solid #ffc107 !important;
+    }
+    .border-left-success {
+        border-left: 4px solid #28a745 !important;
+    }
+    .border-left-info {
+        border-left: 4px solid #17a2b8 !important;
+    }
+    .text-uppercase {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}

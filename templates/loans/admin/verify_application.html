@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify Application - BestStore{% endblock %}
+
+{% block page_title %}Verify Loan Application{% endblock %}
+{% block page_subtitle %}Application ID: {{ application.id }}{% endblock %}
+{% block breadcrumb %}Verify Application{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Application Summary -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Applicant Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <strong>Full Name</strong>
+                        <p class="text-muted">{{ application.get_full_name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Email</strong>
+                        <p class="text-muted">
+                            <a href="mailto:{{ application.email }}">{{ application.email }}</a>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Phone Number</strong>
+                        <p class="text-muted">{{ application.phone_number }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>National ID</strong>
+                        <p class="text-muted"><code>{{ application.national_id }}</code></p>
+                    </div>
+                    <div class="col-md-6 mb-0">
+                        <strong>Institution</strong>
+                        <p class="text-muted">{{ application.institution }}</p>
+                    </div>
+                    <div class="col-md-6 mb-0">
+                        <strong>Status</strong>
+                        <p class="text-muted">
+                            {% if application.status == 'pending' %}
+                                <span class="badge bg-warning">Pending Review</span>
+                            {% elif application.status == 'verified' %}
+                                <span class="badge bg-success">Verified</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loan Details -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Loan Details</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <strong>Requested Amount</strong>
+                        <p class="h5 text-success">KES {{ application.loan_amount|floatformat:0 }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Loan Duration</strong>
+                        <p class="h5">{{ application.loan_duration }} months</p>
+                    </div>
+                    <div class="col-md-6 mb-0">
+                        <strong>Monthly Payment</strong>
+                        <p class="h5">KES {{ application.monthly_payment|floatformat:0 }}</p>
+                    </div>
+                    <div class="col-md-6 mb-0">
+                        <strong>Interest Rate</strong>
+                        <p class="h5">12% p.a.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Location Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <strong>County</strong>
+                        <p class="text-muted">{{ application.county }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Sub-County</strong>
+                        <p class="text-muted">{{ application.sub_county }}</p>
+                    </div>
+                    <div class="col-md-12 mb-0">
+                        <strong>Geolocation</strong>
+                        <p class="text-muted">
+                            Latitude: {{ application.latitude }}<br>
+                            Longitude: {{ application.longitude }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ID Image -->
+        {% if application.id_image %}
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-id-card me-2"></i>National ID Image</h6>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ application.id_image.url }}" alt="National ID" class="img-fluid rounded" 
+                         style="max-height: 400px;">
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Supporting Documents -->
+        {% if application.loandocument_set.all %}
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Supporting Documents</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Document Type</th>
+                                <th>Uploaded Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in application.loandocument_set.all %}
+                                <tr>
+                                    <td>{{ doc.get_document_type_display }}</td>
+                                    <td>{{ doc.uploaded_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        <a href="{{ doc.document_file.url }}" target="_blank" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download me-2"></i>Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Verification Form -->
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h6 class="mb-0"><i class="fas fa-check-circle me-2"></i>Verification Decision</h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Decision</strong></label>
+                        <div class="btn-group w-100" role="group">
+                            {% for value, label in form.decision.field.choices %}
+                                <input type="radio" class="btn-check" name="decision" id="decision_{{ value }}" 
+                                       value="{{ value }}" {% if form.decision.value == value %}checked{% endif %}>
+                                <label class="btn btn-outline-{% if value == 'approved' %}success{% else %}danger{% endif %}" 
+                                       for="decision_{{ value }}">
+                                    {% if value == 'approved' %}
+                                        <i class="fas fa-check me-2"></i>Approve
+                                    {% else %}
+                                        <i class="fas fa-times me-2"></i>Reject
+                                    {% endif %}
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% if form.decision.errors %}
+                            <div class="invalid-feedback d-block">{{ form.decision.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.verification_notes.id_for_label }}" class="form-label">
+                            <strong>{{ form.verification_notes.label }}</strong>
+                        </label>
+                        {{ form.verification_notes }}
+                        <small class="form-text text-muted d-block mt-2">Include your findings and recommendations</small>
+                        {% if form.verification_notes.errors %}
+                            <div class="invalid-feedback d-block">{{ form.verification_notes.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div id="rejection-section" style="display: none;">
+                        <div class="mb-3">
+                            <label for="{{ form.rejection_reason.id_for_label }}" class="form-label">
+                                <strong>{{ form.rejection_reason.label }}</strong>
+                            </label>
+                            {{ form.rejection_reason }}
+                            <small class="form-text text-muted d-block mt-2">Explain why the application is being rejected</small>
+                            {% if form.rejection_reason.errors %}
+                                <div class="invalid-feedback d-block">{{ form.rejection_reason.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Decision
+                        </button>
+                        <a href="{% url 'loans:admin_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Verification Checklist -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0"><i class="fas fa-tasks me-2"></i>Verification Checklist</h6>
+            </div>
+            <div class="card-body">
+                {% for step in verification_steps %}
+                    <div class="mb-2">
+                        <div class="form-check">
+                            {% if step.status == 'passed' %}
+                                <input class="form-check-input" type="checkbox" id="step_{{ step.id }}" checked disabled>
+                                <label class="form-check-label text-success" for="step_{{ step.id }}">
+                                    <strong>{{ step.get_verification_step_display }}</strong>
+                                </label>
+                            {% elif step.status == 'failed' %}
+                                <input class="form-check-input is-invalid" type="checkbox" id="step_{{ step.id }}" disabled>
+                                <label class="form-check-label text-danger" for="step_{{ step.id }}">
+                                    <strong>{{ step.get_verification_step_display }}</strong>
+                                </label>
+                            {% else %}
+                                <input class="form-check-input" type="checkbox" id="step_{{ step.id }}" disabled>
+                                <label class="form-check-label text-muted" for="step_{{ step.id }}">
+                                    {{ step.get_verification_step_display }}
+                                </label>
+                            {% endif %}
+                        </div>
+                        {% if step.notes %}
+                            <small class="text-muted d-block ps-4 mt-1">{{ step.notes }}</small>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="text-muted mb-0">No verification steps recorded yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-history me-2"></i>Timeline</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item mb-3">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div>
+                            <strong>Application Created</strong>
+                            <p class="text-muted small mb-0">{{ application.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    {% if application.verified_at %}
+                        <div class="timeline-item mb-3">
+                            <div class="timeline-marker bg-success"></div>
+                            <div>
+                                <strong>Verified</strong>
+                                <p class="text-muted small mb-0">{{ application.verified_at|date:"M d, Y H:i" }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if application.disbursed_at %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div>
+                                <strong>Disbursed</strong>
+                                <p class="text-muted small mb-0">{{ application.disbursed_at|date:"M d, Y H:i" }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input[name="decision"]').forEach(el => {
+        el.addEventListener('change', function() {
+            const rejectionSection = document.getElementById('rejection-section');
+            if (this.value === 'rejected') {
+                rejectionSection.style.display = 'block';
+                document.getElementById('id_rejection_reason').required = true;
+            } else {
+                rejectionSection.style.display = 'none';
+                document.getElementById('id_rejection_reason').required = false;
+            }
+        });
+    });
+
+    // Initialize on page load
+    const selectedDecision = document.querySelector('input[name="decision"]:checked');
+    if (selectedDecision && selectedDecision.value === 'rejected') {
+        document.getElementById('rejection-section').style.display = 'block';
+    }
+</script>
+
+<style>
+    .timeline-marker {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 12px;
+        margin-top: 4px;
+    }
+    
+    .timeline-item {
+        display: flex;
+        padding-left: 10px;
+        border-left: 2px solid #dee2e6;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Documents - BestStore{% endblock %}
+
+{% block page_title %}Upload Supporting Documents{% endblock %}
+{% block page_subtitle %}Application for {{ application.get_full_name }}{% endblock %}
+{% block breadcrumb %}Documents{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Upload Supporting Documents</strong>
+                        <p class="mb-0 mt-2">Upload additional documents to support your loan application. Accepted formats: PDF, DOC, DOCX, JPG, JPEG, PNG</p>
+                    </div>
+
+                    {{ formset.management_form }}
+
+                    {% if formset.non_form_errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for error in formset.non_form_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div id="documents-container">
+                        {% for form in formset.forms %}
+                            <div class="document-form card mb-3 p-3" data-form-index="{{ forloop.counter0 }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">{{ form.document_type.label }}</label>
+                                        {{ form.document_type }}
+                                        {% if form.document_type.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.document_type.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">{{ form.document_file.label }}</label>
+                                        {{ form.document_file }}
+                                        {% if form.document_file.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.document_file.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    {% if not forloop.first %}
+                                        <button type="button" class="btn btn-sm btn-danger remove-form">
+                                            <i class="fas fa-trash me-2"></i>Remove
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                {{ form.DELETE }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-outline-secondary" id="add-more">
+                            <i class="fas fa-plus me-2"></i>Add Another Document
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Documents
+                        </button>
+                        <a href="{% url 'loans:application_detail' application.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Document Types</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Employment Letter</strong>
+                        <br>
+                        <small class="text-muted">From your employer confirming employment</small>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Pay Slip</strong>
+                        <br>
+                        <small class="text-muted">Recent salary documentation</small>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Bank Statement</strong>
+                        <br>
+                        <small class="text-muted">Last 3-6 months bank statements</small>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Income Certificate</strong>
+                        <br>
+                        <small class="text-muted">Official income verification document</small>
+                    </li>
+                    <li>
+                        <strong>Other Document</strong>
+                        <br>
+                        <small class="text-muted">Any other supporting document</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let formCount = {{ formset.forms|length }};
+    const totalForms = document.querySelector('[name="documents-TOTAL_FORMS"]');
+
+    document.getElementById('add-more').addEventListener('click', function() {
+        const container = document.getElementById('documents-container');
+        const formIdx = container.children.length;
+        
+        const newForm = container.querySelector('.document-form').cloneNode(true);
+        newForm.setAttribute('data-form-index', formIdx);
+        
+        // Update form field names and IDs
+        newForm.querySelectorAll('[name], [id]').forEach(field => {
+            if (field.name) {
+                field.name = field.name.replace(/-\d+-/, `-${formIdx}-`);
+            }
+            if (field.id) {
+                field.id = field.id.replace(/_\d+_/, `_${formIdx}_`);
+            }
+        });
+        
+        // Clear field values
+        newForm.querySelectorAll('input, select, textarea').forEach(field => {
+            field.value = '';
+        });
+        
+        container.appendChild(newForm);
+        totalForms.value = formIdx + 1;
+        updateRemoveButtons();
+    });
+
+    function updateRemoveButtons() {
+        const forms = document.querySelectorAll('.document-form');
+        forms.forEach((form, idx) => {
+            const removeBtn = form.querySelector('.remove-form');
+            if (removeBtn) {
+                if (idx === 0) {
+                    removeBtn.style.display = 'none';
+                } else {
+                    removeBtn.style.display = 'inline-block';
+                }
+            }
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-form')) {
+            e.preventDefault();
+            e.target.closest('.document-form').remove();
+            updateRemoveButtons();
+            const forms = document.querySelectorAll('.document-form');
+            totalForms.value = forms.length;
+        }
+    });
+
+    updateRemoveButtons();
+</script>
+{% endblock %}
