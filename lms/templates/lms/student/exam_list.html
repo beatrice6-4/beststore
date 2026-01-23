@@ -36,28 +36,28 @@
                                             </div>
 
                                             <!-- Student's Attempt Info -->
-                                            {% for attempt in attempts %}
-                                                {% if attempt.exam.id == exam.id %}
+                                            {% with student_attempt=exam.attempts.all|first %}
+                                                {% if student_attempt and student_attempt.status != 'in_progress' %}
                                                     <div class="alert alert-info mb-2 p-2">
                                                         <small>
-                                                            <strong>Your Score:</strong> {{ attempt.obtained_marks }}/{{ exam.total_marks }}
-                                                            ({{ attempt.percentage|floatformat:1 }}%)
-                                                            {% if attempt.is_passed %}
+                                                            <strong>Your Score:</strong> {{ student_attempt.obtained_marks }}/{{ exam.total_marks }}
+                                                            ({{ student_attempt.percentage|floatformat:1 }}%)
+                                                            {% if student_attempt.is_passed %}
                                                                 <span class="badge badge-success">PASSED</span>
                                                             {% else %}
                                                                 <span class="badge badge-danger">FAILED</span>
                                                             {% endif %}
                                                         </small>
                                                     </div>
-                                                    <a href="{% url 'lms:exam_result' attempt.pk %}?review=1" class="btn btn-sm btn-primary btn-block">
+                                                    <a href="{% url 'lms:exam_result' student_attempt.pk %}?review=1" class="btn btn-sm btn-primary btn-block">
                                                         <i class="fas fa-eye"></i> Review Answers
                                                     </a>
+                                                {% else %}
+                                                    <a href="{% url 'lms:exam_instructions' exam.pk %}" class="btn btn-sm btn-primary btn-block">
+                                                        <i class="fas fa-play"></i> Start Exam
+                                                    </a>
                                                 {% endif %}
-                                            {% empty %}
-                                                <a href="{% url 'lms:exam_instructions' exam.pk %}" class="btn btn-sm btn-primary btn-block">
-                                                    <i class="fas fa-play"></i> Start Exam
-                                                </a>
-                                            {% endfor %}
+                                            {% endwith %}
                                         </div>
                                     </div>
                                 </div>

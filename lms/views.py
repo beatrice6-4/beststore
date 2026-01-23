@@ -387,7 +387,14 @@ def get_exam_time_remaining(request, attempt_pk):
     exam = attempt.exam
     
     now = timezone.now()
-    time_remaining = (exam.end_time - now).total_seconds()
+    
+    # If end_time is not set, calculate from exam duration
+    if exam.end_time:
+        time_remaining = (exam.end_time - now).total_seconds()
+    else:
+        # Use exam start time + duration if end_time not set
+        exam_end = attempt.started_at + timezone.timedelta(minutes=exam.duration_minutes)
+        time_remaining = (exam_end - now).total_seconds()
     
     if time_remaining < 0:
         time_remaining = 0
