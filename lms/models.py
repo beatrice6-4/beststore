@@ -25,8 +25,8 @@ class Exam(models.Model):
     allowed_users = models.ManyToManyField(User, blank=True, related_name='lms_exams', help_text="If set, only these users can access")
     
     # Scheduling
-    start_time = models.DateTimeField(help_text="When the exam becomes available")
-    end_time = models.DateTimeField(help_text="When the exam closes")
+    start_time = models.DateTimeField(null=True, blank=True, help_text="When the exam becomes available (optional)")
+    end_time = models.DateTimeField(null=True, blank=True, help_text="When the exam closes (optional)")
     
     # Exam settings
     show_answers = models.BooleanField(default=True, help_text="Show answers after submission")
@@ -47,8 +47,17 @@ class Exam(models.Model):
 
     def is_available(self):
         """Check if exam is currently available for taking"""
+        if self.status != 'published':
+            return False
+        
         now = timezone.now()
-        return self.status == 'published' and self.start_time <= now <= self.end_time
+        
+        # If times are not set, exam is available when published
+        if not self.start_time or not self.end_time:
+            return True
+        
+        # If times are set, check if now falls within the time window
+        return self.start_time <= now <= self.end_time
 
     def get_question_count(self):
         return self.questions.count()
