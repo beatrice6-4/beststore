@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Exam Result - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-chart-bar me-2"></i> Exam Result
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Score Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ exam.title }}</h4>
+                    
+                    <div class="score-display mt-4 mb-4">
+                        <h1 class="display-1">{{ attempt.percentage|floatformat:0 }}%</h1>
+                        <h3>{{ attempt.obtained_marks }}/{{ exam.total_marks }} marks</h3>
+                    </div>
+
+                    {% if attempt.is_passed %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <h5>Congratulations! You Passed</h5>
+                            <p>You scored {{ attempt.percentage|floatformat:1 }}% ({{ attempt.obtained_marks }} marks)</p>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i>
+                            <h5>Unfortunately, You Failed</h5>
+                            <p>You scored {{ attempt.percentage|floatformat:1 }}% ({{ attempt.obtained_marks }} marks)</p>
+                            <p class="small">Passing marks: {{ exam.passing_marks }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="details mt-4">
+                        <p><strong>Time Taken:</strong> {{ attempt.get_duration_minutes }} minutes</p>
+                        <p><strong>Submitted at:</strong> {{ attempt.submitted_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Answer Review -->
+    {% if show_answers %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Answer Review</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for answer in answers %}
+                            <div class="answer-review border rounded p-3 mb-3 {% if answer.is_correct %}border-success{% else %}border-danger{% endif %}">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6><strong>Q{{ answer.question.order }}: {{ answer.question.text }}</strong></h6>
+                                        
+                                        <div class="ms-3 mt-2">
+                                            <p class="mb-2">
+                                                <span class="badge badge-info">Your Answer:</span>
+                                                {% if answer.selected_choice %}
+                                                    <strong>{{ answer.selected_choice.text }}</strong>
+                                                {% else %}
+                                                    <span class="text-muted">Not answered</span>
+                                                {% endif %}
+                                            </p>
+                                            
+                                            <p class="mb-2">
+                                                <span class="badge badge-success">Correct Answer:</span>
+                                                <strong>
+                                                    {% for choice in answer.question.choices.all %}
+                                                        {% if choice.is_correct %}
+                                                            {{ choice.text }}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </strong>
+                                            </p>
+
+                                            {% if answer.question.explanation %}
+                                                <div class="alert alert-info mt-2">
+                                                    <strong>Explanation:</strong> {{ answer.question.explanation }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        {% if answer.is_correct %}
+                                            <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                                            <p class="text-success mt-2"><strong>CORRECT</strong></p>
+                                            <p class="small text-muted">+{{ answer.question.marks }} marks</p>
+                                        {% else %}
+                                            <i class="fas fa-times-circle text-danger" style="font-size: 3rem;"></i>
+                                            <p class="text-danger mt-2"><strong>INCORRECT</strong></p>
+                                            <p class="small text-muted">0 marks</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'lms:exam_list' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Exams
+            </a>
+            <a href="{% url 'lms:my_exams' %}" class="btn btn-secondary">
+                <i class="fas fa-history"></i> My Exam History
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .score-display { color: #007bff; }
+    .answer-review { background: #fafafa; }
+</style>
+{% endblock %}

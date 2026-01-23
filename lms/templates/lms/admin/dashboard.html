@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-graduation-cap me-2"></i> LMS Admin Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Exams</h5>
+                    <h3 class="m-0">{{ total_exams }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Attempts</h5>
+                    <h3 class="m-0">{{ total_attempts }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Exams -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Recent Exams</h5>
+                    <a href="{% url 'lms:create_exam' %}" class="btn btn-primary btn-sm float-end">
+                        <i class="fas fa-plus"></i> Create Exam
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if exams %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                        <th>Marks</th>
+                                        <th>Questions</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for exam in exams %}
+                                        <tr>
+                                            <td>{{ exam.title }}</td>
+                                            <td>
+                                                <span class="badge badge-{{ exam.status }}">{{ exam.get_status_display }}</span>
+                                            </td>
+                                            <td>{{ exam.total_marks }}</td>
+                                            <td>{{ exam.get_question_count }}</td>
+                                            <td>{{ exam.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'lms:exam_detail' exam.pk %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <a href="{% url 'lms:edit_exam' exam.pk %}" class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <a href="{% url 'lms:exam_results' exam.pk %}" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-chart-bar"></i> Results
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No exams created yet.
+                            <a href="{% url 'lms:create_exam' %}" class="alert-link">Create your first exam</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-draft { background-color: #FFC107; color: #000; }
+    .badge-published { background-color: #28A745; }
+    .badge-closed { background-color: #DC3545; }
+</style>
+{% endblock %}

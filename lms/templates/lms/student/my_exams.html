@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Exams - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-history me-2"></i> My Exam History
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Your Exam Attempts</h5>
+                </div>
+                <div class="card-body">
+                    {% if attempts %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Exam</th>
+                                        <th>Marks</th>
+                                        <th>Percentage</th>
+                                        <th>Status</th>
+                                        <th>Attempted</th>
+                                        <th>Time Taken</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attempt in attempts %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ attempt.exam.title }}</strong>
+                                            </td>
+                                            <td>{{ attempt.obtained_marks }}/{{ attempt.exam.total_marks }}</td>
+                                            <td>
+                                                <strong {% if attempt.percentage >= 80 %}class="text-success"{% elif attempt.percentage >= 50 %}class="text-warning"{% else %}class="text-danger"{% endif %}>
+                                                    {{ attempt.percentage|floatformat:1 }}%
+                                                </strong>
+                                            </td>
+                                            <td>
+                                                {% if attempt.is_passed %}
+                                                    <span class="badge badge-success">PASSED</span>
+                                                {% else %}
+                                                    <span class="badge badge-danger">FAILED</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ attempt.started_at|date:"M d, Y H:i" }}</td>
+                                            <td>
+                                                {% if attempt.get_duration_minutes %}
+                                                    {{ attempt.get_duration_minutes }} mins
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'lms:exam_result' attempt.pk %}?review=1" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View Result
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You haven't attempted any exams yet.
+                            <a href="{% url 'lms:exam_list' %}" class="alert-link">Browse available exams</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'lms:exam_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Exams
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

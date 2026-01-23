@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ exam.title }} Results - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-chart-bar me-2"></i> {{ exam.title }} - Results
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Attempts</h5>
+                    <h3 class="text-primary">{{ attempts.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Passed</h5>
+                    <h3 class="text-success">{{ attempts|dictsort:"is_passed"|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Student Attempts</h5>
+                </div>
+                <div class="card-body">
+                    {% if attempts %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Status</th>
+                                        <th>Marks</th>
+                                        <th>Percentage</th>
+                                        <th>Result</th>
+                                        <th>Started</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attempt in attempts %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ attempt.student.get_full_name|default:attempt.student.username }}</strong><br>
+                                                <small class="text-muted">{{ attempt.student.email }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-{{ attempt.status }}">
+                                                    {{ attempt.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if attempt.obtained_marks %}
+                                                    <strong>{{ attempt.obtained_marks }}/{{ exam.total_marks }}</strong>
+                                                {% else %}
+                                                    <span class="text-muted">Not graded</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if attempt.percentage %}
+                                                    <strong>{{ attempt.percentage|floatformat:1 }}%</strong>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if attempt.is_passed %}
+                                                    <span class="badge badge-success">PASSED</span>
+                                                {% else %}
+                                                    <span class="badge badge-danger">FAILED</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ attempt.started_at|date:"M d, Y H:i" }}</td>
+                                            <td>
+                                                {% if attempt.submitted_at %}
+                                                    {{ attempt.submitted_at|date:"M d, Y H:i" }}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'lms:student_exam_details' attempt.pk %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No attempts yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'lms:exam_detail' exam.pk %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Exam
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-in_progress { background-color: #007BFF; }
+    .badge-submitted { background-color: #FFC107; color: #000; }
+    .badge-completed { background-color: #28A745; }
+</style>
+{% endblock %}

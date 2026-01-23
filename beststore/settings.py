@@ -1,13 +1,11 @@
 import os
 from pathlib import Path
-import django_heroku
-import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = False
-ALLOWED_HOSTS = ['mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
+DEBUG = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -28,11 +26,11 @@ INSTALLED_APPS = [
     'CDMIS',
     'school',
     'loans',
+    'lms',
     'cloudinary_storage',
     'cloudinary',
 ]
 
-# Jazzmin (Admin UI) configuration - tuned for a clean, modern admin
 JAZZMIN_SETTINGS = {
     "site_title": "BestStore Admin",
     "site_header": "BestStore",
@@ -63,7 +61,6 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-# UI tweaks: colors, compactness and layout choices for a pleasant UX
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": True,
@@ -82,6 +79,12 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": True,
 }
+
+AUTHENTICATION_BACKENDS = [
+    'backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -117,39 +120,13 @@ WSGI_APPLICATION = 'beststore.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
-# Database configuration
-# PostgreSQL Configuration
-if os.environ.get('DATABASE_URL'):
-    # Use DATABASE_URL from environment (Render, Heroku, etc.)
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-elif os.environ.get('DB_ENGINE') == 'postgresql':
-    # PostgreSQL configuration using individual environment variables
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'postgres'),
-            'USER': os.environ.get('DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'xxxxxxx'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
-            'CONN_MAX_AGE': 600,
-            'OPTIONS': {
-                'sslmode': os.environ.get('DB_SSLMODE', 'prefer'),
-            }
-        }
-    }
-else:
-    # SQLite configuration for local development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
-# Cloudinary storage for media files
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dhklmtpxy',
     'API_KEY': '345437392578237',
@@ -157,7 +134,6 @@ CLOUDINARY_STORAGE = {
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Static files configuration
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -165,11 +141,9 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -184,5 +158,3 @@ USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-django_heroku.settings(locals())

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Online Exams - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-book me-2"></i> Online Exams
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Active Exams -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Available Exams</h5>
+                </div>
+                <div class="card-body">
+                    {% if exams %}
+                        <div class="row">
+                            {% for exam in exams %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card exam-card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ exam.title }}</h6>
+                                            <p class="card-text text-muted">{{ exam.description|truncatewords:20 }}</p>
+                                            
+                                            <div class="exam-info mb-3">
+                                                <small>
+                                                    <div><strong>Marks:</strong> {{ exam.total_marks }}</div>
+                                                    <div><strong>Questions:</strong> {{ exam.get_question_count }}</div>
+                                                    <div><strong>Duration:</strong> {{ exam.duration_minutes }} mins</div>
+                                                    <div><strong>Passing:</strong> {{ exam.passing_marks }} marks</div>
+                                                </small>
+                                            </div>
+
+                                            <!-- Student's Attempt Info -->
+                                            {% for attempt in attempts %}
+                                                {% if attempt.exam.id == exam.id %}
+                                                    <div class="alert alert-info mb-2 p-2">
+                                                        <small>
+                                                            <strong>Your Score:</strong> {{ attempt.obtained_marks }}/{{ exam.total_marks }}
+                                                            ({{ attempt.percentage|floatformat:1 }}%)
+                                                            {% if attempt.is_passed %}
+                                                                <span class="badge badge-success">PASSED</span>
+                                                            {% else %}
+                                                                <span class="badge badge-danger">FAILED</span>
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                    <a href="{% url 'lms:exam_result' attempt.pk %}?review=1" class="btn btn-sm btn-primary btn-block">
+                                                        <i class="fas fa-eye"></i> Review Answers
+                                                    </a>
+                                                {% endif %}
+                                            {% empty %}
+                                                <a href="{% url 'lms:exam_instructions' exam.pk %}" class="btn btn-sm btn-primary btn-block">
+                                                    <i class="fas fa-play"></i> Start Exam
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No exams available right now.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Exams Button -->
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'lms:my_exams' %}" class="btn btn-secondary">
+                <i class="fas fa-history"></i> View My Exam History
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .exam-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .exam-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .exam-info { background: #f8f9fa; padding: 10px; border-radius: 5px; }
+</style>
+{% endblock %}

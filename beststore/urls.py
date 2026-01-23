@@ -7,6 +7,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
@@ -21,7 +22,7 @@ urlpatterns = [
     path('cdmis/', include('CDMIS.urls')),
     path('school/', include('school.urls')),
     path('loans/', include('loans.urls')),
-    path('cart/', include('carts.urls')),  # Carts app URLs
+    path('lms/', include('lms.urls')),
     
     # API endpoints
     path('api/', include('api.urls')) if 'api' in settings.INSTALLED_APPS else None,

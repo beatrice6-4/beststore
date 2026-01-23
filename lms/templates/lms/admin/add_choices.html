@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Choices - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-list me-2"></i> Add Answer Choices
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Question: {{ question.text }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Add 4 answer choices below. Mark the correct one.</p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {{ formset.management_form }}
+
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Choice Text</th>
+                                        <th width="150">Mark as Correct</th>
+                                        <th width="100">Order</th>
+                                        <th width="80">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in formset %}
+                                        <tr>
+                                            <td>
+                                                {{ form.text }}
+                                                {% if form.text.errors %}
+                                                    <div class="invalid-feedback d-block">{{ form.text.errors }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="form-check">
+                                                    {{ form.is_correct }}
+                                                </div>
+                                                {% if form.is_correct.errors %}
+                                                    <div class="invalid-feedback d-block">{{ form.is_correct.errors }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.order }}
+                                                {% if form.order.errors %}
+                                                    <div class="invalid-feedback d-block">{{ form.order.errors }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.DELETE }}
+                                                {% if form.DELETE.errors %}
+                                                    <div class="invalid-feedback d-block">{{ form.DELETE.errors }}</div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Important:</strong> Mark at least one choice as correct!
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check"></i> Save Choices
+                        </button>
+                        <a href="{% url 'lms:exam_detail' exam.pk %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to Exam
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table input[type="text"] { width: 100%; }
+    .table input[type="number"] { width: 80px; }
+</style>
+{% endblock %}

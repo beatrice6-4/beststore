@@ -9,7 +9,7 @@ import requests
 from datetime import datetime
 @login_required(login_url='login')
 def mpesa_payment(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number, user=request.user, is_ordered=False)
+    order = get_object_or_404(Order, user=request.user, status='pending')
     payment_response = None
 
     if request.method == "POST":

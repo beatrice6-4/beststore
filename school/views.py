@@ -507,6 +507,10 @@ class BulkEnrollmentView(AdminRequiredMixin, TemplateView):
             return redirect('school:bulk_enrollment')
 
 
+
+
+
+
 # ===================== FEE VIEWS =====================
 class StudentFeeListView(ListView):
     model = StudentFee

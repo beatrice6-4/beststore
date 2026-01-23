@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Student Exam Details - LMS{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-file-alt me-2"></i> Student Exam Details
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Student & Exam Info -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Student</h5>
+                            <p><strong>{{ attempt.student.get_full_name|default:attempt.student.username }}</strong></p>
+                            <p class="text-muted">{{ attempt.student.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Exam</h5>
+                            <p><strong>{{ attempt.exam.title }}</strong></p>
+                            <p class="text-muted">Total Marks: {{ attempt.exam.total_marks }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Obtained Marks</h5>
+                    <h3 class="text-primary">{{ attempt.obtained_marks }}/{{ attempt.exam.total_marks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Percentage</h5>
+                    <h3 class="text-info">{{ attempt.percentage|floatformat:1 }}%</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Status</h5>
+                    <h3>
+                        {% if attempt.is_passed %}
+                            <span class="badge badge-success">PASSED</span>
+                        {% else %}
+                            <span class="badge badge-danger">FAILED</span>
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Time Taken</h5>
+                    <h3>{{ attempt.get_duration_minutes }} mins</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Answers -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Student Answers</h5>
+                </div>
+                <div class="card-body">
+                    {% for answer in answers %}
+                        <div class="answer-item border rounded p-3 mb-3 {% if answer.is_correct %}bg-light-success border-success{% else %}bg-light-danger border-danger{% endif %}">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-2">
+                                        <strong>Q{{ answer.question.order }}: {{ answer.question.text }}</strong>
+                                    </h6>
+                                    <div class="ms-3">
+                                        <p class="mb-2">
+                                            <span class="badge badge-info">Student's Answer</span>
+                                            {% if answer.selected_choice %}
+                                                <strong>{{ answer.selected_choice.text }}</strong>
+                                            {% else %}
+                                                <span class="text-muted">Not answered</span>
+                                            {% endif %}
+                                        </p>
+                                        <p class="mb-2">
+                                            <span class="badge badge-success">Correct Answer</span>
+                                            <strong>
+                                                {% for choice in answer.question.choices.all %}
+                                                    {% if choice.is_correct %}
+                                                        {{ choice.text }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </strong>
+                                        </p>
+                                        {% if answer.question.explanation %}
+                                            <p class="mt-2 text-muted">
+                                                <strong>Explanation:</strong> {{ answer.question.explanation }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="answer-status">
+                                        {% if answer.is_correct %}
+                                            <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                                            <p class="text-success mt-2"><strong>CORRECT</strong></p>
+                                            <p class="text-muted">+{{ answer.question.marks }} marks</p>
+                                        {% else %}
+                                            <i class="fas fa-times-circle text-danger" style="font-size: 3rem;"></i>
+                                            <p class="text-danger mt-2"><strong>INCORRECT</strong></p>
+                                            <p class="text-muted">0 marks</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'lms:exam_results' attempt.exam.pk %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Results
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-light-success { background-color: #d4edda !important; }
+    .bg-light-danger { background-color: #f8d7da !important; }
+    .answer-status { padding: 20px; }
+</style>
+{% endblock %}

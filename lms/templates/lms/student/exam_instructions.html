@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Exam Instructions - LMS{% endblock %}
+
+{% block page_title %}{{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Exam Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3"><strong>{{ exam.title }}</strong></h6>
+                    <p class="text-muted">{{ exam.description }}</p>
+
+                    <!-- Exam Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Total Questions:</strong> {{ exam.get_question_count }}</p>
+                            <p><strong>Total Marks:</strong> {{ exam.total_marks }}</p>
+                            <p><strong>Passing Marks:</strong> {{ exam.passing_marks }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Duration:</strong> {{ exam.duration_minutes }} minutes</p>
+                            <p><strong>Exam Starts:</strong> {{ exam.start_time }}</p>
+                            <p><strong>Exam Ends:</strong> {{ exam.end_time }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="alert alert-warning">
+                        <h6><strong>Important Instructions:</strong></h6>
+                        <ul class="mb-0">
+                            <li>You will have <strong>{{ exam.duration_minutes }} minutes</strong> to complete the exam</li>
+                            <li>All questions are <strong>Multiple Choice</strong></li>
+                            <li>You must answer all questions</li>
+                            <li>Once submitted, you cannot change your answers</li>
+                            {% if exam.show_answers %}
+                                <li>Answers will be shown after submission</li>
+                            {% endif %}
+                            <li>To pass, you need to score at least <strong>{{ exam.passing_marks }}</strong> marks</li>
+                        </ul>
+                    </div>
+
+                    <!-- Attempt Info -->
+                    {% if attempt %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            You have already attempted this exam. 
+                            <strong>Score: {{ attempt.obtained_marks }}/{{ exam.total_marks }} ({{ attempt.percentage|floatformat:1 }}%)</strong>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4">
+                        {% if attempt %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-redo"></i> Retake Exam
+                                </button>
+                                <a href="{% url 'lms:exam_list' %}" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-arrow-left"></i> Go Back
+                                </a>
+                            </form>
+                        {% else %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-play"></i> Start Exam
+                                </button>
+                                <a href="{% url 'lms:exam_list' %}" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-arrow-left"></i> Go Back
+                                </a>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
