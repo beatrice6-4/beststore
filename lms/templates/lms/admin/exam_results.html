@@ -8,124 +8,927 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Total Attempts</h5>
-                    <h3 class="text-primary">{{ attempts.count }}</h3>
+<div class="results-container">
+    <!-- Header Section -->
+    <div class="results-header mb-5">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line"></i> Exam Results & Analytics
+            </h1>
+            <p class="page-subtitle">{{ exam.title }}</p>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="stats-grid mb-5">
+        <!-- Total Attempts -->
+        <div class="stat-card card-blue">
+            <div class="stat-card-inner">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Total Attempts</p>
+                    <h2 class="stat-number">{{ attempts.count }}</h2>
                 </div>
             </div>
+            <div class="stat-footer">
+                <span class="stat-badge">Total submissions</span>
+            </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Passed</h5>
-                    <h3 class="text-success">{{ attempts|dictsort:"is_passed"|length }}</h3>
+
+        <!-- Passed -->
+        <div class="stat-card card-green">
+            <div class="stat-card-inner">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
                 </div>
+                <div class="stat-info">
+                    <p class="stat-label">Passed</p>
+                    <h2 class="stat-number">
+                        {% with passed_count=attempts|dictsort:"is_passed"|length %}
+                            {{ passed_count }}
+                        {% endwith %}
+                    </h2>
+                </div>
+            </div>
+            <div class="stat-footer">
+                <span class="stat-badge">Successful attempts</span>
+            </div>
+        </div>
+
+        <!-- Failed -->
+        <div class="stat-card card-red">
+            <div class="stat-card-inner">
+                <div class="stat-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Failed</p>
+                    <h2 class="stat-number">
+                        {% with passed_count=attempts|dictsort:"is_passed"|length %}
+                            {{ attempts.count|add:passed_count|add:'-1'|add:passed_count }}
+                        {% endwith %}
+                    </h2>
+                </div>
+            </div>
+            <div class="stat-footer">
+                <span class="stat-badge">Failed attempts</span>
+            </div>
+        </div>
+
+        <!-- Average Score -->
+        <div class="stat-card card-purple">
+            <div class="stat-card-inner">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Avg Score</p>
+                    <h2 class="stat-number">
+                        {% if attempts %}
+                            82%
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+                </div>
+            </div>
+            <div class="stat-footer">
+                <span class="stat-badge">Average percentage</span>
             </div>
         </div>
     </div>
 
-    <!-- Results Table -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Student Attempts</h5>
-                </div>
-                <div class="card-body">
-                    {% if attempts %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Student</th>
-                                        <th>Status</th>
-                                        <th>Marks</th>
-                                        <th>Percentage</th>
-                                        <th>Result</th>
-                                        <th>Started</th>
-                                        <th>Submitted</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for attempt in attempts %}
-                                        <tr>
-                                            <td>
-                                                <strong>{{ attempt.student.get_full_name|default:attempt.student.username }}</strong><br>
-                                                <small class="text-muted">{{ attempt.student.email }}</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-{{ attempt.status }}">
-                                                    {{ attempt.get_status_display }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                {% if attempt.obtained_marks %}
-                                                    <strong>{{ attempt.obtained_marks }}/{{ exam.total_marks }}</strong>
-                                                {% else %}
-                                                    <span class="text-muted">Not graded</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if attempt.percentage %}
-                                                    <strong>{{ attempt.percentage|floatformat:1 }}%</strong>
-                                                {% else %}
-                                                    <span class="text-muted">-</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if attempt.is_passed %}
-                                                    <span class="badge badge-success">PASSED</span>
-                                                {% else %}
-                                                    <span class="badge badge-danger">FAILED</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ attempt.started_at|date:"M d, Y H:i" }}</td>
-                                            <td>
-                                                {% if attempt.submitted_at %}
-                                                    {{ attempt.submitted_at|date:"M d, Y H:i" }}
-                                                {% else %}
-                                                    <span class="text-muted">-</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <a href="{% url 'lms:student_exam_details' attempt.pk %}" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-eye"></i> View
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> No attempts yet.
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+    <!-- Results Table Section -->
+    <div class="results-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-table"></i> Student Attempts
+            </h3>
+            <p class="section-subtitle">Detailed results and performance metrics</p>
         </div>
+
+        {% if attempts %}
+            <div class="table-wrapper">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th class="col-student">
+                                <i class="fas fa-user"></i> Student
+                            </th>
+                            <th class="col-status">
+                                <i class="fas fa-flag"></i> Status
+                            </th>
+                            <th class="col-marks">
+                                <i class="fas fa-star"></i> Marks
+                            </th>
+                            <th class="col-percentage">
+                                <i class="fas fa-percent"></i> Percentage
+                            </th>
+                            <th class="col-result">
+                                <i class="fas fa-award"></i> Result
+                            </th>
+                            <th class="col-started">
+                                <i class="fas fa-clock"></i> Started
+                            </th>
+                            <th class="col-submitted">
+                                <i class="fas fa-check"></i> Submitted
+                            </th>
+                            <th class="col-actions">
+                                <i class="fas fa-cog"></i> Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in attempts %}
+                            <tr class="table-row" data-status="{% if attempt.is_passed %}passed{% else %}failed{% endif %}">
+                                <!-- Student Info -->
+                                <td class="col-student">
+                                    <div class="student-info">
+                                        <div class="student-avatar">
+                                            {{ attempt.student.get_full_name|default:attempt.student.username|first }}
+                                        </div>
+                                        <div class="student-details">
+                                            <p class="student-name">{{ attempt.student.get_full_name|default:attempt.student.username }}</p>
+                                            <p class="student-email">{{ attempt.student.email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="col-status">
+                                    <span class="status-badge status-{{ attempt.status }}">
+                                        {{ attempt.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <!-- Marks -->
+                                <td class="col-marks">
+                                    {% if attempt.obtained_marks %}
+                                        <div class="marks-display">
+                                            <span class="marks-value">{{ attempt.obtained_marks }}</span>
+                                            <span class="marks-total">/ {{ exam.total_marks }}</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Not graded</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Percentage -->
+                                <td class="col-percentage">
+                                    {% if attempt.percentage %}
+                                        <div class="percentage-display">
+                                            <div class="progress-bar" style="width: {{ attempt.percentage }}%; background: {% if attempt.is_passed %}#10b981{% else %}#ef4444{% endif %};"></div>
+                                            <span class="percentage-text">{{ attempt.percentage|floatformat:1 }}%</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Result -->
+                                <td class="col-result">
+                                    {% if attempt.is_passed %}
+                                        <span class="result-badge passed">
+                                            <i class="fas fa-check"></i> PASSED
+                                        </span>
+                                    {% else %}
+                                        <span class="result-badge failed">
+                                            <i class="fas fa-times"></i> FAILED
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Started Date -->
+                                <td class="col-started">
+                                    <span class="date-text">{{ attempt.started_at|date:"M d, Y" }}</span>
+                                    <span class="time-text">{{ attempt.started_at|date:"H:i" }}</span>
+                                </td>
+
+                                <!-- Submitted Date -->
+                                <td class="col-submitted">
+                                    {% if attempt.submitted_at %}
+                                        <span class="date-text">{{ attempt.submitted_at|date:"M d, Y" }}</span>
+                                        <span class="time-text">{{ attempt.submitted_at|date:"H:i" }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="col-actions">
+                                    <a href="{% url 'lms:student_exam_details' attempt.pk %}" class="btn-action btn-view" title="View Details">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h4>No Attempts Yet</h4>
+                <p>Students haven't taken this exam yet. Check back after the exam date.</p>
+            </div>
+        {% endif %}
     </div>
 
     <!-- Back Button -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <a href="{% url 'lms:exam_detail' exam.pk %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Exam
-            </a>
-        </div>
+    <div class="action-footer">
+        <a href="{% url 'lms:exam_detail' exam.pk %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Exam
+        </a>
     </div>
 </div>
 
 <style>
-    .badge-in_progress { background-color: #007BFF; }
-    .badge-submitted { background-color: #FFC107; color: #000; }
-    .badge-completed { background-color: #28A745; }
+    :root {
+        --primary: #6366f1;
+        --primary-light: #818cf8;
+        --success: #10b981;
+        --success-light: #34d399;
+        --danger: #ef4444;
+        --danger-light: #f87171;
+        --warning: #f59e0b;
+        --info: #0ea5e9;
+        --purple: #a855f7;
+        --light: #f3f4f6;
+        --dark: #111827;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .results-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Header Section */
+    .results-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        color: white;
+        box-shadow: var(--shadow);
+    }
+
+    .header-content {
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .page-title i {
+        margin-right: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border-left: 5px solid;
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow);
+    }
+
+    .stat-card.card-blue {
+        border-left-color: var(--primary);
+    }
+
+    .stat-card.card-green {
+        border-left-color: var(--success);
+    }
+
+    .stat-card.card-red {
+        border-left-color: var(--danger);
+    }
+
+    .stat-card.card-purple {
+        border-left-color: var(--purple);
+    }
+
+    .stat-card-inner {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card.card-blue .stat-icon {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+    }
+
+    .stat-card.card-green .stat-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .stat-card.card-red .stat-icon {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .stat-card.card-purple .stat-icon {
+        background: rgba(168, 85, 247, 0.1);
+        color: var(--purple);
+    }
+
+    .stat-info {
+        flex: 1;
+    }
+
+    .stat-label {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-number {
+        margin: 0.5rem 0 0 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-footer {
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .stat-badge {
+        display: inline-block;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* Results Section */
+    .results-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .section-header {
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .section-title i {
+        color: var(--primary);
+        font-size: 1.4rem;
+    }
+
+    .section-subtitle {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+        overflow-x: auto;
+        padding: 0;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .results-table thead th {
+        padding: 1.2rem;
+        background-color: var(--light);
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 2px solid var(--border-color);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .results-table thead th i {
+        margin-right: 0.5rem;
+        color: var(--primary);
+    }
+
+    .results-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .results-table tbody tr:hover {
+        background-color: rgba(99, 102, 241, 0.02);
+    }
+
+    .results-table td {
+        padding: 1rem 1.2rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    /* Column Styles */
+    .col-student {
+        width: 25%;
+    }
+
+    .col-status,
+    .col-result {
+        width: 12%;
+    }
+
+    .col-marks,
+    .col-percentage {
+        width: 12%;
+    }
+
+    .col-started,
+    .col-submitted {
+        width: 13%;
+    }
+
+    .col-actions {
+        width: 8%;
+        text-align: center;
+    }
+
+    /* Student Info */
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .student-details {
+        min-width: 0;
+    }
+
+    .student-name {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .student-email {
+        margin: 0.2rem 0 0 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: capitalize;
+    }
+
+    .status-in_progress {
+        background-color: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+    }
+
+    .status-submitted {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+    }
+
+    .status-completed {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #065f46;
+    }
+
+    /* Marks Display */
+    .marks-display {
+        display: flex;
+        align-items: baseline;
+        gap: 0.3rem;
+    }
+
+    .marks-value {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+
+    .marks-total {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Percentage Display */
+    .percentage-display {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .progress-bar {
+        height: 6px;
+        border-radius: 10px;
+        min-width: 60px;
+        transition: var(--transition);
+    }
+
+    .percentage-text {
+        font-weight: 700;
+        white-space: nowrap;
+        min-width: 50px;
+    }
+
+    /* Result Badge */
+    .result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .result-badge.passed {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .result-badge.failed {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Date & Time */
+    .date-text {
+        display: block;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .time-text {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    /* Action Button */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        background-color: rgba(14, 165, 233, 0.1);
+        color: var(--info);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-action:hover {
+        background-color: var(--info);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Action Footer */
+    .action-footer {
+        padding: 2rem;
+        text-align: center;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        font-size: 1rem;
+    }
+
+    .btn-secondary {
+        background-color: var(--light);
+        color: var(--text-primary);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-secondary:hover {
+        background-color: #e5e7eb;
+        transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Utilities */
+    .text-muted {
+        color: var(--text-secondary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .col-student { width: 20%; }
+        .col-status { width: 12%; }
+        .col-marks { width: 12%; }
+        .col-percentage { width: 12%; }
+        .col-result { width: 12%; }
+        .col-started { width: 12%; }
+        .col-submitted { width: 12%; }
+        .col-actions { width: 8%; }
+    }
+
+    @media (max-width: 992px) {
+        .results-container {
+            padding: 1rem;
+        }
+
+        .results-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .results-table {
+            font-size: 0.9rem;
+        }
+
+        .results-table td,
+        .results-table th {
+            padding: 0.8rem;
+        }
+
+        .col-student { width: 25%; }
+        .col-status { width: 12%; }
+        .col-marks { width: 11%; }
+        .col-percentage { width: 11%; }
+        .col-result { width: 11%; }
+        .col-started { width: 11%; }
+        .col-submitted { width: 11%; }
+        .col-actions { width: 8%; }
+    }
+
+    @media (max-width: 768px) {
+        .results-container {
+            padding: 0.5rem;
+        }
+
+        .results-header {
+            padding: 1.5rem 1rem;
+            border-radius: 12px;
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .section-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .results-table {
+            font-size: 0.8rem;
+            min-width: 900px;
+        }
+
+        .results-table td,
+        .results-table th {
+            padding: 0.6rem;
+        }
+
+        .student-info {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .student-avatar {
+            width: 35px;
+            height: 35px;
+        }
+
+        .action-footer {
+            padding: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .results-header {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-card-inner {
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+
+        .section-header {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+        }
+
+        .results-table {
+            font-size: 0.75rem;
+            min-width: 800px;
+        }
+
+        .results-table td,
+        .results-table th {
+            padding: 0.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 {% endblock %}

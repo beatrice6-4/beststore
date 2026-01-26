@@ -8,121 +8,785 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Score Card -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h4 class="card-title">{{ exam.title }}</h4>
-                    
-                    <div class="score-display mt-4 mb-4">
-                        <h1 class="display-1">{{ attempt.percentage|floatformat:0 }}%</h1>
-                        <h3>{{ attempt.obtained_marks }}/{{ exam.total_marks }} marks</h3>
+<div class="result-container">
+    <!-- Score Card Section -->
+    <div class="score-section mb-5">
+        <div class="score-card {% if attempt.is_passed %}passed{% else %}failed{% endif %}">
+            <!-- Background Animation -->
+            <div class="card-background"></div>
+            
+            <!-- Content -->
+            <div class="score-content">
+                <div class="exam-title-section">
+                    <h2 class="exam-title">{{ exam.title }}</h2>
+                </div>
+
+                <!-- Score Circle -->
+                <div class="score-circle-wrapper">
+                    <div class="score-circle {% if attempt.is_passed %}success{% else %}danger{% endif %}">
+                        <div class="score-inner">
+                            <div class="percentage">{{ attempt.percentage|floatformat:0 }}<span class="percent-sign">%</span></div>
+                            <div class="marks-info">{{ attempt.obtained_marks }}/{{ exam.total_marks }} marks</div>
+                        </div>
                     </div>
+                </div>
 
-                    {% if attempt.is_passed %}
-                        <div class="alert alert-success">
+                <!-- Status Message -->
+                {% if attempt.is_passed %}
+                    <div class="status-message success-message">
+                        <div class="status-icon">
                             <i class="fas fa-check-circle"></i>
-                            <h5>Congratulations! You Passed</h5>
-                            <p>You scored {{ attempt.percentage|floatformat:1 }}% ({{ attempt.obtained_marks }} marks)</p>
                         </div>
-                    {% else %}
-                        <div class="alert alert-danger">
+                        <div class="status-text">
+                            <h3>Congratulations!</h3>
+                            <p>You have successfully passed the exam</p>
+                            <p class="score-text">You scored <strong>{{ attempt.percentage|floatformat:1 }}%</strong> ({{ attempt.obtained_marks }} marks)</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="status-message failed-message">
+                        <div class="status-icon">
                             <i class="fas fa-times-circle"></i>
-                            <h5>Unfortunately, You Failed</h5>
-                            <p>You scored {{ attempt.percentage|floatformat:1 }}% ({{ attempt.obtained_marks }} marks)</p>
-                            <p class="small">Passing marks: {{ exam.passing_marks }}</p>
                         </div>
-                    {% endif %}
+                        <div class="status-text">
+                            <h3>Keep Trying!</h3>
+                            <p>You didn't pass this time</p>
+                            <p class="score-text">You scored <strong>{{ attempt.percentage|floatformat:1 }}%</strong> ({{ attempt.obtained_marks }} marks)</p>
+                            <p class="passing-marks"><i class="fas fa-info-circle"></i> Passing marks required: {{ exam.passing_marks }}</p>
+                        </div>
+                    </div>
+                {% endif %}
 
-                    <div class="details mt-4">
-                        <p><strong>Time Taken:</strong> {{ attempt.get_duration_minutes }} minutes</p>
-                        <p><strong>Submitted at:</strong> {{ attempt.submitted_at|date:"M d, Y H:i" }}</p>
+                <!-- Details Grid -->
+                <div class="details-grid mt-5">
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="detail-content">
+                            <p class="detail-label">Time Taken</p>
+                            <p class="detail-value">{{ attempt.get_duration_minutes }} minutes</p>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="detail-content">
+                            <p class="detail-label">Submitted</p>
+                            <p class="detail-value">{{ attempt.submitted_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="detail-content">
+                            <p class="detail-label">Questions</p>
+                            <p class="detail-value">{{ answers|length }} Q</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Answer Review -->
+    <!-- Answer Review Section -->
     {% if show_answers %}
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Answer Review</h5>
-                    </div>
-                    <div class="card-body">
-                        {% for answer in answers %}
-                            <div class="answer-review border rounded p-3 mb-3 {% if answer.is_correct %}border-success{% else %}border-danger{% endif %}">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <h6><strong>Q{{ answer.question.order }}: {{ answer.question.text }}</strong></h6>
-                                        
-                                        <div class="ms-3 mt-2">
-                                            <p class="mb-2">
-                                                <span class="badge badge-info">Your Answer:</span>
-                                                {% if answer.selected_choice %}
-                                                    <strong>{{ answer.selected_choice.text }}</strong>
-                                                {% else %}
-                                                    <span class="text-muted">Not answered</span>
-                                                {% endif %}
-                                            </p>
-                                            
-                                            <p class="mb-2">
-                                                <span class="badge badge-success">Correct Answer:</span>
-                                                <strong>
-                                                    {% for choice in answer.question.choices.all %}
-                                                        {% if choice.is_correct %}
-                                                            {{ choice.text }}
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </strong>
-                                            </p>
+        <div class="review-section mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-list-check"></i> Answer Review
+                </h3>
+                <p class="section-subtitle">Review your answers and learn from mistakes</p>
+            </div>
 
-                                            {% if answer.question.explanation %}
-                                                <div class="alert alert-info mt-2">
-                                                    <strong>Explanation:</strong> {{ answer.question.explanation }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
+            <div class="answers-container">
+                {% for answer in answers %}
+                    <div class="answer-card {% if answer.is_correct %}correct{% else %}incorrect{% endif %}">
+                        <!-- Question Section -->
+                        <div class="answer-header">
+                            <div class="question-number">
+                                <span class="q-badge">Q{{ answer.question.order }}</span>
+                            </div>
+                            <div class="question-text">
+                                <h5>{{ answer.question.text }}</h5>
+                            </div>
+                            <div class="answer-status">
+                                {% if answer.is_correct %}
+                                    <div class="status-badge correct">
+                                        <i class="fas fa-check"></i>
+                                        <span>Correct</span>
                                     </div>
-                                    <div class="col-md-4 text-center">
-                                        {% if answer.is_correct %}
-                                            <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
-                                            <p class="text-success mt-2"><strong>CORRECT</strong></p>
-                                            <p class="small text-muted">+{{ answer.question.marks }} marks</p>
+                                    <p class="marks-earned">+{{ answer.question.marks }} marks</p>
+                                {% else %}
+                                    <div class="status-badge incorrect">
+                                        <i class="fas fa-times"></i>
+                                        <span>Incorrect</span>
+                                    </div>
+                                    <p class="marks-earned">0 marks</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Answer Details -->
+                        <div class="answer-body">
+                            <div class="answer-comparison">
+                                <!-- Your Answer -->
+                                <div class="answer-item your-answer">
+                                    <div class="answer-label">
+                                        <i class="fas fa-user"></i> Your Answer
+                                    </div>
+                                    <div class="answer-content">
+                                        {% if answer.selected_choice %}
+                                            <p class="answer-text">{{ answer.selected_choice.text }}</p>
                                         {% else %}
-                                            <i class="fas fa-times-circle text-danger" style="font-size: 3rem;"></i>
-                                            <p class="text-danger mt-2"><strong>INCORRECT</strong></p>
-                                            <p class="small text-muted">0 marks</p>
+                                            <p class="answer-text not-answered">
+                                                <i class="fas fa-minus-circle"></i> Not answered
+                                            </p>
                                         {% endif %}
                                     </div>
                                 </div>
+
+                                <!-- Correct Answer -->
+                                <div class="answer-item correct-answer">
+                                    <div class="answer-label">
+                                        <i class="fas fa-check-circle"></i> Correct Answer
+                                    </div>
+                                    <div class="answer-content">
+                                        <p class="answer-text">
+                                            {% for choice in answer.question.choices.all %}
+                                                {% if choice.is_correct %}
+                                                    {{ choice.text }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        {% endfor %}
+
+                            <!-- Explanation -->
+                            {% if answer.question.explanation %}
+                                <div class="explanation-box">
+                                    <div class="explanation-header">
+                                        <i class="fas fa-lightbulb"></i> Explanation
+                                    </div>
+                                    <p class="explanation-text">{{ answer.question.explanation }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     {% endif %}
 
     <!-- Action Buttons -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <a href="{% url 'lms:exam_list' %}" class="btn btn-primary">
-                <i class="fas fa-arrow-left"></i> Back to Exams
-            </a>
-            <a href="{% url 'lms:my_exams' %}" class="btn btn-secondary">
-                <i class="fas fa-history"></i> My Exam History
-            </a>
-        </div>
+    <div class="action-buttons">
+        <a href="{% url 'lms:exam_list' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Exams
+        </a>
+        <a href="{% url 'lms:my_exams' %}" class="btn btn-secondary">
+            <i class="fas fa-history"></i> My Exam History
+        </a>
     </div>
 </div>
 
 <style>
-    .score-display { color: #007bff; }
-    .answer-review { background: #fafafa; }
+    :root {
+        --primary: #6366f1;
+        --primary-light: #818cf8;
+        --success: #10b981;
+        --success-light: #34d399;
+        --danger: #ef4444;
+        --danger-light: #f87171;
+        --warning: #f59e0b;
+        --info: #0ea5e9;
+        --light: #f3f4f6;
+        --dark: #111827;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .result-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Score Section */
+    .score-section {
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .score-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    .score-card.passed {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    }
+
+    .score-card.failed {
+        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    }
+
+    .card-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="20" fill="white"/><circle cx="80" cy="80" r="30" fill="white"/></svg>');
+        z-index: 1;
+    }
+
+    .score-content {
+        position: relative;
+        z-index: 2;
+        padding: 3rem 2rem;
+        color: white;
+        text-align: center;
+    }
+
+    .exam-title-section {
+        margin-bottom: 2rem;
+    }
+
+    .exam-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Score Circle */
+    .score-circle-wrapper {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+
+    .score-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        animation: scaleIn 0.6s ease-out;
+    }
+
+    .score-circle.success {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2);
+    }
+
+    .score-circle.danger {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2);
+    }
+
+    .score-inner {
+        text-align: center;
+    }
+
+    .percentage {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: -2px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .percent-sign {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 0.3rem;
+    }
+
+    .marks-info {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+
+    /* Status Message */
+    .status-message {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        margin: 2rem 0;
+    }
+
+    .status-icon {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+    }
+
+    .status-text h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .status-text p {
+        margin: 0.3rem 0;
+        opacity: 0.95;
+        font-size: 0.95rem;
+    }
+
+    .score-text {
+        font-weight: 600;
+        margin-top: 0.5rem !important;
+    }
+
+    .passing-marks {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        margin-top: 0.5rem !important;
+    }
+
+    /* Details Grid */
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .detail-icon {
+        font-size: 1.8rem;
+        opacity: 0.9;
+    }
+
+    .detail-label {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        margin: 0;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0.3rem 0 0 0;
+    }
+
+    /* Review Section */
+    .review-section {
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .section-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .section-title i {
+        color: var(--primary);
+        margin-right: 0.8rem;
+    }
+
+    .section-subtitle {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Answers Container */
+    .answers-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .answer-card {
+        background: white;
+        border-radius: 16px;
+        border-left: 5px solid;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .answer-card.correct {
+        border-left-color: var(--success);
+    }
+
+    .answer-card.incorrect {
+        border-left-color: var(--danger);
+    }
+
+    .answer-card:hover {
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
+    }
+
+    /* Answer Header */
+    .answer-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .question-number {
+        flex-shrink: 0;
+    }
+
+    .q-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .question-text {
+        flex: 1;
+        text-align: left;
+    }
+
+    .question-text h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .answer-status {
+        flex-shrink: 0;
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-badge.correct {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.incorrect {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .marks-earned {
+        margin: 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-badge.correct ~ .marks-earned {
+        color: var(--success);
+    }
+
+    .status-badge.incorrect ~ .marks-earned {
+        color: var(--danger);
+    }
+
+    /* Answer Body */
+    .answer-body {
+        padding: 1.5rem;
+    }
+
+    .answer-comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .answer-item {
+        padding: 1rem;
+        border-radius: 12px;
+        background-color: var(--light);
+    }
+
+    .answer-item.your-answer {
+        border-left: 4px solid var(--info);
+    }
+
+    .answer-item.correct-answer {
+        border-left: 4px solid var(--success);
+    }
+
+    .answer-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .answer-content {
+        margin: 0;
+    }
+
+    .answer-text {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    .answer-text.not-answered {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    /* Explanation Box */
+    .explanation-box {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+        border-left: 4px solid var(--info);
+        padding: 1rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+    }
+
+    .explanation-header {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--info);
+        margin-bottom: 0.5rem;
+    }
+
+    .explanation-text {
+        margin: 0;
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: var(--light);
+        color: var(--text-primary);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-secondary:hover {
+        background-color: #e5e7eb;
+        transform: translateY(-2px);
+        color: var(--text-primary);
+    }
+
+    /* Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .result-container {
+            padding: 1rem;
+        }
+
+        .score-content {
+            padding: 2rem 1rem;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+        }
+
+        .percentage {
+            font-size: 2rem;
+        }
+
+        .percent-sign {
+            font-size: 1.2rem;
+        }
+
+        .exam-title {
+            font-size: 1.4rem;
+        }
+
+        .status-message {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .answer-header {
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .answer-status {
+            text-align: left;
+        }
+
+        .answer-comparison {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .score-circle {
+            width: 120px;
+            height: 120px;
+        }
+
+        .percentage {
+            font-size: 1.5rem;
+        }
+
+        .percent-sign {
+            font-size: 1rem;
+        }
+
+        .exam-title {
+            font-size: 1.1rem;
+        }
+
+        .status-text h3 {
+            font-size: 1.2rem;
+        }
+
+        .status-text p {
+            font-size: 0.85rem;
+        }
+
+        .answer-header {
+            padding: 1rem;
+            gap: 0.8rem;
+        }
+
+        .q-badge {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .question-text h5 {
+            font-size: 0.9rem;
+        }
+    }
 </style>
 {% endblock %}
