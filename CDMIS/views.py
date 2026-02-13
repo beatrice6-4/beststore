@@ -1139,7 +1139,7 @@ def payment_select_dates(request):
                 logo_paragraph = doc.add_paragraph()
                 logo_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 logo_run = logo_paragraph.add_run()
-                logo_run.add_picture(logo_path, width=Inches(1.2))
+                logo_run.add_picture(logo_path, width=Inches(0.6))
             
             # Add title
             title = doc.add_heading('PAYMENT RECORDS REPORT', 0)
@@ -1149,17 +1149,6 @@ def payment_select_dates(request):
             subtitle = doc.add_paragraph('STATE DEPARTMENT FOR SOCIAL DEVELOPMENT - CDMIS')
             subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
             subtitle.runs[0].bold = True
-            
-            # Add report generation date
-            report_date = doc.add_paragraph(f'Report Generated: {datetime.now().strftime("%d %B %Y at %H:%M:%S")}')
-            report_date.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            
-            # Add date range info
-            if selected_payments:
-                min_date = min(p.payment_date for p in selected_payments)
-                max_date = max(p.payment_date for p in selected_payments)
-                date_range = doc.add_paragraph(f'Date Range: {min_date.strftime("%d %B %Y")} to {max_date.strftime("%d %B %Y")}')
-                date_range.alignment = WD_ALIGN_PARAGRAPH.CENTER
             
             doc.add_paragraph()  # Add space
             
