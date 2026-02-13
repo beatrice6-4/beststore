@@ -201,16 +201,19 @@ class FinanceView(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         from collections import defaultdict
         from .models import Group, Payment
+        from datetime import datetime
 
         payments = Payment.objects.select_related('group').order_by('payment_date')
         finance_data = defaultdict(list)
         date_choices = set()
+        
         for payment in payments:
-            finance_data[payment.payment_date].append({
-                'group': payment.group.name,
-                'amount': payment.amount
-            })
-            date_choices.add(payment.payment_date)
+            if payment.payment_date:
+                finance_data[payment.payment_date].append({
+                    'group': payment.group.name,
+                    'amount': payment.amount
+                })
+                date_choices.add(payment.payment_date)
 
         finance_list = []
         for date, items in finance_data.items():
@@ -220,13 +223,11 @@ class FinanceView(UserPassesTestMixin, View):
                 'payments': items,
                 'date_total': date_total
             })
-        finance_list = [item for item in finance_list if item['date'] is not None]
         finance_list.sort(key=lambda x: x['date'])
 
         grand_total = payments.aggregate(total=Sum('amount'))['total'] or 0
 
-        date_choices = [d for d in date_choices if d is not None]
-        date_choices = sorted(date_choices)
+        date_choices = sorted([d for d in date_choices if d is not None])
         form = FinanceDateForm()
         form.fields['dates'].choices = [(str(d), d.strftime("%b %d, %Y")) for d in date_choices]
 
@@ -234,35 +235,77 @@ class FinanceView(UserPassesTestMixin, View):
             'finance_list': finance_list,
             'grand_total': grand_total,
             'form': form,
+            'date_choices_count': len(date_choices),
         })
 
     def post(self, request, *args, **kwargs):
-        # Handle download request
-        form = FinanceDateForm(request.POST)
+        from datetime import datetime
+        from django.http import HttpResponseForbidden
+        
         payments = Payment.objects.select_related('group').order_by('payment_date')
-        date_choices = sorted(set(payment.payment_date for payment in payments))
+        
+        # Get all available dates
+        date_choices = sorted(set(payment.payment_date for payment in payments if payment.payment_date))
+        form = FinanceDateForm(request.POST)
         form.fields['dates'].choices = [(str(d), d.strftime("%b %d, %Y")) for d in date_choices]
 
         if form.is_valid():
-            selected_dates = form.cleaned_data['dates']
+            selected_dates_str = form.cleaned_data['dates']
+            
+            # Convert string dates back to date objects
+            try:
+                selected_dates = []
+                for date_str in selected_dates_str:
+                    parsed_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                    selected_dates.append(parsed_date)
+            except (ValueError, TypeError):
+                return self.get(request)
+            
+            # Filter payments for selected dates only
             selected_payments = payments.filter(payment_date__in=selected_dates)
 
             # Prepare CSV response
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename=finance_summary.csv'
+            
             import csv
             writer = csv.writer(response)
-            writer.writerow(['Date', 'Group', 'Amount'])
-            total = 0
-            for payment in selected_payments:
-                writer.writerow([
-                    payment.payment_date.strftime("%Y-%m-%d"),
-                    payment.group.name,
-                    payment.amount
-                ])
-                total += payment.amount
+            writer.writerow(['PAYMENT RECORDS - SELECTED DATES'])
             writer.writerow([])
-            writer.writerow(['', 'Total', total])
+            writer.writerow(['Date', 'Group', 'Amount'])
+            writer.writerow(['-' * 50, '-' * 50, '-' * 50])
+            
+            # Group payments by date
+            payments_by_date = defaultdict(list)
+            total_amount = 0
+            
+            for payment in selected_payments:
+                payments_by_date[payment.payment_date].append(payment)
+                total_amount += payment.amount
+            
+            # Write payments organized by date
+            for payment_date in sorted(payments_by_date.keys()):
+                date_payments = payments_by_date[payment_date]
+                date_subtotal = sum(p.amount for p in date_payments)
+                
+                writer.writerow([payment_date.strftime("%Y-%m-%d"), '', ''])
+                
+                for payment in date_payments:
+                    writer.writerow([
+                        '',
+                        payment.group.name,
+                        f"{payment.amount}"
+                    ])
+                
+                writer.writerow(['[Subtotal]', '', f"{date_subtotal}"])
+                writer.writerow([])
+            
+            # Add grand total
+            writer.writerow(['-' * 50, '-' * 50, '-' * 50])
+            writer.writerow(['TOTAL', '', f"{total_amount}"])
+            writer.writerow([])
+            writer.writerow([f"Records downloaded on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
+            
             return response
 
         # If form is not valid, re-render page
