@@ -237,9 +237,9 @@ def mpesa_payment(request, order_id):
                         }
                     else:
                         # ========================= M-PESA CONFIGURATION =========================
-                        passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"
-                        business_short_code = '3581517'
-                        till_number = 6391014
+                        passkey = "46c4b4ea9885ebebe4054aa05ba24ebede634ra956de7286c28135be035bdec933"
+                        business_short_code = '400200'
+            
                         process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                         callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
 
@@ -267,7 +267,7 @@ def mpesa_payment(request, order_id):
                             'TransactionType': 'CustomerBuyGoodsOnline',
                             'Amount': amount,
                             'PartyA': phone_number,
-                            'PartyB': till_number,
+                            'PartyB': 1126728,
                             'PhoneNumber': phone_number,
                             'CallBackURL': callback_url,
                             'AccountReference': account_reference,
@@ -310,7 +310,7 @@ def mpesa_payment(request, order_id):
                                     'ResponseCode': response_code,
                                     'amount': amount,
                                     'account_reference': account_reference,
-                                    'till_number': till_number,
+                                    'till_number': 1126728,
                                     'order_number': order_id,
                                     'phone_number': phone_number
                                 }
