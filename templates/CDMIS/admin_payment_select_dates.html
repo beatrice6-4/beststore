@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Payment Dates - CDMIS Payment Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px 12px 0 0;
+            padding: 30px;
+        }
+        
+        .card-header h2 {
+            color: white;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 40px;
+        }
+        
+        .form-check {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .form-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .form-check label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+            padding-top: 2px;
+        }
+        
+        .form-check:hover {
+            background: #e9ecef;
+            border-left-color: #764ba2;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 32px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+            padding: 12px 32px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .text-muted {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .dates-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .select-all-wrapper {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .select-all-wrapper .form-check {
+            background: #e7f3ff;
+            border-left-color: #0056b3;
+            margin-bottom: 0;
+        }
+        
+        .icon-info {
+            color: #667eea;
+            margin-right: 8px;
+        }
+        
+        h2 {
+            font-size: 24px;
+        }
+        
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-calendar-check icon-info"></i>Select Payment Dates</h2>
+                <p style="color: rgba(255, 255, 255, 0.9); margin-top: 10px; margin-bottom: 0;">
+                    Choose specific dates to generate your financial report
+                </p>
+            </div>
+            
+            <div class="card-body">
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.non_field_errors.0 }}
+                    </div>
+                {% endif %}
+                
+                <form method="POST" id="date_selection_form">
+                    {% csrf_token %}
+                    
+                    <div class="select-all-wrapper">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleAllDates()">
+                            <label class="form-check-label" for="selectAll">
+                                <strong>Select All Dates</strong>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label fw-bold mb-3">
+                            <i class="fas fa-list icon-info"></i>Payment Dates
+                        </label>
+                    </div>
+                    
+                    <div class="dates-list">
+                        {% for choice_value, choice_label in form.dates.field.choices %}
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input date-checkbox" 
+                                       name="dates" value="{{ choice_value }}" 
+                                       id="id_dates_{{ forloop.counter0 }}">
+                                <label class="form-check-label" for="id_dates_{{ forloop.counter0 }}">
+                                    {{ choice_label }}
+                                </label>
+                            </div>
+                        {% empty %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> No payment dates available.
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if form.dates.errors %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.dates.errors.0 }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Generate Report (Word)
+                        </button>
+                        <a href="/admin/" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Go Back to Admin
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleAllDates() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const dateCheckboxes = document.querySelectorAll('.date-checkbox');
+            
+            dateCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+        
+        // Update "Select All" checkbox when individual dates are changed
+        document.querySelectorAll('.date-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const allChecked = Array.from(document.querySelectorAll('.date-checkbox'))
+                    .every(cb => cb.checked);
+                
+                selectAllCheckbox.checked = allChecked;
+            });
+        });
+        
+        // Form validation
+        document.getElementById('date_selection_form').addEventListener('submit', function(e) {
+            const selectedDates = document.querySelectorAll('.date-checkbox:checked');
+            if (selectedDates.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one date before generating the report.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1080,3 +1080,187 @@ class WithdrawalDetailView(DetailView):
     model = Withdrawal
     template_name = 'CDMIS/withdrawal_detail.html'
     context_object_name = 'withdrawal'
+
+
+# ========================= ADMIN PAYMENT REPORT VIEW =========================
+from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponse
+from docx import Document
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+import os
+from django.conf import settings
+
+class PaymentDateSelectForm(forms.Form):
+    """Form to select payment dates for report generation"""
+    dates = forms.MultipleChoiceField(
+        choices=[],
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select Payment Dates"
+    )
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def payment_select_dates(request):
+    """View to select dates for financial report"""
+    # Get all unique payment dates
+    all_payments = Payment.objects.all().order_by('-payment_date').values_list('payment_date', flat=True).distinct()
+    date_choices = sorted(set([d for d in all_payments if d is not None]))
+    
+    form = PaymentDateSelectForm()
+    form.fields['dates'].choices = [(str(d), d.strftime("%d %B %Y (%A)")) for d in date_choices]
+    
+    if request.method == 'POST':
+        form = PaymentDateSelectForm(request.POST)
+        form.fields['dates'].choices = [(str(d), d.strftime("%d %B %Y (%A)")) for d in date_choices]
+        
+        if form.is_valid():
+            selected_dates_str = form.cleaned_data['dates']
+            
+            # Convert string dates back to date objects
+            try:
+                selected_dates = []
+                for date_str in selected_dates_str:
+                    parsed_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                    selected_dates.append(parsed_date)
+            except (ValueError, TypeError):
+                form.add_error(None, "Invalid date format. Please try again.")
+                return render(request, 'CDMIS/admin_payment_select_dates.html', {'form': form})
+            
+            # Get payments for selected dates
+            selected_payments = Payment.objects.filter(payment_date__in=selected_dates).order_by('payment_date')
+            
+            # Generate Word document
+            doc = Document()
+            
+            # Add logo
+            logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov.png')
+            if os.path.exists(logo_path):
+                logo_paragraph = doc.add_paragraph()
+                logo_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                logo_run = logo_paragraph.add_run()
+                logo_run.add_picture(logo_path, width=Inches(1.2))
+            
+            # Add title
+            title = doc.add_heading('PAYMENT RECORDS REPORT', 0)
+            title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            
+            # Add subtitle
+            subtitle = doc.add_paragraph('STATE DEPARTMENT FOR SOCIAL DEVELOPMENT - CDMIS')
+            subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            subtitle.runs[0].bold = True
+            
+            # Add report generation date
+            report_date = doc.add_paragraph(f'Report Generated: {datetime.now().strftime("%d %B %Y at %H:%M:%S")}')
+            report_date.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            
+            # Add date range info
+            if selected_payments:
+                min_date = min(p.payment_date for p in selected_payments)
+                max_date = max(p.payment_date for p in selected_payments)
+                date_range = doc.add_paragraph(f'Date Range: {min_date.strftime("%d %B %Y")} to {max_date.strftime("%d %B %Y")}')
+                date_range.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            
+            doc.add_paragraph()  # Add space
+            
+            # Calculate totals
+            total_amount = sum(p.amount for p in selected_payments)
+            
+            # Add summary section
+            summary_table = doc.add_table(rows=4, cols=2)
+            summary_table.style = 'Light Grid Accent 1'
+            
+            summary_cells = summary_table.rows[0].cells
+            summary_cells[0].text = 'Total Payment Records'
+            summary_cells[1].text = str(len(selected_payments))
+            
+            summary_cells = summary_table.rows[1].cells
+            summary_cells[0].text = 'Number of Dates'
+            summary_cells[1].text = str(len(selected_dates))
+            
+            summary_cells = summary_table.rows[2].cells
+            summary_cells[0].text = 'Number of Groups'
+            summary_cells[1].text = str(selected_payments.values('group').distinct().count())
+            
+            summary_cells = summary_table.rows[3].cells
+            summary_cells[0].text = 'Grand Total Amount'
+            summary_cells[1].text = f'Ksh {total_amount:,.2f}'
+            
+            doc.add_paragraph()  # Add space
+            
+            # Add all payments in one table
+            heading = doc.add_heading('Payment Details - All Selected Dates', level=2)
+            heading.runs[0].font.color.rgb = RGBColor(0, 56, 179)
+            
+            # Create single table for all payments
+            total_rows = len(selected_payments) + 2
+            payment_table = doc.add_table(rows=total_rows, cols=4)
+            payment_table.style = 'Light Grid Accent 1'
+            
+            # Add headers
+            header_cells = payment_table.rows[0].cells
+            header_cells[0].text = 'Date'
+            header_cells[1].text = 'Group Name'
+            header_cells[2].text = 'Amount (Ksh)'
+            header_cells[3].text = 'Notes'
+            
+            # Make header bold and colored
+            for cell in header_cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.bold = True
+                        run.font.color.rgb = RGBColor(255, 255, 255)
+                # Set header background to dark blue
+                from docx.oxml import parse_xml
+                from docx.oxml.ns import nsdecls
+                shading_elm = parse_xml(r'<w:shd {} w:fill="003B7F"/>'.format(nsdecls('w')))
+                cell._element.get_or_add_tcPr().append(shading_elm)
+            
+            # Add payment rows
+            row_idx = 1
+            for payment in selected_payments:
+                row_cells = payment_table.rows[row_idx].cells
+                row_cells[0].text = payment.payment_date.strftime('%d %b %Y')
+                row_cells[1].text = payment.group.name
+                row_cells[2].text = f'{payment.amount:,.2f}'
+                row_cells[3].text = payment.notes if payment.notes else '—'
+                row_idx += 1
+            
+            # Add grand total row
+            grand_total_cells = payment_table.rows[-1].cells
+            grand_total_cells[0].text = 'GRAND TOTAL'
+            grand_total_cells[1].text = ''
+            grand_total_cells[2].text = f'{total_amount:,.2f}'
+            grand_total_cells[3].text = ''
+            
+            # Style grand total row
+            for cell in grand_total_cells[:3]:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.bold = True
+                        run.font.size = Pt(12)
+                        run.font.color.rgb = RGBColor(178, 34, 34)
+                # Set background color
+                from docx.oxml import parse_xml
+                from docx.oxml.ns import nsdecls
+                shading_elm = parse_xml(r'<w:shd {} w:fill="FFEB9C"/>'.format(nsdecls('w')))
+                cell._element.get_or_add_tcPr().append(shading_elm)
+            
+            doc.add_paragraph()  # Add space
+            
+            # Add final summary
+            doc.add_paragraph()
+            final_summary = doc.add_paragraph(f'Total Amount: Ksh {total_amount:,.2f}')
+            final_summary.runs[0].bold = True
+            final_summary.runs[0].font.size = Pt(14)
+            final_summary.runs[0].font.color.rgb = RGBColor(178, 34, 34)
+            
+            # Prepare response
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+            response['Content-Disposition'] = f'attachment; filename=financial_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
+            doc.save(response)
+            return response
+    
+    return render(request, 'CDMIS/admin_payment_select_dates.html', {'form': form})

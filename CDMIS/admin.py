@@ -210,7 +210,14 @@ class PaymentAdmin(admin.ModelAdmin):
             'classes': ('wide', 'collapse'),
         }),
     )
-    actions = ['download_financial_report_word']
+    actions = ['download_financial_report_word', 'select_dates_for_report']
+
+    def select_dates_for_report(self, request, queryset):
+        """Redirect to date selection page for financial report"""
+        from django.urls import reverse
+        return HttpResponseRedirect(reverse('cdmis:payment_select_dates'))
+    
+    select_dates_for_report.short_description = '📄 Download Financial Report (Select Dates)'
 
     def download_financial_report_word(self, request, queryset):
         """Download financial report as Word document for selected payments"""
@@ -218,16 +225,18 @@ class PaymentAdmin(admin.ModelAdmin):
         from docx.shared import Inches, Pt, RGBColor
         from docx.enum.text import WD_ALIGN_PARAGRAPH
         from datetime import datetime
-        from collections import defaultdict
         import os
         from django.conf import settings
         
         # Group payments by date
-        payments_by_date = defaultdict(list)
+        payments_by_date = {}
         total_amount = 0
         
         for payment in queryset.order_by('payment_date'):
-            payments_by_date[payment.payment_date].append(payment)
+            payment_date = payment.payment_date
+            if payment_date not in payments_by_date:
+                payments_by_date[payment_date] = []
+            payments_by_date[payment_date].append(payment)
             total_amount += payment.amount
         
         # Create Word document
@@ -254,6 +263,13 @@ class PaymentAdmin(admin.ModelAdmin):
         report_date = doc.add_paragraph(f'Report Generated: {datetime.now().strftime("%d %B %Y at %H:%M:%S")}')
         report_date.alignment = WD_ALIGN_PARAGRAPH.CENTER
         
+        # Add date range info
+        if payments_by_date:
+            min_date = min(payments_by_date.keys())
+            max_date = max(payments_by_date.keys())
+            date_range = doc.add_paragraph(f'Date Range: {min_date.strftime("%d %B %Y")} to {max_date.strftime("%d %B %Y")}')
+            date_range.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
         doc.add_paragraph()  # Add space
         
         # Add summary section
@@ -278,61 +294,73 @@ class PaymentAdmin(admin.ModelAdmin):
         
         doc.add_paragraph()  # Add space
         
-        # Add detailed payments section
+        # Add all payments in one table
+        heading = doc.add_heading('Payment Details - All Selected Dates', level=2)
+        heading.runs[0].font.color.rgb = RGBColor(0, 56, 179)  # Blue color
+        
+        # Calculate total rows: 1 header + all payments + 1 grand total
+        total_rows = len(queryset) + 2
+        payment_table = doc.add_table(rows=total_rows, cols=4)
+        payment_table.style = 'Light Grid Accent 1'
+        
+        # Add headers
+        header_cells = payment_table.rows[0].cells
+        header_cells[0].text = 'Date'
+        header_cells[1].text = 'Group Name'
+        header_cells[2].text = 'Amount (Ksh)'
+        header_cells[3].text = 'Notes'
+        
+        # Make header bold and colored
+        for cell in header_cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+            # Set header background to dark blue
+            from docx.oxml import parse_xml
+            from docx.oxml.ns import nsdecls
+            shading_elm = parse_xml(r'<w:shd {} w:fill="003B7F"/>'.format(nsdecls('w')))
+            cell._element.get_or_add_tcPr().append(shading_elm)
+        
+        # Add payment rows
+        row_idx = 1
         for payment_date in sorted(payments_by_date.keys()):
-            date_heading = doc.add_heading(f'Date: {payment_date.strftime("%d %B %Y (%A)")}', level=2)
-            date_heading.runs[0].font.color.rgb = RGBColor(0, 56, 179)  # Blue color
-            
-            date_payments = payments_by_date[payment_date]
-            date_subtotal = sum(p.amount for p in date_payments)
-            
-            # Create table for payments on this date
-            payment_table = doc.add_table(rows=len(date_payments) + 2, cols=3)
-            payment_table.style = 'Light Grid Accent 1'
-            
-            # Add headers
-            header_cells = payment_table.rows[0].cells
-            header_cells[0].text = 'Group Name'
-            header_cells[1].text = 'Amount (Ksh)'
-            header_cells[2].text = 'Notes'
-            
-            # Make header bold
-            for cell in header_cells:
-                for paragraph in cell.paragraphs:
-                    for run in paragraph.runs:
-                        run.bold = True
-            
-            # Add payment rows
-            for idx, payment in enumerate(date_payments):
-                row_cells = payment_table.rows[idx + 1].cells
-                row_cells[0].text = payment.group.name
-                row_cells[1].text = f'{payment.amount:,.2f}'
-                row_cells[2].text = payment.notes if payment.notes else '—'
-            
-            # Add subtotal row
-            subtotal_cells = payment_table.rows[-1].cells
-            subtotal_cells[0].text = 'DATE SUBTOTAL'
-            subtotal_cells[1].text = f'{date_subtotal:,.2f}'
-            subtotal_cells[2].text = ''
-            
-            # Style subtotal row
-            for cell in subtotal_cells[:2]:
-                for paragraph in cell.paragraphs:
-                    for run in paragraph.runs:
-                        run.bold = True
-                        run.font.color.rgb = RGBColor(0, 128, 0)  # Green color
-            
-            doc.add_paragraph()  # Add space between dates
+            for payment in payments_by_date[payment_date]:
+                row_cells = payment_table.rows[row_idx].cells
+                row_cells[0].text = payment_date.strftime('%d %b %Y')
+                row_cells[1].text = payment.group.name
+                row_cells[2].text = f'{payment.amount:,.2f}'
+                row_cells[3].text = payment.notes if payment.notes else '—'
+                row_idx += 1
         
-        # Add grand total section
+        # Add grand total row
+        grand_total_cells = payment_table.rows[-1].cells
+        grand_total_cells[0].text = 'GRAND TOTAL'
+        grand_total_cells[1].text = ''
+        grand_total_cells[2].text = f'{total_amount:,.2f}'
+        grand_total_cells[3].text = ''
+        
+        # Style grand total row
+        for cell in grand_total_cells[:3]:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+                    run.font.size = Pt(12)
+                    run.font.color.rgb = RGBColor(178, 34, 34)
+            # Set background color
+            from docx.oxml import parse_xml
+            from docx.oxml.ns import nsdecls
+            shading_elm = parse_xml(r'<w:shd {} w:fill="FFEB9C"/>'.format(nsdecls('w')))
+            cell._element.get_or_add_tcPr().append(shading_elm)
+        
+        doc.add_paragraph()  # Add space
+        
+        # Add final summary
         doc.add_paragraph()
-        grand_total_heading = doc.add_heading('GRAND TOTAL', level=2)
-        grand_total_heading.runs[0].font.color.rgb = RGBColor(178, 34, 34)  # Dark red color
-        
-        grand_total_para = doc.add_paragraph(f'Total Amount: Ksh {total_amount:,.2f}')
-        grand_total_para.runs[0].bold = True
-        grand_total_para.runs[0].font.size = Pt(14)
-        grand_total_para.runs[0].font.color.rgb = RGBColor(178, 34, 34)
+        final_summary = doc.add_paragraph(f'Total Amount: Ksh {total_amount:,.2f}')
+        final_summary.runs[0].bold = True
+        final_summary.runs[0].font.size = Pt(14)
+        final_summary.runs[0].font.color.rgb = RGBColor(178, 34, 34)
         
         # Prepare response
         response = HttpResponse(
@@ -341,8 +369,6 @@ class PaymentAdmin(admin.ModelAdmin):
         response['Content-Disposition'] = f'attachment; filename=financial_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
         doc.save(response)
         return response
-    
-    download_financial_report_word.short_description = '📄 Download as Word (Selected Dates)'
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
