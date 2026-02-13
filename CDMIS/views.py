@@ -241,6 +241,10 @@ class FinanceView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         from datetime import datetime
         from django.http import HttpResponseForbidden
+        import csv
+        from docx import Document
+        from docx.shared import Inches, Pt, RGBColor
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
         
         payments = Payment.objects.select_related('group').order_by('payment_date')
         
@@ -264,17 +268,6 @@ class FinanceView(UserPassesTestMixin, View):
             # Filter payments for selected dates only
             selected_payments = payments.filter(payment_date__in=selected_dates)
 
-            # Prepare CSV response
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename=finance_summary.csv'
-            
-            import csv
-            writer = csv.writer(response)
-            writer.writerow(['PAYMENT RECORDS - SELECTED DATES'])
-            writer.writerow([])
-            writer.writerow(['Date', 'Group', 'Amount'])
-            writer.writerow(['-' * 50, '-' * 50, '-' * 50])
-            
             # Group payments by date
             payments_by_date = defaultdict(list)
             total_amount = 0
@@ -282,31 +275,143 @@ class FinanceView(UserPassesTestMixin, View):
             for payment in selected_payments:
                 payments_by_date[payment.payment_date].append(payment)
                 total_amount += payment.amount
-            
-            # Write payments organized by date
-            for payment_date in sorted(payments_by_date.keys()):
-                date_payments = payments_by_date[payment_date]
-                date_subtotal = sum(p.amount for p in date_payments)
+
+            # Determine format from request
+            download_format = request.POST.get('download_format', 'csv')
+
+            if download_format == 'word':
+                # Generate Word document
+                doc = Document()
                 
-                writer.writerow([payment_date.strftime("%Y-%m-%d"), '', ''])
+                # Add title
+                title = doc.add_heading('PAYMENT RECORDS REPORT', 0)
+                title.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 
-                for payment in date_payments:
-                    writer.writerow([
-                        '',
-                        payment.group.name,
-                        f"{payment.amount}"
-                    ])
+                # Add subtitle with date range
+                subtitle = doc.add_paragraph('Selected Dates Financial Report')
+                subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                subtitle.runs[0].bold = True
                 
-                writer.writerow(['[Subtotal]', '', f"{date_subtotal}"])
+                # Add report generation date
+                report_date = doc.add_paragraph(f'Report Generated: {datetime.now().strftime("%d %B %Y at %H:%M:%S")}')
+                report_date.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                
+                doc.add_paragraph()  # Add space
+                
+                # Add summary section
+                summary_table = doc.add_table(rows=3, cols=2)
+                summary_table.style = 'Light Grid Accent 1'
+                
+                summary_cells = summary_table.rows[0].cells
+                summary_cells[0].text = 'Total Payment Records'
+                summary_cells[1].text = str(len(selected_payments))
+                
+                summary_cells = summary_table.rows[1].cells
+                summary_cells[0].text = 'Number of Dates'
+                summary_cells[1].text = str(len(payments_by_date))
+                
+                summary_cells = summary_table.rows[2].cells
+                summary_cells[0].text = 'Grand Total Amount'
+                summary_cells[1].text = f'Ksh {total_amount:,.2f}'
+                
+                doc.add_paragraph()  # Add space
+                
+                # Add detailed payments section
+                for payment_date in sorted(payments_by_date.keys()):
+                    date_heading = doc.add_heading(f'Date: {payment_date.strftime("%d %B %Y (%A)")}', level=2)
+                    date_heading.runs[0].font.color.rgb = RGBColor(0, 56, 179)  # Blue color
+                    
+                    date_payments = payments_by_date[payment_date]
+                    date_subtotal = sum(p.amount for p in date_payments)
+                    
+                    # Create table for payments on this date
+                    payment_table = doc.add_table(rows=len(date_payments) + 2, cols=2)
+                    payment_table.style = 'Light Grid Accent 1'
+                    
+                    # Add headers
+                    header_cells = payment_table.rows[0].cells
+                    header_cells[0].text = 'Group Name'
+                    header_cells[1].text = 'Amount (Ksh)'
+                    
+                    # Make header bold
+                    for cell in header_cells:
+                        for paragraph in cell.paragraphs:
+                            for run in paragraph.runs:
+                                run.bold = True
+                    
+                    # Add payment rows
+                    for idx, payment in enumerate(date_payments):
+                        row_cells = payment_table.rows[idx + 1].cells
+                        row_cells[0].text = payment.group.name
+                        row_cells[1].text = f'{payment.amount:,.2f}'
+                    
+                    # Add subtotal row
+                    subtotal_cells = payment_table.rows[-1].cells
+                    subtotal_cells[0].text = 'DATE SUBTOTAL'
+                    subtotal_cells[1].text = f'{date_subtotal:,.2f}'
+                    
+                    # Style subtotal row
+                    for cell in subtotal_cells:
+                        for paragraph in cell.paragraphs:
+                            for run in paragraph.runs:
+                                run.bold = True
+                                run.font.color.rgb = RGBColor(0, 128, 0)  # Green color
+                    
+                    doc.add_paragraph()  # Add space between dates
+                
+                # Add grand total section
+                doc.add_paragraph()
+                grand_total_heading = doc.add_heading('GRAND TOTAL', level=2)
+                grand_total_heading.runs[0].font.color.rgb = RGBColor(178, 34, 34)  # Dark red color
+                
+                grand_total_para = doc.add_paragraph(f'Total Amount: Ksh {total_amount:,.2f}')
+                grand_total_para.runs[0].bold = True
+                grand_total_para.runs[0].font.size = Pt(14)
+                grand_total_para.runs[0].font.color.rgb = RGBColor(178, 34, 34)
+                
+                # Prepare response
+                response = HttpResponse(
+                    content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                )
+                response['Content-Disposition'] = 'attachment; filename=finance_report.docx'
+                doc.save(response)
+                return response
+
+            else:
+                # Generate CSV response (default)
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename=finance_summary.csv'
+                
+                writer = csv.writer(response)
+                writer.writerow(['PAYMENT RECORDS - SELECTED DATES'])
                 writer.writerow([])
-            
-            # Add grand total
-            writer.writerow(['-' * 50, '-' * 50, '-' * 50])
-            writer.writerow(['TOTAL', '', f"{total_amount}"])
-            writer.writerow([])
-            writer.writerow([f"Records downloaded on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
-            
-            return response
+                writer.writerow(['Date', 'Group', 'Amount'])
+                writer.writerow(['-' * 50, '-' * 50, '-' * 50])
+                
+                # Write payments organized by date
+                for payment_date in sorted(payments_by_date.keys()):
+                    date_payments = payments_by_date[payment_date]
+                    date_subtotal = sum(p.amount for p in date_payments)
+                    
+                    writer.writerow([payment_date.strftime("%Y-%m-%d"), '', ''])
+                    
+                    for payment in date_payments:
+                        writer.writerow([
+                            '',
+                            payment.group.name,
+                            f"{payment.amount}"
+                        ])
+                    
+                    writer.writerow(['[Subtotal]', '', f"{date_subtotal}"])
+                    writer.writerow([])
+                
+                # Add grand total
+                writer.writerow(['-' * 50, '-' * 50, '-' * 50])
+                writer.writerow(['TOTAL', '', f"{total_amount}"])
+                writer.writerow([])
+                writer.writerow([f"Records downloaded on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
+                
+                return response
 
         # If form is not valid, re-render page
         return self.get(request)
