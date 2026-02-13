@@ -219,6 +219,8 @@ class PaymentAdmin(admin.ModelAdmin):
         from docx.enum.text import WD_ALIGN_PARAGRAPH
         from datetime import datetime
         from collections import defaultdict
+        import os
+        from django.conf import settings
         
         # Group payments by date
         payments_by_date = defaultdict(list)
@@ -231,12 +233,20 @@ class PaymentAdmin(admin.ModelAdmin):
         # Create Word document
         doc = Document()
         
+        # Add logo if it exists
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov.png')
+        if os.path.exists(logo_path):
+            logo_paragraph = doc.add_paragraph()
+            logo_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            logo_run = logo_paragraph.add_run()
+            logo_run.add_picture(logo_path, width=Inches(1.2))
+        
         # Add title
         title = doc.add_heading('PAYMENT RECORDS REPORT', 0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
         
         # Add subtitle
-        subtitle = doc.add_paragraph('Selected Dates Financial Report')
+        subtitle = doc.add_paragraph('STATE DEPARTMENT FOR SOCIAL DEVELOPMENT - CDMIS')
         subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
         subtitle.runs[0].bold = True
         
