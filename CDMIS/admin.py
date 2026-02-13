@@ -255,7 +255,7 @@ class PaymentAdmin(admin.ModelAdmin):
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
         
         # Add subtitle
-        subtitle = doc.add_paragraph('STATE DEPARTMENT FOR SOCIAL DEVELOPMENT - CDMIS')
+        subtitle = doc.add_paragraph('STATE DEPARTMENT FOR SOCIAL DEVELOPMENT - CDMIS FOR DIANA NAMBUCHI SCSDO KIMILILI')
         subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
         subtitle.runs[0].bold = True
         
