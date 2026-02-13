@@ -56,12 +56,12 @@
                         <div class="form-group mb-3">
                             <label class="form-label fw-bold">Select Dates to Download:</label>
                             <div class="row g-2">
-                                {% for date_choice, date_display in form.dates %}
+                                {% for choice_value, choice_label in form.dates.field.choices %}
                                     <div class="col-md-6 col-lg-4">
                                         <div class="form-check">
-                                            {{ date_choice.tag }}
-                                            <label class="form-check-label" for="{{ date_choice.id_for_label }}">
-                                                {{ date_display }}
+                                            <input type="checkbox" class="form-check-input" name="dates" value="{{ choice_value }}" id="id_dates_{{ forloop.counter0 }}">
+                                            <label class="form-check-label" for="id_dates_{{ forloop.counter0 }}">
+                                                {{ choice_label }}
                                             </label>
                                         </div>
                                     </div>
