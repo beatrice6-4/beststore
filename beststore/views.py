@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from store.models import Product
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
@@ -7,103 +6,71 @@ from datetime import timedelta
 
 def home(request):
     """
-    Display home page with products, user statistics, and account information.
+    Display CDMIS home page with community development information.
     Shows:
-    - All available products
-    - User order history and statistics (if logged in)
-    - Account balance and spending information (if logged in)
-    - Featured/trending products
+    - Total registered groups
+    - Total community members
+    - Recent activities and trainings
+    - Payment statistics
+    - Group information and services
     """
     
-    # ========================= FETCH PRODUCTS =========================
-    # Get all available products, ordered by newest first
-    products = Product.objects.filter(
-        is_available=True
-    ).select_related('category').order_by('-created_at')
+    from CDMIS.models import Group, Member, Activity, Training, Service, Payment
     
-    # Get featured/trending products (limit to 8)
-    featured_products = products[:8]
+    # ========================= FETCH CDMIS STATISTICS =========================
+    # Total Groups
+    total_groups = Group.objects.count()
+    groups = Group.objects.all()
     
-    # ========================= USER AUTHENTICATION CHECK =========================
-    user_stats = {
-        'is_authenticated': request.user.is_authenticated,
-        'total_orders': 0,
-        'completed_orders': 0,
-        'total_spent': 0.0,
-        'pending_orders': 0,
-        'pending_amount': 0.0,
-        'account_balance': 0.0,
-        'recent_orders': [],
-    }
+    # Total Members
+    total_members = Member.objects.count()
     
-    # If user is logged in, fetch user-specific data
-    if request.user.is_authenticated:
-        from orders.models import Order
-        from accounts.models import Account
+    # Total Payments
+    total_payments = Payment.objects.aggregate(
+        total=Sum('amount')
+    )['total'] or 0.0
+    
+    # Get recent activities (last 10)
+    recent_activities = Activity.objects.all().order_by('-activity_date')[:10]
+    
+    # Get recent trainings (last 10)
+    recent_trainings = Training.objects.all().order_by('-training_date')[:10]
+    
+    # Get all services
+    all_services = Service.objects.all().order_by('-service_date')[:10]
+    
+    # Get recent payments (last 10)
+    recent_payments = Payment.objects.all().order_by('-payment_date')[:10]
+    
+    # ========================= GROUP STATISTICS =========================
+    group_stats = []
+    for group in groups[:5]:  # Top 5 groups
+        group_members = Member.objects.filter(group=group).count()
+        group_payments = Payment.objects.filter(group=group).aggregate(
+            total=Sum('amount')
+        )['total'] or 0.0
+        group_activities = Activity.objects.filter(group=group).count()
         
-        user = request.user
-        
-        try:
-            # ========================= FETCH USER ACCOUNT =========================
-            account = Account.objects.get(id=user.id)
-            
-            # Get account balance if available
-            user_stats['account_balance'] = getattr(account, 'account_balance', 0.0) or 0.0
-            
-        except Account.DoesNotExist:
-            user_stats['account_balance'] = 0.0
-        except Exception as e:
-            print(f"Error fetching account: {str(e)}")
-            user_stats['account_balance'] = 0.0
-        
-        try:
-            # ========================= FETCH ORDER STATISTICS =========================
-            all_orders = Order.objects.filter(user=user).select_related('user')
-            
-            # Total orders count
-            user_stats['total_orders'] = all_orders.count()
-            
-            # Completed/delivered orders
-            completed_orders = all_orders.filter(
-                status__in=['completed', 'delivered', 'confirmed']
-            )
-            user_stats['completed_orders'] = completed_orders.count()
-            
-            # ========================= CALCULATE TOTAL SPENT =========================
-            # Total amount spent on completed orders
-            spent_data = completed_orders.aggregate(
-                total=Sum('total_amount')
-            )
-            user_stats['total_spent'] = float(spent_data['total'] or 0)
-            
-            # ========================= PENDING ORDERS =========================
-            # Pending/in-progress orders
-            pending_orders = all_orders.filter(
-                status__in=['pending', 'processing', 'shipped']
-            )
-            user_stats['pending_orders'] = pending_orders.count()
-            
-            # Pending spending (not yet completed)
-            pending_data = pending_orders.aggregate(
-                total=Sum('total_amount')
-            )
-            user_stats['pending_amount'] = float(pending_data['total'] or 0)
-            
-            # ========================= RECENT ORDERS =========================
-            # Get last 5 recent orders
-            user_stats['recent_orders'] = all_orders.order_by('-created_at')[:5]
-            
-        except Exception as e:
-            print(f"Error fetching user statistics: {str(e)}")
-            user_stats['recent_orders'] = []
+        group_stats.append({
+            'group': group,
+            'members': group_members,
+            'total_paid': group_payments,
+            'activities': group_activities,
+        })
     
     # ========================= CONTEXT DATA =========================
     context = {
-        'products': products,
-        'featured_products': featured_products,
-        'total_products': products.count(),
-        'user_stats': user_stats,
-        'page_title': 'Home - BESTSTORE',
+        'page_title': 'CDMIS - Community Development Management System',
+        'total_groups': total_groups,
+        'total_members': total_members,
+        'total_payments': total_payments,
+        'groups': groups,
+        'group_stats': group_stats,
+        'recent_activities': recent_activities,
+        'recent_trainings': recent_trainings,
+        'all_services': all_services,
+        'recent_payments': recent_payments,
+        'is_authenticated': request.user.is_authenticated,
     }
     
     return render(request, 'home.html', context)
