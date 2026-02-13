@@ -1,0 +1,228 @@
+{% extends 'gov.html' %}
+{% load static %}
+
+{% block title %}Finance Records - CDMIS{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="fas fa-file-invoice-dollar"></i> Payment Records
+            </h1>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">Total Payment Records</h6>
+                    <h3 class="mb-0" style="color: #007bff;">{{ finance_list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">Available Dates</h6>
+                    <h3 class="mb-0" style="color: #28a745;">{{ date_choices_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">Grand Total</h6>
+                    <h3 class="mb-0" style="color: #dc3545;">Ksh {{ grand_total|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Selected Dates Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter"></i> Download Payment Records by Date
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Select Dates to Download:</label>
+                            <div class="row g-2">
+                                {% for date_choice, date_display in form.dates %}
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="form-check">
+                                            {{ date_choice.tag }}
+                                            <label class="form-check-label" for="{{ date_choice.id_for_label }}">
+                                                {{ date_display }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i> Please select at least one date.
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download CSV
+                            </button>
+                            <a href="{% url 'cdmis:finance' %}" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Records by Date -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table"></i> All Payment Records
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if finance_list %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead style="background-color: #e9ecef;">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Group Name</th>
+                                        <th class="text-right">Amount</th>
+                                        <th class="text-center">Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in finance_list %}
+                                        <tr style="background-color: #f8f9fa; font-weight: bold;">
+                                            <td colspan="4">
+                                                <i class="fas fa-calendar"></i> 
+                                                <strong>{{ item.date|date:"d M Y (l)" }}</strong>
+                                                <span class="badge bg-info">{{ item.payments|length }} payments</span>
+                                            </td>
+                                        </tr>
+
+                                        {% for payment in item.payments %}
+                                            <tr>
+                                                <td></td>
+                                                <td>{{ payment.group }}</td>
+                                                <td class="text-right">
+                                                    <span class="badge bg-success">
+                                                        Ksh {{ payment.amount|floatformat:2 }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">—</td>
+                                            </tr>
+                                        {% endfor %}
+
+                                        <tr style="background-color: #e7f3ff; font-weight: bold;">
+                                            <td colspan="2" class="text-right">
+                                                <strong>Date Subtotal:</strong>
+                                            </td>
+                                            <td class="text-right" style="color: #0056b3;">
+                                                <strong>Ksh {{ item.date_total|floatformat:2 }}</strong>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+
+                                        <tr style="background-color: #ffffff; height: 10px;">
+                                            <td colspan="4"></td>
+                                        </tr>
+                                    {% endfor %}
+
+                                    <!-- Grand Total Row -->
+                                    <tr style="background-color: #ffc107; font-weight: bold;">
+                                        <td colspan="2" class="text-right">
+                                            <strong style="font-size: 1.1em;">GRAND TOTAL:</strong>
+                                        </td>
+                                        <td class="text-right" style="font-size: 1.1em;">
+                                            <strong>Ksh {{ grand_total|floatformat:2 }}</strong>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> No payment records found.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5 !important;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+
+    h1 {
+        color: #333;
+        font-weight: 600;
+        border-bottom: 3px solid #007bff;
+        padding-bottom: 10px;
+    }
+
+    .card {
+        border-radius: 8px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .form-check {
+        padding-left: 0;
+    }
+
+    .form-check-input {
+        margin-right: 8px;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    @media (max-width: 768px) {
+        .row {
+            margin-bottom: 2rem;
+        }
+
+        .table-responsive {
+            font-size: 0.9em;
+        }
+
+        h1 {
+            font-size: 1.5em;
+        }
+    }
+</style>
+{% endblock %}
