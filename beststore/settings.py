@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
 DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'mamamaasaibakers.onrender.com', 'mamamaasaibakers.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'mamamaasaibakers.onrender.com', 'mamamaasaibakers.com', 'dianah-dad5dcff9a01.herokuapp.com', '*.herokuapp.com']
 
 INSTALLED_APPS = [
     'jazzmin',
