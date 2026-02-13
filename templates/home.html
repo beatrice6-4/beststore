@@ -53,98 +53,20 @@
         pointer-events: none;
     }
 
-    .hero-section::after {
-        content: '';
-        position: absolute;
-        bottom: -40%;
-        left: -15%;
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 1;
-        max-width: 800px;
-        margin: 0 auto;
-        animation: slideDown 0.8s ease-out;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
     .hero-title {
         font-size: 3rem;
         font-weight: 800;
         margin-bottom: 15px;
-        letter-spacing: -1px;
     }
 
     .hero-subtitle {
         font-size: 1.2rem;
         opacity: 0.95;
         margin-bottom: 30px;
-        font-weight: 500;
     }
 
-    .hero-buttons {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        padding: 14px 32px;
-        border-radius: 8px;
-        font-weight: 700;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        border: none;
-        font-size: 1rem;
-    }
-
-    .btn-primary {
-        background: white;
-        color: var(--primary);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        text-decoration: none;
-        color: var(--primary);
-    }
-
-    .btn-secondary {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 2px solid white;
-    }
-
-    .btn-secondary:hover {
-        background: white;
-        color: var(--primary);
-        text-decoration: none;
-    }
-
-    /* ======================== USER STATS SECTION ======================== */
-    .user-stats-section {
+    /* ======================== STATS SECTION ======================== */
+    .stats-section {
         padding: 40px 20px;
         max-width: 1400px;
         margin: -80px auto 0;
@@ -154,7 +76,7 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 20px;
         margin-bottom: 40px;
     }
@@ -164,85 +86,15 @@
         border-radius: 12px;
         padding: 25px;
         box-shadow: var(--shadow-md);
-        animation: fadeIn 0.6s ease-out;
-        border-left: 4px solid;
+        border-left: 4px solid var(--primary);
         position: relative;
         overflow: hidden;
     }
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 80px;
-        height: 80px;
-        background: radial-gradient(circle, rgba(36, 178, 74, 0.1) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-
-    .stat-card.orders {
-        border-left-color: var(--primary);
-        background: linear-gradient(135deg, white 0%, rgba(36, 178, 74, 0.02) 100%);
-    }
-
-    .stat-card.spent {
-        border-left-color: var(--success);
-        background: linear-gradient(135deg, white 0%, rgba(16, 185, 129, 0.02) 100%);
-    }
-
-    .stat-card.balance {
-        border-left-color: var(--info);
-        background: linear-gradient(135deg, white 0%, rgba(13, 202, 240, 0.02) 100%);
-    }
-
-    .stat-card.pending {
-        border-left-color: var(--warning);
-        background: linear-gradient(135deg, white 0%, rgba(245, 158, 11, 0.02) 100%);
-    }
-
     .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        margin-bottom: 15px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .stat-card.orders .stat-icon {
-        background: rgba(36, 178, 74, 0.15);
+        font-size: 2.5rem;
         color: var(--primary);
-    }
-
-    .stat-card.spent .stat-icon {
-        background: rgba(16, 185, 129, 0.15);
-        color: var(--success);
-    }
-
-    .stat-card.balance .stat-icon {
-        background: rgba(13, 202, 240, 0.15);
-        color: var(--info);
-    }
-
-    .stat-card.pending .stat-icon {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--warning);
+        margin-bottom: 15px;
     }
 
     .stat-label {
@@ -250,32 +102,13 @@
         color: var(--text-muted);
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         margin-bottom: 8px;
     }
 
     .stat-value {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 800;
         color: var(--text-dark);
-        margin-bottom: 5px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .stat-change {
-        font-size: 0.8rem;
-        font-weight: 600;
-        position: relative;
-        z-index: 1;
-    }
-
-    .stat-change.positive {
-        color: var(--success);
-    }
-
-    .stat-change.warning {
-        color: var(--warning);
     }
 
     /* ======================== MAIN CONTENT ======================== */
@@ -285,7 +118,6 @@
         padding: 40px 20px;
     }
 
-    /* ======================== SECTION HEADER ======================== */
     .section-header {
         margin-bottom: 30px;
     }
@@ -302,274 +134,114 @@
         font-size: 1rem;
     }
 
-    .section-header-action {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .view-all-link {
-        color: var(--primary);
-        text-decoration: none;
-        font-weight: 700;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .view-all-link:hover {
-        color: var(--primary-dark);
-        text-decoration: underline;
-    }
-
-    /* ======================== PRODUCTS GRID ======================== */
-    .products-section {
-        margin-bottom: 60px;
-    }
-
-    .products-grid {
+    /* ======================== CARDS ======================== */
+    .card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 20px;
+        margin-bottom: 40px;
     }
 
-    .product-card {
+    .card {
         background: white;
         border-radius: 12px;
-        overflow: hidden;
+        padding: 20px;
         box-shadow: var(--shadow-sm);
         transition: all 0.3s ease;
-        animation: fadeInUp 0.6s ease-out;
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .product-card:hover {
-        transform: translateY(-8px);
+    .card:hover {
+        transform: translateY(-4px);
         box-shadow: var(--shadow-lg);
     }
 
-    .product-image {
-        width: 100%;
-        height: 200px;
-        background: var(--light);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .product-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .product-card:hover .product-image img {
-        transform: scale(1.05);
-    }
-
-    .product-image i {
-        font-size: 3rem;
-        color: var(--border);
-    }
-
-    .product-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: var(--primary);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-
-    .product-info {
-        padding: 18px;
-    }
-
-    .product-category {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        font-weight: 600;
-    }
-
-    .product-name {
+    .card-title {
+        font-size: 1rem;
         font-weight: 700;
         color: var(--text-dark);
-        font-size: 1rem;
         margin-bottom: 10px;
-        line-height: 1.3;
-        min-height: 2.6em;
     }
 
-    .product-footer {
+    .card-description {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .card-meta {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border);
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding-top: 12px;
-        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+        color: var(--text-muted);
     }
 
-    .product-price {
-        font-weight: 800;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-
-    .product-btn {
-        background: var(--light);
-        border: none;
-        color: var(--primary);
-        padding: 8px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 700;
-        transition: all 0.2s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .product-btn:hover {
-        background: var(--primary);
-        color: white;
-        text-decoration: none;
-    }
-
-    /* ======================== RECENT ORDERS ======================== */
-    .recent-orders-section {
+    /* ======================== TABLE ======================== */
+    .table-section {
         background: white;
         border-radius: 12px;
         padding: 30px;
         box-shadow: var(--shadow-md);
         margin-bottom: 40px;
+        overflow-x: auto;
     }
 
-    .orders-table {
+    .table {
         width: 100%;
         border-collapse: collapse;
     }
 
-    .orders-table thead {
+    .table thead {
         background: var(--light);
     }
 
-    .orders-table th {
+    .table th {
         padding: 12px;
         text-align: left;
         font-weight: 700;
         color: var(--text-dark);
         font-size: 0.9rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
-    .orders-table td {
+    .table td {
         padding: 14px 12px;
         border-bottom: 1px solid var(--border);
         color: var(--text-dark);
     }
 
-    .orders-table tbody tr:hover {
+    .table tbody tr:hover {
         background: var(--light);
     }
 
-    .order-id {
-        font-weight: 700;
-        color: var(--primary);
-    }
-
-    .status-badge {
+    .badge {
         display: inline-block;
         padding: 6px 12px;
         border-radius: 20px;
         font-size: 0.8rem;
         font-weight: 700;
-        text-transform: uppercase;
     }
 
-    .status-completed {
+    .badge-primary {
+        background: rgba(36, 178, 74, 0.15);
+        color: var(--primary);
+    }
+
+    .badge-success {
         background: rgba(16, 185, 129, 0.15);
         color: var(--success);
     }
 
-    .status-pending {
+    .badge-warning {
         background: rgba(245, 158, 11, 0.15);
         color: var(--warning);
     }
 
-    .status-processing {
+    .badge-info {
         background: rgba(13, 202, 240, 0.15);
         color: var(--info);
-    }
-
-    .status-shipped {
-        background: rgba(99, 102, 241, 0.15);
-        color: #6366f1;
-    }
-
-    /* ======================== EMPTY STATE ======================== */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-
-    .empty-icon {
-        font-size: 4rem;
-        color: var(--border);
-        margin-bottom: 20px;
-    }
-
-    .empty-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 10px;
-    }
-
-    .empty-text {
-        color: var(--text-muted);
-        margin-bottom: 25px;
-    }
-
-    .empty-btn {
-        background: var(--primary);
-        color: white;
-        padding: 12px 28px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.3s ease;
-    }
-
-    .empty-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(36, 178, 74, 0.3);
-        text-decoration: none;
-        color: white;
     }
 
     /* ======================== RESPONSIVE ======================== */
@@ -578,40 +250,25 @@
             font-size: 2rem;
         }
 
-        .hero-subtitle {
-            font-size: 1rem;
-        }
-
-        .hero-buttons {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
-
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
         }
 
-        .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
+        .card-grid {
+            grid-template-columns: 1fr;
         }
 
         .section-header h2 {
             font-size: 1.5rem;
         }
 
-        .orders-table {
+        .table {
             font-size: 0.85rem;
         }
 
-        .orders-table th,
-        .orders-table td {
+        .table th,
+        .table td {
             padding: 10px 8px;
         }
     }
@@ -625,9 +282,8 @@
             font-size: 1.5rem;
         }
 
-        .user-stats-section {
+        .stats-section {
             padding: 20px 15px;
-            margin-top: -60px;
         }
 
         .main-content {
@@ -636,29 +292,11 @@
 
         .stats-grid {
             grid-template-columns: 1fr;
-            gap: 12px;
         }
 
-        .stat-card {
+        .table-section {
             padding: 15px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-        }
-
-        .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .product-image {
-            height: 150px;
-        }
-
-        .recent-orders-section {
-            padding: 15px;
-            overflow-x: auto;
+            border-radius: 8px;
         }
     }
 </style>
@@ -667,147 +305,124 @@
 
     <!-- ======================== HERO SECTION ======================== -->
     <section class="hero-section">
-        <div class="hero-content">
+        <div>
             <h1 class="hero-title">
-                {% if user.is_authenticated %}
-                    Welcome back, {{ user.first_name|default:user.username }}! 👋
-                {% else %}
-                    Welcome to BESTSTORE 🛍️
-                {% endif %}
+                CDMIS - Community Development Management System 🌍
             </h1>
             <p class="hero-subtitle">
-                {% if user.is_authenticated %}
-                    Discover amazing products and continue your shopping journey.
-                {% else %}
-                    Your one-stop destination for quality products and great deals.
-                {% endif %}
+                Empowering communities through organized development initiatives
             </p>
-            <div class="hero-buttons">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'myOrders' %}" class="btn btn-primary">
-                        <i class="fas fa-history"></i> My Orders
-                    </a>
-                    <a href="#products" class="btn btn-secondary">
-                        <i class="fas fa-shopping-bag"></i> Browse Products
-                    </a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i> Sign In
-                    </a>
-                    <a href="{% url 'register' %}" class="btn btn-secondary">
-                        <i class="fas fa-user-plus"></i> Register
-                    </a>
-                {% endif %}
-            </div>
         </div>
     </section>
 
-    <!-- ======================== USER STATS SECTION ======================== -->
-    {% if user.is_authenticated and user_stats.is_authenticated %}
-    <section class="user-stats-section">
+    <!-- ======================== STATS SECTION ======================== -->
+    <section class="stats-section">
         <div class="stats-grid">
 
-            <!-- Total Orders -->
-            <div class="stat-card orders">
+            <!-- Total Groups -->
+            <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fas fa-users"></i>
                 </div>
-                <div class="stat-label">Total Orders</div>
-                <div class="stat-value">{{ user_stats.total_orders }}</div>
-                <div class="stat-change positive">
-                    <i class="fas fa-check"></i> All time
-                </div>
+                <div class="stat-label">Total Groups</div>
+                <div class="stat-value">{{ total_groups }}</div>
             </div>
 
-            <!-- Total Spent -->
-            <div class="stat-card spent">
+            <!-- Total Members -->
+            <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-wallet"></i>
+                    <i class="fas fa-user-friends"></i>
                 </div>
-                <div class="stat-label">Total Spent</div>
-                <div class="stat-value">KES {{ user_stats.total_spent|floatformat:2 }}</div>
-                <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> Lifetime
-                </div>
+                <div class="stat-label">Community Members</div>
+                <div class="stat-value">{{ total_members }}</div>
             </div>
 
-            <!-- Account Balance -->
-            <div class="stat-card balance">
+            <!-- Total Payments -->
+            <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-piggy-bank"></i>
+                    <i class="fas fa-coins"></i>
                 </div>
-                <div class="stat-label">Account Balance</div>
-                <div class="stat-value">KES {{ user_stats.account_balance|floatformat:2 }}</div>
-                <div class="stat-change positive">
-                    <i class="fas fa-info-circle"></i> Current
-                    <a href="{% url 'recharge' %}">Recharge</a>
-                </div>
-            </div>
-
-            <!-- Pending Orders -->
-            <div class="stat-card pending">
-                <div class="stat-icon">
-                    <i class="fas fa-hourglass-half"></i>
-                </div>
-                <div class="stat-label">Pending Orders</div>
-                <div class="stat-value">{{ user_stats.pending_orders }}</div>
-                <div class="stat-change {% if user_stats.pending_orders > 0 %}warning{% else %}positive{% endif %}">
-                    {% if user_stats.pending_orders > 0 %}
-                        <i class="fas fa-clock"></i> In Progress
-                    {% else %}
-                        <i class="fas fa-check"></i> All Clear
-                    {% endif %}
-                </div>
+                <div class="stat-label">Total Payments</div>
+                <div class="stat-value">KES {{ total_payments|floatformat:0 }}</div>
             </div>
 
         </div>
     </section>
-    {% endif %}
 
     <!-- ======================== MAIN CONTENT ======================== -->
     <div class="main-content">
 
-        <!-- ===================== RECENT ORDERS ===================== -->
-        {% if user.is_authenticated and user_stats.recent_orders %}
-        <section class="recent-orders-section">
-            <div class="section-header-action">
-                <div class="section-header">
-                    <h2>Your Recent Orders</h2>
-                    <p>Track and manage your latest purchases</p>
-                </div>
-                <a href="{% url 'myOrders' %}" class="view-all-link">
-                    View All <i class="fas fa-arrow-right"></i>
-                </a>
+        <!-- ===================== GROUP STATISTICS ===================== -->
+        {% if group_stats %}
+        <section>
+            <div class="section-header">
+                <h2>Group Overview</h2>
+                <p>Statistics for active community groups</p>
             </div>
 
-            <div style="overflow-x: auto;">
-                <table class="orders-table">
+            <div class="card-grid">
+                {% for stat in group_stats %}
+                <div class="card">
+                    <div class="card-title">{{ stat.group.name }}</div>
+                    <div class="card-description">
+                        Registered on: <strong>{{ stat.group.registration_date|date:"M d, Y" }}</strong>
+                    </div>
+                    {% if stat.group.description %}
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        {{ stat.group.description|truncatewords:20 }}
+                    </p>
+                    {% endif %}
+                    <div class="card-meta">
+                        <div>
+                            <i class="fas fa-users"></i> {{ stat.members }} Members
+                        </div>
+                        <div>
+                            <i class="fas fa-coins"></i> KES {{ stat.total_paid|floatformat:2 }}
+                        </div>
+                        <div>
+                            <i class="fas fa-tasks"></i> {{ stat.activities }} Activities
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ===================== RECENT ACTIVITIES ===================== -->
+        {% if recent_activities %}
+        <section>
+            <div class="section-header">
+                <h2>Recent Activities</h2>
+                <p>Latest community activities and events</p>
+            </div>
+
+            <div class="table-section">
+                <table class="table">
                     <thead>
                         <tr>
-                            <th>Order ID</th>
+                            <th>Activity</th>
+                            <th>Group</th>
                             <th>Date</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Status</th>
+                            <th>Description</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for order in user_stats.recent_orders %}
+                        {% for activity in recent_activities %}
                         <tr>
                             <td>
-                                <a href="{% url 'order_detail' order.id %}" class="order-id">
-                                    #{{ order.id }}
-                                </a>
-                            </td>
-                            <td>{{ order.created_at|date:"M d, Y" }}</td>
-                            <td>{{ order.items.all.count }} item{{ order.items.all.count|pluralize }}</td>
-                            <td>
-                                <strong>KES {{ order.total_amount|floatformat:2 }}</strong>
+                                <strong>{{ activity.title }}</strong>
                             </td>
                             <td>
-                                <span class="status-badge status-{{ order.status|lower }}">
-                                    {{ order.get_status_display }}
-                                </span>
+                                <span class="badge badge-primary">{{ activity.group.name }}</span>
+                            </td>
+                            <td>{{ activity.activity_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% if activity.description %}
+                                    {{ activity.description|truncatewords:15 }}
+                                {% else %}
+                                    -
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -817,119 +432,161 @@
         </section>
         {% endif %}
 
-        <!-- ===================== FEATURED PRODUCTS ===================== -->
-        <section class="products-section" id="products">
-            <div class="section-header-action">
-                <div class="section-header">
-                    <h2>Featured Products</h2>
-                    <p>Check out our latest and most popular items</p>
-                </div>
-                <a href="/" class="view-all-link">
-                    Shop All <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-
-            {% if featured_products %}
-                <div class="products-grid">
-                    {% for product in featured_products %}
-                    <div class="product-card">
-                        <div class="product-image">
-                            {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.product_name }}" loading="lazy">
-                            {% else %}
-                                <i class="fas fa-image"></i>
-                            {% endif %}
-                            <span class="product-badge">New</span>
-                        </div>
-                        <div class="product-info">
-                            {% if product.category %}
-                            <div class="product-category">{{ product.category.category_name }}</div>
-                            {% endif %}
-                            <h3 class="product-name">{{ product.product_name }}</h3>
-                            <div class="product-footer">
-                                <span class="product-price">KES {{ product.price|floatformat:2 }}</span>
-                                <a href="{{ product.get_url }}" class="product-btn">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <h3 class="empty-title">No Products Available</h3>
-                    <p class="empty-text">Check back soon for new items!</p>
-                </div>
-            {% endif %}
-        </section>
-
-        <!-- ===================== ALL PRODUCTS ===================== -->
-        <section class="products-section">
+        <!-- ===================== RECENT TRAININGS ===================== -->
+        {% if recent_trainings %}
+        <section>
             <div class="section-header">
-                <h2>All Products ({{ total_products }})</h2>
-                <p>Browse our complete collection</p>
+                <h2>Training Programs</h2>
+                <p>Skills development and capacity building initiatives</p>
             </div>
 
-            {% if products %}
-                <div class="products-grid">
-                    {% for product in products %}
-                    <div class="product-card">
-                        <div class="product-image">
-                            {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.product_name }}" loading="lazy">
-                            {% else %}
-                                <i class="fas fa-image"></i>
-                            {% endif %}
-                        </div>
-                        <div class="product-info">
-                            {% if product.category %}
-                            <div class="product-category">{{ product.category.category_name }}</div>
-                            {% endif %}
-                            <h3 class="product-name">{{ product.product_name }}</h3>
-                            <div class="product-footer">
-                                <span class="product-price">KES {{ product.price|floatformat:2 }}</span>
-                                <a href="{{ product.get_url }}" class="product-btn">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <h3 class="empty-title">No Products Found</h3>
-                    <p class="empty-text">Please check back later.</p>
-                </div>
-            {% endif %}
+            <div class="table-section">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Topic</th>
+                            <th>Trainer</th>
+                            <th>Group</th>
+                            <th>Date</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for training in recent_trainings %}
+                        <tr>
+                            <td>
+                                <strong>{{ training.topic }}</strong>
+                            </td>
+                            <td>{{ training.trainer }}</td>
+                            <td>
+                                <span class="badge badge-info">{{ training.group.name }}</span>
+                            </td>
+                            <td>{{ training.training_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% if training.notes %}
+                                    {{ training.notes|truncatewords:10 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </section>
+        {% endif %}
+
+        <!-- ===================== SERVICES PROVIDED ===================== -->
+        {% if all_services %}
+        <section>
+            <div class="section-header">
+                <h2>Community Services</h2>
+                <p>Services provided to member communities</p>
+            </div>
+
+            <div class="card-grid">
+                {% for service in all_services %}
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        {{ service.name }}
+                    </div>
+                    <div class="card-description">
+                        {{ service.description|default:"No description provided" }}
+                    </div>
+                    <div class="card-meta">
+                        <div>
+                            <i class="fas fa-calendar"></i> {{ service.service_date|date:"M d, Y" }}
+                        </div>
+                        <div>
+                            <span class="badge badge-success">{{ service.group.name }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ===================== RECENT PAYMENTS ===================== -->
+        {% if recent_payments %}
+        <section>
+            <div class="section-header">
+                <h2>Payment Records</h2>
+                <p>Recent group payment transactions</p>
+            </div>
+
+            <div class="table-section">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in recent_payments %}
+                        <tr>
+                            <td>
+                                <strong>{{ payment.group.name }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge badge-warning">
+                                    KES {{ payment.amount|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if payment.notes %}
+                                    {{ payment.notes|truncatewords:15 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ===================== ALL GROUPS ===================== -->
+        {% if groups %}
+        <section>
+            <div class="section-header">
+                <h2>All Community Groups</h2>
+                <p>Complete directory of registered community groups</p>
+            </div>
+
+            <div class="card-grid">
+                {% for group in groups %}
+                <div class="card">
+                    <div class="card-title">{{ group.name }}</div>
+                    <div class="card-description">
+                        {{ group.description|default:"Community development group" }}
+                    </div>
+                    <div class="card-meta">
+                        <div>
+                            <i class="fas fa-calendar"></i> {{ group.registration_date|date:"M d, Y" }}
+                        </div>
+                        <div>
+                            <a href="{% url 'admin:cdmis_group_change' group.id %}" style="color: var(--primary); text-decoration: none;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
 
     </div>
 
 </div>
-
-<script>
-    // Lazy load images
-    if ('IntersectionObserver' in window) {
-        const images = document.querySelectorAll('img[loading="lazy"]');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.src;
-                    observer.unobserve(img);
-                }
-            });
-        });
-        images.forEach(img => imageObserver.observe(img));
-    }
-</script>
 
 {% endblock %}
