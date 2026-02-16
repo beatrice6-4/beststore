@@ -451,17 +451,17 @@
             <form method="POST" action="{% url 'login' %}">
                 {% csrf_token %}
 
-                <!-- Email Input -->
+                <!-- Email or Username Input -->
                 <div class="form-group">
                     <label for="email" class="form-label">
-                        <i class="fas fa-envelope"></i> Email Address
+                        <i class="fas fa-user"></i> Email or Username
                     </label>
                     <input 
-                        type="email" 
+                        type="text" 
                         id="email"
                         name="email" 
                         class="form-control" 
-                        placeholder="Enter your email"
+                        placeholder="Enter your email or username"
                         required 
                         autofocus
                     >

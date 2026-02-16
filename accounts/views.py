@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import RegistrationForm, UserForm
+from .forms import RegistrationForm, UserForm, LoginForm
 from .models import Account
 from orders.models import Order, OrderProduct
-from .forms import RegistrationForm, UserForm
+from .forms import RegistrationForm, UserForm, LoginForm
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -87,43 +87,47 @@ def login(request):
     from django.shortcuts import render, redirect
 
     if request.method == 'POST':
-        identifier = request.POST.get('email') or request.POST.get('username') or ''
-        password = request.POST.get('password') or ''
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            identifier = form.cleaned_data['email']  # Can be email or username
+            password = form.cleaned_data['password']
 
-        # try authenticate by email first, then username
-        user = auth.authenticate(request, email=identifier, password=password)
-        if user is None:
-            user = auth.authenticate(request, username=identifier, password=password)
+            # try authenticate by email first, then username
+            user = auth.authenticate(request, email=identifier, password=password)
+            if user is None:
+                user = auth.authenticate(request, username=identifier, password=password)
 
-        if user is not None:
-            # merge anonymous cart into user cart if cart models/helpers exist
-            try:
-                from carts.models import Cart, CartItem
-                from carts.views import _cart_id
-                cart = Cart.objects.get(cart_id=_cart_id(request))
-                cart_items = CartItem.objects.filter(cart=cart)
-                for item in cart_items:
-                    item.user = user
-                    item.save()
-            except Exception:
-                # ignore if cart app/names differ or any error during merge
-                pass
+            if user is not None:
+                # merge anonymous cart into user cart if cart models/helpers exist
+                try:
+                    from carts.models import Cart, CartItem
+                    from carts.views import _cart_id
+                    cart = Cart.objects.get(cart_id=_cart_id(request))
+                    cart_items = CartItem.objects.filter(cart=cart)
+                    for item in cart_items:
+                        item.user = user
+                        item.save()
+                except Exception:
+                    # ignore if cart app/names differ or any error during merge
+                    pass
 
-            auth.login(request, user)
-            messages.success(request, 'You are now logged in the system.')
+                auth.login(request, user)
+                messages.success(request, 'You are now logged in the system.')
 
-            role = getattr(user, 'role', None)
-            # Strict role-based redirect
-            if role == 'finance':
-                return redirect('finance_dashboard')
-            if user.is_staff or user.is_superuser or role == 'admin':
-                return redirect('admin_dashboard')
-            return redirect('dashboard')
+                role = getattr(user, 'role', None)
+                # Strict role-based redirect
+                if role == 'finance':
+                    return redirect('finance_dashboard')
+                if user.is_staff or user.is_superuser or role == 'admin':
+                    return redirect('admin_dashboard')
+                return redirect('dashboard')
 
-        messages.error(request, 'Invalid login credentials, try again')
-        return redirect('login')
+            messages.error(request, 'Invalid login credentials, try again')
+            return redirect('login')
+    else:
+        form = LoginForm()
 
-    return render(request, 'accounts/login.html')
+    return render(request, 'accounts/login.html', {'form': form})
 
 
 @login_required(login_url = 'login')

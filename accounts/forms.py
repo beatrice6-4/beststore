@@ -2,6 +2,38 @@ from django import forms
 from .models import Account
 
 
+class LoginForm(forms.Form):
+    """
+    Login form that accepts either email or username with password.
+    """
+    email = forms.CharField(
+        label='Email or Username',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email or username',
+            'autocomplete': 'email',
+        }),
+        max_length=100,
+        required=True
+    )
+    password = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your password',
+            'autocomplete': 'current-password',
+        }),
+        required=True
+    )
+    remember_me = forms.BooleanField(
+        label='Remember me',
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+        })
+    )
+
+
 class RegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
         'placeholder': 'Enter Password',
