@@ -150,22 +150,35 @@
         border-radius: 14px;
         box-shadow: var(--shadow-md);
         overflow: hidden;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(25,135,84,0.08);
+        transition: all 0.3s ease;
+    }
+
+    .checkout-card:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(25,135,84,0.15);
     }
 
     .checkout-card-header {
-        padding: 20px;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 22px 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: #fff;
         font-weight: 700;
         font-size: 1.1rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        letter-spacing: 0.3px;
     }
 
     .checkout-card-body {
-        padding: 24px;
+        padding: 28px;
+    }
+
+    .checkout-card-body textarea {
+        resize: vertical;
+        min-height: 100px;
     }
 
     /* ============ FORM ELEMENTS ============ */
@@ -207,18 +220,25 @@
     .form-select {
         padding: 12px 14px;
         border: 1.5px solid var(--border-color);
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 0.95rem;
-        transition: all 0.2s;
-        background: #fff;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
         color: var(--text-dark);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .form-control:hover,
+    .form-select:hover {
+        border-color: rgba(25,135,84,0.3);
     }
 
     .form-control:focus,
     .form-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(25,135,84,0.1);
+        box-shadow: 0 0 0 4px rgba(25,135,84,0.12), 0 2px 8px rgba(25,135,84,0.08);
         outline: none;
+        background: #ffffff;
     }
 
     .form-control::placeholder {
@@ -388,51 +408,73 @@
 
     /* ============ BUTTONS ============ */
     .btn-place-order {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
         width: 100%;
-        padding: 14px;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 16px 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: #fff;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
         text-align: center;
-        font-size: 0.95rem;
+        font-size: 1rem;
         margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(25,135,84,0.3);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
     }
 
     .btn-place-order:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(25,135,84,0.4);
+    }
+
+    .btn-place-order:active:not(:disabled) {
+        transform: translateY(-1px);
     }
 
     .btn-place-order:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+        transform: none;
     }
 
     .btn-back {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         width: 100%;
-        padding: 12px;
-        background: #fff;
-        color: var(--primary);
-        border: 1.5px solid var(--primary);
-        border-radius: 8px;
-        font-weight: 700;
+        padding: 14px 20px;
+        background: #f8f9fa;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
         text-align: center;
         text-decoration: none;
         font-size: 0.95rem;
-        margin-top: 8px;
+        margin-top: 12px;
     }
 
     .btn-back:hover {
-        background: var(--light-bg);
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(25,135,84,0.05) 0%, rgba(25,135,84,0.02) 100%);
+        color: var(--primary);
+        box-shadow: 0 4px 12px rgba(25,135,84,0.15);
+        transform: translateY(-2px);
         text-decoration: none;
+    }
+
+    .btn-back:active {
+        transform: translateY(0);
     }
 
     /* ============ PAYMENT METHOD ============ */
@@ -458,34 +500,45 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 14px;
-        border: 2px solid var(--border-color);
-        border-radius: 10px;
+        gap: 10px;
+        padding: 18px 12px;
+        border: 2.5px solid var(--border-color);
+        border-radius: 12px;
         cursor: pointer;
-        transition: all 0.2s;
-        background: #fff;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .payment-label:hover {
+        border-color: rgba(25,135,84,0.2);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
 
     .payment-option input:checked + .payment-label {
         border-color: var(--primary);
-        background: rgba(25,135,84,0.05);
-        box-shadow: 0 2px 8px rgba(25,135,84,0.15);
+        background: linear-gradient(135deg, rgba(25,135,84,0.08) 0%, rgba(25,135,84,0.04) 100%);
+        box-shadow: 0 4px 16px rgba(25,135,84,0.2);
+        transform: scale(1.02);
     }
 
     .payment-label i {
-        font-size: 1.8rem;
+        font-size: 2rem;
         color: var(--text-muted);
+        transition: all 0.3s ease;
     }
 
     .payment-option input:checked + .payment-label i {
         color: var(--primary);
+        transform: scale(1.15);
     }
 
     .payment-label span {
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-weight: 700;
+        font-size: 0.95rem;
         color: var(--text-dark);
+        text-align: center;
     }
 
     /* ============ LOADER ============ */
