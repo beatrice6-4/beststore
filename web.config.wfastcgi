@@ -1,0 +1,91 @@
+# Alternative web.config using wfastcgi (Recommended)
+# Use this if you prefer wfastcgi over FastCGI module
+# First install: pip install wfastcgi
+
+"""
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appSettings>
+    <add key="WSGI_HANDLER" value="beststore.wsgi.application" />
+    <add key="PYTHONPATH" value="C:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE" />
+    <add key="DJANGO_SETTINGS_MODULE" value="beststore.settings" />
+  </appSettings>
+
+  <system.webServer>
+    <handlers>
+      <!-- This handler uses wfastcgi to serve Django -->
+      <add name="wfastcgi-handler" 
+           path="*" 
+           verb="*" 
+           modules="FastCgiModule" 
+           scriptProcessor="C:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\venv\Scripts\python.exe|C:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\venv\Lib\site-packages\wfastcgi.py"
+           resourceType="Unspecified" 
+           requireAccess="Script" />
+    </handlers>
+
+    <defaultDocument>
+      <files>
+        <add value="index.html" />
+        <add value="default.htm" />
+      </files>
+    </defaultDocument>
+
+    <httpErrors>
+      <remove statusCode="500" subStatusCode="-1" />
+      <error statusCode="500" prefixLanguageFilePath="" path="500.html" />
+    </httpErrors>
+
+    <security>
+      <requestFiltering>
+        <hiddenSegments>
+          <add segment="web.config" />
+          <add segment="manage.py" />
+          <add segment="venv" />
+          <add segment=".git" />
+        </hiddenSegments>
+      </requestFiltering>
+    </security>
+
+    <rewrite>
+      <rules>
+        <!-- Skip static and media files -->
+        <rule name="Static" stopProcessing="true">
+          <match url="^(static|media)" />
+          <action type="None" />
+        </rule>
+        
+        <!-- Skip .html files and directories -->
+        <rule name="Skip directories and files" stopProcessing="true">
+          <match url="^/.*\.(html|htm|ico|txt|js|css|gif|jpg|jpeg|png|pdf)$" />
+          <action type="None" />
+        </rule>
+        
+        <!-- Django handler -->
+        <rule name="Django Routes" stopProcessing="true">
+          <match url=".*" />
+          <conditions>
+            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+          </conditions>
+          <action type="Rewrite" url="/" />
+        </rule>
+      </rules>
+    </rewrite>
+
+    <staticContent>
+      <mimeMap fileExtension=".json" mimeType="application/json" />
+      <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
+      <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+    </staticContent>
+
+    <httpCompression directory="%SystemDrive%\inetpub\temp\IIS Temporary Compressed Files">
+      <scheme name="gzip" dll="%Windir%\system32\inetsrv\gzip.dll" staticCompressionLevel="9" />
+      <dynamicTypes>
+        <add mimeType="text/*" enabled="true" />
+        <add mimeType="message/*" enabled="true" />
+        <add mimeType="application/json" enabled="true" />
+      </dynamicTypes>
+    </httpCompression>
+  </system.webServer>
+</configuration>
+"""

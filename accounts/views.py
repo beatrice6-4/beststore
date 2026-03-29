@@ -537,9 +537,23 @@ from orders.models import Order
 
 @login_required(login_url='login')
 def myOrders(request):
-    orders = Order.objects.filter(user=request.user).exclude(status='pending').order_by('-created_at')
+    """Display user's order history including pending, completed, and cancelled orders"""
+    user = request.user
+    
+    # Get all orders for the logged-in user
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+    
+    # Calculate statistics
+    completed_count = orders.filter(status='completed').count()
+    pending_count = orders.filter(status='pending').count()
+    total_spent = sum(order.order_total for order in orders.filter(status='completed'))
+    
     context = {
         'orders': orders,
+        'completed_count': completed_count,
+        'pending_count': pending_count,
+        'total_spent': total_spent,
+        'page_title': 'My Orders',
     }
     return render(request, 'accounts/myOrders.html', context)
 

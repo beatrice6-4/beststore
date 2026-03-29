@@ -103,15 +103,24 @@ class ContactMessage(models.Model):
 
 class Transaction(models.Model):
     # Use string reference to avoid circular import
-    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='transactions')
-    transaction_id = models.CharField(max_length=100, unique=True)
+    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='account_transactions')
+    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    mpesa_request_id = models.CharField(max_length=100, null=True, blank=True)  # Checkout Request ID
+    mpesa_receipt = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=50)
+    payment_method = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=30)
+    response_code = models.CharField(max_length=20, null=True, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.transaction_id} - {self.status}"
+        return f"{self.transaction_id or self.mpesa_receipt or 'N/A'} - {self.status}"
 
 class Wishlist(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist_items')

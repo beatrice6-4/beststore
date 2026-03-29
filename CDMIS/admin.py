@@ -210,7 +210,7 @@ class PaymentAdmin(admin.ModelAdmin):
             'classes': ('wide', 'collapse'),
         }),
     )
-    actions = ['download_financial_report_word', 'select_dates_for_report']
+    actions = ['download_financial_report_word', 'select_dates_for_report', 'download_audit_report_by_group']
 
     def select_dates_for_report(self, request, queryset):
         """Redirect to date selection page for financial report"""
@@ -218,6 +218,179 @@ class PaymentAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('cdmis:payment_select_dates'))
     
     select_dates_for_report.short_description = '📄 Download Financial Report (Select Dates)'
+
+    def download_audit_report_by_group(self, request, queryset):
+        """Download audit report showing groups by date with subtotals"""
+        from docx import Document
+        from docx.shared import Inches, Pt, RGBColor
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from datetime import datetime
+        import os
+        from django.conf import settings
+        from collections import defaultdict
+        from decimal import Decimal
+        
+        # Group payments by date, then by group within each date
+        date_group_totals = defaultdict(lambda: defaultdict(Decimal))
+        date_totals = {}
+        total_amount = Decimal(0)
+        
+        for payment in queryset.order_by('payment_date', 'group__name'):
+            payment_date = payment.payment_date
+            group_name = payment.group.name
+            
+            date_group_totals[payment_date][group_name] += payment.amount
+            if payment_date not in date_totals:
+                date_totals[payment_date] = Decimal(0)
+            date_totals[payment_date] += payment.amount
+            total_amount += payment.amount
+        
+        # Sort dates
+        sorted_dates = sorted(date_totals.items())
+        
+        # Create Word document
+        doc = Document()
+        
+        # Add logo if it exists
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'gov.png')
+        if os.path.exists(logo_path):
+            logo_paragraph = doc.add_paragraph()
+            logo_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            logo_run = logo_paragraph.add_run()
+            logo_run.add_picture(logo_path, width=Inches(0.6))
+        
+        # Add title
+        title = doc.add_heading('AUDIT REPORT - GROUPS BY DATE WITH TOTALS', 0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # Add subtitle
+        subtitle = doc.add_paragraph('STATE DEPARTMENT FOR SOCIAL DEVELOPMENT - CDMIS FOR DIANA NAMBUCHI SCSDO KIMILILI')
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        subtitle.runs[0].bold = True
+        
+        doc.add_paragraph()  # Add space
+        
+        # Add summary section
+        summary_table = doc.add_table(rows=3, cols=2)
+        summary_table.style = 'Light Grid Accent 1'
+        
+        summary_cells = summary_table.rows[0].cells
+        summary_cells[0].text = 'Number of Dates'
+        summary_cells[1].text = str(len(date_totals))
+        
+        summary_cells = summary_table.rows[1].cells
+        summary_cells[0].text = 'Total Payments'
+        summary_cells[1].text = str(len(queryset))
+        
+        summary_cells = summary_table.rows[2].cells
+        summary_cells[0].text = 'Grand Total Amount'
+        summary_cells[1].text = f'Ksh {total_amount:,.2f}'
+        
+        doc.add_paragraph()  # Add space
+        
+        # Add detailed table
+        heading = doc.add_heading('Payment Details by Date and Group', level=2)
+        heading.runs[0].font.color.rgb = RGBColor(0, 56, 179)  # Blue color
+        
+        # Calculate total rows: for each date, we have groups + 1 subtotal row
+        total_rows = sum(len(date_group_totals[date]) + 1 for date, _ in sorted_dates) + 1
+        audit_table = doc.add_table(rows=total_rows, cols=3)
+        audit_table.style = 'Light Grid Accent 1'
+        
+        # Add headers
+        header_cells = audit_table.rows[0].cells
+        header_cells[0].text = 'Date'
+        header_cells[1].text = 'Group Name'
+        header_cells[2].text = 'Amount (Ksh)'
+        
+        # Make header bold and colored
+        for cell in header_cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+            # Set header background to dark blue
+            from docx.oxml import parse_xml
+            from docx.oxml.ns import nsdecls
+            shading_elm = parse_xml(r'<w:shd {} w:fill="003B7F"/>'.format(nsdecls('w')))
+            cell._element.get_or_add_tcPr().append(shading_elm)
+        
+        # Add data rows
+        row_idx = 1
+        for payment_date, date_total in sorted_dates:
+            groups = date_group_totals[payment_date]
+            sorted_groups = sorted(groups.items())
+            
+            # Add each group for this date
+            first_group = True
+            for group_name, amount in sorted_groups:
+                row_cells = audit_table.rows[row_idx].cells
+                if first_group:
+                    row_cells[0].text = payment_date.strftime('%d %b %Y')
+                    first_group = False
+                else:
+                    row_cells[0].text = ''  # Empty for subsequent groups on same date
+                row_cells[1].text = group_name
+                row_cells[2].text = f'{amount:,.2f}'
+                row_idx += 1
+            
+            # Add date subtotal row
+            subtotal_cells = audit_table.rows[row_idx].cells
+            subtotal_cells[0].text = ''
+            subtotal_cells[1].text = f'Subtotal for {payment_date.strftime("%d %b %Y")}'
+            subtotal_cells[2].text = f'{date_total:,.2f}'
+            
+            # Style subtotal row
+            for cell in subtotal_cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.bold = True
+                        run.font.size = Pt(11)
+                        run.font.color.rgb = RGBColor(0, 56, 179)
+                # Set background color to light blue
+                from docx.oxml import parse_xml
+                from docx.oxml.ns import nsdecls
+                shading_elm = parse_xml(r'<w:shd {} w:fill="E7F3FF"/>'.format(nsdecls('w')))
+                cell._element.get_or_add_tcPr().append(shading_elm)
+            
+            row_idx += 1
+        
+        # Add grand total row
+        grand_total_cells = audit_table.rows[-1].cells
+        grand_total_cells[0].text = ''
+        grand_total_cells[1].text = 'GRAND TOTAL'
+        grand_total_cells[2].text = f'{total_amount:,.2f}'
+        
+        # Style grand total row
+        for cell in grand_total_cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+                    run.font.size = Pt(12)
+                    run.font.color.rgb = RGBColor(178, 34, 34)
+            # Set background color to light yellow
+            from docx.oxml import parse_xml
+            from docx.oxml.ns import nsdecls
+            shading_elm = parse_xml(r'<w:shd {} w:fill="FFEB9C"/>'.format(nsdecls('w')))
+            cell._element.get_or_add_tcPr().append(shading_elm)
+        
+        doc.add_paragraph()  # Add space
+        
+        # Add generation info
+        doc.add_paragraph()
+        generated_info = doc.add_paragraph(f'Report Generated: {datetime.now().strftime("%d %b %Y at %H:%M:%S")}')
+        generated_info.runs[0].font.size = Pt(10)
+        generated_info.runs[0].font.color.rgb = RGBColor(128, 128, 128)
+        
+        # Prepare response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename=audit_report_groups_by_date_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
+        doc.save(response)
+        return response
+    
+    download_audit_report_by_group.short_description = "📊 Download Audit Report - Groups by Date"
 
     def download_financial_report_word(self, request, queryset):
         """Download financial report as Word document for selected payments"""

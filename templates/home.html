@@ -1,4 +1,4 @@
-{% extends 'gov.html' %}
+{% extends 'base.html' %}
 {% block page_title %}{{ page_title }}{% endblock %}
 {% load static %}
 
@@ -307,10 +307,10 @@
     <section class="hero-section">
         <div>
             <h1 class="hero-title">
-                CDMIS - Community Development Management System 🌍
+                BESTSTORE - Premium Quality Bags 👜
             </h1>
             <p class="hero-subtitle">
-                Empowering communities through organized development initiatives
+                Discover our collection of stylish, durable, and affordable bags for every occasion
             </p>
         </div>
     </section>
@@ -319,31 +319,31 @@
     <section class="stats-section">
         <div class="stats-grid">
 
-            <!-- Total Groups -->
+            <!-- Total Products -->
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-shopping-bag"></i>
                 </div>
-                <div class="stat-label">Total Groups</div>
-                <div class="stat-value">{{ total_groups }}</div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value">{{ total_products|default:0 }}</div>
             </div>
 
-            <!-- Total Members -->
+            <!-- Total Categories -->
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-user-friends"></i>
+                    <i class="fas fa-th-list"></i>
                 </div>
-                <div class="stat-label">Community Members</div>
-                <div class="stat-value">{{ total_members }}</div>
+                <div class="stat-label">Categories</div>
+                <div class="stat-value">{{ total_categories|default:0 }}</div>
             </div>
 
-            <!-- Total Payments -->
+            <!-- In Stock -->
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-coins"></i>
+                    <i class="fas fa-inventory"></i>
                 </div>
-                <div class="stat-label">Total Payments</div>
-                <div class="stat-value">KES {{ total_payments|floatformat:0 }}</div>
+                <div class="stat-label">In Stock</div>
+                <div class="stat-value">{{ total_stock|default:0 }}</div>
             </div>
 
         </div>
@@ -352,35 +352,40 @@
     <!-- ======================== MAIN CONTENT ======================== -->
     <div class="main-content">
 
-        <!-- ===================== GROUP STATISTICS ===================== -->
-        {% if group_stats %}
+        <!-- ===================== FEATURED PRODUCTS ===================== -->
+        {% if featured_products %}
         <section>
             <div class="section-header">
-                <h2>Group Overview</h2>
-                <p>Statistics for active community groups</p>
+                <h2>Featured Bags</h2>
+                <p>Check out our best-selling and most popular bags</p>
             </div>
 
             <div class="card-grid">
-                {% for stat in group_stats %}
+                {% for product in featured_products %}
                 <div class="card">
-                    <div class="card-title">{{ stat.group.name }}</div>
-                    <div class="card-description">
-                        Registered on: <strong>{{ stat.group.registration_date|date:"M d, Y" }}</strong>
+                    {% if product.image %}
+                    <div style="margin-bottom: 12px; border-radius: 8px; overflow: hidden; background: #f0f0f0;">
+                        <img src="{{ product.image.url }}" alt="{{ product.product_name }}" style="width: 100%; height: 200px; object-fit: cover;">
                     </div>
-                    {% if stat.group.description %}
-                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                        {{ stat.group.description|truncatewords:20 }}
-                    </p>
                     {% endif %}
+                    <div class="card-title">{{ product.product_name }}</div>
+                    <div class="card-description">
+                        {% if product.description %}
+                            {{ product.description|truncatewords:15 }}
+                        {% else %}
+                            Premium quality bag
+                        {% endif %}
+                    </div>
                     <div class="card-meta">
                         <div>
-                            <i class="fas fa-users"></i> {{ stat.members }} Members
+                            <span class="badge badge-success" style="font-size: 1rem;">KES {{ product.price|floatformat:0 }}</span>
                         </div>
                         <div>
-                            <i class="fas fa-coins"></i> KES {{ stat.total_paid|floatformat:2 }}
-                        </div>
-                        <div>
-                            <i class="fas fa-tasks"></i> {{ stat.activities }} Activities
+                            {% if product.stock > 0 %}
+                                <span class="badge badge-primary">In Stock</span>
+                            {% else %}
+                                <span class="badge badge-warning">Out of Stock</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -389,193 +394,35 @@
         </section>
         {% endif %}
 
-        <!-- ===================== RECENT ACTIVITIES ===================== -->
-        {% if recent_activities %}
+        <!-- ===================== PRODUCT CATEGORIES ===================== -->
+        {% if categories %}
         <section>
             <div class="section-header">
-                <h2>Recent Activities</h2>
-                <p>Latest community activities and events</p>
-            </div>
-
-            <div class="table-section">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Activity</th>
-                            <th>Group</th>
-                            <th>Date</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for activity in recent_activities %}
-                        <tr>
-                            <td>
-                                <strong>{{ activity.title }}</strong>
-                            </td>
-                            <td>
-                                <span class="badge badge-primary">{{ activity.group.name }}</span>
-                            </td>
-                            <td>{{ activity.activity_date|date:"M d, Y" }}</td>
-                            <td>
-                                {% if activity.description %}
-                                    {{ activity.description|truncatewords:15 }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        {% endif %}
-
-        <!-- ===================== RECENT TRAININGS ===================== -->
-        {% if recent_trainings %}
-        <section>
-            <div class="section-header">
-                <h2>Training Programs</h2>
-                <p>Skills development and capacity building initiatives</p>
-            </div>
-
-            <div class="table-section">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Topic</th>
-                            <th>Trainer</th>
-                            <th>Group</th>
-                            <th>Date</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for training in recent_trainings %}
-                        <tr>
-                            <td>
-                                <strong>{{ training.topic }}</strong>
-                            </td>
-                            <td>{{ training.trainer }}</td>
-                            <td>
-                                <span class="badge badge-info">{{ training.group.name }}</span>
-                            </td>
-                            <td>{{ training.training_date|date:"M d, Y" }}</td>
-                            <td>
-                                {% if training.notes %}
-                                    {{ training.notes|truncatewords:10 }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        {% endif %}
-
-        <!-- ===================== SERVICES PROVIDED ===================== -->
-        {% if all_services %}
-        <section>
-            <div class="section-header">
-                <h2>Community Services</h2>
-                <p>Services provided to member communities</p>
+                <h2>Shop by Category</h2>
+                <p>Browse our wide range of bag categories</p>
             </div>
 
             <div class="card-grid">
-                {% for service in all_services %}
+                {% for category in categories %}
                 <div class="card">
                     <div class="card-title">
-                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                        {{ service.name }}
+                        <i class="fas fa-tag" style="color: var(--primary);"></i>
+                        {{ category.category_name }}
                     </div>
                     <div class="card-description">
-                        {{ service.description|default:"No description provided" }}
+                        {% if category.description %}
+                            {{ category.description|truncatewords:15 }}
+                        {% else %}
+                            Browse our selection of {{ category.category_name|lower }}
+                        {% endif %}
                     </div>
                     <div class="card-meta">
                         <div>
-                            <i class="fas fa-calendar"></i> {{ service.service_date|date:"M d, Y" }}
+                            <i class="fas fa-shopping-bag"></i> Shop Now
                         </div>
                         <div>
-                            <span class="badge badge-success">{{ service.group.name }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-
-        <!-- ===================== RECENT PAYMENTS ===================== -->
-        {% if recent_payments %}
-        <section>
-            <div class="section-header">
-                <h2>Payment Records</h2>
-                <p>Recent group payment transactions</p>
-            </div>
-
-            <div class="table-section">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Group</th>
-                            <th>Amount</th>
-                            <th>Date</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for payment in recent_payments %}
-                        <tr>
-                            <td>
-                                <strong>{{ payment.group.name }}</strong>
-                            </td>
-                            <td>
-                                <span class="badge badge-warning">
-                                    KES {{ payment.amount|floatformat:2 }}
-                                </span>
-                            </td>
-                            <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
-                            <td>
-                                {% if payment.notes %}
-                                    {{ payment.notes|truncatewords:15 }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        {% endif %}
-
-        <!-- ===================== ALL GROUPS ===================== -->
-        {% if groups %}
-        <section>
-            <div class="section-header">
-                <h2>All Community Groups</h2>
-                <p>Complete directory of registered community groups</p>
-            </div>
-
-            <div class="card-grid">
-                {% for group in groups %}
-                <div class="card">
-                    <div class="card-title">{{ group.name }}</div>
-                    <div class="card-description">
-                        {{ group.description|default:"Community development group" }}
-                    </div>
-                    <div class="card-meta">
-                        <div>
-                            <i class="fas fa-calendar"></i> {{ group.registration_date|date:"M d, Y" }}
-                        </div>
-                        <div>
-                            <a href="{% url 'admin:cdmis_group_change' group.id %}" style="color: var(--primary); text-decoration: none;">
-                                <i class="fas fa-edit"></i> Edit
+                            <a href="{% url 'store:products_by_category' category.slug %}" style="color: var(--primary); text-decoration: none;">
+                                <i class="fas fa-arrow-right"></i> View
                             </a>
                         </div>
                     </div>
@@ -584,6 +431,100 @@
             </div>
         </section>
         {% endif %}
+
+        <!-- ===================== LATEST PRODUCTS ===================== -->
+        {% if latest_products %}
+        <section>
+            <div class="section-header">
+                <h2>Latest Arrivals</h2>
+                <p>New bags just added to our collection</p>
+            </div>
+
+            <div class="table-section">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in latest_products %}
+                        <tr>
+                            <td>
+                                <strong>{{ product.product_name }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge badge-primary">{{ product.category.category_name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-success">
+                                    KES {{ product.price|floatformat:0 }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if product.stock > 0 %}
+                                    <span class="badge badge-info">{{ product.stock }} items</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ===================== WHY SHOP WITH US ===================== -->
+        <section>
+            <div class="section-header">
+                <h2>Why Shop With Us</h2>
+                <p>Quality, affordability, and excellent service</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        Premium Quality
+                    </div>
+                    <div class="card-description">
+                        All our bags are made with high-quality materials and craftsmanship to ensure durability and style.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-tag" style="color: var(--success);"></i>
+                        Affordable Prices
+                    </div>
+                    <div class="card-description">
+                        We offer competitive pricing without compromising on quality. Get the best bags at great prices.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-shipping-fast" style="color: var(--success);"></i>
+                        Fast Delivery
+                    </div>
+                    <div class="card-description">
+                        We ensure quick and reliable delivery to get your favorite bags to you in perfect condition.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-headset" style="color: var(--success);"></i>
+                        Customer Support
+                    </div>
+                    <div class="card-description">
+                        Our dedicated support team is ready to help you with any questions or concerns about your purchase.
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </div>
 

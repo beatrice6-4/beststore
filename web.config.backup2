@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <system.webServer>
+        <!-- Static file handling -->
+        <staticContent>
+            <mimeMap fileExtension=".json" mimeType="application/json" />
+            <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
+            <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+            <mimeMap fileExtension=".ttf" mimeType="application/x-font-ttf" />
+            <mimeMap fileExtension=".svg" mimeType="image/svg+xml" />
+            <mimeMap fileExtension=".js" mimeType="application/javascript" />
+            <mimeMap fileExtension=".css" mimeType="text/css" />
+            <mimeMap fileExtension=".html" mimeType="text/html" />
+            <mimeMap fileExtension=".htm" mimeType="text/html" />
+            <mimeMap fileExtension=".txt" mimeType="text/plain" />
+            <mimeMap fileExtension=".png" mimeType="image/png" />
+            <mimeMap fileExtension=".jpg" mimeType="image/jpeg" />
+            <mimeMap fileExtension=".jpeg" mimeType="image/jpeg" />
+            <mimeMap fileExtension=".gif" mimeType="image/gif" />
+            <mimeMap fileExtension=".ico" mimeType="image/x-icon" />
+        </staticContent>
+
+        <!-- Default documents -->
+        <defaultDocument>
+            <files>
+                <add value="index.html" />
+                <add value="home.html" />
+                <add value="default.htm" />
+            </files>
+        </defaultDocument>
+
+        <!-- Security settings -->
+        <security>
+            <requestFiltering>
+                <hiddenSegments>
+                    <add segment="web.config" />
+                    <add segment="manage.py" />
+                    <add segment="venv" />
+                    <add segment=".git" />
+                    <add segment=".env" />
+                </hiddenSegments>
+            </requestFiltering>
+        </security>
+
+        <!-- Directory browsing disabled -->
+        <directoryBrowse enabled="false" />
+    </system.webServer>
+</configuration>

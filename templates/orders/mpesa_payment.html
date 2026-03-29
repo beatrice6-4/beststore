@@ -100,7 +100,7 @@
     .payment-header {
         background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
         color: #fff;
-        padding: 50px 40px;
+        padding: 35px 40px;
         text-align: center;
         position: relative;
         overflow: hidden;
@@ -168,7 +168,7 @@
 
     /* ============ PAYMENT BODY ============ */
     .payment-body {
-        padding: 45px 40px;
+        padding: 30px 40px;
     }
 
     /* ============ ALERTS ============ */
@@ -266,16 +266,16 @@
         background: linear-gradient(135deg, rgba(36, 178, 74, 0.08) 0%, rgba(10, 143, 42, 0.04) 100%);
         border: 2px solid var(--mpesa-light);
         border-left: 5px solid var(--mpesa-green);
-        padding: 25px;
+        padding: 20px;
         border-radius: 12px;
-        margin-bottom: 35px;
+        margin-bottom: 25px;
     }
 
     .order-info-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 0;
+        padding: 10px 0;
         border-bottom: 1px solid rgba(36, 178, 74, 0.15);
         font-size: 0.98rem;
     }
@@ -319,7 +319,7 @@
     }
 
     .form-section {
-        margin-bottom: 35px;
+        margin-bottom: 25px;
     }
 
     .form-section-title {
@@ -460,8 +460,8 @@
         background: linear-gradient(135deg, rgba(36, 178, 74, 0.06) 0%, rgba(10, 143, 42, 0.03) 100%);
         border: 2px solid var(--mpesa-light);
         border-radius: 12px;
-        padding: 28px;
-        margin-bottom: 30px;
+        padding: 20px;
+        margin-bottom: 25px;
     }
 
     .steps-title {
@@ -490,7 +490,7 @@
     .steps-item {
         display: flex;
         gap: 16px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         font-size: 0.95rem;
     }
 
@@ -800,7 +800,7 @@
                     <i class="fas fa-mobile-alt"></i>
                 </div>
                 <h1>M-Pesa Payment</h1>
-                <p>Secure payment via Safaricom M-Pesa</p>
+                <p>Fast & Secure Payment</p>
             </div>
 
             <!-- BODY -->
@@ -850,21 +850,15 @@
                     <div class="order-info">
                         <div class="order-info-row">
                             <span class="order-info-label">
-                                <i class="fas fa-box"></i>Order Number
+                                <i class="fas fa-box"></i>Order
                             </span>
                             <span class="order-info-value">#{{ order.id }}</span>
                         </div>
                         <div class="order-info-row">
                             <span class="order-info-label">
-                                <i class="fas fa-calendar"></i>Order Date
+                                <i class="fas fa-money-bill-wave"></i>Total
                             </span>
-                            <span class="order-info-value">{{ order.created_at|date:"M d, Y \a\t H:i"|default:"Today" }}</span>
-                        </div>
-                        <div class="order-info-row">
-                            <span class="order-info-label">
-                                <i class="fas fa-money-bill-wave"></i>Total Amount
-                            </span>
-                            <span class="order-info-value highlight">Ksh {{ grand_total|floatformat:2 }}</span>
+                            <span class="order-info-value highlight">KES {{ grand_total|floatformat:2 }}</span>
                         </div>
                     </div>
                 {% endif %}
@@ -881,24 +875,21 @@
 
                         <div class="form-group">
                             <label for="phone" class="form-label">
-                                M-Pesa Registered Number
-                                <small>Enter the phone number registered with M-Pesa</small>
+                                M-Pesa Number
                             </label>
-                            <div class="input-wrapper">
-                                <div class="input-prefix">+</div>
-                                <input 
-                                    id="phone" 
-                                    name="phone_number" 
-                                    class="form-control" 
-                                    inputmode="numeric" 
-                                    pattern="[0-9+]{10,15}" 
-                                    maxlength="15" 
-                                    placeholder="2547XXXXXXXX" 
-                                    required 
-                                    aria-label="M-Pesa phone number">
-                            </div>
+                            <input 
+                                id="phone" 
+                                name="phone_number" 
+                                class="form-control" 
+                                inputmode="numeric" 
+                                pattern="[0-9]{10,15}" 
+                                maxlength="15" 
+                                placeholder="2547XXXXXXXX" 
+                                required 
+                                aria-label="M-Pesa phone number"
+                                style="border-radius: 12px;">
                             <div class="form-help">
-                                <i class="fas fa-info-circle"></i>Format: 2547XXXXXXXX (12 digits) or 07XXXXXXXX
+                                <i class="fas fa-info-circle"></i>Format: 2547XXXXXXXX or 07XXXXXXXX
                             </div>
                             <div class="form-error" id="phone-error" style="display: none;"></div>
                         </div>
@@ -907,13 +898,12 @@
                     <!-- Amount Section -->
                     <div class="form-section">
                         <div class="form-section-title">
-                            <i class="fas fa-money-bill-alt"></i>Payment Amount
+                            <i class="fas fa-money-bill-alt"></i>Amount
                         </div>
 
                         <div class="form-group">
                             <label for="amount" class="form-label">
-                                Amount in Kenyan Shillings (Ksh)
-                                <small>You can adjust this amount if needed</small>
+                                Amount (KES)
                             </label>
                             <input 
                                 id="amount" 
@@ -926,39 +916,10 @@
                                 value="{{ grand_total|floatformat:0 }}"
                                 aria-label="Payment amount">
                             <div class="form-help">
-                                <i class="fas fa-lock"></i>Minimum: Ksh 1 | Original: Ksh {{ grand_total|floatformat:2 }}
+                                <i class="fas fa-lock"></i>Original: KES {{ grand_total|floatformat:2 }}
                             </div>
                             <div class="form-error" id="amount-error" style="display: none;"></div>
                         </div>
-                    </div>
-
-                    <!-- Payment Steps -->
-                    <div class="payment-steps">
-                        <p class="steps-title">
-                            <i class="fas fa-list-ol"></i>How It Works
-                        </p>
-                        <ul class="steps-list">
-                            <li class="steps-item">
-                                <span class="steps-number">1</span>
-                                <span class="steps-text">Enter your M-Pesa registered phone number</span>
-                            </li>
-                            <li class="steps-item">
-                                <span class="steps-number">2</span>
-                                <span class="steps-text">Verify the payment amount is correct</span>
-                            </li>
-                            <li class="steps-item">
-                                <span class="steps-number">3</span>
-                                <span class="steps-text">Click "Pay Now" to send STK push</span>
-                            </li>
-                            <li class="steps-item">
-                                <span class="steps-number">4</span>
-                                <span class="steps-text">You'll receive a prompt on your phone</span>
-                            </li>
-                            <li class="steps-item">
-                                <span class="steps-number">5</span>
-                                <span class="steps-text">Enter your M-Pesa PIN to complete payment</span>
-                            </li>
-                        </ul>
                     </div>
 
                     <!-- Buttons -->
@@ -978,14 +939,14 @@
                 <div class="security-info">
                     <i class="fas fa-shield-alt"></i>
                     <div class="security-text">
-                        <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your M-Pesa PIN. Till Reference: <strong>BRAMH</strong>. You have 3 minutes to complete the payment after STK push.
+                        <strong>Secure:</strong> Encrypted payment. Till: <strong>6391014</strong>
                     </div>
                 </div>
 
                 <!-- Footer -->
                 <div class="payment-footer">
                     <p>
-                        Need help? <a href="mailto:support@beststore.com">Contact Support</a> | Call: <a href="tel:+254712345678">+254 7298 731 55 OR +254 791 711 693</a>
+                        <a href="mailto:support@beststore.com">Support</a> | Call: <a href="tel:+254729873155">+254729873155 OR 0791711693</a>
                     </p>
                 </div>
 
@@ -1139,15 +1100,21 @@
             // Parse response
             const html = await response.text();
             
-            // Stop loading after 2 seconds
-            setTimeout(() => {
+            // Check if STK push was successful
+            if (html.includes('STK Push successful') || html.includes('success')) {
+                // Show waiting modal immediately
+                showWaitingModal();
+                
+                // Start polling immediately for payment detection
+                const orderId = {{ order.id }};
+                startPaymentPolling(orderId);
+            } else {
+                // Update page with error response
                 payBtn.disabled = false;
                 payBtn.setAttribute('aria-busy', 'false');
                 payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Pay Now</span>';
-                
-                // Update page with response
                 document.body.innerHTML = html;
-            }, 2000);
+            }
 
         } catch (err) {
             console.error('Payment error:', err);
@@ -1190,6 +1157,195 @@
         }
     });
 })();
+
+// ============ WAITING MODAL ============
+function showWaitingModal() {
+    const waitingHtml = `
+        <div id="waiting-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+            <div style="background: white; padding: 60px 40px; border-radius: 20px; text-align: center; max-width: 500px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); animation: slideUp 0.6s ease-out;">
+                <div style="font-size: 60px; color: #24b24a; margin-bottom: 20px; animation: bounce 2s ease-in-out infinite;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 10px; font-weight: 800;">
+                    Processing Payment
+                </h1>
+                <p style="color: #6c757d; font-size: 16px; margin-bottom: 30px; line-height: 1.6;">
+                    Enter your M-Pesa PIN on your phone to complete the payment.
+                </p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                    <p style="color: #6c757d; font-size: 14px; margin: 0;">
+                        <strong>ℹ️ Waiting for payment confirmation...</strong><br/>
+                        This may take a few seconds.
+                    </p>
+                </div>
+
+                <div style="color: #24b24a; font-weight: 700; font-size: 14px;">
+                    Do not close this page
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(40px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+            }
+        </style>
+    `;
+    
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = waitingHtml;
+    document.body.appendChild(modalDiv);
+}
+
+// ============ PAYMENT STATUS POLLING ============
+function startPaymentPolling(orderId) {
+    console.log('Starting payment status polling for order:', orderId);
+    
+    let pollCount = 0;
+    const maxPolls = 180; // Poll for 3 minutes (180 * 1 second)
+    const pollInterval = 1000; // Check every 1 second
+    
+    const pollTimer = setInterval(async () => {
+        pollCount++;
+        
+        try {
+            const response = await fetch(`/orders/api/check-payment/${orderId}/`);
+            const data = await response.json();
+            
+            console.log(`Poll #${pollCount}: Order ${orderId} status = ${data.status}`);
+            
+            // Check if payment is completed
+            if (data.is_paid && (data.status === 'processing' || data.status === 'completed')) {
+                // Payment received! Remove waiting modal and show success
+                clearInterval(pollTimer);
+                const waitingModal = document.getElementById('waiting-modal');
+                if (waitingModal) {
+                    waitingModal.remove();
+                }
+                showPaymentSuccess(orderId, data);
+                return;
+            }
+            
+            // Stop after max polls
+            if (pollCount >= maxPolls) {
+                clearInterval(pollTimer);
+                console.log('Max polling attempts reached');
+                const waitingModal = document.getElementById('waiting-modal');
+                if (waitingModal) {
+                    waitingModal.innerHTML = `
+                        <div style="background: white; padding: 60px 40px; border-radius: 20px; text-align: center; max-width: 500px; box-shadow: 0 10px 50px rgba(0,0,0,0.3);">
+                            <div style="font-size: 60px; color: #f59e0b; margin-bottom: 20px;">
+                                <i class="fas fa-hourglass-end"></i>
+                            </div>
+                            <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 10px; font-weight: 800;">
+                                Timeout
+                            </h1>
+                            <p style="color: #6c757d; font-size: 16px; margin-bottom: 30px;">
+                                The payment request has expired. Please try again.
+                            </p>
+                            <a href="javascript:location.reload()" style="background: #24b24a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block;">
+                                Try Again
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking payment status:', error);
+        }
+    }, pollInterval);
+}
+
+function showPaymentSuccess(orderId, orderData) {
+    // Mark payment as successful in localStorage
+    localStorage.setItem('payment-success', 'true');
+    
+    // Remove waiting modal if exists
+    const waitingModal = document.getElementById('waiting-modal');
+    if (waitingModal) {
+        waitingModal.remove();
+    }
+    
+    // Create success message
+    const successHtml = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+            <div style="background: white; padding: 60px 40px; border-radius: 20px; text-align: center; max-width: 600px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); animation: slideUp 0.6s ease-out;">
+                <div style="font-size: 70px; color: #10b981; margin-bottom: 20px;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1 style="color: #1a1a1a; font-size: 28px; margin-bottom: 10px; font-weight: 800;">
+                    Payment Successful!
+                </h1>
+                <p style="color: #6c757d; font-size: 16px; margin-bottom: 30px; line-height: 1.6;">
+                    Your payment of <strong style="color: #1a1a1a; font-size: 20px;">KES ${orderData.total_amount}</strong> has been received successfully.
+                </p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef;">
+                        <span style="color: #6c757d;">Order Number:</span>
+                        <span style="color: #1a1a1a; font-weight: 700;">#${orderData.order_id}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef;">
+                        <span style="color: #6c757d;">Status:</span>
+                        <span style="color: #10b981; font-weight: 700; text-transform: capitalize;">${orderData.status}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+                        <span style="color: #6c757d;">Amount:</span>
+                        <span style="color: #1a1a1a; font-weight: 700;">KES ${orderData.total_amount}</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px; flex-direction: column;">
+                    <a href="/accounts/myOrders/" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 30px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; transition: all 0.3s;">
+                        <i class="fas fa-list"></i> View My Orders
+                    </a>
+                    <a href="/cart/checkout/" style="background: #f8f9fa; color: #1a1a1a; padding: 16px 30px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; border: 2px solid #e9ecef; transition: all 0.3s;">
+                        <i class="fas fa-shopping-cart"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(40px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            a:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            }
+        </style>
+    `;
+    
+    // Insert success modal
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = successHtml;
+    document.body.appendChild(modalDiv);
+    
+    // Redirect to myOrders after 3 seconds
+    setTimeout(() => {
+        window.location.href = '/accounts/myOrders/';
+    }, 3000);
+}
 </script>
 
 {% endblock %}

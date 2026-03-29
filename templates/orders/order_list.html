@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+/* Order List - clean user view */
+.page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin:18px 0;
+}
+.page-header h1{margin:0;font-size:22px;color:#222}
+.header-actions{display:flex;gap:8px;align-items:center}
+.header-actions .btn{
+  padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600;
+}
+.btn-primary{background:#0a64c7;color:#fff;box-shadow:0 6px 18px rgba(10,100,199,0.08)}
+.btn-ghost{background:transparent;border:1px solid #e6e9ec;color:#111}
+.search-bar{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0 18px 0;
+}
+.search-bar input, .search-bar select{
+  padding:8px 10px;border:1px solid #e7eef6;border-radius:8px;background:#fff;
+  font-size:14px;
+}
+.card{
+  background:#fff;border-radius:10px;padding:16px;box-shadow:0 6px 18px rgba(28,40,50,0.04);
+}
+.table{
+  width:100%;border-collapse:collapse;margin-top:12px;font-size:14px;
+}
+.table th, .table td{padding:12px 10px;border-bottom:1px solid #f1f4f7;text-align:left}
+.table th{background:#fafbfd;font-weight:700;color:#333;font-size:13px}
+.table tbody tr:hover{background:linear-gradient(90deg, rgba(234,246,255,0.5), rgba(255,255,255,0));}
+
+.badge{
+  display:inline-block;padding:6px 8px;border-radius:999px;font-weight:700;font-size:12px;
+}
+.badge-success{background:#e6fbf0;color:#0a7a46}
+.badge-pending{background:#fff8e6;color:#a36d00}
+.badge-completed{background:#e6f3ff;color:#0055b8}
+.badge-failed{background:#fff0f0;color:#b00000}
+
+.empty-state{padding:36px;text-align:center;color:#666}
+.empty-state-icon{font-size:48px;margin-bottom:16px}
+
+@media (max-width:900px){
+  .search-bar{flex-direction:column;align-items:stretch}
+  .header-actions{flex-direction:column;align-items:flex-end}
+}
+</style>
+
+<div class="container" style="max-width:1200px;margin:18px auto;">
+  <div class="page-header">
+    <h1>My Orders</h1>
+    <div class="header-actions">
+      <a href="{% url 'store:store' %}" class="btn btn-primary">Continue Shopping</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if orders %}
+      <table class="table" role="table" aria-label="My orders list">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Total (KES)</th>
+            <th>Status</th>
+            <th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td><strong>#{{ order.id }}</strong></td>
+            <td>{{ order.created_at|date:"M d, Y" }}</td>
+            <td>Ksh. {{ order.total_amount|floatformat:2 }}</td>
+            <td>
+              {% if order.status == 'completed' %}
+                <span class="badge badge-success">Completed</span>
+              {% elif order.status == 'pending' %}
+                <span class="badge badge-pending">Pending</span>
+              {% elif order.status == 'processing' %}
+                <span class="badge badge-completed">Processing</span>
+              {% else %}
+                <span class="badge badge-failed">{{ order.status|default:"Unknown" }}</span>
+              {% endif %}
+            </td>
+            <td style="text-align:right">
+              <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-ghost" style="padding:6px 10px">View Details</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <p>You haven't placed any orders yet.</p>
+        <p style="color:#999;font-size:14px;margin-top:8px">Start shopping and your orders will appear here.</p>
+        <a href="{% url 'store:store' %}" class="btn btn-primary" style="margin-top:16px;display:inline-block">Shop Now</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

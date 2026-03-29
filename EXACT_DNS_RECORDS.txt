@@ -1,0 +1,73 @@
+# 📋 EXACT DNS RECORDS FOR NAMECHEAP
+
+## Domain: mamamaasaibakers.com
+## Public IP: 105.164.7.132
+
+## STEP-BY-STEP NAMECHEAP CONFIGURATION:
+
+### 1. Login to Namecheap
+- Go to: https://www.namecheap.com/
+- Sign in to your account
+- Click "Domain List"
+- Find "mamamaasaibakers.com"
+- Click "Manage"
+
+### 2. Go to DNS Settings
+- Click "Advanced DNS" tab
+
+### 3. DELETE Existing Records (if any)
+- Remove any existing A records for "@"
+- Remove any existing CNAME records for "www"
+
+### 4. ADD These Records:
+
+## 📍 RECORD 1: A RECORD (Main Domain)
+```
+Type:     A Record
+Host:     @
+Value:    105.164.7.132
+TTL:      5 min
+```
+
+## 📍 RECORD 2: CNAME RECORD (www Subdomain)
+```
+Type:     CNAME Record
+Host:     www
+Value:    mamamaasaibakers.com.
+TTL:      5 min
+```
+
+**IMPORTANT:** Don't forget the trailing dot (.) after "mamamaasaibakers.com."
+
+### 5. SAVE Each Record
+- Click the green checkmark (✓) for each record
+- Wait for "Record updated successfully" message
+
+### 6. VERIFY Configuration
+After adding, your DNS records should show:
+```
+TYPE    HOST    VALUE                   TTL
+A       @       105.164.7.132          5 min
+CNAME   www     mamamaasaibakers.com.  5 min
+```
+
+## ✅ WHAT THIS DOES:
+
+- **A Record**: Points `mamamaasaibakers.com` → `105.164.7.132`
+- **CNAME Record**: Points `www.mamamaasaibakers.com` → `mamamaasaibakers.com`
+
+## 🧪 TESTING:
+
+After 5-10 minutes, test with:
+```batch
+verify_namecheap_setup.bat
+```
+
+## 🌐 RESULT:
+- `http://mamamaasaibakers.com` ✅
+- `http://www.mamamaasaibakers.com` ✅
+
+## ⚠️ NOTES:
+- Use TTL of 5 minutes for faster DNS updates
+- DNS propagation takes 5-60 minutes globally
+- Your public IP `105.164.7.132` must remain the same

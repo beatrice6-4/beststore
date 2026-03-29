@@ -11,6 +11,7 @@ from django.db.models import Q
 from carts.models import CartItem, Cart
 from store.models import Product
 from .models import Order, OrderItem, Transaction
+from accounts.models import Transaction as AccountTransaction
 from datetime import datetime
 import json
 import csv
@@ -237,10 +238,11 @@ def mpesa_payment(request, order_id):
                         }
                     else:
                         # ========================= M-PESA CONFIGURATION =========================
-                        passkey = "46c4b4ea9885ebebe4054aa05ba24ebede634ra956de7286c28135be035bdec933"
-                        business_short_code = '400200'
+                        passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"
+                        business_short_code = '3581517'
             
                         process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                        # Use production domain for callback URL (must be HTTPS and publicly accessible)
                         callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
 
                         # Generate timestamp and password
@@ -267,34 +269,49 @@ def mpesa_payment(request, order_id):
                             'TransactionType': 'CustomerBuyGoodsOnline',
                             'Amount': amount,
                             'PartyA': phone_number,
-                            'PartyB': 1126728,
+                            'PartyB': '6391014',  # Convert to string for API
                             'PhoneNumber': phone_number,
                             'CallBackURL': callback_url,
                             'AccountReference': account_reference,
                             'TransactionDesc': transaction_desc
                         }
 
-                        print(f"Initiating STK Push: {stk_push_payload}")
+                        print(f"\n=== STK PUSH REQUEST ===")
+                        print(f"Phone: {phone_number}")
+                        print(f"Amount: {amount}")
+                        print(f"Callback URL: {callback_url}")
+                        print(f"Payload: {json.dumps(stk_push_payload, indent=2)}")
+                        print(f"Headers: {stk_push_headers}")
+                        print(f"=== END REQUEST ===")
 
                         # ========================= INITIATE STK PUSH =========================
                         try:
+                            print(f"\n>>> Sending STK Push to: {process_request_url}")
                             response = requests.post(
                                 process_request_url,
                                 headers=stk_push_headers,
                                 json=stk_push_payload,
                                 timeout=30
                             )
+                            print(f"Status Code: {response.status_code}")
+                            print(f"Response Text: {response.text}")
+                            
                             response.raise_for_status()
                             response_data = response.json()
                             response_code = response_data.get('ResponseCode')
 
-                            print(f"STK Push Response: {response_data}")
+                            print(f"\n=== STK PUSH RESPONSE ===")
+                            print(f"Response Code: {response_code}")
+                            print(f"Full Response: {json.dumps(response_data, indent=2)}")
+                            print(f"=== END RESPONSE ===")
 
                             if response_code == "0":
                                 checkout_request_id = response_data.get('CheckoutRequestID')
                                 
+                                print(f"✓ STK Push successful! CheckoutRequestID: {checkout_request_id}")
+                                
                                 # Save transaction record
-                                Transaction.objects.create(
+                                AccountTransaction.objects.create(
                                     order=order,
                                     mpesa_request_id=checkout_request_id,
                                     phone_number=phone_number,
@@ -310,34 +327,52 @@ def mpesa_payment(request, order_id):
                                     'ResponseCode': response_code,
                                     'amount': amount,
                                     'account_reference': account_reference,
-                                    'till_number': 1126728,
+                                    'till_number': 6391014,
                                     'order_number': order_id,
                                     'phone_number': phone_number
                                 }
                             else:
-                                error_message = response_data.get('errorMessage', 'Unknown error')
+                                error_message = response_data.get('errorMessage', response_data.get('ResultDesc', 'Unknown error'))
+                                response_code_str = response_data.get('ResponseCode', 'N/A')
+                                print(f"✗ STK Push failed! Code: {response_code_str}, Message: {error_message}")
                                 payment_response = {
                                     'error': 'STK Push Failed',
                                     'details': error_message,
-                                    'response_code': response_code
+                                    'response_code': response_code_str
                                 }
 
-                        except requests.exceptions.Timeout:
+                        except requests.exceptions.Timeout as e:
+                            print(f"✗ Timeout Error: {str(e)}")
                             payment_response = {
                                 'error': 'Request Timeout',
                                 'details': 'The M-Pesa gateway took too long to respond. Please try again.'
                             }
+                        except requests.exceptions.ConnectionError as e:
+                            print(f"✗ Connection Error: {str(e)}")
+                            payment_response = {
+                                'error': 'Connection Error',
+                                'details': 'Unable to connect to M-Pesa gateway. Check your network and credentials.'
+                            }
                         except requests.exceptions.RequestException as e:
+                            print(f"✗ Request Error: {str(e)}")
                             payment_response = {
                                 'error': 'Network Error',
                                 'details': str(e)
                             }
+                        except json.JSONDecodeError as e:
+                            print(f"✗ JSON Decode Error: {str(e)}")
+                            payment_response = {
+                                'error': 'Invalid Response',
+                                'details': 'M-Pesa gateway returned an invalid response. Please contact support.'
+                            }
                         except Exception as e:
+                            import traceback
+                            print(f"✗ Unexpected Error: {str(e)}")
+                            print(traceback.format_exc())
                             payment_response = {
                                 'error': 'Unexpected Error',
                                 'details': str(e)
                             }
-                            print(f"STK Push Error: {str(e)}")
 
         except Exception as e:
             payment_response = {
@@ -354,7 +389,32 @@ def mpesa_payment(request, order_id):
     return render(request, 'orders/mpesa_payment.html', context)
 
 
-# ========================= MPESA CALLBACK HANDLER =========================
+# ========================= MPESA PAYMENT STATUS CHECK =========================
+@csrf_exempt
+def check_payment_status(request, order_id):
+    """
+    Check current payment status of an order.
+    Used by frontend for polling after STK push.
+    """
+    try:
+        order = Order.objects.get(id=order_id)
+        return JsonResponse({
+            'status': order.status,
+            'is_paid': order.status in ['completed', 'processing', 'shipped', 'delivered'],
+            'order_id': order.id,
+            'total_amount': str(order.total_amount)
+        })
+    except Order.DoesNotExist:
+        return JsonResponse({
+            'error': 'Order not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
+
+
+
 @csrf_exempt
 def mpesa_callback(request):
     """
@@ -375,6 +435,7 @@ def mpesa_callback(request):
             phone_number = None
             amount = None
             account_reference = None
+            checkout_request_id = stk_callback.get('CheckoutRequestID')
 
             for item in callback_metadata:
                 if item['Name'] == 'MpesaReceiptNumber':
@@ -386,55 +447,133 @@ def mpesa_callback(request):
                 elif item['Name'] == 'AccountReference':
                     account_reference = str(item['Value'])
 
-            print(f"Callback - Receipt: {mpesa_receipt}, Phone: {phone_number}, Amount: {amount}, Ref: {account_reference}")
+            # ============================ DETAILED LOGGING ============================
+            print("\n" + "="*80)
+            print("MPESA CALLBACK RECEIVED")
+            print("="*80)
+            print(f"Result Code: {result_code}")
+            print(f"Result Desc: {result_desc}")
+            print(f"CheckoutRequestID: {checkout_request_id}")
+            print(f"Phone Number: {phone_number}")
+            print(f"Amount: {amount}")
+            print(f"M-Pesa Receipt: {mpesa_receipt}")
+            print(f"Account Reference: {account_reference}")
+            print("="*80)
 
             # Validate callback
             if result_code == 0 and mpesa_receipt and account_reference == 'BRAMH':
                 try:
-                    # Find order and update status
-                    order = Order.objects.get(phone__icontains=phone_number[-9:])
+                    # Find order - use CheckoutRequestID first (most reliable)
+                    transaction = None
+                    order = None
                     
-                    # Update order status to completed
-                    order.status = 'completed'
+                    print(f"\n[LOOKUP] Starting order lookup...")
+                    print(f"[LOOKUP] CheckoutRequestID: {checkout_request_id}")
+                    
+                    if checkout_request_id:
+                        print(f"[LOOKUP] Searching by CheckoutRequestID...")
+                        try:
+                            # Get all transactions to debug
+                            all_transactions = AccountTransaction.objects.filter(order__isnull=False)
+                            print(f"[LOOKUP] Total transactions in DB: {all_transactions.count()}")
+                            for t in all_transactions:
+                                print(f"[LOOKUP] Transaction {t.id}: mpesa_request_id='{t.mpesa_request_id}' order={t.order.id}")
+                            
+                            transaction = AccountTransaction.objects.get(mpesa_request_id=checkout_request_id)
+                            order = transaction.order
+                            print(f"[LOOKUP] ✓ Found order {order.id} via CheckoutRequestID")
+                        except AccountTransaction.DoesNotExist:
+                            print(f"[LOOKUP] ✗ No transaction found with CheckoutRequestID: {checkout_request_id}")
+                    
+                    # Fallback to phone number lookup if transaction not found
+                    if not order:
+                        print(f"[LOOKUP] Trying phone number lookup...")
+                        # Extract last 10 digits from phone number
+                        phone_suffix = phone_number[-9:] if phone_number else None
+                        print(f"[LOOKUP] Phone suffix: {phone_suffix}")
+                        if phone_suffix:
+                            orders = Order.objects.filter(phone__endswith=phone_suffix).order_by('-created_at')
+                            print(f"[LOOKUP] Found {orders.count()} order(s) with phone suffix {phone_suffix}")
+                            if orders.exists():
+                                order = orders.first()
+                                print(f"[LOOKUP] ✓ Found order {order.id} via phone suffix")
+                    
+                    if not order:
+                        print(f"[LOOKUP] ✗ Order not found! Phone: {phone_number}")
+                        raise Order.DoesNotExist("Order not found")
+                    
+                    print(f"\n[UPDATE] Order found: {order.id}")
+                    print(f"[UPDATE] Current status: {order.status}")
+                    
+                    # Update order status to processing (payment received)
+                    old_status = order.status
+                    order.status = 'processing'  # Changed from pending to processing
                     order.save()
                     
+                    print(f"[UPDATE] Status updated: {old_status} → {order.status}")
+                    
                     # Update or create transaction record
-                    Transaction.objects.filter(order=order).update(
-                        mpesa_receipt=mpesa_receipt,
-                        amount=amount,
-                        status='completed',
-                        paid_at=datetime.now()
-                    )
+                    if transaction:
+                        print(f"[TRANSACTION] Updating existing transaction {transaction.id}")
+                        transaction.mpesa_receipt = mpesa_receipt
+                        transaction.amount = amount
+                        transaction.status = 'completed'
+                        transaction.paid_at = datetime.now()
+                        transaction.save()
+                    else:
+                        # Create transaction if it doesn't exist
+                        print(f"[TRANSACTION] Creating new transaction")
+                        AccountTransaction.objects.create(
+                            order=order,
+                            mpesa_request_id=checkout_request_id,
+                            mpesa_receipt=mpesa_receipt,
+                            phone_number=phone_number,
+                            amount=amount,
+                            status='completed',
+                            paid_at=datetime.now(),
+                            response_code='0'
+                        )
 
-                    print(f"Order {order.id} payment completed with receipt {mpesa_receipt}")
+                    print(f"\n[SUCCESS] Order {order.id} payment processed successfully!")
+                    print(f"[SUCCESS] Receipt: {mpesa_receipt}")
+                    print("="*80 + "\n")
 
                     return JsonResponse({
                         "ResultCode": 0,
                         "ResultDesc": "Payment received successfully"
                     })
 
-                except Order.DoesNotExist:
-                    print(f"Order not found for phone {phone_number}")
+                except Order.DoesNotExist as e:
+                    print(f"\n[ERROR] {str(e)}")
+                    print("="*80 + "\n")
                     return JsonResponse({
                         "ResultCode": 1,
-                        "ResultDesc": "Order not found"
+                        "ResultDesc": f"Order not found"
                     }, status=404)
 
                 except Exception as e:
-                    print(f"Error processing callback: {str(e)}")
+                    print(f"\n[ERROR] Exception: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    print("="*80 + "\n")
                     return JsonResponse({
                         "ResultCode": 1,
                         "ResultDesc": f"Error: {str(e)}"
                     }, status=500)
             else:
-                print(f"Invalid callback - Code: {result_code}, Desc: {result_desc}")
+                print(f"[VALIDATION] Callback validation failed")
+                print(f"[VALIDATION] Result Code: {result_code} (expected 0)")
+                print(f"[VALIDATION] Receipt: {mpesa_receipt} (expected non-null)")
+                print(f"[VALIDATION] Account Ref: {account_reference} (expected 'BRAMH')")
+                print("="*80 + "\n")
                 return JsonResponse({
                     "ResultCode": 1,
                     "ResultDesc": f"Payment unsuccessful: {result_desc}"
                 })
 
         except json.JSONDecodeError as e:
-            print(f"JSON decode error: {str(e)}")
+            print(f"[ERROR] JSON decode error: {str(e)}")
+            print("="*80 + "\n")
             return JsonResponse({
                 "ResultCode": 1,
                 "ResultDesc": f"Invalid JSON"
@@ -538,6 +677,47 @@ def paid_orders_api(request):
             'created_at': o.created_at.isoformat() if o.created_at else '',
         })
     return JsonResponse(results, safe=False)
+
+
+@csrf_exempt
+def debug_payment_status(request, order_id):
+    """
+    DEBUG ENDPOINT: Check payment status and all related transactions
+    Shows what the system sees for this order
+    """
+    try:
+        order = Order.objects.get(id=order_id)
+        transactions = AccountTransaction.objects.filter(order=order).order_by('-created_at')
+        
+        debug_info = {
+            'order': {
+                'id': order.id,
+                'status': order.status,
+                'phone': order.phone,
+                'amount': str(order.total_amount),
+                'created_at': order.created_at.isoformat() if order.created_at else None,
+            },
+            'transactions': [
+                {
+                    'id': t.id,
+                    'mpesa_request_id': t.mpesa_request_id,
+                    'mpesa_receipt': t.mpesa_receipt,
+                    'phone_number': t.phone_number,
+                    'amount': str(t.amount),
+                    'status': t.status,
+                    'response_code': t.response_code,
+                    'paid_at': t.paid_at.isoformat() if t.paid_at else None,
+                    'created_at': t.created_at.isoformat() if t.created_at else None,
+                }
+                for t in transactions
+            ]
+        }
+        
+        return JsonResponse(debug_info)
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @staff_member_required

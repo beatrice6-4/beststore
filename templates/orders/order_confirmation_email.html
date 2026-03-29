@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .header {
+            background: linear-gradient(135deg, #0a64c7 0%, #084298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+        .order-info {
+            background: #f0f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .order-info h3 {
+            margin-top: 0;
+            color: #0a64c7;
+        }
+        .order-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0a64c7;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table th {
+            background: #f0f5ff;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #0a64c7;
+            font-weight: bold;
+        }
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .total-row {
+            background: #f0f5ff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .footer {
+            background: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 12px;
+            color: #666;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .button {
+            display: inline-block;
+            background: #0a64c7;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Order Confirmed</h1>
+            <p>Thank you for your purchase!</p>
+        </div>
+
+        <div class="content">
+            <p>Dear {{ order.first_name }},</p>
+
+            <p>Your order has been received and we're getting it ready for you. Below are your order details:</p>
+
+            <div class="order-info">
+                <h3>Order Number: <span class="order-number">#{{ order.id }}</span></h3>
+                <p><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+                <p><strong>Status:</strong> {{ order.get_status_display|default:"Processing" }}</p>
+            </div>
+
+            <h3>Order Items</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.product_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>Ksh. {{ item.price|floatformat:2 }}</td>
+                        <td>Ksh. {{ item.get_total_price|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">Total Amount:</td>
+                        <td>Ksh. {{ order.total_amount|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Delivery Address</h3>
+            <p>
+                {{ order.first_name }} {{ order.last_name }}<br>
+                {{ order.phone }}<br>
+                {{ order.address }}<br>
+            </p>
+
+            {% if order.order_note %}
+            <h3>Special Notes</h3>
+            <p>{{ order.order_note }}</p>
+            {% endif %}
+
+            <p>If you have any questions about your order, please don't hesitate to contact us at support@beststore.com or reply to this email.</p>
+
+            <p>Thank you for shopping with BestStore!</p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 BestStore - Premium Bags. All rights reserved.</p>
+            <p>For inquiries: support@beststore.com | Phone: +254-xxx-xxx-xxx</p>
+        </div>
+    </div>
+</body>
+</html>

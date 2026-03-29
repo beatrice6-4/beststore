@@ -25,6 +25,8 @@ urlpatterns = [
 
 
     path('mpesa/<str:order_id>/', views.mpesa_payment, name='mpesa_payment'),
+    path('api/check-payment/<int:order_id>/', views.check_payment_status, name='check_payment_status'),
+    path('api/debug-payment/<int:order_id>/', views.debug_payment_status, name='debug_payment_status'),
 
 
 

@@ -20,6 +20,18 @@
         --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
     }
 
+    /* ============ ANIMATIONS ============ */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     /* ============ PAGE WRAPPER ============ */
     .orders-wrapper {
         background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
@@ -348,6 +360,19 @@
         background: transparent;
     }
 
+    .btn-action.pay-now {
+        background: linear-gradient(90deg, var(--primary) 0%, #0a7a46 100%);
+        color: #fff !important;
+        border-color: var(--primary) !important;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(25,135,84,0.2);
+    }
+
+    .btn-action.pay-now:hover {
+        background: linear-gradient(90deg, #0a6f42 0%, #056033 100%);
+        box-shadow: 0 4px 12px rgba(25,135,84,0.3);
+    }
+
     /* ============ EMPTY STATE ============ */
     .empty-orders-card {
         background: #fff;
@@ -486,6 +511,20 @@
             </div>
         </div>
 
+        <!-- ========================= SUCCESS ALERT ========================= -->
+        <div id="success-alert" class="alert alert-success" style="margin-bottom: 24px; padding: 16px 20px; border-radius: 10px; background: linear-gradient(135deg, #d1e7dd 0%, #d1e7dd 100%); border-left: 4px solid #10b981; display: none; animation: slideDown 0.4s ease;">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem; flex-shrink: 0;"></i>
+                <div>
+                    <strong style="color: #0f5132;">Payment Successful!</strong>
+                    <p style="margin: 4px 0 0 0; color: #0f5132; font-size: 0.95rem;">Your order has been received and is being processed.</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.style.display='none'; localStorage.removeItem('payment-success');" style="background: none; border: none; color: #0f5132; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; padding: 0; margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- ========================= STATS ========================= -->
         {% if orders %}
             <div class="orders-stats">
@@ -535,7 +574,7 @@
                         <div class="order-card-header">
                             <div class="order-number">
                                 <i class="fas fa-receipt"></i>
-                                Order #{{ order.order_number }}
+                                Order #{{ order.id }}
                             </div>
                             <div class="order-date">
                                 <i class="fas fa-calendar"></i>
@@ -551,7 +590,7 @@
                             <div class="order-info-row">
                                 <div class="info-item">
                                     <span class="info-label">Customer Name</span>
-                                    <span class="info-value">{{ order.full_name }}</span>
+                                    <span class="info-value">{{ order.first_name }} {{ order.last_name }}</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Phone Number</span>
@@ -563,7 +602,7 @@
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Order Total</span>
-                                    <span class="info-value price">Ksh {{ order.order_total }}</span>
+                                    <span class="info-value price">Ksh {{ order.total_amount|floatformat:2 }}</span>
                                 </div>
                             </div>
 
@@ -594,13 +633,16 @@
                         <!-- Order Footer / Actions -->
                         <div class="order-card-footer">
                             <div class="order-actions">
-                                <a href="{% url 'order_detail' order.order_number %}" class="btn-action">
+                                <a href="{% url 'order_detail' order.id %}" class="btn-action">
                                     <i class="fas fa-eye me-1"></i> View Details
                                 </a>
                                 <a href="#" class="btn-action secondary" title="Download Invoice">
                                     <i class="fas fa-download me-1"></i> Invoice
                                 </a>
                                 {% if order.status|lower == 'pending' %}
+                                    <a href="{% url 'orders:mpesa_payment' order.id %}" class="btn-action pay-now">
+                                        <i class="fas fa-mobile-alt me-1"></i> Pay Now
+                                    </a>
                                     <form action="#" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn-action" style="width: 100%; border-color: #dc3545; color: #dc3545;">
@@ -699,6 +741,37 @@ function sortOrders(sortType) {
     });
     
     cards.forEach(card => list.appendChild(card));
+}
+
+// ============ PAYMENT SUCCESS DETECTION ============
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if payment was just successful
+    const paymentSuccess = localStorage.getItem('payment-success');
+    
+    if (paymentSuccess) {
+        // Show success alert
+        const successAlert = document.getElementById('success-alert');
+        if (successAlert) {
+            successAlert.style.display = 'flex';
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Clear the flag
+        localStorage.removeItem('payment-success');
+        
+        // Refresh the page data after 2 seconds to show updated status
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+    }
+});
+
+// Function to set payment success flag (can be called from payment page)
+function markPaymentSuccess() {
+    localStorage.setItem('payment-success', 'true');
 }
 </script>
 

@@ -4,9 +4,13 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kds8lcf_2yb3w_!l!qn=k(tc6^y_%4*nbsw5h62)_t8%4((a-4')
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'mamamaasaibakers.onrender.com', 'mamamaasaibakers.com', 'dianah-dad5dcff9a01.herokuapp.com', '*.herokuapp.com']
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-production-secret-key-here-change-this')
+DEBUG = 'RENDER' not in os.environ
+ALLOWED_HOSTS = ['mamamaasaibakers.com', 'www.mamamaasaibakers.com', 'localhost', '127.0.0.1', '10.190.143.234']
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 INSTALLED_APPS = [
     'jazzmin',
