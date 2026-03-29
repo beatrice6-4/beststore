@@ -1,0 +1,973 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Pesa Payment Processing - BestStore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --mpesa-green: #24b24a;
+            --mpesa-dark: #0a8f2a;
+            --mpesa-light: #d4f4dd;
+            --primary: #198754;
+            --primary-dark: #145c32;
+            --secondary: #004080;
+            --accent: #FF6B35;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #0dcaf0;
+            --light: #f8f9fa;
+            --light-secondary: #f0f4f8;
+            --border: #e9ecef;
+            --text-dark: #1a1a1a;
+            --text-muted: #6c757d;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(36, 178, 74, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(25, 135, 84, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-popup {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ============ HEADER ============ */
+        .payment-header {
+            background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+            color: #fff;
+            padding: 30px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .payment-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -20%;
+            width: 250px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        .payment-header-logo {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .payment-header-logo i {
+            font-size: 3rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .payment-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .payment-header p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        /* ============ BODY ============ */
+        .payment-body {
+            padding: 25px;
+        }
+
+        /* ============ ALERTS ============ */
+        .alerts-container {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            animation: slideIn 0.4s ease;
+            border-left: 3px solid;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: #10b981;
+            border-left-color: #10b981;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+            color: #dc3545;
+            border-left-color: #ef4444;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.05) 100%);
+            color: #0c5aa0;
+            border-left-color: #0dcaf0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-content strong {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        /* ============ ORDER INFO ============ */
+        .order-info {
+            background: linear-gradient(135deg, rgba(36, 178, 74, 0.08) 0%, rgba(10, 143, 42, 0.04) 100%);
+            border: 2px solid var(--mpesa-light);
+            border-left: 4px solid var(--mpesa-green);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .order-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(36, 178, 74, 0.15);
+            font-size: 0.95rem;
+        }
+
+        .order-info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .order-info-label {
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .order-info-label i {
+            color: var(--mpesa-green);
+            font-size: 1rem;
+        }
+
+        .order-info-value {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .order-info-value.highlight {
+            color: var(--mpesa-dark);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        /* ============ FORM ============ */
+        .payment-form {
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            gap: 0;
+        }
+
+        .input-prefix {
+            padding: 12px 14px;
+            background: linear-gradient(135deg, var(--light) 0%, var(--light-secondary) 100%);
+            border: 2px solid var(--border);
+            border-radius: 10px 0 0 10px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            user-select: none;
+            font-size: 0.9rem;
+            min-width: 50px;
+            justify-content: center;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 0 10px 10px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: var(--text-dark);
+        }
+
+        .input-wrapper .form-control {
+            border-left: none;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--mpesa-green);
+            box-shadow: 0 0 0 3px rgba(36, 178, 74, 0.15);
+            background: #f9fff7;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-error {
+            font-size: 0.85rem;
+            color: var(--error);
+            margin-top: 6px;
+            display: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .form-error i {
+            font-size: 0.9rem;
+        }
+
+        /* Amount Input */
+        .amount-input {
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: var(--mpesa-dark);
+            text-align: center;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: var(--mpesa-green);
+            box-shadow: 0 0 0 3px rgba(36, 178, 74, 0.15);
+            background: #f9fff7;
+        }
+
+        /* ============ PAYMENT STEPS ============ */
+        .payment-steps {
+            background: linear-gradient(135deg, rgba(36, 178, 74, 0.06) 0%, rgba(10, 143, 42, 0.03) 100%);
+            border: 2px solid var(--mpesa-light);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .steps-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .steps-title i {
+            color: var(--mpesa-green);
+            font-size: 1rem;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .steps-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .steps-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .steps-number {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 6px rgba(36, 178, 74, 0.3);
+        }
+
+        .steps-text {
+            flex: 1;
+            color: var(--text-muted);
+            padding-top: 2px;
+            line-height: 1.4;
+        }
+
+        /* ============ BUTTONS ============ */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-dark) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(36, 178, 74, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-pay:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(36, 178, 74, 0.4);
+        }
+
+        .btn-pay:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-pay:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+
+        .btn-pay i {
+            font-size: 1rem;
+        }
+
+        .loader-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--light);
+            color: var(--text-dark);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            border-color: var(--text-muted);
+            text-decoration: none;
+            color: var(--text-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ============ SUCCESS MODAL ============ */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-content {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease-out;
+            position: relative;
+        }
+
+        .success-content .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            color: #666;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .success-content .close-btn:hover {
+            background: rgba(0,0,0,0.2);
+            color: #333;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .success-message {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .success-details {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .success-details div {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .success-details div:last-child {
+            border-bottom: none;
+        }
+
+        .success-details .label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .success-details .value {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .success-details .value.success {
+            color: #10b981;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 480px) {
+            .payment-popup {
+                margin: 10px;
+                max-width: none;
+            }
+
+            .payment-header {
+                padding: 25px 20px;
+            }
+
+            .payment-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .payment-body {
+                padding: 20px;
+            }
+
+            .btn-pay {
+                font-size: 0.95rem;
+                padding: 14px 20px;
+            }
+
+            .success-content {
+                padding: 30px 20px;
+            }
+
+            .success-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-popup">
+        <!-- HEADER -->
+        <div class="payment-header">
+            <div class="payment-header-logo">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h1>M-Pesa Payment</h1>
+            <p>Secure & Fast Payment</p>
+        </div>
+
+        <!-- BODY -->
+        <div class="payment-body">
+            <!-- ALERTS -->
+            <div class="alerts-container" id="alerts"></div>
+
+            <!-- ORDER INFO -->
+            <div class="order-info">
+                <div class="order-info-row">
+                    <span class="order-info-label">
+                        <i class="fas fa-box"></i> Order
+                    </span>
+                    <span class="order-info-value">#{{ order.id }}</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="order-info-label">
+                        <i class="fas fa-money-bill-wave"></i> Amount
+                    </span>
+                    <span class="order-info-value highlight">KES {{ grand_total|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <!-- PAYMENT FORM -->
+            <form id="mpesa-form" method="POST" class="payment-form">
+                {% csrf_token %}
+
+                <!-- Phone Number -->
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <div class="input-prefix">+254</div>
+                        <input type="tel" id="phone" name="phone_number" class="form-control"
+                               placeholder="7XXXXXXXX" maxlength="9" required>
+                    </div>
+                    <div class="form-error" id="phone-error">
+                        <i class="fas fa-times-circle"></i>
+                        <span></span>
+                    </div>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-group">
+                    <label class="form-label">Amount (KES)</label>
+                    <input type="number" id="amount" name="amount" class="amount-input"
+                           value="{{ grand_total|floatformat:0 }}" readonly required>
+                </div>
+
+                <!-- Payment Steps -->
+                <div class="payment-steps">
+                    <div class="steps-title">
+                        <i class="fas fa-list-check"></i> Payment Steps
+                    </div>
+                    <ul class="steps-list">
+                        <li class="steps-item">
+                            <span class="steps-number">1</span>
+                            <span class="steps-text">Click "Pay Now" to initiate payment</span>
+                        </li>
+                        <li class="steps-item">
+                            <span class="steps-number">2</span>
+                            <span class="steps-text">Check your phone for STK push</span>
+                        </li>
+                        <li class="steps-item">
+                            <span class="steps-number">3</span>
+                            <span class="steps-text">Enter M-Pesa PIN to complete</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Buttons -->
+                <div class="btn-group">
+                    <button id="pay-btn" class="btn-pay" type="submit">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span id="pay-text">Pay Now</span>
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closePopup()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <button class="close-btn" onclick="closeSuccessModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="success-title">Payment Successful!</h2>
+            <p class="success-message">
+                Your payment has been processed successfully. This window will close automatically.
+            </p>
+            <div class="success-details">
+                <div>
+                    <span class="label">Order ID:</span>
+                    <span class="value">#{{ order.id }}</span>
+                </div>
+                <div>
+                    <span class="label">Amount:</span>
+                    <span class="value">KES {{ grand_total|floatformat:2 }}</span>
+                </div>
+                <div>
+                    <span class="label">Status:</span>
+                    <span class="value success">Completed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get CSRF token
+        function getCookie(name) {
+            const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return match ? match.pop() : '';
+        }
+
+        // Show alert
+        function showAlert(text, type = 'info', timeout = 5000) {
+            const alerts = document.getElementById('alerts');
+            const div = document.createElement('div');
+            div.className = `alert alert-${type}`;
+
+            const icons = {
+                error: 'fa-exclamation-circle',
+                success: 'fa-check-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+
+            div.innerHTML = `
+                <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+                <div class="alert-content">${text}</div>
+                <button class="alert-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            alerts.insertBefore(div, alerts.firstChild);
+
+            if (timeout) {
+                setTimeout(() => {
+                    if (div.parentNode) div.remove();
+                }, timeout);
+            }
+        }
+
+        // Validate phone number
+        function validatePhone(phone) {
+            phone = phone.replace(/\s/g, '');
+            if (phone.startsWith('+')) phone = phone.substring(1);
+            if (phone.startsWith('0')) phone = '254' + phone.substring(1);
+            return /^2547\d{8}$/.test(phone) && phone.length === 12;
+        }
+
+        // Validate amount
+        function validateAmount(amount) {
+            return !isNaN(amount) && parseInt(amount, 10) > 0;
+        }
+
+        // Clear errors
+        function clearErrors() {
+            document.getElementById('phone-error').style.display = 'none';
+        }
+
+        // Show error
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + '-error');
+            if (errorElement) {
+                errorElement.querySelector('span').textContent = message;
+                errorElement.style.display = 'flex';
+            }
+        }
+
+        // Close popup function
+        function closePopup() {
+            if (window.opener) {
+                window.close();
+            } else {
+                // If not a popup, redirect to previous page
+                window.history.back();
+            }
+        }
+
+        // Close success modal
+        function closeSuccessModal() {
+            const modal = document.getElementById('success-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                closePopup();
+            }, 500);
+        }
+
+        // Show success modal
+        function showSuccessModal() {
+            const modal = document.getElementById('success-modal');
+            modal.classList.add('show');
+
+            // Auto close after 3 seconds
+            setTimeout(() => {
+                closeSuccessModal();
+            }, 3000);
+        }
+
+        // Form submission
+        document.getElementById('mpesa-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            clearErrors();
+
+            const phone = document.getElementById('phone').value.trim();
+            const amount = document.getElementById('amount').value;
+            const payBtn = document.getElementById('pay-btn');
+            const payText = document.getElementById('pay-text');
+
+            // Validate inputs
+            if (!phone) {
+                showError('phone', 'Phone number is required');
+                document.getElementById('phone').focus();
+                return;
+            }
+
+            if (!validatePhone(phone)) {
+                showError('phone', 'Phone number must be in format 07XXXXXXXX');
+                document.getElementById('phone').focus();
+                return;
+            }
+
+            if (!validateAmount(amount)) {
+                showAlert('Invalid amount', 'error');
+                return;
+            }
+
+            // Disable button and show loading
+            payBtn.disabled = true;
+            payText.innerHTML = '<span class="loader-spinner"></span> Processing...';
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                });
+
+                if (response.redirected) {
+                    // Payment initiated successfully - show success
+                    showSuccessModal();
+                } else {
+                    const result = await response.json();
+                    if (result.success) {
+                        showSuccessModal();
+                    } else {
+                        showAlert(result.error || 'Payment failed', 'error');
+                        payBtn.disabled = false;
+                        payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Pay Now</span>';
+                    }
+                }
+
+            } catch (err) {
+                console.error('Payment error:', err);
+                showAlert('An error occurred. Please try again.', 'error');
+                payBtn.disabled = false;
+                payText.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>Pay Now</span>';
+            }
+        });
+
+        // Auto-focus on phone input
+        window.addEventListener('load', () => {
+            document.getElementById('phone').focus();
+        });
+
+        // Phone number formatting
+        document.getElementById('phone').addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);
+        });
+
+        // Phone validation on blur
+        document.getElementById('phone').addEventListener('blur', function () {
+            clearErrors();
+            if (this.value && !validatePhone('254' + this.value)) {
+                showError('phone', 'Invalid format. Use 07XXXXXXXX');
+            }
+        });
+    </script>
+</body>
+</html></content>
+<parameter name="filePath">c:\Users\BRAMWEL\OneDrive\Desktop\BESTSTORE\templates\orders\mpesa_payment_popup.html

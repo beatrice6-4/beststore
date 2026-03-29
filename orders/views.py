@@ -389,6 +389,130 @@ def mpesa_payment(request, order_id):
     return render(request, 'orders/mpesa_payment.html', context)
 
 
+@login_required(login_url='login')
+def mpesa_payment_popup(request, order_id):
+    """
+    Handle M-Pesa payment in a popup window.
+    Processes payment and closes popup on success.
+    """
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if request.method == "POST":
+        try:
+            access_token = get_access_token()
+            if not access_token:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Failed to get access token'
+                }, status=500)
+
+            phone_number = request.POST.get('phone_number', '').strip()
+
+            if not phone_number:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Phone number is required'
+                }, status=400)
+
+            # Format phone number
+            phone_number = ''.join(filter(str.isdigit, phone_number))
+            if phone_number.startswith("+"):
+                phone_number = phone_number[1:]
+            if phone_number.startswith("0"):
+                phone_number = "254" + phone_number[1:]
+            if not phone_number.startswith("254"):
+                phone_number = "254" + phone_number
+
+            if len(phone_number) != 12 or not phone_number.startswith("254"):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid phone number format'
+                }, status=400)
+
+            # M-Pesa configuration
+            passkey = "46c4b4ea9885ebebe4054aa05ba24ebede63a956de7286c28135be035bdec933"
+            business_short_code = '3581517'
+            process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+            callback_url = 'https://mamamaasaibakers.com/orders/mpesa/callback/'
+
+            # Generate timestamp and password
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            password_string = business_short_code + passkey + timestamp
+            password = base64.b64encode(password_string.encode()).decode()
+
+            # Transaction details
+            transaction_desc = f'Payment for Order #{order_id}'
+            account_reference = 'BRAMH'
+            amount = int(order.total_amount)
+
+            # STK Push payload
+            stk_push_payload = {
+                'BusinessShortCode': business_short_code,
+                'Password': password,
+                'Timestamp': timestamp,
+                'TransactionType': 'CustomerBuyGoodsOnline',
+                'Amount': amount,
+                'PartyA': phone_number,
+                'PartyB': '6391014',
+                'PhoneNumber': phone_number,
+                'CallBackURL': callback_url,
+                'AccountReference': account_reference,
+                'TransactionDesc': transaction_desc
+            }
+
+            # Send STK push
+            stk_push_headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + access_token
+            }
+
+            response = requests.post(
+                process_request_url,
+                headers=stk_push_headers,
+                json=stk_push_payload,
+                timeout=30
+            )
+
+            response.raise_for_status()
+            response_data = response.json()
+
+            if response_data.get('ResponseCode') == "0":
+                checkout_request_id = response_data.get('CheckoutRequestID')
+
+                # Save transaction record
+                AccountTransaction.objects.create(
+                    order=order,
+                    mpesa_request_id=checkout_request_id,
+                    phone_number=phone_number,
+                    amount=amount,
+                    status='initiated',
+                    response_code='0'
+                )
+
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Payment initiated successfully',
+                    'checkout_request_id': checkout_request_id
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': response_data.get('errorMessage', 'Payment initiation failed')
+                }, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+
+    context = {
+        'order': order,
+        'grand_total': order.total_amount,
+    }
+    return render(request, 'orders/mpesa_payment_popup.html', context)
+
+
 # ========================= MPESA PAYMENT STATUS CHECK =========================
 @csrf_exempt
 def check_payment_status(request, order_id):
