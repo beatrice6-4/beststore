@@ -114,7 +114,56 @@
 
     /* Quantity Cell */
     .quantity-cell {
-        min-width: 150px;
+        min-width: 180px;
+    }
+
+    .qty-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        border-radius: 10px;
+        padding: 6px 8px;
+        border: 2px solid #667eea;
+    }
+
+    .qty-btn {
+        width: 34px;
+        height: 34px;
+        border: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+    }
+
+    .qty-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .qty-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    .qty-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .qty-display {
+        width: 45px;
+        text-align: center;
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1.05rem;
     }
 
     .qty-update-form {
@@ -124,8 +173,8 @@
     }
 
     .qty-update-form input {
-        width: 60px;
-        padding: 8px 12px;
+        width: 50px;
+        padding: 8px 10px;
         border: 2px solid #e0e0e0;
         border-radius: 8px;
         text-align: center;
@@ -177,7 +226,7 @@
 
     .btn-remove {
         display: inline-block;
-        padding: 10px 20px;
+        padding: 10px 16px;
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
         text-decoration: none;
@@ -186,11 +235,19 @@
         transition: all 0.3s ease;
         font-size: 13px;
         text-transform: uppercase;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(245, 87, 108, 0.2);
     }
 
     .btn-remove:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+        text-decoration: none;
+    }
+
+    .btn-remove i {
+        margin-right: 6px;
     }
 
     /* Cart Summary Section */
@@ -295,6 +352,7 @@
     .btn-checkout:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        text-decoration: none;
     }
 
     /* Empty Cart */
@@ -436,17 +494,25 @@
                                     </div>
                                 </td>
                                 <td class="quantity-cell">
-                                    <form action="{% url 'cart:add_cart' item.product.id %}" method="POST" class="qty-update-form">
-                                        {% csrf_token %}
-                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="100">
-                                        <button type="submit">Update</button>
-                                    </form>
+                                    <div class="qty-control">
+                                        <a href="{% url 'cart:remove_cart' item.product.id item.id %}" class="qty-btn" title="Decrease quantity">
+                                            <i class="fas fa-minus"></i>
+                                        </a>
+                                        <span class="qty-display">{{ item.quantity }}</span>
+                                        <form action="{% url 'cart:add_cart' item.product.id %}" method="POST" style="display: inline; margin: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="qty-btn" title="Increase quantity">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                                 <td class="price-cell">Ksh {{ item.product.price|floatformat:2 }}</td>
                                 <td class="subtotal-cell">Ksh {{ item.sub_total|floatformat:2 }}</td>
                                 <td class="action-cell">
-                                    <a href="{% url 'cart:remove_cart_item' item.product.id item.id %}" class="btn-remove">
-                                        <i class="fas fa-trash"></i> Remove
+                                    <a href="{% url 'cart:remove_cart_item' item.product.id item.id %}" class="btn-remove" onclick="return confirm('Are you sure you want to remove this item?')">
+                                        <i class="fas fa-trash-alt"></i> Remove
                                     </a>
                                 </td>
                             </tr>

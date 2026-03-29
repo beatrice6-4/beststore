@@ -249,38 +249,69 @@
     .qty-control {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        background: var(--light-bg);
-        border-radius: 8px;
-        padding: 4px;
-        border: 1px solid var(--border-color);
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(0, 64, 128, 0.05) 100%);
+        border-radius: 10px;
+        padding: 6px 8px;
+        border: 2px solid var(--primary);
+        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.1);
     }
 
     .qty-btn {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         border: 0;
-        background: #fff;
-        color: var(--primary);
-        border-radius: 6px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        border-radius: 8px;
         cursor: pointer;
         font-weight: 700;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 6px rgba(25, 135, 84, 0.2);
+        position: relative;
     }
 
     .qty-btn:hover {
-        background: var(--primary);
-        color: #fff;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #0d3f1b 100%);
+    }
+
+    .qty-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    .qty-btn i {
+        pointer-events: none;
+    }
+
+    .qty-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .qty-btn.loading {
+        animation: pulse 0.6s ease-in-out infinite;
     }
 
     .qty-display {
-        width: 40px;
+        width: 45px;
         text-align: center;
         font-weight: 700;
-        color: var(--text-dark);
+        color: var(--primary);
+        font-size: 1.05rem;
+        padding: 0 4px;
+        transition: all 0.2s ease;
     }
 
     .cart-item-price {
@@ -581,29 +612,23 @@
                                     <div class="cart-item-footer">
                                         <!-- Quantity Control -->
                                         <div class="qty-control">
-                                            <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="qty-btn">
+                                            <button class="qty-btn qty-decrease" data-product-id="{{ cart_item.product.id }}" data-cart-id="{{ cart_item.id }}" title="Decrease quantity">
                                                 <i class="fas fa-minus"></i>
-                                            </a>
-                                            <span class="qty-display">{{ cart_item.quantity }}</span>
-                                            <form action="{% url 'add_cart' cart_item.product.id %}" method="POST" style="display: inline;">
-                                                {% csrf_token %}
-                                                {% for item in cart_item.variations.all %}
-                                                    <input type="hidden" name="{{ item.variation_category|lower }}" value="{{ item.variation_value|capfirst }}">
-                                                {% endfor %}
-                                                <button type="submit" class="qty-btn">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            </form>
+                                            </button>
+                                            <span class="qty-display qty-value" data-qty="{{ cart_item.quantity }}">{{ cart_item.quantity }}</span>
+                                            <button class="qty-btn qty-increase" data-product-id="{{ cart_item.product.id }}" data-cart-id="{{ cart_item.id }}" {% for item in cart_item.variations.all %}data-{{ item.variation_category|lower }}="{{ item.variation_value|capfirst }}"{% endfor %} title="Increase quantity">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
                                         </div>
 
                                         <!-- Price -->
                                         <div class="cart-item-price">
-                                            <span class="price-value">Ksh {{ cart_item.sub_total }}</span>
+                                            <span class="price-value cart-subtotal" data-price="{{ cart_item.sub_total }}">Ksh {{ cart_item.sub_total }}</span>
                                             <span class="price-unit">Ksh {{ cart_item.product.price }} each</span>
                                         </div>
 
                                         <!-- Remove -->
-                                        <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" class="remove-item-btn" onclick="return confirm('Remove this item?')">
+                                        <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" class="remove-item-btn" onclick="return confirm('Are you sure you want to remove this item?')">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -683,6 +708,124 @@
 </div>
 
 <script>
+// CSRF Token for AJAX requests
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
+
+const csrftoken = getCookie('csrftoken');
+
+// Function to update subtotal and grand total
+const updateTotals = () => {
+    const subtotalElement = document.querySelector('.summary-row value');
+    const taxElement = document.querySelectorAll('.summary-row value')[1];
+    const grandTotalElement = document.querySelectorAll('.summary-row.total value')[0];
+    
+    let newSubtotal = 0;
+    document.querySelectorAll('.cart-subtotal').forEach(el => {
+        newSubtotal += parseFloat(el.getAttribute('data-price')) || 0;
+    });
+    
+    const tax = newSubtotal * 0.16;
+    const grandTotal = newSubtotal + tax;
+    
+    if (subtotalElement) subtotalElement.textContent = 'Ksh ' + newSubtotal.toFixed(2);
+    if (taxElement) taxElement.textContent = 'Ksh ' + tax.toFixed(2);
+    if (grandTotalElement) grandTotalElement.textContent = 'Ksh ' + grandTotal.toFixed(2);
+};
+
+// Quantity Decrease (AJAX)
+document.querySelectorAll('.qty-decrease').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const productId = btn.getAttribute('data-product-id');
+        const cartId = btn.getAttribute('data-cart-id');
+        const qtyElement = document.querySelector(`.qty-value[data-qty]`);
+        const currentQty = parseInt(qtyElement.textContent);
+        
+        if (currentQty <= 1) {
+            // Remove item if quantity is 1
+            if (confirm('Remove this item from cart?')) {
+                window.location.href = `{% url 'remove_cart_item' 0 0 %}`.replace('/0/0/', `/${productId}/${cartId}/`);
+            }
+            return;
+        }
+        
+        try {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            
+            // Use the remove_cart URL to decrease quantity
+            const response = await fetch(`{% url 'remove_cart' 0 0 %}`.replace('/0/0/', `/${productId}/${cartId}/`), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+            
+            if (response.ok) {
+                location.reload();
+            }
+        } finally {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    });
+});
+
+// Quantity Increase (AJAX with form data)
+document.querySelectorAll('.qty-increase').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const productId = btn.getAttribute('data-product-id');
+        const formData = new FormData();
+        formData.append('quantity', 1);  // Increment by 1
+        
+        // Add variation data if exists
+        const variationKeys = Array.from(btn.attributes)
+            .filter(attr => attr.name.startsWith('data-') && attr.name !== 'data-product-id' && attr.name !== 'data-cart-id')
+            .map(attr => [attr.name.replace('data-', ''), attr.value]);
+        
+        variationKeys.forEach(([key, value]) => {
+            formData.append(key, value);
+        });
+        
+        try {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            
+            const response = await fetch(`{% url 'add_cart' 0 %}`.replace('/0/', `/${productId}/`), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error updating quantity');
+            }
+        } finally {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    });
+});
+
 function applyPromo() {
     const code = document.getElementById('promo-code').value.trim();
     if (!code) {
