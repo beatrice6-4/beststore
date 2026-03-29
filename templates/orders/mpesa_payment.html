@@ -1280,13 +1280,13 @@ function showPaymentSuccess(orderId, orderData) {
     
     // Create success message
     const successHtml = `
-        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <div id="success-modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
             <div style="background: white; padding: 60px 40px; border-radius: 20px; text-align: center; max-width: 600px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); animation: slideUp 0.6s ease-out;">
                 <div style="font-size: 70px; color: #10b981; margin-bottom: 20px;">
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <h1 style="color: #1a1a1a; font-size: 28px; margin-bottom: 10px; font-weight: 800;">
-                    Payment Successful!
+                    Payment Received!
                 </h1>
                 <p style="color: #6c757d; font-size: 16px; margin-bottom: 30px; line-height: 1.6;">
                     Your payment of <strong style="color: #1a1a1a; font-size: 20px;">KES ${orderData.total_amount}</strong> has been received successfully.
@@ -1307,14 +1307,9 @@ function showPaymentSuccess(orderId, orderData) {
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 12px; flex-direction: column;">
-                    <a href="/accounts/myOrders/" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 30px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; transition: all 0.3s;">
-                        <i class="fas fa-list"></i> View My Orders
-                    </a>
-                    <a href="/cart/checkout/" style="background: #f8f9fa; color: #1a1a1a; padding: 16px 30px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; border: 2px solid #e9ecef; transition: all 0.3s;">
-                        <i class="fas fa-shopping-cart"></i> Continue Shopping
-                    </a>
-                </div>
+                <button id="close-payment-modal" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 30px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-size: 1rem;">
+                    <i class="fas fa-home"></i> Go to Home
+                </button>
             </div>
         </div>
         <style>
@@ -1329,9 +1324,13 @@ function showPaymentSuccess(orderId, orderData) {
                 }
             }
             
-            a:hover {
+            #close-payment-modal:hover {
                 transform: translateY(-2px) !important;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+            }
+            
+            #close-payment-modal:active {
+                transform: translateY(0) !important;
             }
         </style>
     `;
@@ -1341,10 +1340,13 @@ function showPaymentSuccess(orderId, orderData) {
     modalDiv.innerHTML = successHtml;
     document.body.appendChild(modalDiv);
     
-    // Redirect to myOrders after 3 seconds
-    setTimeout(() => {
-        window.location.href = '/accounts/myOrders/';
-    }, 3000);
+    // Add close button click handler
+    const closeBtn = document.getElementById('close-payment-modal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    }
 }
 </script>
 
