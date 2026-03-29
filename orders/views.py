@@ -398,9 +398,18 @@ def check_payment_status(request, order_id):
     """
     try:
         order = Order.objects.get(id=order_id)
+
+        # Safety checkpoint: if an MPESA transaction exists as completed, mark order as processing/completed
+        mpesa_tx = AccountTransaction.objects.filter(order=order, status__in=['completed', 'success']).order_by('-paid_at').first()
+        if mpesa_tx and order.status not in ['processing', 'completed', 'shipped', 'delivered']:
+            order.status = 'processing'
+            order.save()
+
+        is_paid = order.status in ['completed', 'processing', 'shipped', 'delivered'] or mpesa_tx is not None
+
         return JsonResponse({
             'status': order.status,
-            'is_paid': order.status in ['completed', 'processing', 'shipped', 'delivered'],
+            'is_paid': is_paid,
             'order_id': order.id,
             'total_amount': str(order.total_amount)
         })
